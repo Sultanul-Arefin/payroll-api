@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Hash;
 
 class RegisteredUserController extends Controller
@@ -14,19 +15,12 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-     * @param Request $request
+     * @param RegisterRequest $request
      *
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(RegisterRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            // 'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'password' => ['required', 'confirmed'],
-        ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
