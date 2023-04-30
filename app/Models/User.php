@@ -12,6 +12,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const USER_ACTIVE = 1;
+    public const USER_DISABLE = 0;
+    public const USER_PENDING = 2;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -39,6 +43,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
+        'status' => 'integer',
         'email_verified_at' => 'datetime',
     ];
 }
