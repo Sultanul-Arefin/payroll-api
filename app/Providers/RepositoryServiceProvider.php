@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Repositories\Interfaces\BaseRepositoryInterface;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Support\ServiceProvider;
+use Modules\Company\Repositories\Classes\CompanyRepository;
+use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             BaseRepositoryInterface::class,
             BaseRepository::class
+        );
+
+        $this->app->bind(
+            CompanyRepositoryInterface::class,
+            CompanyRepository::class
         );
     }
 

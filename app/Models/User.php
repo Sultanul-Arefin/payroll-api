@@ -16,6 +16,10 @@ class User extends Authenticatable
     public const USER_DISABLE = 0;
     public const USER_PENDING = 2;
 
+    public const SUPER_ADMIN = 1;
+    public const ADMIN = 2;
+    public const EMPLOYEE = 3;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,7 +30,8 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
-        'last_login'
+        'last_login',
+        'company_id'
     ];
 
     /**
