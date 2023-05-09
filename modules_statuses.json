@@ -1,4 +1,5 @@
 {
     "Auth": true,
-    "Company": true
+    "Company": true,
+    "Package": true
 }
