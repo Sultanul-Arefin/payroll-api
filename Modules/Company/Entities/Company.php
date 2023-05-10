@@ -18,5 +18,18 @@ class Company extends Model
         'company_name',
         'company_address',
         'company_email',
+        'company_phone',
+        'company_logo',
+        'company_website',
+        'company_registration_no',
+        'government_employee_no',
+        'fiscal_year_from',
+        'fiscal_year_to',
+        'bank_name',
+        'bank_bic_or_swift_code',
+        'bank_iban_or_account_no',
+        'contact_person_name',
+        'contact_person_email',
+        'contact_person_phone',
     ];
 }
