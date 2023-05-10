@@ -15,7 +15,7 @@ use Modules\Department\Http\Controllers\DepartmentController;
 */
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'checkIfCompanyCreated'])->group(function () {
         Route::get('departments', [DepartmentController::class, 'index'])
             ->name('details_department');
         Route::post('department', [DepartmentController::class, 'store'])
