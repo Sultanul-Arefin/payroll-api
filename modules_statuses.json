@@ -1,5 +1,6 @@
 {
     "Auth": true,
     "Company": true,
-    "Package": true
+    "Package": true,
+    "Department": true
 }
