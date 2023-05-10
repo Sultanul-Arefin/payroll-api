@@ -7,6 +7,8 @@ use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Support\ServiceProvider;
 use Modules\Company\Repositories\Classes\CompanyRepository;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
+use Modules\Department\Repositories\Classes\DepartmentRepository;
+use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
 
@@ -30,6 +32,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             PackageRepositoryInterface::class,
             PackageRepository::class
+        );
+
+        $this->app->bind(
+            DepartmentRepositoryInterface::class,
+            DepartmentRepository::class
         );
     }
 

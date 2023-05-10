@@ -18,11 +18,6 @@ class CompanyController extends Controller
     ){
     }
 
-    public function name()
-    {
-        return 'name';
-    }
-
     public function index()
     {
         $company = $this->companyRepo->allWithSearch(
