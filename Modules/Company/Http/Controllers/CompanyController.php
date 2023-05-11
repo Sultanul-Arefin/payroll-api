@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\DB;
 use Modules\Company\Entities\Company;
 use Modules\Company\Http\Requests\CompanyStoreRequest;
 use Modules\Company\Http\Requests\CompanyUpdateRequest;
+use Modules\Company\Http\Traits\CompanyTrait;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {
+    use CompanyTrait;
     public function __construct(
         private CompanyRepositoryInterface $companyRepo
     ){
@@ -51,6 +53,7 @@ class CompanyController extends Controller
                 'company_address' => $request->company_address,
                 'company_email' => $request->company_email,
                 'company_phone' => $request->company_phone,
+                'company_logo' => $this->upload_logo($request),
                 'company_website' => $request->company_website,
                 'company_registration_no' => $request->company_registration_no,
                 'government_employee_no' => $request->government_employee_no,
