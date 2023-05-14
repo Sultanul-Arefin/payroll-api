@@ -26,6 +26,10 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             // 'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'password' => ['required', 'confirmed'],
+            'package_id' => ['required'],
+            'company_name' => ['required'],
+            'company_email' => ['required'],
+            'company_phone' => ['required'],
         ];
     }
 }

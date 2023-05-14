@@ -14,6 +14,9 @@ class Company extends Model
     //     return \Modules\Company\Database\factories\CompanyFactory::new();
     // }
 
+    public const ACTIVE = 1;
+    public const PENDING = 0;
+
     protected $fillable = [
         'company_name',
         'company_address',
@@ -31,5 +34,6 @@ class Company extends Model
         'contact_person_name',
         'contact_person_email',
         'contact_person_phone',
+        'status'
     ];
 }

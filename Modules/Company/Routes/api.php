@@ -17,12 +17,12 @@ use Modules\Company\Http\Controllers\CompanyController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
-        Route::middleware('checkIfCompanyCreated')->group(function(){
+        // Route::middleware('checkIfCompanyCreated')->group(function(){
             Route::get('company', [CompanyController::class, 'index'])
                 ->name('details_company');
-        });
-        Route::post('company', [CompanyController::class, 'store'])
-            ->name('add_company');
+        // });
+        // Route::post('company', [CompanyController::class, 'store'])
+        //     ->name('add_company');
         Route::patch('company/{company}', [CompanyController::class, 'update'])
             ->name('update_company');
     });

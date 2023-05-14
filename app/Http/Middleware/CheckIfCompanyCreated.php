@@ -16,7 +16,7 @@ class CheckIfCompanyCreated
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::check() && !is_null(Auth::user()->company_id)){
+        if(Auth::check() && !is_null(Auth::user()->company_id) && Auth::user()->active_company){
             return $next($request);
         } else{
             return apiResponse(
