@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Modules\Company\Entities\Company;
 
 return new class extends Migration
 {
@@ -16,15 +17,16 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->string('company_name');
-            $table->string('company_address');
+            $table->string('company_address')->nullable();
             $table->string('company_email');
             $table->string('company_phone');
-            $table->string('company_logo');
+            $table->string('company_logo')->nullable();
             $table->string('company_website')->nullable();
+            $table->string('status')->default(Company::PENDING);
             $table->string('company_registration_no')->nullable();
             $table->string('government_employee_no')->nullable();
-            $table->date('fiscal_year_from');
-            $table->date('fiscal_year_to');
+            $table->date('fiscal_year_from')->nullable();
+            $table->date('fiscal_year_to')->nullable();
             $table->string('bank_name')->nullable();
             $table->string('bank_bic_or_swift_code')->nullable();
             $table->string('bank_iban_or_account_no')->nullable();
