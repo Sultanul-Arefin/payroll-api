@@ -5,6 +5,7 @@ namespace Modules\Company\Http\Traits;
 use Illuminate\Support\Facades\Storage;
 
 trait CompanyTrait{
+    
     public function upload_logo($request)
     {
         if($_FILES['company_logo']['name'] != ''){
@@ -29,7 +30,15 @@ trait CompanyTrait{
 
             $data['raw_name'] = $fileName;
         }
-        return 'storage/uploads/company/photo/' . $fileName;
+        return 'uploads/company/photo/' . $fileName;
         // return $data['full_path'];
+    }
+
+    public function isLogoExist($fileName){
+        return Storage::disk('public')->exists($fileName);
+    }
+
+    public function deleteLogo($fileName){
+        Storage::disk('public')->delete($fileName);
     }
 }

@@ -23,7 +23,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // });
         // Route::post('company', [CompanyController::class, 'store'])
         //     ->name('add_company');
-        Route::patch('company/{company}', [CompanyController::class, 'update'])
+        Route::post('company/{company}', [CompanyController::class, 'update'])
             ->name('update_company');
     });
 });
