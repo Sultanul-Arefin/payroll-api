@@ -2,11 +2,14 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -50,6 +53,39 @@ class Handler extends ExceptionHandler
                 'message' => 'Url Not Found!',
                 'data' => []
             ];
+            return response()->json($response, 404);
+        }
+        if ($exception instanceof HttpException) {
+            $response = [
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+                'data' => []
+            ];
+            return response()->json($response, $exception->getStatusCode());
+        }
+        if ($exception instanceof ValidationException) {
+            $response = [
+                'status' => 'error',
+                'message' => implode(
+                    ',',
+                    collect($exception->errors())
+                        ->flatten()
+                        ->toArray()
+                ),
+                'data' => [
+                    'errors' => $exception->errors()
+                ]
+            ];
+
+            return response()->json($response, 422);
+        }
+        if ($exception instanceof ModelNotFoundException) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Resource Not Found',
+                'data' => []
+            ];
+
             return response()->json($response, 404);
         }
         if ($exception instanceof RouteNotFoundException) {
