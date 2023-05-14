@@ -2,5 +2,6 @@
     "Auth": true,
     "Company": true,
     "Package": true,
-    "Department": true
+    "Department": true,
+    "Employee": true
 }
