@@ -3,5 +3,7 @@
     "Company": true,
     "Package": true,
     "Department": true,
-    "Employee": true
+    "Employee": true,
+    "Role": true,
+    "Permission": true
 }
