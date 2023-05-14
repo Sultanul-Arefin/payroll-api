@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Modules\Company\Entities\Company;
 
 class UserSeeder extends Seeder
 {
@@ -19,7 +20,9 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
             'password' => bcrypt('password'), // password
+            'company_id' => Company::factory()
         ]);
+        $user->assignRole('super-admin');
         // User::factory()->count(10)->create();
     }
 }

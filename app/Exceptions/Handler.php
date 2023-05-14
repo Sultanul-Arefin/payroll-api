@@ -4,6 +4,12 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class Handler extends ExceptionHandler
 {
@@ -26,5 +32,42 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param Request $request
+     * @param Throwable $exception
+     * @return JsonResponse|\Illuminate\Http\Response|Response
+     * @throws Throwable
+     */
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof NotFoundHttpException) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Url Not Found!',
+                'data' => []
+            ];
+            return response()->json($response, 404);
+        }
+        if ($exception instanceof RouteNotFoundException) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Bearer Token Not Found!',
+                'data' => []
+            ];
+            return response()->json($response, 404);
+        }
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Method Not Allowed!',
+                'data' => []
+            ];
+            return response()->json($response, 404);
+        }
+        return parent::render($request, $exception);
     }
 }
