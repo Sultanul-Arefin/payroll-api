@@ -3,7 +3,7 @@
     "Company": true,
     "Package": true,
     "Department": true,
-    "Employee": true,
     "Role": true,
-    "Permission": true
+    "Permission": true,
+    "User": true
 }

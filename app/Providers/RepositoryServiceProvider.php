@@ -9,8 +9,8 @@ use Modules\Company\Repositories\Classes\CompanyRepository;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 use Modules\Department\Repositories\Classes\DepartmentRepository;
 use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
-use Modules\Employee\Repositories\Classes\EmployeeRepository;
-use Modules\Employee\Repositories\Interfaces\EmployeeRepositoryInterface;
+use Modules\User\Repositories\Classes\UserRepository;
+use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
 
@@ -42,8 +42,8 @@ class RepositoryServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            EmployeeRepositoryInterface::class,
-            EmployeeRepository::class
+            UserRepositoryInterface::class,
+            UserRepository::class
         );
     }
 

@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\Employee\Http\Controllers\EmployeeController;
+use Modules\User\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +17,6 @@ use Modules\Employee\Http\Controllers\EmployeeController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function(){
     Route::middleware(['auth:sanctum'])->group(function(){
-        Route::post('employee',[EmployeeController::class, 'store'])->name('add_employee');
+        Route::post('user',[UserController::class, 'store'])->name('add_user');
     });
 });
