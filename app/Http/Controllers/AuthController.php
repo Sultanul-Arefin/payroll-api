@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Mail\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Contracts\Activity;
 
@@ -67,5 +70,38 @@ class AuthController extends Controller
             ],
             message: 'User logged in successful'
         );
+    }
+
+    public function reset_password(Request $request)
+    {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            // 'password' => ['required', Rules\Password::defaults()]
+        ]);
+        // $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+                    ? back()->with(['status' => __($status)])
+                    : back()->withErrors(['email' => __($status)]);
+    }
+
+    public function change_password(Request $request)
+    {
+        Mail::to('fahimsultan4@gmail.com')->queue(new ChangePassword());
+        return $this->apiResponse(
+            [],
+            'Mail Successfully Sent!',
+            statusCode: 200
+        );
+    //     if (Mail::failures()) {
+    //         return response()->Fail('Sorry! Please try again latter');
+    //    }else{
+    //         return response()->success('Great! Successfully send in your mail');
+    //       }
     }
 }

@@ -33,8 +33,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->middleware('guest')
             ->name('password.email');
 
-        Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        Route::post('/change-password', [AuthController::class, 'change_password'])
             ->middleware('guest')
-            ->name('password.update');
+            ->name('password.change');
     });
 });
