@@ -1,5 +1,5 @@
 {
-    "name": "nwidart/employee",
+    "name": "nwidart/user",
     "description": "",
     "authors": [
         {
@@ -10,14 +10,12 @@
     "extra": {
         "laravel": {
             "providers": [],
-            "aliases": {
-
-            }
+            "aliases": {}
         }
     },
     "autoload": {
         "psr-4": {
-            "Modules\\Employee\\": ""
+            "Modules\\User\\": ""
         }
     }
 }

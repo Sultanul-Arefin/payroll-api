@@ -13,9 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('user_details', function (Blueprint $table) {
             $table->id();
-            $table->string("name");  
+            $table->foreignId('user_id')
+            ->constrained('users', 'id')
+            ->cascadeOnDelete();
+            $table->string('user_address')->nullable();
+            $table->string('user_phone');
+            $table->string('user_image')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('user_details');
     }
 };

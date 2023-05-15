@@ -1,20 +1,20 @@
 <?php
 
-namespace Modules\Employee\Http\Controllers;
+namespace Modules\User\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Employee\Http\Requests\EmployeeStoreRequest;
-use Modules\Employee\Repositories\Interfaces\EmployeeRepositoryInterface;
+use Modules\User\Http\Requests\UserStoreRequest;
+use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
-class EmployeeController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      * @return Renderable
      */
-    public function __construct(private EmployeeRepositoryInterface $employee_repo)
+    public function __construct(private UserRepositoryInterface $user_repo)
     {
         
     }
@@ -37,9 +37,9 @@ class EmployeeController extends Controller
      * @param Request $request
      * @return Renderable
      */
-    public function store(EmployeeStoreRequest $request)
+    public function store(UserStoreRequest $request)
     {
-        $employee = $this->employee_repo->create([
+        $employee = $this->user_repo->create([
             'name' => $request->name
         ]);
 

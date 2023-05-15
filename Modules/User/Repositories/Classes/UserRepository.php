@@ -1,19 +1,20 @@
 <?php
 
-namespace Modules\Employee\Repositories\Classes;
+namespace Modules\User\Repositories\Classes;
+
+use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Modules\Employee\Entities\Employee;
-use Modules\Employee\Repositories\Interfaces\EmployeeRepositoryInterface;
+use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
-
-class EmployeeRepository extends BaseRepository implements EmployeeRepositoryInterface
+class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
     /**
-     * Employee Repository constructor.
+     * User Repository constructor.
      *
-     * @param Employee $model
+     * @param User $model
      */
-    public function __construct(Employee $model)
+    public function __construct(User $model)
     {
         parent::__construct($model);
     }

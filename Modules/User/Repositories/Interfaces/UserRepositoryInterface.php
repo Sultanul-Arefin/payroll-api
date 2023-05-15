@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\Employee\Repositories\Interfaces;
+namespace Modules\User\Repositories\Interfaces;
 
 
-interface EmployeeRepositoryInterface
+interface UserRepositoryInterface
 {
     /**
      * @param array|string[] $columns

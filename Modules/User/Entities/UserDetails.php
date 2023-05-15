@@ -1,20 +1,22 @@
 <?php
 
-namespace Modules\Employee\Entities;
+namespace Modules\User\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Employee extends Model
+class UserDetails extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'address',
+        'phone',
+        'image',
     ];
     
     protected static function newFactory()
     {
-        return \Modules\Employee\Database\factories\EmployeeFactory::new();
+        return \Modules\User\Database\factories\UserDetailsFactory::new();
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Employee\Http\Requests;
+namespace Modules\User\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class EmployeeStoreRequest extends FormRequest
+class UserStoreRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,7 +14,9 @@ class EmployeeStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required'
+            'user_address' => 'required',
+            'user_phone' => 'required',
+            'user_logo' => 'required|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 
