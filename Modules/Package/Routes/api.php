@@ -18,4 +18,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('packages', [PackageController::class, 'index'])
             ->name('package_list');
     });
+    Route::get('package-list', [PackageController::class, 'package_list'])
+            ->name('package_list_without_guard');
 });

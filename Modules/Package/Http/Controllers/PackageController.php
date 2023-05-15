@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Package\Http\Resources\PackageResource;
+use Modules\Package\Http\Resources\PackageResourceUnguarded;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
 
 class PackageController extends Controller
@@ -27,6 +28,25 @@ class PackageController extends Controller
         }
 
         return PackageResource::collection(
+            $this->packageRepo->allWithSearch(
+                ['*'],
+                [],
+                $rows
+            )
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function package_list(): mixed
+    {
+        $rows = 15;
+        if (request()?->has('rows')) {
+            $rows = (int) request('rows');
+        }
+
+        return PackageResourceUnguarded::collection(
             $this->packageRepo->allWithSearch(
                 ['*'],
                 [],
