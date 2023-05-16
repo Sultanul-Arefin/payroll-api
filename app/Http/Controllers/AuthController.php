@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Mail\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Contracts\Activity;
 
@@ -67,5 +71,80 @@ class AuthController extends Controller
             ],
             message: 'User logged in successful'
         );
+    }
+
+    public function reset_password(Request $request)
+    {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            // 'password' => ['required', Rules\Password::defaults()]
+        ]);
+        // $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+                    ? back()->with(['status' => __($status)])
+                    : back()->withErrors(['email' => __($status)]);
+    }
+
+    /**
+     * Handle an incoming registration request.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function change_password(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'string', 'max:255'],
+            'new_password' => ['required']
+        ]);
+        if(\Hash::check($request->current_password, auth()->user()->password)){
+            if (!\Hash::check($request->new_password, auth()->user()->password)) {
+                $user = User::where('id', auth()->user()->id)->update([
+                    'password' => Hash::make($request->new_password)
+                ]);
+                $message = 'Password Updated successfully';
+                Mail::to(auth()->user()->email)->queue(new ChangePassword($request->new_password, auth()->user()->name));
+                return apiResponse(
+                    data: [
+                        'message' => $message,
+                    ],
+                    message: $message,
+                    status: 'success',
+                    statusCode: 200
+                );
+            } else {
+                $message = 'Password Same as Before';
+                return apiResponse(
+                    data: [
+                        'message' => $message,
+                    ],
+                    message: $message,
+                    status: 'error',
+                    statusCode: 422
+                );
+            }
+        } else{
+            $message = 'Current Password Doesn\'t match';
+            return apiResponse(
+                data: [
+                    'message' => $message,
+                ],
+                message: $message,
+                status: 'error',
+                statusCode: 422
+            );
+        }
+    //     if (Mail::failures()) {
+    //         return response()->Fail('Sorry! Please try again latter');
+    //    }else{
+    //         return response()->success('Great! Successfully send in your mail');
+    //       }
     }
 }
