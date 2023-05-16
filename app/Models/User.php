@@ -5,11 +5,13 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
+use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -66,5 +68,13 @@ class User extends Authenticatable
     public function active_company(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'company_id')->where('status', Company::ACTIVE);
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function user_details(): HasOne
+    {
+        return $this->hasOne(UserDetails::class, 'user_id', 'id');
     }
 }

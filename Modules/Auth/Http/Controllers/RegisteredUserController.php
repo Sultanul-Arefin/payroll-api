@@ -11,6 +11,7 @@ use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Modules\Company\Entities\Company;
+use Modules\User\Entities\UserDetails;
 
 class RegisteredUserController extends Controller
 {
@@ -44,6 +45,12 @@ class RegisteredUserController extends Controller
             DB::table('company_associated_with_package')->insert([
                 'company_id' => $company->id,
                 'package_id' => $request->package_id
+            ]);
+            UserDetails::create([
+                'user_id' => $user->id,
+                'user_address' => $request->user_address ?? null,
+                'user_phone' => $request->user_phone,
+                // 'user_image' => $request->user_address ?? null,
             ]);
             return $user;
         });
