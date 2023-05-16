@@ -16,7 +16,7 @@ class ChangePassword extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(public string $password, public string $name)
     {
         //
     }
@@ -38,6 +38,10 @@ class ChangePassword extends Mailable
     {
         return new Content(
             view: 'emails.users.change_password',
+            with: [
+                'password' => $this->password,
+                'username' => $this->name
+            ],
         );
     }
 

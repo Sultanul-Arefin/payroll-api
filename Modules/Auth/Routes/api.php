@@ -33,8 +33,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->middleware('guest')
             ->name('password.email');
 
+    });
+    Route::middleware(['auth:sanctum'])->group(function(){
         Route::post('/change-password', [AuthController::class, 'change_password'])
-            ->middleware('guest')
             ->name('password.change');
     });
 });
