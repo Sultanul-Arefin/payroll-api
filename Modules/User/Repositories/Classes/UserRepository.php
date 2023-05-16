@@ -4,6 +4,7 @@ namespace Modules\User\Repositories\Classes;
 
 use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Modules\Employee\Entities\Employee;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
@@ -23,23 +24,23 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
      * @param array|string[] $columns
      * @param array $relations
      * @param int $count
-     * @return mixed
+     * @return CursorPaginator
      */
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
         int   $count = 15
-    ): mixed
+    ): CursorPaginator
     {
-        return $this->searchQuery($relations);
+        return $this->searchQuery($relations)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($relations)
     {
         return $this->model
             ::query()
-            ->where('id', auth()->user()->company_id)
+            ->where('company_id', auth()->user()->company_id)
             ->with($relations)
-            ->first();
+            ->latest();
     }
 }

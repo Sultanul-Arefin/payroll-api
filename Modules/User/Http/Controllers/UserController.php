@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\User\Http\Requests\UserStoreRequest;
+use Modules\User\Http\Resources\UserResource;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
@@ -16,11 +17,24 @@ class UserController extends Controller
      */
     public function __construct(private UserRepositoryInterface $user_repo)
     {
-        
+
     }
     public function index()
     {
-        return view('employee::index');
+        $rows = 15;
+        if (request()?->has('rows')) {
+            $rows = (int) request('rows');
+        }
+
+        return UserResource::collection(
+            $this->user_repo->allWithSearch(
+                ['*'],
+                [
+                    'user_details'
+                ],
+                $rows
+            )
+        );
     }
 
     /**

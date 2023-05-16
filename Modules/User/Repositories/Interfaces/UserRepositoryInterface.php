@@ -2,6 +2,7 @@
 
 namespace Modules\User\Repositories\Interfaces;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 interface UserRepositoryInterface
 {
@@ -9,11 +10,11 @@ interface UserRepositoryInterface
      * @param array|string[] $columns
      * @param array $relations
      * @param int $count
-     * @return mixed
+     * @return CursorPaginator
      */
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
         int $count = 15
-    ): mixed;
+    ): CursorPaginator;
 }

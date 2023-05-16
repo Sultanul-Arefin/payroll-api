@@ -17,6 +17,7 @@ use Modules\User\Http\Controllers\UserController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function(){
     Route::middleware(['auth:sanctum'])->group(function(){
+        Route::get('user',[UserController::class, 'index'])->name('user_list');
         Route::post('user',[UserController::class, 'store'])->name('add_user');
     });
 });

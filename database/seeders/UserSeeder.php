@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\Company\Entities\Company;
+use Modules\User\Entities\UserDetails;
 
 class UserSeeder extends Seeder
 {
@@ -21,6 +22,12 @@ class UserSeeder extends Seeder
             'status' => User::USER_ACTIVE,
             'password' => bcrypt('password'), // password
             'company_id' => Company::factory()
+        ]);
+        UserDetails::create([
+            'user_id' => $user->id,
+            'user_address' => 'Dhaka, Bangladesh',
+            'user_phone' => '1234567890',
+            // 'user_image' => $request->user_address ?? null,
         ]);
         $user->assignRole('super-admin');
         // User::factory()->count(10)->create();
