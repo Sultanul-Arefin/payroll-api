@@ -34,6 +34,26 @@ class RoleAndPermissionSeeder extends Seeder
             'name' => 'super-admin',
             'guard_name' => 'sanctum'
         ]);
+        $role = Role::query()->create([
+            'status' => 1,
+            'name' => 'admin',
+            'guard_name' => 'sanctum'
+        ]);
+        $role = Role::query()->create([
+            'status' => 1,
+            'name' => 'department-manager',
+            'guard_name' => 'sanctum'
+        ]);
+        $role = Role::query()->create([
+            'status' => 1,
+            'name' => 'hr',
+            'guard_name' => 'sanctum'
+        ]);
+        $role = Role::query()->create([
+            'status' => 1,
+            'name' => 'employee',
+            'guard_name' => 'sanctum'
+        ]);
         $role->givePermissionTo(Permission::all());
     }
 }
