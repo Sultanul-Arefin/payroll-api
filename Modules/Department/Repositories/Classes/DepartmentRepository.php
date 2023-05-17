@@ -38,6 +38,7 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
         return $this->model
             ::query()
             ->where('company_id', auth()->user()->company_id)
+            ->where('parent_id', null)
             ->with($relations)
             ->latest('id');
     }
