@@ -21,7 +21,8 @@ class DepartmentResource extends JsonResource
         return [
             $this->merge(
                 Arr::only(parent::toArray($request), [
-                    'id'
+                    'id',
+                    'department_name'
                 ])
             ),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

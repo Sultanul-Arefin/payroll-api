@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->integer('status')->default(User::USER_PENDING);
+            $table->integer('status')->default(User::USER_ACTIVE);
             $table->integer('user_role')->default(User::SUPER_ADMIN);
             $table->integer('company_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();

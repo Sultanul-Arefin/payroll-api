@@ -62,7 +62,7 @@ class DepartmentController extends Controller
 
         return $this->apiResponse(
             [
-                'enrollment' => DepartmentResource::make($department->fresh())
+                'department' => DepartmentResource::make($department->fresh())
             ],
             'Department updated successfully'
         );
