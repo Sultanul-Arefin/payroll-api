@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class UserDetails extends Model
 {
     use HasFactory;
-
+    public const USER_IMAGE_PATH = 'uploads/users/photo/';
+    
     protected $fillable = [
         'user_id',
         'user_address',
