@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 
-class DepartmentResource extends JsonResource
+class DepartmentChildResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
