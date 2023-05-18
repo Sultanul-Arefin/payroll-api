@@ -28,7 +28,9 @@ class DepartmentController extends Controller
         return DepartmentResource::collection(
             $this->departmentRepo->allWithSearch(
                 ['*'],
-                [],
+                [
+                    'departments'
+                ],
                 $rows
             )
         );
