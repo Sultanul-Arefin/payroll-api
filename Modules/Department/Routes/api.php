@@ -18,6 +18,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'checkIfCompanyCreated'])->group(function () {
         Route::get('departments', [DepartmentController::class, 'index'])
             ->name('details_department');
+        Route::get('all-departments', [DepartmentController::class, 'all_departments'])
+            ->name('all_departments');
         Route::post('department', [DepartmentController::class, 'store'])
             ->name('add_department');
         Route::patch('department/{department}', [DepartmentController::class, 'update'])

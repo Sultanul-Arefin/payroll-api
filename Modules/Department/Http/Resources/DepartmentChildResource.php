@@ -25,7 +25,6 @@ class DepartmentChildResource extends JsonResource
                     'department_name'
                 ])
             ),
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'child' => DepartmentChildResource::collection($this->departments)
         ];
     }

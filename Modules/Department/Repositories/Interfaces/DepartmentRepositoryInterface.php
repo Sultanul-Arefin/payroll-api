@@ -16,4 +16,16 @@ interface DepartmentRepositoryInterface
         array $relations = [],
         int $count = 15
     ): mixed;
+
+    /**
+     * @param array|string[] $columns
+     * @param array $relations
+     * @param int $count
+     * @return mixed
+     */
+    public function allDataWithSearch(
+        array $columns = ['*'],
+        array $relations = [],
+        int $count = 15
+    ): mixed;
 }

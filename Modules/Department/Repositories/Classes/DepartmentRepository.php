@@ -42,4 +42,28 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
             ->with($relations)
             ->latest('id');
     }
+
+    /**
+     * @param array|string[] $columns
+     * @param array $relations
+     * @param int $count
+     * @return CursorPaginator
+     */
+    public function allDataWithSearch(
+        array $columns = ['*'],
+        array $relations = [],
+        int   $count = 15
+    ): CursorPaginator
+    {
+        return $this->searchAllQuery($relations)->cursorPaginate($count, $columns);
+    }
+
+    private function searchAllQuery($relations)
+    {
+        return $this->model
+            ::query()
+            ->where('company_id', auth()->user()->company_id)
+            ->with($relations)
+            ->latest('id');
+    }
 }
