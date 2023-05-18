@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Modules\Department\Entities\Department;
 use Modules\Department\Http\Requests\StoreDepartment;
 use Modules\Department\Http\Requests\UpdateDepartment;
+use Modules\Department\Http\Resources\AllDepartmentResource;
 use Modules\Department\Http\Resources\DepartmentResource;
 use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
 
@@ -26,6 +27,24 @@ class DepartmentController extends Controller
 
         return DepartmentResource::collection(
             $this->departmentRepo->allWithSearch(
+                ['*'],
+                [
+                    'departments'
+                ],
+                $rows
+            )
+        );
+    }
+
+    public function all_departments()
+    {
+        $rows = 15;
+        if (request()?->has('rows')) {
+            $rows = (int) request('rows');
+        }
+
+        return AllDepartmentResource::collection(
+            $this->departmentRepo->allDataWithSearch(
                 ['*'],
                 [],
                 $rows

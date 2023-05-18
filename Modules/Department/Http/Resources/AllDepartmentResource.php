@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 
-class DepartmentResource extends JsonResource
+class AllDepartmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -24,8 +24,7 @@ class DepartmentResource extends JsonResource
                     'id',
                     'department_name'
                 ])
-            ),
-            'child' => DepartmentChildResource::collection($this->departments)
+            )
         ];
     }
 }
