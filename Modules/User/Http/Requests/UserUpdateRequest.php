@@ -4,7 +4,7 @@ namespace Modules\User\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserStoreRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -15,8 +15,7 @@ class UserStoreRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'email' => 'required|unique:users',
-            'password' => 'required',
+            'email' => 'required',
             'user_address' => 'required',
             'user_phone' => 'required',
             'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
