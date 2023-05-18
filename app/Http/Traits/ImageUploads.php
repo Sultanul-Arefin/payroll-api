@@ -1,6 +1,8 @@
 <?php
     namespace App\Http\Traits;
 
+use Illuminate\Support\Facades\Storage;
+
     trait ImageUploads{
 
         public function imageUpload($request,$desired_path){
@@ -14,6 +16,14 @@
     
             }
             return $desired_path . $fileName;
+        }
+
+        public function isImageExist($fileName){
+            return Storage::disk('public')->exists($fileName);
+        }
+
+        public function deleteImage($fileName){
+            Storage::disk('public')->delete($fileName);
         }
     }
 
