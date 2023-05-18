@@ -52,6 +52,7 @@ class RegisteredUserController extends Controller
                 'user_phone' => $request->user_phone,
                 // 'user_image' => $request->user_address ?? null,
             ]);
+            $user->assignRole('super-admin');
             return $user;
         });
 
