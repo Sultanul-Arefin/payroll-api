@@ -71,6 +71,14 @@ class UserController extends Controller
                         'company_id' => auth()->user()->company_id,
                         'password' => Hash::make($request->password),
                     ]);
+            $user->assignRole('employee');
+            
+            $user_details = UserDetails::create([
+                'user_id' => $user->id,
+                'user_address' => $request->user_address,
+                'user_phone' => $request->user_phone,
+                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+            ]);
             
             try{
                 Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
@@ -81,14 +89,7 @@ class UserController extends Controller
             }
            
 
-            $user->assignRole('employee');
             
-            $user_details = UserDetails::create([
-                'user_id' => $user->id,
-                'user_address' => $request->user_address,
-                'user_phone' => $request->user_phone,
-                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
-            ]);
         });
         
 
