@@ -77,7 +77,7 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'user_address' => $request->user_address,
                 'user_phone' => $request->user_phone,
-                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+                // 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
             
             try{
