@@ -18,7 +18,7 @@ class CompanyStoreRequest extends FormRequest
             'company_email' => 'required',
             'company_address' => 'required',
             'company_phone' => 'required',
-            'company_logo' => 'required|mimes:jpg,jpeg,png|max:2048',
+            // 'company_logo' => 'required|mimes:jpg,jpeg,png|max:2048',
             'company_website' => 'nullable',
             'company_registration_no' => 'nullable',
             'government_employee_no' => 'nullable',

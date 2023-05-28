@@ -18,7 +18,7 @@ class UserUpdateRequest extends FormRequest
             'email' => 'required',
             'user_address' => 'required',
             'user_phone' => 'required',
-            'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
+            // 'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 

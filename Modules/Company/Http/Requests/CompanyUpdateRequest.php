@@ -18,7 +18,7 @@ class CompanyUpdateRequest extends FormRequest
             'company_email' => 'required',
             'company_address' => 'required',
             'company_phone' => 'required',
-            'company_logo' => 'mimes:jpg,jpeg,png|max:2048',
+            // 'company_logo' => 'mimes:jpg,jpeg,png|max:2048',
             'company_registration_no' => 'nullable',
             'government_employee_no' => 'nullable',
             'fiscal_year_from' => 'required|date|date_format:Y-m-d',
