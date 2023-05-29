@@ -14,16 +14,16 @@ class SalaryItemsNamesSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Wages' => [
+            [
                 'Ordinary Time',
                 'Annual Leave',
                 'Sick Leave',
             ],
-            'Staff Deductions(Unpaid/Absent)' => [
+            [
                 'Absent',
                 'Unpaid Sick Leave'
             ],
-            'Taxable Allowances' => [
+            [
                 'Item 1'
             ],
             'Non-Taxable Allowances',
@@ -36,7 +36,7 @@ class SalaryItemsNamesSeeder extends Seeder
             if(is_array($value)){
                 foreach($value as $item){
                     SalaryItemsName::create([
-                        'salary_items_category_id' => $key,
+                        'salary_items_category_id' => $key + 1,
                         'name' => $item
                     ]);
                 }
