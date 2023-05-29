@@ -1,0 +1,43 @@
+<?php
+
+namespace Modules\SalaryItemsCategory\Repositories\Classes;
+use App\Repositories\RepositoryClasses\BaseRepository;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
+use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInterface;
+
+class SalaryItemsCategoryRepository extends BaseRepository implements SalaryItemsCategoryInterface
+{
+    /**
+     * SalaryItemsCategory Repository constructor.
+     *
+     * @param SalaryItemsCategory $model
+     */
+    public function __construct(SalaryItemsCategory $model)
+    {
+        parent::__construct($model);
+    }
+
+    /**
+     * @param array|string[] $columns
+     * @param array $relations
+     * @param int $count
+     * @return CursorPaginator
+     */
+    public function allWithSearch(
+        array $columns = ['*'],
+        array $relations = [],
+        int   $count = 15
+    ): CursorPaginator
+    {
+        return $this->searchQuery($relations)->cursorPaginate($count, $columns);
+    }
+
+    private function searchQuery($relations)
+    {
+        return $this->model
+            ::query()
+            ->with($relations)
+            ->latest();
+    }
+}
