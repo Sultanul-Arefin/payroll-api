@@ -15,6 +15,8 @@ use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
 use Modules\SalaryItemsCategory\Repositories\Classes\SalaryItemsCategoryRepository;
 use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInterface;
+use Modules\SalaryItemsName\Repositories\Classes\SalaryItemsNameRepository;
+use Modules\SalaryItemsName\Repositories\Interfaces\SalaryItemsNameInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -51,6 +53,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             SalaryItemsCategoryInterface::class,
             SalaryItemsCategoryRepository::class
+        );
+
+        $this->app->bind(
+            SalaryItemsNameInterface::class,
+            SalaryItemsNameRepository::class
         );
     }
 

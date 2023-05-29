@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\SalaryItemsName\Http\Controllers\SalaryItemsNameController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/salaryitemsname', function (Request $request) {
-    return $request->user();
+Route::middleware(['json.response'])->prefix('v1')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('salary-items/{salary_items_category_id}', [SalaryItemsNameController::class, 'index'])
+            ->name('salary-items-name');
+    });
 });
