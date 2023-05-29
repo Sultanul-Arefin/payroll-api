@@ -1,0 +1,11 @@
+{
+    "name": "EmployeeSalaryItems",
+    "alias": "employeesalaryitems",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\EmployeeSalaryItems\\Providers\\EmployeeSalaryItemsServiceProvider"
+    ],
+    "files": []
+}

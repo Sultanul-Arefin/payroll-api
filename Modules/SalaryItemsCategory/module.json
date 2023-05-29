@@ -1,0 +1,11 @@
+{
+    "name": "SalaryItemsCategory",
+    "alias": "salaryitemscategory",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SalaryItemsCategory\\Providers\\SalaryItemsCategoryServiceProvider"
+    ],
+    "files": []
+}

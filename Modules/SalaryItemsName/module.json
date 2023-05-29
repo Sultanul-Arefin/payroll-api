@@ -1,0 +1,11 @@
+{
+    "name": "SalaryItemsName",
+    "alias": "salaryitemsname",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SalaryItemsName\\Providers\\SalaryItemsNameServiceProvider"
+    ],
+    "files": []
+}
