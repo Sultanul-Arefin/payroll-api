@@ -5,5 +5,9 @@
     "Department": true,
     "Role": true,
     "Permission": true,
-    "User": true
+    "User": true,
+    "SalaryItemsCategory": true,
+    "SalaryItemsName": true,
+    "EmployeeSalaryItems": true,
+    "Payslip": true
 }
