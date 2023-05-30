@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table
                 ->foreignId('salary_items_category_id')
-                ->nullable()
                 ->constrained('salary_items_categories', 'id')
                 ->cascadeOnDelete();
             $table->string('name');
