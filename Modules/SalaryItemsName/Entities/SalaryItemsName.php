@@ -9,7 +9,10 @@ class SalaryItemsName extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'salary_items_category_id',
+        'name'
+    ];
     
     protected static function newFactory()
     {

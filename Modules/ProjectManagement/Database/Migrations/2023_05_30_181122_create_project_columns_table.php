@@ -13,13 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('salary_items_names', function (Blueprint $table) {
+        Schema::create('project_columns', function (Blueprint $table) {
             $table->id();
+            $table->string('column_name');
             $table
-                ->foreignId('salary_items_category_id')
-                ->constrained('salary_items_categories', 'id')
+                ->foreignId('company_id')
+                ->constrained('companies', 'id')
                 ->cascadeOnDelete();
-            $table->string('name');
+            $table
+                ->foreignId('created_by')
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -31,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('salary_items_names');
+        Schema::dropIfExists('project_columns');
     }
 };

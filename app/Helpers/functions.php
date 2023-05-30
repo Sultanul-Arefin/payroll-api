@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Modules\Company\Entities\Company;
+use Modules\ProjectManagement\Entities\ProjectColumn;
 
 if (!function_exists('apiResponse')) {
     /**
@@ -23,5 +26,28 @@ if (!function_exists('apiResponse')) {
         ];
 
         return response()->json($response, $statusCode);
+    }
+}
+
+if(!function_exists('project_columns_seeder')){
+    function project_columns_seeder(
+        User $user,
+        Company $company
+    )
+    {
+        $columns = [
+            'Backlog',
+            'In Progress',
+            'Completed',
+            'On Hold',
+            'Cancelled'
+        ];
+        foreach($columns as $value){
+            ProjectColumn::create([
+                'column_name' => $value,
+                'company_id' => $company->id,
+                'created_by' => $user->id
+            ]);
+        }
     }
 }

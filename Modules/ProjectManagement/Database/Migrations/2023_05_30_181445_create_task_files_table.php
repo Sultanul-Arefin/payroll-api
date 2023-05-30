@@ -13,13 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('salary_items_names', function (Blueprint $table) {
+        Schema::create('task_files', function (Blueprint $table) {
             $table->id();
             $table
-                ->foreignId('salary_items_category_id')
-                ->constrained('salary_items_categories', 'id')
+                ->foreignId('task_id')
+                ->constrained('tasks', 'id')
                 ->cascadeOnDelete();
-            $table->string('name');
+            $table->string('files');
+            $table
+                ->foreignId('uploaded_by')
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -31,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('salary_items_names');
+        Schema::dropIfExists('task_files');
     }
 };

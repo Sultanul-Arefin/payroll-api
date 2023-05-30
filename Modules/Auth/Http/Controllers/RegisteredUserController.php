@@ -53,6 +53,8 @@ class RegisteredUserController extends Controller
                 // 'user_image' => $request->user_address ?? null,
             ]);
             $user->assignRole('super-admin');
+            // add project columns
+            project_columns_seeder($user, $company);
             return $user;
         });
 
