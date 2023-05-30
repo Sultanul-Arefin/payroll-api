@@ -9,5 +9,6 @@
     "SalaryItemsCategory": true,
     "SalaryItemsName": true,
     "EmployeeSalaryItems": true,
-    "Payslip": true
+    "Payslip": true,
+    "ProjectManagement": true
 }

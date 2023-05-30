@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Modules\Company\Entities\Company;
 use Modules\User\Entities\UserDetails;
 
@@ -30,6 +31,8 @@ class UserSeeder extends Seeder
             // 'user_image' => $request->user_address ?? null,
         ]);
         $user->assignRole('super-admin');
+        // Project Columns Setup
+        project_columns_seeder($user, $user->company);
         // User::factory()->count(10)->create();
     }
 }
