@@ -4,12 +4,19 @@ namespace Modules\ProjectManagement\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'project_title',
+        'project_description',
+        'created_by',
+        'company_id',
+        'depatment_id'
+    ];
     
     protected static function newFactory()
     {
@@ -19,4 +26,12 @@ class Project extends Model
     public const CANCELLED = 0;
     public const COMPLETED = 1;
     public const PROCESSING = 2;
+
+    /**
+     * @return HasMany
+     */
+    public function project_associated_colums(): HasMany
+    {
+        return $this->hasMany(ProjectAssociatedColumn::class, 'project_id', 'id');
+    }
 }

@@ -1,18 +1,17 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\ProjectManagement\Http\Controllers\ProjectColumnController;
+use Modules\ProjectManagement\Http\Controllers\ProjectController;
+use Modules\ProjectManagement\Http\Controllers\ProjectManagementController;
+use Modules\ProjectManagement\Http\Controllers\TaskController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::middleware(['json.response'])->prefix('v1')->group(function(){
+    Route::middleware(['auth:sanctum'])->group(function(){
+        Route::apiResource('projects', ProjectController::class);
 
-Route::middleware('auth:api')->get('/projectmanagement', function (Request $request) {
-    return $request->user();
+        Route::apiResource('project_columns', ProjectColumnController::class);
+
+        Route::get('task/{project}', [TaskController::class, 'index']);
+    });
 });
