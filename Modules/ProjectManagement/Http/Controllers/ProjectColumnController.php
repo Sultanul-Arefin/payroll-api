@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\ProjectManagement\Entities\ProjectColumn;
 use Modules\ProjectManagement\Http\Requests\StoreProjectColumnRequest;
+use Modules\ProjectManagement\Http\Resources\ProjectColumnResource;
 use Modules\ProjectManagement\Repositories\Interfaces\ProjectColumnInterface;
 
 class ProjectColumnController extends Controller
@@ -23,7 +24,7 @@ class ProjectColumnController extends Controller
             $rows = (int) request('rows');
         }
 
-        return ProjectResource::collection(
+        return ProjectColumnResource::collection(
             $this->projectColRepo->allWithSearch(
                 ['*'],
                 [],

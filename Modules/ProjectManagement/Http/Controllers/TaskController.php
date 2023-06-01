@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
+use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
+use Modules\ProjectManagement\Http\Resources\TaskResource;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
 use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 
@@ -27,7 +29,8 @@ class TaskController extends Controller
             $rows = (int) request('rows');
         }
 
-        return ProjectAssociatedResource::collection(
+        // return TaskResource::collection(
+            return ProjectAssociatedResource::collection(
             $this->taskRepo->allWithSearch(
                 $id,
                 ['*'],
@@ -36,24 +39,21 @@ class TaskController extends Controller
             )
         );
     }
-
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('projectmanagement::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
+    
     public function store(Request $request)
     {
-        //
+        $task = Task::create([
+            'project_id' => $request->project_id,
+            'project_associated_column_id' => $request->project_associated_column_id,
+            'project_column_id' => $request->project_column_id,
+            'task_title' => $request->task_title,
+            'task_description' => $request->task_description,
+            'estimation_hour' => $request->estimation_hour,
+            'start_date_time' => $request->start_date_time,
+            'end_date_time' => $request->end_date_time,
+            'created_by' => auth()->user()->id,
+        ]);
+        return $task;
     }
 
     /**
