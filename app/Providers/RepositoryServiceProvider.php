@@ -13,6 +13,12 @@ use Modules\User\Repositories\Classes\UserRepository;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
+use Modules\ProjectManagement\Repositories\Classes\ProjectColumnRepository;
+use Modules\ProjectManagement\Repositories\Classes\ProjectRepository;
+use Modules\ProjectManagement\Repositories\Classes\TaskRepository;
+use Modules\ProjectManagement\Repositories\Interfaces\ProjectColumnInterface;
+use Modules\ProjectManagement\Repositories\Interfaces\ProjectInterface;
+use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 use Modules\SalaryItemsCategory\Repositories\Classes\SalaryItemsCategoryRepository;
 use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInterface;
 use Modules\SalaryItemsName\Repositories\Classes\SalaryItemsNameRepository;
@@ -58,6 +64,21 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             SalaryItemsNameInterface::class,
             SalaryItemsNameRepository::class
+        );
+
+        $this->app->bind(
+            ProjectInterface::class,
+            ProjectRepository::class
+        );
+
+        $this->app->bind(
+            ProjectColumnInterface::class,
+            ProjectColumnRepository::class
+        );
+
+        $this->app->bind(
+            TaskInterface::class,
+            TaskRepository::class
         );
     }
 

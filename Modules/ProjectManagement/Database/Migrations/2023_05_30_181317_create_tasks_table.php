@@ -19,6 +19,14 @@ return new class extends Migration
                 ->foreignId('project_associated_column_id')
                 ->constrained('project_associated_columns', 'id')
                 ->cascadeOnDelete();
+            $table
+                ->foreignId('project_id')
+                ->constrained('projects', 'id')
+                ->cascadeOnDelete();
+            $table
+                ->foreignId('project_column_id')
+                ->constrained('project_columns', 'id')
+                ->cascadeOnDelete();
             $table->string('task_title');
             $table->text('task_description');
             $table->string('estimation_hour');

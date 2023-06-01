@@ -4,6 +4,7 @@ namespace Modules\User\Http\Controllers;
 
 use App\Http\Traits\ImageUploads;
 use App\Models\User;
+use App\Notifications\UserCreateMailFailedNotification;
 use Exception;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -85,6 +86,7 @@ class UserController extends Controller
                 return "Successfully sent";
 
             }catch(Exception $e){
+                $user->notify(new UserCreateMailFailedNotification($request->email));
                 return null;
             }
            
