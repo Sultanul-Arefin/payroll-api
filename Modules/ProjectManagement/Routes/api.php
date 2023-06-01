@@ -13,5 +13,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::apiResource('project_columns', ProjectColumnController::class);
 
         Route::get('task/{project}', [TaskController::class, 'index']);
+        Route::post('task', [TaskController::class, 'store']);
     });
 });

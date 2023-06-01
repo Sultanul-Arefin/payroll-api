@@ -19,17 +19,17 @@ class ProjectAssociatedResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'column' => $this->info($this, $this->project_column),
+            'id' => $this->project_column_id,
+            'column' => $this->getColumnName($this->project_column),
+            'tasks' => $this->tasks
+            // 'tasks' => TaskResource::collection($this->tasks)
+            // 'column' => $this->info($this, $this->project_column),
             // 'columnss' => ProjectColumnResource::collection($this->project_column)
-            // 'tasks' => TaskResource::collection($this->)
         ];
     }
 
-    public function info($all_info, $column_name)
+    public function getColumnName($column)
     {
-        return [
-            'column_name' => $column_name->column_name,
-            // 'tasks' => TaskResource::collection()
-        ];
+        return $column->column_name;
     }
 }

@@ -24,7 +24,8 @@ class TaskResource extends JsonResource
                     'id',
                     'task_title'
                 ])
-            )
+            ),
+            'columns' => $this->project_associated_column
         ];
     }
 }

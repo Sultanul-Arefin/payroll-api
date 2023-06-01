@@ -38,9 +38,15 @@ class TaskRepository extends BaseRepository implements TaskInterface
 
     private function searchQuery($project_id, $relations)
     {
+        // return $this->model
+        //     ::query()
+        //     ->where('project_id', $project_id)
+        //     ->with($relations)
+        //     ->latest('id');
         return ProjectAssociatedColumn
             ::query()
             ->where('project_id', $project_id)
+            ->groupBy('project_column_id')
             ->with($relations)
             ->latest('id');
     }
