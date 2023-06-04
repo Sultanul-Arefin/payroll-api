@@ -3,6 +3,7 @@
 namespace Modules\ProjectManagement\Repositories\Classes;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\ProjectColumn;
 use Modules\ProjectManagement\Repositories\Interfaces\ProjectColumnInterface;
@@ -38,6 +39,15 @@ class ProjectColumnRepository extends BaseRepository implements ProjectColumnInt
     {
         return $this->model
             ::query()
+            ->when(
+                !is_null(request('project_id')),
+                fn(Builder $builder) => $builder
+                    ->whereRelation(
+                        'project_associated_column',
+                        'project_id',
+                        request('project_id')
+                    )
+            )
             ->where('company_id', auth()->user()->company_id)
             ->with($relations)
             ->latest('id');
