@@ -1,18 +1,11 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\EmployeeSalaryItems\Http\Controllers\EmployeeSalaryItemsController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
-Route::middleware('auth:api')->get('/employeesalaryitems', function (Request $request) {
-    return $request->user();
+Route::middleware(['json.response'])->prefix('v1')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('associate-salary-items-with-employees', [EmployeeSalaryItemsController::class, 'store'])
+            ->name('salary-items-associate-with-employees');
+    });
 });

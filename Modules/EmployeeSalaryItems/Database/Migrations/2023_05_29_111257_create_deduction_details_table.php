@@ -15,7 +15,14 @@ return new class extends Migration
     {
         Schema::create('deduction_details', function (Blueprint $table) {
             $table->id();
-
+            $table
+                ->foreignId('employee_salary_item_id')
+                ->constrained('employee_salary_items', 'id')
+                ->cascadeOnDelete();
+            $table->integer('employee_amount')->nullable();
+            $table->integer('government_or_company_amount')->nullable();
+            $table->integer('start_percentage')->nullable();
+            $table->integer('end_percentage')->nullable();
             $table->timestamps();
         });
     }

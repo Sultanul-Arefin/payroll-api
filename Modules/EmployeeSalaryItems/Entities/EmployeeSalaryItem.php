@@ -9,10 +9,23 @@ class EmployeeSalaryItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'salary_item_id',
+        'employee_id',
+        'company_id',
+        'is_percentage',
+        'is_general',
+        'amount'
+    ];
     
     protected static function newFactory()
     {
         return \Modules\EmployeeSalaryItems\Database\factories\EmployeeSalaryItemFactory::new();
     }
+
+    public const IS_PERCENTAGE = 1;
+    public const IS_AMOUNT = 0;
+
+    public const IS_GENERAL = 1;
+    public const IS_NOT_GENERAL = 0;
 }
