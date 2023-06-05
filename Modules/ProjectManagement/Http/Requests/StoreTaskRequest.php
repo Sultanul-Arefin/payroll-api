@@ -4,7 +4,7 @@ namespace Modules\ProjectManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProjectRequest extends FormRequest
+class StoreTaskRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,9 +14,13 @@ class StoreProjectRequest extends FormRequest
     public function rules()
     {
         return [
-            'project_title' => 'required',
-            'project_description' => 'required',
-            'project_columns' => 'required|array',
+            'project_id' => 'required',
+            'project_column_id' => 'required',
+            'task_title' => 'required',
+            'task_description' => 'required',
+            'estimation_hour' => 'required',
+            'start_date_time' => 'required',
+            'end_date_time' => 'required',
             'assigned_employees' => 'required|array|exists:users,id',
         ];
     }

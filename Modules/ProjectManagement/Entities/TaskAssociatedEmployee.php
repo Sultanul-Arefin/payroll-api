@@ -9,7 +9,10 @@ class TaskAssociatedEmployee extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'task_id',
+        'user_id'
+    ];
     
     protected static function newFactory()
     {
