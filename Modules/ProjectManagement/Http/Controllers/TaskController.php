@@ -8,6 +8,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
+use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
+use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
 use Modules\ProjectManagement\Http\Resources\TaskResource;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
@@ -40,20 +42,32 @@ class TaskController extends Controller
         );
     }
     
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $task = Task::create([
-            'project_id' => $request->project_id,
-            'project_associated_column_id' => $request->project_associated_column_id,
-            'project_column_id' => $request->project_column_id,
-            'task_title' => $request->task_title,
-            'task_description' => $request->task_description,
-            'estimation_hour' => $request->estimation_hour,
-            'start_date_time' => $request->start_date_time,
-            'end_date_time' => $request->end_date_time,
-            'created_by' => auth()->user()->id,
-        ]);
-        return $task;
+        $task = DB::transaction(function() use($request){
+            $task = Task::create([
+                'project_id' => $request->project_id,
+                'project_associated_column_id' => $request->project_associated_column_id,
+                'project_column_id' => $request->project_column_id,
+                'task_title' => $request->task_title,
+                'task_description' => $request->task_description,
+                'estimation_hour' => $request->estimation_hour,
+                'start_date_time' => $request->start_date_time,
+                'end_date_time' => $request->end_date_time,
+                'created_by' => auth()->user()->id,
+            ]);
+            foreach($request->assigned_employees as $employee_value){
+                TaskAssociatedEmployee::create([
+                    'task_id' => $task->id,
+                    'user_id' => $employee_value
+                ]);
+            }
+        });
+        return apiResponse(
+            data: $task,
+            message: "Task Created Successfully",
+            status: 'success'
+        );
     }
 
     /**
