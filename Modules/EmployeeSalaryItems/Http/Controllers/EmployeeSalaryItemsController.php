@@ -16,10 +16,10 @@ class EmployeeSalaryItemsController extends Controller
         $employee_salary = DB::transaction(function() use($request){
             $employee_salary = EmployeeSalaryItem::create([
                 'salary_item_id' => $request->salary_item_id,
-                'employee_id' => $request->employee_id ?? null,
                 'company_id' => auth()->user()->company_id,
                 'is_percentage' => $request->is_percentage,
                 'is_general' => $request->is_general,
+                'employee_id' => $request->employee_id ?? null,
                 'amount' => $request->amount ?? null
             ]);
             return $employee_salary;
