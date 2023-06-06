@@ -10,5 +10,6 @@
     "SalaryItemsName": true,
     "EmployeeSalaryItems": true,
     "Payslip": true,
-    "ProjectManagement": true
+    "ProjectManagement": true,
+    "Attendance": true
 }
