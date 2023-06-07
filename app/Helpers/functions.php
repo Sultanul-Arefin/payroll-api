@@ -29,25 +29,14 @@ if (!function_exists('apiResponse')) {
     }
 }
 
-if(!function_exists('project_columns_seeder')){
-    function project_columns_seeder(
-        User $user,
-        Company $company
-    )
-    {
-        $columns = [
+if(!function_exists('default_project_columns')){
+    function default_project_columns(){
+        return [
             'Backlog',
             'In Progress',
             'Completed',
             'On Hold',
             'Cancelled'
         ];
-        foreach($columns as $value){
-            ProjectColumn::create([
-                'column_name' => $value,
-                'company_id' => $company->id,
-                'created_by' => $user->id
-            ]);
-        }
     }
 }

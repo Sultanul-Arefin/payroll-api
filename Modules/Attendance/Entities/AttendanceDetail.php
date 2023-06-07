@@ -9,7 +9,11 @@ class AttendanceDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'attendance_id',
+        'in_time',
+        'out_time'
+    ];
     
     protected static function newFactory()
     {

@@ -25,5 +25,13 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         //     ->name('add_company');
         Route::post('company/{company}', [CompanyController::class, 'update'])
             ->name('update_company');
+
+        // ADD OR UPDATE WEEKLY HOLIDAYS
+        Route::post('add-weekly-holidays', [CompanyController::class, 'add_weekly_holidays'])
+            ->name('add-weekly-holidays');
+        
+        // ADD OR UPDATE ANNUAL HOLIDAYS
+        Route::post('add-annual-holidays', [CompanyController::class, 'add_annual_holidays'])
+            ->name('add-annual-holidays');  
     });
 });
