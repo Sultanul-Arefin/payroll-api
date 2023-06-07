@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\ProjectAssociatedEmployee;
+use Modules\ProjectManagement\Entities\ProjectColumn;
 use Modules\ProjectManagement\Http\Requests\StoreProjectRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectResource;
 use Modules\ProjectManagement\Repositories\Interfaces\ProjectInterface;
@@ -46,10 +47,15 @@ class ProjectController extends Controller
                 'company_id' => auth()->user()->company_id,
                 'department_id' => 1
             ]);
-            foreach($request->project_columns as $value){
+            foreach(default_project_columns() as $key => $value){
+                $column = ProjectColumn::create([
+                    'column_name' => $value,
+                    'company_id' => auth()->user()->company_id,
+                    'created_by' => auth()->user()->id
+                ]);
                 ProjectAssociatedColumn::create([
                     'project_id' => $project->id,
-                    'project_column_id' => $value,
+                    'project_column_id' => $column->id,
                     'created_by' => auth()->user()->id
                 ]);
             }
