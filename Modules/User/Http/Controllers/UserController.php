@@ -62,27 +62,27 @@ class UserController extends Controller
      * @param Request $request
      * @return Renderable
      */
-    public function store(UserStoreRequest $request)
+    public function store(Request $request)
     {
         $message = DB::transaction(function ()use($request){
             
             $user = $this->user_repo->create([
-                        'name' => $request->name,
+                        'name' => 'a',
                         'email' => $request->email,
-                        'company_id' => auth()->user()->company_id,
-                        'password' => Hash::make($request->password),
+                        'company_id' => 1,
+                        'password' => Hash::make('password'),
                     ]);
             $user->assignRole('employee');
             
             $user_details = UserDetails::create([
                 'user_id' => $user->id,
-                'user_address' => $request->user_address,
-                'user_phone' => $request->user_phone,
-                // 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+                'user_address' => 'a',
+                'user_phone' => 'b',
+                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
             
             try{
-                Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
+                Mail::to($user->email)->send(new SendPassword('password','a'));
                 return "Successfully sent";
 
             }catch(Exception $e){
