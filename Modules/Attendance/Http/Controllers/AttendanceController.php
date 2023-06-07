@@ -5,16 +5,32 @@ namespace Modules\Attendance\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Modules\Attendance\Entities\Attendance;
+use Modules\Attendance\Entities\AttendanceDetail;
+use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
+use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
 
 class AttendanceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
+    public function __construct(private AttendanceRepositoryInterface $attendanceRepo){
+    }
+
     public function index()
     {
-        return view('attendance::index');
+        $rows = 15;
+        if (request()?->has('rows')) {
+            $rows = (int) request('rows');
+        }
+
+        // return TaskResource::collection(
+            return AttendanceResourceForUser::collection(
+                $this->attendanceRepo->allWithSearch(
+                    ['*'],
+                    [],
+                    $rows
+            )
+        );
     }
 
     /**
@@ -24,7 +40,31 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'dates' => 'required',
+            'in_time' => 'required',
+            'out_time' => 'required'
+        ]);
+
+        $attendances = DB::transaction(function() use($request){
+            $attendance = Attendance::create([
+                'dates' => $request->dates,
+                'user_id' => auth()->user()->id,
+                'status' => Attendance::PENDING
+            ]);
+            $attendance_details = AttendanceDetail::create([
+                'attendance_id' => $attendance->id,
+                'in_time' => $request->in_time,
+                'out_time' => $request->out_time
+            ]);
+            return $attendance;
+        });
+
+        return apiResponse(
+            data: $attendances,
+            message: 'Attendance Successfully Added',
+            status: 'success'
+        );
     }
 
     /**
