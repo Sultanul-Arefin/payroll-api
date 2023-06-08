@@ -67,6 +67,9 @@ class UserController extends Controller
         $message = DB::transaction(function ()use($request){
             
             $user = $this->user_repo->create([
+                        'designation_id' => $request->designation_id,
+                        'assign_to' => $request->assign_to,
+                        'department_id' => $request->department_id,
                         'name' => $request->name,
                         'email' => $request->email,
                         'company_id' => auth()->user()->company_id,
@@ -76,24 +79,37 @@ class UserController extends Controller
             
             $user_details = UserDetails::create([
                 'user_id' => $user->id,
-                'user_address' => $request->user_address,
+                'user_area' => $request->user_area,
+                'user_city' => $request->user_city,
+                'zip_code' => $request->zip_code,
+                'country_id' => $request->country_id,
                 'user_phone' => $request->user_phone,
-                // 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+                'gender' => $request->gender,
+                'nid' => $request->nid,
+                'passport' => "assport",
+                'date_of_birth' => $request->date_of_birth,
+                'joining_date' => $request->joining_date,
+                'payment_type' => $request->payment_type,
+                'bank_name' => $request->bank_name,
+                'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
+                'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
+                'tin' => $request->tin,
+                'user_image' => "ugy",
             ]);
-            
-            try{
-                Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
-                return "Successfully sent";
+            // try{
+            //     Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
+            //     return "Successfully sent";
 
-            }catch(Exception $e){
-                $user->notify(new UserCreateMailFailedNotification($request->email));
-                return null;
-            }
+            // }catch(Exception $e){
+            //     $user->notify(new UserCreateMailFailedNotification($request->email));
+            //     return null;
+            // }
            
 
             
         });
         
+        return $message;
 
         return apiResponse(
             data: null,
@@ -142,9 +158,13 @@ class UserController extends Controller
                 $user_image = $this->imageUpload($request,UserDetails::USER_IMAGE_PATH);
             }
 
-            $user = $this->user_repo->update($user->id,[
+            $user_update = $this->user_repo->update($user->id,[
                         'name' => $request->name,
-                        'email' => $request->email,
+                        'designation_id' => $request->designation_id,
+                        'department_id' => $request->department_id,
+                        'assign_to' => $request->assign_to,
+                        'status' => $request->status,
+                        'company_id' => auth()->user()->company_id,
                     ]);
 
             // update the roles
@@ -153,9 +173,21 @@ class UserController extends Controller
                 $user->syncRoles($request->role);
             }
             
-            $user_details = UserDetails::find($user->id)->update([
-                'user_address' => $request->user_address,
+            $user_details = $this->user_repo->userDetailsUpdate($user->id,[
+                'user_area' => $request->user_area,
                 'user_phone' => $request->user_phone,
+                'user_city' => $request->user_city,
+                'zip_code' => $request->zip_code,
+                'country_id' => $request->country_id,
+                'gender' => $request->gender,
+                'passport' => $request->passport,
+                'date_of_birth' => $request->date_of_birth,
+                'joining_date' => $request->joining_date,
+                'payment_type' => $request->payment_type,
+                'bank_name' => $request->bank_name,
+                'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
+                'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
+                'tin' => $request->tin,
                 'user_image' => $user_image,
             ]);
         });

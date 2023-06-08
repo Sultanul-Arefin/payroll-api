@@ -15,8 +15,13 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'email' => 'required',
-            'user_address' => 'required',
+            'designation_id' => 'required',
+            'assign_to' => 'required',
+            'department_id' => 'required',
+            'zip_code' => 'required',
+            'gender' => 'required',
+            'payment_type' => 'required',
+            'user_city' => 'required',
             'user_phone' => 'required',
             // 'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
         ];

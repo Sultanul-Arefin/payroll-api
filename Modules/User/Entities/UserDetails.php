@@ -14,8 +14,21 @@ class UserDetails extends Model
     
     protected $fillable = [
         'user_id',
-        'user_address',
+        'user_area',
+        'user_city',
+        'zip_code',
+        'country_id',
         'user_phone',
+        'gender',
+        'nid',
+        'passport',
+        'date_of_birth',
+        'joining_date',
+        'payment_type',
+        'bank_name',
+        'bank_bic_or_swift_code',
+        'bank_iban_or_account_no',
+        'tin',
         'user_image',
     ];
 

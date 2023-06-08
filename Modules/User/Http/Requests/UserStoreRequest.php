@@ -17,7 +17,7 @@ class UserStoreRequest extends FormRequest
             'name' => 'required',
             'email' => 'required|unique:users',
             'password' => 'required',
-            'user_address' => 'required',
+            'user_city' => 'required',
             'user_phone' => 'required',
             // 'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
         ];
