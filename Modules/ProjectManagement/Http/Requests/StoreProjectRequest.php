@@ -16,7 +16,7 @@ class StoreProjectRequest extends FormRequest
         return [
             'project_title' => 'required',
             'project_description' => 'required',
-            'project_columns' => 'required|array',
+            // 'project_columns' => 'required|array',
             'assigned_employees' => 'required|array|exists:users,id',
         ];
     }

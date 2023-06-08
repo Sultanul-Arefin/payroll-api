@@ -10,6 +10,8 @@ use Modules\Company\Entities\Company;
 use Modules\Company\Http\Requests\CompanyStoreRequest;
 use Modules\Company\Http\Requests\CompanyUpdateRequest;
 use Illuminate\Support\Facades\Storage;
+use Modules\Company\Entities\AnnualHoliday;
+use Modules\Company\Entities\WeeklyHoliday;
 use Modules\Company\Http\Traits\CompanyTrait;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
@@ -124,6 +126,50 @@ class CompanyController extends Controller
             message: $company_update ? 'Company Updated Successfully':'Company Updated Failed',
             status: 'success',
             statusCode: 201
+        );
+    }
+
+    public function add_weekly_holidays(Request $request)
+    {
+        $request->validate([
+            'dates' => 'required|array'
+        ]);
+        $dates = collect($request->dates);
+        $dates->each(function($item, $key){
+            WeeklyHoliday::create([
+                'dates' => $item,
+                'company_id' => auth()->user()->id,
+                'added_by' => auth()->user()->id
+            ]);
+        });
+
+        return apiResponse(
+            data: null,
+            message: 'Weekly Holidays Added Successfully',
+            status: 'success'
+        );
+    }
+
+    public function add_annual_holidays(Request $request)
+    {
+        $request->validate([
+            'dates' => 'required|array',
+            'holiday_type' => 'required'
+        ]);
+        $dates = collect($request->dates);
+        $dates->each(function($item, $key) use($request){
+            AnnualHoliday::create([
+                'dates' => $item,
+                'holiday_type' => $request->holiday_type,
+                'company_id' => auth()->user()->id,
+                'added_by' => auth()->user()->id
+            ]);
+        });
+
+        return apiResponse(
+            data: null,
+            message: 'Annual Holidays Added Successfully',
+            status: 'success'
         );
     }
 }

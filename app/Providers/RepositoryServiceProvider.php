@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Repositories\Interfaces\BaseRepositoryInterface;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Support\ServiceProvider;
+use Modules\Attendance\Repositories\Classes\AttendanceRepository;
+use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
 use Modules\Company\Repositories\Classes\CompanyRepository;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 use Modules\Department\Repositories\Classes\DepartmentRepository;
@@ -79,6 +81,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             TaskInterface::class,
             TaskRepository::class
+        );
+
+        $this->app->bind(
+            AttendanceRepositoryInterface::class,
+            AttendanceRepository::class
         );
     }
 

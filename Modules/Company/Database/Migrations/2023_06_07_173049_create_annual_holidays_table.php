@@ -13,14 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('attendance_details', function (Blueprint $table) {
+        Schema::create('annual_holidays', function (Blueprint $table) {
             $table->id();
+            $table->date('dates');
+            $table->string('holiday_type');
             $table
-                ->foreignId('attendance_id')
-                ->constrained('attendances', 'id')
+                ->foreignId('company_id')
+                ->constrained('companies', 'id')
                 ->cascadeOnDelete();
-            $table->time('in_time');
-            $table->time('out_time');
+            $table
+                ->foreignId('added_by')
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -32,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendance_details');
+        Schema::dropIfExists('annual_holidays');
     }
 };

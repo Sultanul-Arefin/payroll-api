@@ -31,8 +31,6 @@ class UserSeeder extends Seeder
             // 'user_image' => $request->user_address ?? null,
         ]);
         $user->assignRole('super-admin');
-        // Project Columns Setup
-        project_columns_seeder($user, $user->company);
         // User::factory()->count(10)->create();
     }
 }
