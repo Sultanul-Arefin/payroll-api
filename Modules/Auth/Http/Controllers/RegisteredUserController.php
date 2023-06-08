@@ -48,7 +48,8 @@ class RegisteredUserController extends Controller
             ]);
             UserDetails::create([
                 'user_id' => $user->id,
-                'user_address' => $request->user_address ?? null,
+                'user_area' => $request->user_area,
+                'user_city' => $request->user_city,
                 'user_phone' => $request->user_phone,
                 // 'user_image' => $request->user_address ?? null,
             ]);

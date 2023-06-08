@@ -14,11 +14,24 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            // $table->foreignId('designation_id')
+            //     ->constrained('designations', 'id')
+            //     ->cascadeOnDelete();
+            $table->integer('designation_id');
+            $table
+                ->foreignId('assign_to')
+                ->nullable()
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
+            // $table->foreignId('department_id')
+            //         ->constrained('departments', 'id')
+            //         ->cascadeOnDelete();
+            $table->integer('department_id');
             $table->string('name');
             $table->string('email')->unique();
             $table->integer('status')->default(User::USER_ACTIVE);
             $table->integer('user_role')->default(User::SUPER_ADMIN);
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

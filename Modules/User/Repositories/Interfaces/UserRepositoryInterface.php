@@ -17,4 +17,6 @@ interface UserRepositoryInterface
         array $relations = [],
         int $count = 15
     ): CursorPaginator;
+
+    public function userDetailsUpdate($user_id,$attributes);
 }

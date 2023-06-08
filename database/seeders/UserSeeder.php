@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         ]);
         UserDetails::create([
             'user_id' => $user->id,
-            'user_address' => 'Dhaka, Bangladesh',
+            'user_city' => 'Dhaka, Bangladesh',
             'user_phone' => '1234567890',
             // 'user_image' => $request->user_address ?? null,
         ]);

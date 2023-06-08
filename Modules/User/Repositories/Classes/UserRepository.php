@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Modules\Employee\Entities\Employee;
+use Modules\User\Entities\UserDetails;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -42,5 +43,9 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             ->where('company_id', auth()->user()->company_id)
             ->with($relations)
             ->latest();
+    }
+
+    public function userDetailsUpdate($user_id,$attributes){
+        return UserDetails::where('user_id',$user_id)?->update($attributes);
     }
 }
