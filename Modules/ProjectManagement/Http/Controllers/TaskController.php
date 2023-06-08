@@ -10,6 +10,7 @@ use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
+use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
 use Modules\ProjectManagement\Http\Resources\TaskResource;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
@@ -32,7 +33,7 @@ class TaskController extends Controller
         }
 
         // return TaskResource::collection(
-            return ProjectAssociatedResource::collection(
+        return ProjectAssociatedResource::collection(
             $this->taskRepo->allWithSearch(
                 $id,
                 ['*'],
@@ -48,20 +49,9 @@ class TaskController extends Controller
             $task = Task::create([
                 'project_id' => $request->project_id,
                 'project_associated_column_id' => $request->project_associated_column_id,
-                'project_column_id' => $request->project_column_id,
                 'task_title' => $request->task_title,
-                'task_description' => $request->task_description,
-                'estimation_hour' => $request->estimation_hour,
-                'start_date_time' => $request->start_date_time,
-                'end_date_time' => $request->end_date_time,
                 'created_by' => auth()->user()->id,
             ]);
-            foreach($request->assigned_employees as $employee_value){
-                TaskAssociatedEmployee::create([
-                    'task_id' => $task->id,
-                    'user_id' => $employee_value
-                ]);
-            }
         });
         return apiResponse(
             data: $task,
@@ -80,25 +70,29 @@ class TaskController extends Controller
         return view('projectmanagement::show');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
+    public function update(UpdateTaskRequest $request, Task $task)
     {
-        return view('projectmanagement::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        $task_update = DB::transaction(function() use($request, $task){
+            $task->update([
+                'task_title' => $request->task_title,
+                'task_description' => $request->task_description,
+                'estimation_hour' => $request->estimation_hour,
+                'start_date_time' => $request->start_date_time,
+                'end_date_time' => $request->end_date_time,
+            ]);
+            foreach($request->assigned_employees as $employee_value){
+                TaskAssociatedEmployee::create([
+                    'task_id' => $task->id,
+                    'user_id' => $employee_value
+                ]);
+            }
+            return $task;
+        });
+        return apiResponse(
+            data: $task,
+            message: 'Task Updated Successfully',
+            status: 'success'
+        );
     }
 
     /**
