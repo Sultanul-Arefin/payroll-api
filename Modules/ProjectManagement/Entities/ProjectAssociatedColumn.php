@@ -13,7 +13,7 @@ class ProjectAssociatedColumn extends Model
 
     protected $fillable = [
         'project_id',
-        'project_column_id',
+        'project_column_name',
         'created_by'
     ];
     
@@ -28,14 +28,6 @@ class ProjectAssociatedColumn extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id', 'id');
-    }
-
-    /**
-     * @return belongsTo
-     */
-    public function project_column(): BelongsTo
-    {
-        return $this->belongsTo(ProjectColumn::class, 'project_column_id', 'id');
     }
 
     /**

@@ -19,8 +19,9 @@ class ProjectAssociatedResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->project_column_id,
-            'column' => $this->getColumnName($this->project_column),
+            'id' => $this->id,
+            'column' => $this->project_column_name,
+            // 'column' => $this->getColumnName($this->project_column),
             'tasks' => $this->tasks
             // 'tasks' => TaskResource::collection($this->tasks)
             // 'column' => $this->info($this, $this->project_column),

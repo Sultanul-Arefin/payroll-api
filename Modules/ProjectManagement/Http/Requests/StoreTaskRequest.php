@@ -15,13 +15,8 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'project_id' => 'required',
-            'project_column_id' => 'required',
-            'task_title' => 'required',
-            'task_description' => 'required',
-            'estimation_hour' => 'required',
-            'start_date_time' => 'required',
-            'end_date_time' => 'required',
-            'assigned_employees' => 'required|array|exists:users,id',
+            'project_associated_column_id' => 'required',
+            'task_title' => 'required'
         ];
     }
 

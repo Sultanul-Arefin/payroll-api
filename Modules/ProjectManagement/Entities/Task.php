@@ -13,7 +13,6 @@ class Task extends Model
     protected $fillable = [
         'project_associated_column_id',
         'project_id',
-        'project_column_id',
         'task_title',
         'task_description',
         'estimation_hour',

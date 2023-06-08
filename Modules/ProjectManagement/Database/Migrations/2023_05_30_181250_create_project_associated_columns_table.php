@@ -19,10 +19,7 @@ return new class extends Migration
                 ->foreignId('project_id')
                 ->constrained('projects', 'id')
                 ->cascadeOnDelete();
-            $table
-                ->foreignId('project_column_id')
-                ->constrained('project_columns', 'id')
-                ->cascadeOnDelete();
+            $table->string('project_column_name');
             $table
                 ->foreignId('created_by')
                 ->constrained('users', 'id')
