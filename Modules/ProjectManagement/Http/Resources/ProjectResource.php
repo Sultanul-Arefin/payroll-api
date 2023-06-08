@@ -22,7 +22,8 @@ class ProjectResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'project_title'
+                    'project_title',
+                    'project_description'
                 ])
             )
         ];
