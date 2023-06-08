@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\Attendance\Entities\Attendance;
 
 class AttendanceResourceForUser extends JsonResource
 {
@@ -19,12 +20,25 @@ class AttendanceResourceForUser extends JsonResource
     public function toArray($request)
     {
         return [
-            'value' => $this->getValue($this)
+            'id' => $this->id,
+            'date' => $this->dates,
+            'status' => $this->getStatus($this->status),
+            // 'value' => $this->getValue($this)
         ];
+    }
+
+    public function getStatus($status):? string
+    {
+        if($status == Attendance::ABSENT){
+            return 'absent';
+        } elseif($status == Attendance::PENDING){
+            return 'pending';
+        }
+        return 'approved';
     }
 
     public function getValue($value)
     {
-        return $value->id;
+        return $value->dates;
     }
 }
