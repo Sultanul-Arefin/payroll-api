@@ -17,8 +17,13 @@ class AttendanceService{
     }
 
     function checkForSameTime($attendance, $in_time, $out_time) {
-        $details = AttendanceDetail::where('attendance_id', $attendance->id)->whereTime('in_time', '>=', $in_time)->whereTime('in_time', '<=', $out_time)->get();
-        return $details;
-        return $attendance->attendance_details;
+        $attendance = AttendanceDetail::where('attendance_id', $attendance->id)->get();
+            foreach($attendance as $value){
+                if(strtotime($value->in_time) >= strtotime($in_time) && strtotime($value->out_time) <= strtotime($out_time)){
+                    return true;
+                } else{
+                    return false;
+                }
+            }
     }
 }

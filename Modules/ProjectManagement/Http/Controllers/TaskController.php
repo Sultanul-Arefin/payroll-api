@@ -50,6 +50,7 @@ class TaskController extends Controller
                 'project_id' => $request->project_id,
                 'project_associated_column_id' => $request->project_associated_column_id,
                 'task_title' => $request->task_title,
+                'task_description' => $request->task_description,
                 'created_by' => auth()->user()->id,
             ]);
         });

@@ -51,16 +51,14 @@ class AttendanceController extends Controller
         $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
         if($attendance){
             $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->checkForSameTime($attendance, $request->in_time, $request->out_time);
-            return AttendanceDetail::where('attendance_id', $attendance->id)
-                ->where(function ($query) use($request){
-                    $query->whereTime('in_time', '>=', $request->in_time);
-                })
-                ->orWhere(function($query) use($request){
-                    $query->whereTime('out_time', '<=', $request->out_time);
-                })
-                ->get();
-            // ->whereTime('in_time', '>=', $request->in_time)->whereTime('in_time', '<=', $request->out_time)->get();
-            return $checkIfSameTimeRangeAttendanceExist;
+            if($checkIfSameTimeRangeAttendanceExist){
+                return apiResponse(
+                    data: null,
+                    message: 'This Time Slot Is Already Booked!',
+                    status: 'warning',
+                    statusCode: 422
+                );    
+            }
             return apiResponse(
                 data: $attendance,
                 message: 'Attendance Successfully Updated',
