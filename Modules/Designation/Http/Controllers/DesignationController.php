@@ -23,7 +23,13 @@ class DesignationController extends Controller
      */
     public function index()
     {
-        return view('designation::index');
+        $designation = Designation::all();
+
+        return apiResponse(
+            data: $designation,
+            message:  "Successfully",
+            status: 'success'
+        );
     }
 
     /**
