@@ -33,6 +33,8 @@ class AttendanceResourceForUser extends JsonResource
             return 'absent';
         } elseif($status == Attendance::PENDING){
             return 'pending';
+        } elseif($status == Attendance::RESTRICTED){
+            return 'restricted';
         }
         return 'approved';
     }
