@@ -11,5 +11,6 @@
     "EmployeeSalaryItems": true,
     "Payslip": true,
     "ProjectManagement": true,
-    "Attendance": true
+    "Attendance": true,
+    "Designation": true
 }
