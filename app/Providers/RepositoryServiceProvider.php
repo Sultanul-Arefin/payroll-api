@@ -11,6 +11,8 @@ use Modules\Company\Repositories\Classes\CompanyRepository;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 use Modules\Department\Repositories\Classes\DepartmentRepository;
 use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
+use Modules\Designation\Repositories\Classes\DesignationRepository;
+use Modules\Designation\Repositories\Interfaces\DesignationInterface;
 use Modules\User\Repositories\Classes\UserRepository;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
@@ -86,6 +88,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             AttendanceRepositoryInterface::class,
             AttendanceRepository::class
+        );
+
+        $this->app->bind(
+            DesignationInterface::class,
+            DesignationRepository::class
         );
     }
 
