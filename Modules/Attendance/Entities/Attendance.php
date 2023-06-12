@@ -24,6 +24,7 @@ class Attendance extends Model
     public const ABSENT = 0;
     public const PRESENT = 1;
     public const PENDING = 2;
+    public const RESTRICTED = 3;
 
     /**
      * @return HasMany
