@@ -13,17 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('project_columns', function (Blueprint $table) {
+        Schema::create('user_leave_details', function (Blueprint $table) {
             $table->id();
-            $table->string('column_name');
             $table
-                ->foreignId('company_id')
-                ->constrained('companies', 'id')
+                ->foreignId('user_leaves_id')
+                ->constrained('user_leaves', 'id')
                 ->cascadeOnDelete();
-            $table
-                ->foreignId('created_by')
-                ->constrained('users', 'id')
-                ->cascadeOnDelete();
+            $table->date('dates');
             $table->timestamps();
         });
     }
@@ -35,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_columns');
+        Schema::dropIfExists('user_leave_details');
     }
 };

@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\DB;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceDetail;
 use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
+use Modules\Attendance\Http\Services\AttendanceService;
 use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
 
 class AttendanceController extends Controller
 {
-    public function __construct(private AttendanceRepositoryInterface $attendanceRepo){
+    public function __construct(private AttendanceRepositoryInterface $attendanceRepo, private AttendanceService $attendanceService){
     }
 
     public function index()
@@ -46,6 +47,26 @@ class AttendanceController extends Controller
             'out_time' => 'required'
         ]);
 
+        // CHECK IF ATTENDANCE EXIST FOR THAT DAY
+        $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
+        if($attendance){
+            $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->checkForSameTime($attendance, $request->in_time, $request->out_time);
+            if($checkIfSameTimeRangeAttendanceExist){
+                return apiResponse(
+                    data: null,
+                    message: 'This Time Slot Is Already Booked!',
+                    status: 'warning',
+                    statusCode: 422
+                );    
+            }
+            return apiResponse(
+                data: $attendance,
+                message: 'Attendance Successfully Updated',
+                status: 'success'
+            );
+        }
+
+        // CREATE A NEW ATTENDANCE
         $attendances = DB::transaction(function() use($request){
             $attendance = Attendance::create([
                 'dates' => $request->dates,
