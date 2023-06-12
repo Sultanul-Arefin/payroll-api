@@ -24,10 +24,10 @@ return new class extends Migration
                 ->constrained('projects', 'id')
                 ->cascadeOnDelete();
             $table->string('task_title');
-            $table->text('task_description');
-            $table->string('estimation_hour');
-            $table->timestamp('start_date_time');
-            $table->timestamp('end_date_time');
+            $table->text('task_description')->nullable();
+            $table->string('estimation_hour')->nullable();
+            $table->timestamp('start_date_time')->nullable();
+            $table->timestamp('end_date_time')->nullable();
             $table
                 ->foreignId('created_by')
                 ->constrained('users', 'id')

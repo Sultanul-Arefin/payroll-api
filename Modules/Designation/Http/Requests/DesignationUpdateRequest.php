@@ -14,7 +14,6 @@ class DesignationUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'company_id' => 'required',
             'name' => 'required',
         ];
     }

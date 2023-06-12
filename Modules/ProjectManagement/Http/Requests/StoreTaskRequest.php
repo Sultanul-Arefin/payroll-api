@@ -17,7 +17,6 @@ class StoreTaskRequest extends FormRequest
             'project_id' => 'required',
             'project_associated_column_id' => 'required',
             'task_title' => 'required',
-            'task_description' => 'required'
         ];
     }
 
