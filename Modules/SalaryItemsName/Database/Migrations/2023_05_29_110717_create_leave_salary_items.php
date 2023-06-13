@@ -13,17 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('salary_items_names', function (Blueprint $table) {
+        Schema::create('leave_salary_items', function (Blueprint $table) {
             $table->id();
             $table
-                ->foreignId('salary_items_category_id')
-                ->constrained('salary_items_categories', 'id')
+                ->foreignId('salary_items_id')
+                ->constrained('salary_items_names', 'id')
                 ->cascadeOnDelete();
-            $table
-                ->foreignId('company_id')
-                ->constrained('companies', 'id')
-                ->cascadeOnDelete();
-            $table->string('name');
+            $table->integer('no_of_days')->default(0);
             $table->timestamps();
         });
     }
@@ -35,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('salary_items_names');
+        Schema::dropIfExists('leave_salary_items');
     }
 };
