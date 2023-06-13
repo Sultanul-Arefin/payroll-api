@@ -41,6 +41,7 @@ class SalaryItemsNameRepository extends BaseRepository implements SalaryItemsNam
         return $this->model
             ::query()
             ->where('salary_items_category_id', $resource->id)
+            ->where('company_id', auth()->user()->company_id)
             ->with($relations)
             ->latest();
     }

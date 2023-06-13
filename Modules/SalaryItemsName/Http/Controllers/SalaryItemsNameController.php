@@ -38,6 +38,9 @@ class SalaryItemsNameController extends Controller
     public function store(StoreSalaryItemsName $request)
     {
         try{
+            $request->merge([
+                'company_id' => auth()->user()->company_id
+            ]);
             $store = $this->salaryItemsNameRepo->create($request->toArray());
             return apiResponse([
                 'data' => $store,

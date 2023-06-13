@@ -37,7 +37,8 @@ class SalaryItemsNamesSeeder extends Seeder
                 foreach($value as $item){
                     SalaryItemsName::create([
                         'salary_items_category_id' => $key + 1,
-                        'name' => $item
+                        'name' => $item,
+                        'company_id' => 1
                     ]);
                 }
             }

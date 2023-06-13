@@ -11,7 +11,8 @@ class SalaryItemsName extends Model
 
     protected $fillable = [
         'salary_items_category_id',
-        'name'
+        'name',
+        'company_id'
     ];
     
     protected static function newFactory()
