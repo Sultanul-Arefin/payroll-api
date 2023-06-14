@@ -94,7 +94,7 @@ class UserController extends Controller
                 'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
                 'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
                 'tin' => $request->tin,
-                'user_image' => "ugy",
+                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
             // try{
             //     Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
