@@ -6,16 +6,13 @@ use Illuminate\Support\Facades\Storage;
     trait ImageUploads{
 
         public function imageUpload($request,$desired_path){
-            if($_FILES['user_image']['name'] != ''){
-                $file = $request->file('user_image');
-                $fileName = rand(10000, 50000) . '_' . time() . '.' . $file->extension();
-                $type = $file->getClientMimeType();
-                $size = $file->getSize();
-    
-                $file->storeAs($desired_path, $fileName, 'public');
-    
+            $file = $request->file('user_image');
+
+            if($file){
+                $image_name = rand(10000, 50000) . '_' . time().'.'.$file->extension();  
+                $file->storeAs($desired_path, $image_name, 'public');
             }
-            return $desired_path . $fileName;
+            return $desired_path . $image_name;
         }
 
         public function isImageExist($fileName){

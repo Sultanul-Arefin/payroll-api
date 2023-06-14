@@ -109,7 +109,6 @@ class UserController extends Controller
             
         });
         
-        return $message;
 
         return apiResponse(
             data: null,
@@ -147,17 +146,17 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
         DB::transaction(function ()use($request,$user){
+            
+            $user_details = UserDetails::where('user_id',$user->id)->first();
 
-            $user_image = $user->user_image;
-
-            if($request->file('user_image')){
+            if($request->has('user_image')){
                 // unlink goes here
-                if($this->isImageExist($user->user_image)){
-                    $this->deleteImage($user->user_image);
+                if($user_details->user_image && $this->isImageExist($user_details->user_image)){
+                    $this->deleteImage($user_details->user_image);
                 }
                 $user_image = $this->imageUpload($request,UserDetails::USER_IMAGE_PATH);
-            }
 
+            }
             $user_update = $this->user_repo->update($user->id,[
                         'name' => $request->name,
                         'designation_id' => $request->designation_id,
