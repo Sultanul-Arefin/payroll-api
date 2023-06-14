@@ -16,5 +16,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::get('task/{project}', [TaskController::class, 'index']);
         Route::post('task', [TaskController::class, 'store']);
         Route::post('update-task/{task}', [TaskController::class, 'update']);
+        Route::post('change-task-column', [TaskController::class, 'change_task_column']);
     });
 });

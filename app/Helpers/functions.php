@@ -33,10 +33,7 @@ if(!function_exists('default_project_columns')){
     function default_project_columns(){
         return [
             'Backlog',
-            'In Progress',
-            'Completed',
-            'On Hold',
-            'Cancelled'
+            'In Progress'
         ];
     }
 }

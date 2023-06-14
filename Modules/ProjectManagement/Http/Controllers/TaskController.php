@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
+use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
@@ -103,5 +104,14 @@ class TaskController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    function change_task_column(ChangeTaskColumnRequest $request) {
+        $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id'=>$request->updated_column_id]);
+        return apiResponse(
+            data: $update,
+            message: 'Column Successfully Updated',
+            status: 'success'
+        );
     }
 }
