@@ -109,7 +109,6 @@ class UserController extends Controller
             
         });
         
-        return $message;
 
         return apiResponse(
             data: null,
