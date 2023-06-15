@@ -81,6 +81,8 @@ class TaskController extends Controller
                 'start_date_time' => $request->start_date_time,
                 'end_date_time' => $request->end_date_time,
             ]);
+            // delete associate employees
+            TaskAssociatedEmployee::where('task_id', $task->id)->delete();
             foreach($request->assigned_employees as $employee_value){
                 TaskAssociatedEmployee::create([
                     'task_id' => $task->id,
