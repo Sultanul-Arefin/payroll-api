@@ -9,12 +9,14 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Modules\SalaryItemsName\Http\Requests\StoreSalaryItemsName;
 use Modules\SalaryItemsName\Http\Resources\SalaryItemsNameResource;
+use Modules\SalaryItemsName\Http\Services\SalaryLeaveItemsService;
 use Modules\SalaryItemsName\Repositories\Interfaces\SalaryItemsNameInterface;
 
 class SalaryItemsNameController extends Controller
 {
     public function __construct(
-        private SalaryItemsNameInterface $salaryItemsNameRepo
+        private SalaryItemsNameInterface $salaryItemsNameRepo,
+        private SalaryLeaveItemsService $leaveSalaryItems
     ){
     }
 
@@ -42,12 +44,15 @@ class SalaryItemsNameController extends Controller
                 'company_id' => auth()->user()->company_id
             ]);
             $store = $this->salaryItemsNameRepo->create($request->toArray());
-            return apiResponse([
-                'data' => $store,
-                'message' => 'Salary Items Stored Successfully',
-                'status' => 'success',
-                'statusCode' => 201
-            ]);
+            if(isset($request->leave_releated_items) && $request->leave_releated_items == 1){
+                $leaveSalaryItems = $this->leaveSalaryItems->create($store);
+            }
+            return apiResponse(
+                data: $store,
+                message: 'Salary Items Stored Successfully',
+                status: 'success',
+                statusCode: 201
+            );
         } catch(Exception $exception){
             Log::alert([
                 'subject' => 'Store Salary Items Name',
