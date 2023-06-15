@@ -5,6 +5,7 @@ namespace Modules\ProjectManagement\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Task extends Model
 {
@@ -30,5 +31,12 @@ class Task extends Model
     public function project_associated_column(): BelongsTo
     {
         return $this->belongsTo(ProjectAssociatedColumn::class, 'project_associated_column_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    function associated_users(): HasMany {
+        return $this->hasMany(TaskAssociatedEmployee::class, 'user_id', 'id');
     }
 }

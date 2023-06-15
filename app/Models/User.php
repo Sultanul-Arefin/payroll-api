@@ -7,12 +7,14 @@ namespace App\Models;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
+use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -89,6 +91,13 @@ class User extends Authenticatable
     public function user_details(): HasOne
     {
         return $this->hasOne(UserDetails::class, 'user_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    function tasks_associated(): HasMany {
+        return $this->hasMany(TaskAssociatedEmployee::class, 'user_id', 'id');
     }
 
     /**
