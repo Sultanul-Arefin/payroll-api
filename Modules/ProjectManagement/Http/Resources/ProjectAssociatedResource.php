@@ -22,10 +22,25 @@ class ProjectAssociatedResource extends JsonResource
             'id' => $this->id,
             'column' => $this->project_column_name,
             // 'column' => $this->getColumnName($this->project_column),
-            'tasks' => $this->tasks
+            'tasks' => $this->getTasks($this->tasks),
+            // 'tasks' => $this->tasks
             // 'tasks' => TaskResource::collection($this->tasks)
             // 'column' => $this->info($this, $this->project_column),
             // 'columnss' => ProjectColumnResource::collection($this->project_column)
+        ];
+    }
+
+    function getTasks($tasks) {
+        $tasks->each(function($item){
+            $item->assigned_employees = $item->associated_users->map(function($name){
+                return $name->user_info->only('id', 'name');
+            });
+        });
+        return $tasks;
+        $tasks->put('a', 'b');
+        return $tasks;
+        return [
+            'tasks' => $tasks
         ];
     }
 

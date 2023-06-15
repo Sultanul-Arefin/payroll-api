@@ -26,8 +26,8 @@ return new class extends Migration
             $table->string('task_title');
             $table->text('task_description')->nullable();
             $table->string('estimation_hour')->nullable();
-            $table->timestamp('start_date_time')->nullable();
-            $table->timestamp('end_date_time')->nullable();
+            $table->date('start_date_time')->nullable();
+            $table->date('end_date_time')->nullable();
             $table
                 ->foreignId('created_by')
                 ->constrained('users', 'id')
