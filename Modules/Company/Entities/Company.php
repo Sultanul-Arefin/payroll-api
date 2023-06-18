@@ -18,6 +18,8 @@ class Company extends Model
     public const ACTIVE = 1;
     public const PENDING = 0;
 
+    public const COMPANY_IMAGE_PATH = 'uploads/company/photo/';
+
     protected $fillable = [
         'company_name',
         'company_address',

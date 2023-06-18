@@ -2,6 +2,7 @@
 
 namespace Modules\Company\Http\Controllers;
 
+use App\Http\Traits\ImageUploads;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -17,7 +18,7 @@ use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {
-    use CompanyTrait;
+    use CompanyTrait, ImageUploads;
     public function __construct(private CompanyRepositoryInterface $companyRepo){
     }
 
@@ -88,13 +89,13 @@ class CompanyController extends Controller
             $request,$company
         ){
             $updated_logo = $company->company_logo;
-
-            if($request->file('company_logo')){
+            if($request->has('company_logo')){
                 // unlink goes here
-                if($this->isLogoExist($company->company_logo)){
-                    $this->deleteLogo($company->company_logo);
+                if($company->company_logo && $this->isImageExist($company->company_logo)){
+                    $this->deleteImage($company->company_logo);
                 }
-                $updated_logo = $this->upload_logo($request);
+                $updated_logo = $this->imageUploadCompany($request,Company::COMPANY_IMAGE_PATH);
+
             }
 
             $company = $this->companyRepo->update($company->id,[

@@ -96,17 +96,14 @@ class UserController extends Controller
                 'tin' => $request->tin,
                 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
-            // try{
-            //     Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
-            //     return "Successfully sent";
+            try{
+                Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
+                return "Successfully sent";
 
-            // }catch(Exception $e){
-            //     $user->notify(new UserCreateMailFailedNotification($request->email));
-            //     return null;
-            // }
-           
-
-            
+            }catch(Exception $e){
+                $user->notify(new UserCreateMailFailedNotification($request->email));
+                return null;
+            }
         });
         
 
@@ -149,6 +146,7 @@ class UserController extends Controller
             
             $user_details = UserDetails::where('user_id',$user->id)->first();
 
+            $user_image = $user_details->user_image;
             if($request->has('user_image')){
                 // unlink goes here
                 if($user_details->user_image && $this->isImageExist($user_details->user_image)){
@@ -158,13 +156,13 @@ class UserController extends Controller
 
             }
             $user_update = $this->user_repo->update($user->id,[
-                        'name' => $request->name,
-                        'designation_id' => $request->designation_id,
-                        'department_id' => $request->department_id,
-                        'assign_to' => $request->assign_to,
-                        'status' => $request->status,
-                        'company_id' => auth()->user()->company_id,
-                    ]);
+                'name' => $request->name,
+                'designation_id' => $request->designation_id,
+                'department_id' => $request->department_id,
+                'assign_to' => $request->assign_to,
+                'status' => $request->status,
+                'company_id' => auth()->user()->company_id,
+            ]);
 
             // update the roles
             $prev_role = $user->getRoleNames();
