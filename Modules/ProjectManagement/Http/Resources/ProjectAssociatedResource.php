@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\ProjectManagement\Http\Controllers\TaskController;
 
 class ProjectAssociatedResource extends JsonResource
 {
@@ -22,7 +23,9 @@ class ProjectAssociatedResource extends JsonResource
             'id' => $this->id,
             'column' => $this->project_column_name,
             // 'column' => $this->getColumnName($this->project_column),
-            'tasks' => $this->getTasks($this->tasks),
+            // 'taskssss' => $this->tasks,
+            // 'tasks' => $this->getTasks($this->tasks),
+            'tasks' => app(TaskController::class)->getTaskDetails($this->tasks)
             // 'tasks' => $this->tasks
             // 'tasks' => TaskResource::collection($this->tasks)
             // 'column' => $this->info($this, $this->project_column),
@@ -31,8 +34,10 @@ class ProjectAssociatedResource extends JsonResource
     }
 
     function getTasks($tasks) {
+        
         $tasks->each(function($item){
-            $item->assigned_employees = $item->associated_users->map(function($name){
+            // return $item->associated_users;
+            $item->associated_users->map(function($name){
                 return $name->user_info->only('id', 'name');
             });
         });

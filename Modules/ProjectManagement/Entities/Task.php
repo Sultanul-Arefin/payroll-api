@@ -37,6 +37,6 @@ class Task extends Model
      * @return HasMany
      */
     function associated_users(): HasMany {
-        return $this->hasMany(TaskAssociatedEmployee::class, 'user_id', 'id');
+        return $this->hasMany(TaskAssociatedEmployee::class, 'task_id', 'id');
     }
 }
