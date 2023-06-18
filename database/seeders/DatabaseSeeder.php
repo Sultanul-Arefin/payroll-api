@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SalaryItemsCategorySeeder::class,
             SalaryItemsNamesSeeder::class,
+            DepartmentSeeder::class,
+            DesignationSeeder::class
         ]);
     }
 }
