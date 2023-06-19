@@ -8,10 +8,13 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use Modules\Company\Entities\Company;
+use Modules\User\Entities\UserDetails;
 use Spatie\Activitylog\Contracts\Activity;
 
 class AuthController extends Controller
@@ -31,6 +34,13 @@ class AuthController extends Controller
             );
         }
         $user = User::where('email', $request->email)->first();
+        $user_details = DB::table('companies')
+                            ->join('users','users.company_id','companies.id')
+                            ->join('user_details','users.id','user_details.user_id')
+                            ->join('roles','roles.id','users.user_role')
+                            ->select('user_details.user_image','companies.company_name','companies.company_logo','roles.name as role_name')
+                            ->where('users.id',$user->id)
+                            ->first();
 
         // check if the user is deactivated
         if ($user->status == User::USER_DISABLE) {
@@ -67,7 +77,20 @@ class AuthController extends Controller
                 // 'first_name' => $user->first_name,
                 // 'last_name' => $user->last_name,
                 'name' => $user->name,
-                'token' => $user->createToken($user->name)->plainTextToken
+                'token' => $user->createToken($user->name)->plainTextToken,
+                'user_info' => [
+                    'user_name' => $user->name,
+                    'user_email' => $user->email,
+                    'user_image' => $user_details->user_image,
+                    'user_role' => $user_details->role_name,
+                ],
+                'company_info' => [
+                    'company_name' => $user_details->company_name,
+                    'company_logo' => $user_details->company_logo,
+                ],
+                'package_info' => [
+                    
+                ]
             ],
             message: 'User logged in successful'
         );
@@ -146,5 +169,14 @@ class AuthController extends Controller
     //    }else{
     //         return response()->success('Great! Successfully send in your mail');
     //       }
+    }
+    
+    public function logout(Request $request){
+        Auth::user()->tokens()->delete();
+
+        return apiResponse(null,
+            message: 'Successfully logged out',
+            status: 'success',
+        );
     }
 }
