@@ -42,6 +42,12 @@ class AuthController extends Controller
                             ->where('users.id',$user->id)
                             ->first();
 
+        $package_info = DB::table('companies')
+                            ->join('company_associated_with_package','company_associated_with_package.company_id','companies.id')
+                            ->join('packages','packages.id','company_associated_with_package.package_id')
+                            ->select('packages.id as package_id','packages.package_name')
+                            ->where('companies.id',$user->company_id)
+                            ->first();
         // check if the user is deactivated
         if ($user->status == User::USER_DISABLE) {
             throw ValidationException::withMessages([
@@ -85,11 +91,13 @@ class AuthController extends Controller
                     'user_role' => $user_details->role_name,
                 ],
                 'company_info' => [
+                    'company_id' => $user->company_id,
                     'company_name' => $user_details->company_name,
                     'company_logo' => $user_details->company_logo,
                 ],
                 'package_info' => [
-                    
+                    'package_id' => $package_info->package_id,
+                    'package_name' => $package_info->package_name
                 ]
             ],
             message: 'User logged in successful'
