@@ -7,6 +7,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Modules\Company\Entities\Company;
+use Modules\Company\Entities\CompanyAssociatedWithPackage;
 use Modules\User\Entities\UserDetails;
 
 class UserSeeder extends Seeder
@@ -29,6 +30,10 @@ class UserSeeder extends Seeder
             'user_city' => 'Dhaka, Bangladesh',
             'user_phone' => '1234567890',
             // 'user_image' => $request->user_address ?? null,
+        ]);
+        CompanyAssociatedWithPackage::create([
+            'company_id' => 1,
+            'package_id' => 1
         ]);
         $user->assignRole('super-admin');
         // User::factory()->count(10)->create();
