@@ -48,6 +48,15 @@ class UserController extends Controller
         );
     }
 
+    public function findById(User $user){
+        $get_user = $this->user_repo->findById($user->id);
+        return apiResponse(
+            data: $get_user,
+            message:"Successfully get User",
+            status: 'success'
+        ); 
+    }
+
     /**
      * Show the form for creating a new resource.
      * @return Renderable
