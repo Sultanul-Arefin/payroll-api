@@ -49,9 +49,9 @@ class UserController extends Controller
     }
 
     public function findById(User $user){
-        $get_user = $this->user_repo->findById($user->id);
+        $user->user_details = $user->user_details;
         return apiResponse(
-            data: $get_user,
+            data: $user,
             message:"Successfully get User",
             status: 'success'
         ); 
