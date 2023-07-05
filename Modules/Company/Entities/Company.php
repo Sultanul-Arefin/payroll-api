@@ -39,4 +39,10 @@ class Company extends Model
         'contact_person_phone',
         'status'
     ];
+
+    public function getChangedCompanyLogoAttribute()
+    {
+        return "storage/".$this->company_logo;
+    }
+
 }
