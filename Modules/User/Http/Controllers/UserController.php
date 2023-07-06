@@ -108,7 +108,6 @@ class UserController extends Controller
             try{
                 Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
                 return "Successfully sent";
-
             }catch(Exception $e){
                 $user->notify(new UserCreateMailFailedNotification($request->email));
                 return null;
