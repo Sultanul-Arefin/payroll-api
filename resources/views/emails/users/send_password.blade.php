@@ -6,7 +6,7 @@
 <body>
 
  <h1>Hey {{ $username }},</h1>
- <p>Your Password Has Been Updated To: <b>{{ $password }}</b></p>
+ <p>Your Password is <b>{{ $password }}</b></p>
 
 </body>
 </html>
