@@ -18,7 +18,7 @@ class SendPassword extends Mailable
      *
      * @return void
      */
-    public function __construct(public string $password, public string $name)
+    public function __construct(public string $username, public string $password)
     {
         //
     }
@@ -26,7 +26,7 @@ class SendPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Change Password',
+            subject: 'Password',
         );
     }
 
@@ -38,8 +38,8 @@ class SendPassword extends Mailable
         return new Content(
             view: 'emails.users.send_password',
             with: [
-                'password' => $this->password,
-                'username' => $this->name
+                'username' => $this->username,
+                'password' => $this->password
             ],
         );
     }
