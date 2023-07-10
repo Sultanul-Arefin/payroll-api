@@ -17,6 +17,7 @@ use Modules\User\Entities\UserDetails;
 use Modules\User\Http\Requests\UserStoreRequest;
 use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
+use Modules\User\Jobs\UserCreateMailJob;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
@@ -46,6 +47,15 @@ class UserController extends Controller
                 $rows
             )
         );
+    }
+
+    public function findById(User $user){
+        $user->user_details = $user->user_details;
+        return apiResponse(
+            data: $user,
+            message:"Successfully get User",
+            status: 'success'
+        ); 
     }
 
     /**
@@ -97,9 +107,9 @@ class UserController extends Controller
                 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
             try{
-                Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
+                UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
+                // Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
                 return "Successfully sent";
-
             }catch(Exception $e){
                 $user->notify(new UserCreateMailFailedNotification($request->email));
                 return null;
@@ -109,7 +119,7 @@ class UserController extends Controller
 
         return apiResponse(
             data: null,
-            message: $message ? "Successfully created user": "Mail could not sent",
+            message: $message ? "Successfully created user, you'll be notified shortly through email": "Mail could not sent",
             status: 'success'
         );
     }
