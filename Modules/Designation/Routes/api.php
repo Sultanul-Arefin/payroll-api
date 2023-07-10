@@ -17,6 +17,7 @@ use Modules\Designation\Http\Controllers\DesignationController;
 Route::middleware(['json.response'])->prefix('v1')->group(function(){
     Route::middleware(['auth:sanctum'])->group(function(){
         Route::get('designation',[DesignationController::class, 'index'])->name('designation_list');
+        Route::get('designation/{designation}',[DesignationController::class, 'show'])->name('designation_show');
         Route::post('designation',[DesignationController::class, 'store'])->name('add_designation');
         Route::post('designation/{designation}',[DesignationController::class, 'update'])->name('update_designation');
     });

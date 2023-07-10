@@ -61,8 +61,8 @@ class DesignationController extends Controller
                 statusCode:500
             );
         }
-        
-        
+
+
         return apiResponse(
             data: null,
             message:  "Successfully created designation",
@@ -75,9 +75,14 @@ class DesignationController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function show($id)
+    public function show(Designation $designation)
     {
-        return view('designation::show');
+        return apiResponse(
+            data: $designation,
+            message:  "Successfully Get Designation",
+            status: 'success'
+        );
+
     }
 
     /**
@@ -110,7 +115,7 @@ class DesignationController extends Controller
                 statusCode:500
             );
         }
-        
+
         return apiResponse(
             data: null,
             message:  "Successfully updated designation",
