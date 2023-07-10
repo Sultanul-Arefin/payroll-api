@@ -78,7 +78,7 @@ class DesignationController extends Controller
     public function show(Designation $designation)
     {
         return apiResponse(
-            data: $designation,
+            data: $designation->select('id','name')->find($designation->id),
             message:  "Successfully Get Designation",
             status: 'success'
         );
