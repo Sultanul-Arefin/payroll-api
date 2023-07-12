@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\Attendance\Http\Controllers;
+namespace Modules\LeaveManagement\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Attendance\Http\Services\LeaveService;
+use Modules\LeaveManagement\Http\Services\LeaveService;
 
-class LeaveController extends Controller
+class LeaveManagementController extends Controller
 {
     function __construct(
         public LeaveService $leaveService
@@ -17,6 +17,7 @@ class LeaveController extends Controller
 
     function leave_types() {
         $leaves = $this->leaveService->get_leave_types();
+        return $leaves;
         return $leaves[0]->salary_items_name;
     }
 }
