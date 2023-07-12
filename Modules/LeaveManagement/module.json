@@ -1,0 +1,11 @@
+{
+    "name": "LeaveManagement",
+    "alias": "leavemanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\LeaveManagement\\Providers\\LeaveManagementServiceProvider"
+    ],
+    "files": []
+}
