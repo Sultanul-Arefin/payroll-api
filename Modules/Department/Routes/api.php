@@ -22,7 +22,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('all_departments');
         Route::post('department', [DepartmentController::class, 'store'])
             ->name('add_department');
-        Route::patch('department/{department}', [DepartmentController::class, 'update'])
+        Route::post('department/{department}', [DepartmentController::class, 'update'])
             ->name('update_department');
     });
 });
