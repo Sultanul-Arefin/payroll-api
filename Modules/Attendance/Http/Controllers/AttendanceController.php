@@ -49,21 +49,30 @@ class AttendanceController extends Controller
 
         // CHECK IF ATTENDANCE EXIST FOR THAT DAY
         $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
+
         if($attendance){
-            $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->checkForSameTime($attendance, $request->in_time, $request->out_time);
+            $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->attendanceIsPossible($attendance, $request->in_time, $request->out_time);
             if($checkIfSameTimeRangeAttendanceExist){
+                $attendance_details = AttendanceDetail::create([
+                    'attendance_id' => $attendance->id,
+                    'in_time' => $request->in_time,
+                    'out_time' => $request->out_time
+                ]);
                 return apiResponse(
-                    data: null,
+                    data: $attendance_details,
+                    message: 'This Slot Successfully Added',
+                    status: 'success'
+                );
+
+            }else{
+                return apiResponse(
+                    data: $checkIfSameTimeRangeAttendanceExist,
                     message: 'This Time Slot Is Already Booked!',
                     status: 'warning',
                     statusCode: 422
-                );    
+                );
             }
-            return apiResponse(
-                data: $attendance,
-                message: 'Attendance Successfully Updated',
-                status: 'success'
-            );
+
         }
 
         // CREATE A NEW ATTENDANCE
