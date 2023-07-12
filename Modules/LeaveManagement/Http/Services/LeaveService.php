@@ -1,10 +1,7 @@
 <?php
 
-namespace Modules\Attendance\Http\Services;
+namespace Modules\LeaveManagement\Http\Services;
 
-use Illuminate\Database\Eloquent\Model;
-use Modules\Attendance\Entities\Attendance;
-use Modules\Attendance\Entities\AttendanceDetail;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
 class LeaveService{

@@ -12,5 +12,6 @@
     "Payslip": true,
     "ProjectManagement": true,
     "Attendance": true,
-    "Designation": true
+    "Designation": true,
+    "LeaveManagement": true
 }
