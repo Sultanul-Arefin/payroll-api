@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
@@ -68,6 +69,10 @@ class User extends Authenticatable
         'status' => 'integer',
         'email_verified_at' => 'datetime',
     ];
+
+    function setPasswordAttribute($value) {
+        $this->attributes['password'] = Hash::make($value);
+    }
 
     /**
      * @return BelongsTo
