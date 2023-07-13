@@ -25,7 +25,7 @@ class EmployeeSalaryItemsController extends Controller
             return $employee_salary;
         });
         return apiResponse(
-            data: $employee_salary,
+            data: null,
             message: 'Salary Items Associate Successfully',
             status: 'success'
         );
