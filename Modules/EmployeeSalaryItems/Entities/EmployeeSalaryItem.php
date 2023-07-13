@@ -4,6 +4,8 @@ namespace Modules\EmployeeSalaryItems\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class EmployeeSalaryItem extends Model
 {
@@ -28,4 +30,11 @@ class EmployeeSalaryItem extends Model
 
     public const IS_GENERAL = 1;
     public const IS_NOT_GENERAL = 0;
+
+    /**
+     * @return belongsTo
+     */
+    function salaryItemsName(): BelongsTo {
+        return $this->belongsTo(SalaryItemsName::class, 'salary_item_id', 'id');
+    }
 }
