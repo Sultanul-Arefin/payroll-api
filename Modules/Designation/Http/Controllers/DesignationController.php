@@ -92,6 +92,7 @@ class DesignationController extends Controller
      */
     public function edit($id)
     {
+        return 'test';
         return view('designation::edit');
     }
 

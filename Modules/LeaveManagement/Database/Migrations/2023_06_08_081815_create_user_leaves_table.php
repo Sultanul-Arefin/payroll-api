@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('action_message')->nullable(); // message when approving or denying by hr or upper users
             $table
                 ->foreignId('action_by')
+                ->nullable()
                 ->constrained('users', 'id')
                 ->cascadeOnDelete(); // who did approve or deny the request
             $table->timestamps();
