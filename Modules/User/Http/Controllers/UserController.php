@@ -83,7 +83,7 @@ class UserController extends Controller
                         'name' => $request->name,
                         'email' => $request->email,
                         'company_id' => auth()->user()->company_id,
-                        'password' => Hash::make($request->password),
+                        'password' => $request->password,
                     ]);
             $user->assignRole('employee');
             
@@ -108,7 +108,6 @@ class UserController extends Controller
             ]);
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
-                // Mail::to($user->email)->send(new SendPassword($request->password,$user->name));
                 return "Successfully sent";
             }catch(Exception $e){
                 $user->notify(new UserCreateMailFailedNotification($request->email));
