@@ -12,12 +12,14 @@ class LeaveManagementController extends Controller
     function __construct(
         public LeaveService $leaveService
     ) {
-        
-    }
 
+    }
     function leave_types() {
         $leaves = $this->leaveService->get_leave_types();
         return $leaves;
         return $leaves[0]->salary_items_name;
+    }
+    public function leave_list(){
+
     }
 }

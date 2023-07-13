@@ -14,4 +14,7 @@ class LeaveService{
             )
             ->get();
     }
+    public function get_leave_list(){
+
+    }
 }
