@@ -15,10 +15,10 @@ class LeaveSalaryItemsSeeder extends Seeder
      */
     public function run(): void
     {
-        $salary_items_names = SalaryItemsName::where('company_id', 1)->where('salary_items_category_id')->get();
+        $salary_items_names = SalaryItemsName::where('company_id', 1)->where('salary_items_category_id', 1)->get();
         foreach($salary_items_names as $value){
             LeaveSalaryItems::create([
-                'salary_item_id' => $value->id,
+                'salary_items_id' => $value->id,
                 'no_of_days' => 0,
             ]);
         }
