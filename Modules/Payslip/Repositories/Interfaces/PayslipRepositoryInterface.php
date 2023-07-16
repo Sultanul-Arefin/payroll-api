@@ -17,4 +17,16 @@ interface PayslipRepositoryInterface
         array $relations = [],
         int $count = 15
     ): CursorPaginator;
+
+    /**
+     * @param array|string[] $columns
+     * @param array $relations
+     * @param int $count
+     * @return CursorPaginator
+     */
+    function getSalaryItemsCategory(
+        array $columns = ['*'],
+        array $relations = [],
+        int $count = 15
+    ): CursorPaginator;
 }
