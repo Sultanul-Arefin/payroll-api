@@ -17,6 +17,8 @@ use Modules\User\Repositories\Classes\UserRepository;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
+use Modules\Payslip\Repositories\Classes\PayslipRepository;
+use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\ProjectManagement\Repositories\Classes\ProjectColumnRepository;
 use Modules\ProjectManagement\Repositories\Classes\ProjectRepository;
 use Modules\ProjectManagement\Repositories\Classes\TaskRepository;
@@ -93,6 +95,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             DesignationInterface::class,
             DesignationRepository::class
+        );
+
+        $this->app->bind(
+            PayslipRepositoryInterface::class,
+            PayslipRepository::class
         );
     }
 
