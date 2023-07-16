@@ -13,6 +13,8 @@ use Modules\Department\Repositories\Classes\DepartmentRepository;
 use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
 use Modules\Designation\Repositories\Classes\DesignationRepository;
 use Modules\Designation\Repositories\Interfaces\DesignationInterface;
+use Modules\LeaveManagement\Repositories\Classes\leaveRepository;
+use Modules\LeaveManagement\Repositories\Interface\LeaveRepositoryInterface;
 use Modules\User\Repositories\Classes\UserRepository;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
@@ -93,6 +95,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             DesignationInterface::class,
             DesignationRepository::class
+        );
+
+        $this->app->bind(
+            LeaveRepositoryInterface::class,
+            leaveRepository::class
         );
     }
 
