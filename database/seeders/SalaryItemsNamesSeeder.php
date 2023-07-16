@@ -18,10 +18,12 @@ class SalaryItemsNamesSeeder extends Seeder
                 'Ordinary Time',
                 'Annual Leave',
                 'Sick Leave',
-            ],
-            [
                 'Absent',
                 'Unpaid Sick Leave'
+            ],
+            [
+                'Item 3',
+                'Item 4'
             ],
             [
                 'Item 1'

@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
-            'password' => bcrypt('password'), // password
+            'password' => 'password', // password
             'company_id' => Company::factory()
         ]);
         UserDetails::create([
