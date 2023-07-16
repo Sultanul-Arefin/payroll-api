@@ -28,7 +28,7 @@ class CompanyController extends Controller
             ['*'],
             [],
         );
-        $company->company_logo = env('APP_URL') . '/' . $company->changed_company_logo;
+        $company->company_logo = $company->changed_company_logo;
         return apiResponse(
             data: $company,
             message: 'Success',
