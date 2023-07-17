@@ -39,7 +39,7 @@ class PayslipController extends Controller
         $request->validate([
             'employee_id' => 'required',
             'from_date' => 'required',
-            'to_date' => 'required'
+            'to_date' => 'required',
             'payment_date' => 'required'
         ]);
     }
