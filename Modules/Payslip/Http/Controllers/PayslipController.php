@@ -35,8 +35,13 @@ class PayslipController extends Controller
         );
     }
 
-    function run_payslip() {
-        
+    function run_payslip(Request $request) {
+        $request->validate([
+            'employee_id' => 'required',
+            'from_date' => 'required',
+            'to_date' => 'required'
+            'payment_date' => 'required'
+        ]);
     }
 
     function preview_payslip() {
