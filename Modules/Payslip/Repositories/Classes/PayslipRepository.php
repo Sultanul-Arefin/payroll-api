@@ -2,9 +2,13 @@
 
 namespace Modules\Payslip\Repositories\Classes;
 
+use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
+use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
 class PayslipRepository extends BaseRepository implements PayslipRepositoryInterface
 {
@@ -48,9 +52,23 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
     }
 
     function getSalaryItemsCategoryData($relations) {
+        return SalaryItemsCategory::query()
+            ->whereHas(
+                'salaryItemsName', function(Builder $builder){
+                    $builder->whereHas(
+                        'employeeSalaryItem', function(Builder $builder){
+                            $builder
+                                ->where('company_id', auth()->user()->company_id)
+                                ->where('employee_id', request('employee_id'));
+                        }
+                    );
+                }
+            )
+            ->with($relations)
+            ->latest();
         return EmployeeSalaryItem::query()
             ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', $employee_id)
+            ->where('employee_id', request('employee_id'))
             ->whereHas(
                 'salaryItemsName', function(Builder $query){
                     $query->where('salary_items_category_id', 1);

@@ -22,6 +22,7 @@ class SalaryItemsCategoryResource extends JsonResource
         return [
             $this->merge(
                 Arr::only(parent::toArray($request), [
+                    'id'
                 ])
             )
         ];

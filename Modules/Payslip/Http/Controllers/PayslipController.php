@@ -26,14 +26,13 @@ class PayslipController extends Controller
         if(request()?->has('rows')){
             $rows = (int) request('rows');
         }
-
         return SalaryItemsCategoryResource::collection(
             $this->payslipRepositoryInterface->getSalaryItemsCategory(
                 ['*'],
                 [],
                 $rows
             )
-        )
+        );
         // $category_1 = $this->payslipService->getCategoryOneData($request->employee_id);
         // return $category_1;
     }
