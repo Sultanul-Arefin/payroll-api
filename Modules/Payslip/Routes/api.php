@@ -11,5 +11,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('run-payslip');
         Route::get('preview-payslip', [PayslipController::class, 'preview_payslip'])
             ->name('preview-payslip');
+        Route::get('payslips', [PayslipController::class, 'payslips'])
+            ->name('payslips');
     });
 });
