@@ -33,12 +33,15 @@ class PayslipController extends Controller
                 $rows
             )
         );
-        // $category_1 = $this->payslipService->getCategoryOneData($request->employee_id);
-        // return $category_1;
     }
 
-    function run_payslip() {
-        
+    function run_payslip(Request $request) {
+        $request->validate([
+            'employee_id' => 'required',
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+            'payment_date' => 'required|date_format:Y-m-d'
+        ]);
     }
 
     function preview_payslip() {
