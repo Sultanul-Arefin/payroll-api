@@ -33,8 +33,6 @@ class PayslipController extends Controller
                 $rows
             )
         );
-        // $category_1 = $this->payslipService->getCategoryOneData($request->employee_id);
-        // return $category_1;
     }
 
     function run_payslip() {

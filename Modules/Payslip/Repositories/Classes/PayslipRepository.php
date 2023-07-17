@@ -66,30 +66,5 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
             )
             ->with($relations)
             ->latest();
-        return EmployeeSalaryItem::query()
-            ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', request('employee_id'))
-            ->whereHas(
-                'salaryItemsName', function(Builder $query){
-                    $query->where('salary_items_category_id', 1);
-                }
-            )
-            ->with($relations)
-            ->latest();
-        return $this->model
-            ::query()
-            ->where('company_id', auth()->user()->company_id)
-            ->when(
-                !is_null(request('department_id')),
-                fn(Builder $builder) => $builder->where(function ($query) {
-                    $query
-                        ->where(
-                            'department_id',
-                            request('department_id')
-                        );
-                })
-            )
-            ->with($relations)
-            ->latest();
     }
 }
