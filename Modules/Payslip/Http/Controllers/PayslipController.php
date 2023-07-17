@@ -38,9 +38,9 @@ class PayslipController extends Controller
     function run_payslip(Request $request) {
         $request->validate([
             'employee_id' => 'required',
-            'from_date' => 'required',
-            'to_date' => 'required',
-            'payment_date' => 'required'
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+            'payment_date' => 'required|date_format:Y-m-d'
         ]);
     }
 
