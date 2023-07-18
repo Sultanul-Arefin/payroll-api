@@ -9,5 +9,5 @@ class UserLeaveDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = ['user_leaves_id', 'dates'];
 }
