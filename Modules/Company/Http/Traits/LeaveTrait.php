@@ -7,8 +7,14 @@ use Modules\Company\Entities\WeeklyHoliday;
 
 trait LeaveTrait{
 
-    public function isHolidayExist(array $data)
+    /**
+     * all holiday exist or not
+     * @param array $data
+     * @return array|null
+     */
+    public function isHolidayExist(array $data):?array
     {
+        //annual holiday fetch
          $annualHoliday = AnnualHoliday::query()
                         ->where('company_id', auth()->user()->company_id)
                         ->whereIn('dates', $data)
@@ -19,7 +25,13 @@ trait LeaveTrait{
          return array_merge($annualHoliday, $weeklyHoliday);
 
     }
-    public function isWeeklyExist(array $data)
+
+    /**
+     * weekly holiday exist or not
+     * @param array $data
+     * @return array|null
+     */
+    public function isWeeklyExist(array $data):?array
     {
         return WeeklyHoliday::query()
             ->where('company_id', auth()->user()->company_id)

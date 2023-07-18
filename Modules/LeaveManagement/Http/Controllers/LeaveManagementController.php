@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\LeaveManagement\Http\Requests\LeaveStoreRequest;
 use Modules\LeaveManagement\Http\Resources\LeaveResource;
-use Modules\LeaveManagement\Http\Services\LeaveService;
+use Modules\LeaveManagement\Http\Services\CompanyService;
 use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
 use Modules\Company\Http\Traits\LeaveTrait;
+use DateTime;
+use DateInterval;
+use DatePeriod;
 
 class LeaveManagementController extends Controller
 {
@@ -29,7 +32,7 @@ class LeaveManagementController extends Controller
 
         $existDates = $this->isHolidayExist($request->dates);//params pass to date for checking holiday exist or not
         $leaveStore = $this->leaveRepository->leave_store($request, $existDates);
-        return apiResponse($leaveStore, 'Successfully Leave Stored', 'success', '201');
+        return apiResponse(null, 'Successfully Leave Stored', 'success', '201');
     }
 
 }

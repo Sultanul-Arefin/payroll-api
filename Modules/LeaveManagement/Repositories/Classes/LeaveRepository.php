@@ -32,6 +32,12 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
     {
        return SalaryItemsName::where('company_id', auth()->user()->company_id)->get();
     }
+
+    /**
+     * @param $request
+     * @param $existDates
+     * @return mixed
+     */
     public function leave_store($request, $existDates)
     {
         $mergeDates = array_merge($request->dates, $existDates); //user request dates and exist dates are merged
