@@ -21,9 +21,12 @@ class PayslipResource extends JsonResource
         return [
             $this->merge(
                 Arr::only(parent::toArray($request), [
-                    'id'
+                    'id',
+                    'month'
                 ])
-            )
+            ),
+            'employee' => $this->employee?->only('name', 'email'),
+            'payment_date' => date('Y-m-d H:i:s')
         ];
     }
 }
