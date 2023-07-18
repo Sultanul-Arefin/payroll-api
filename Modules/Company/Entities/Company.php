@@ -42,7 +42,7 @@ class Company extends Model
 
     public function getChangedCompanyLogoAttribute()
     {
-        return "storage/".$this->company_logo;
+        return $this->company_logo ? env('APP_URL') . '/' . 'storage/'.$this->company_logo : null;
     }
 
 }
