@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
@@ -49,6 +50,18 @@ class PayslipController extends Controller
     }
 
     function payslips() {
-        return 'payslips';
+
+        $rows = 15;
+        if(request()?->has('rows')){
+            $rows = (int) request('rows');
+        }
+
+        return PayslipResource::collection(
+            $this->payslipRepositoryInterface->allWithSearch(
+                ['*'],
+                [],
+                $rows
+            )
+        );
     }
 }

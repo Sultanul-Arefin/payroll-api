@@ -11,8 +11,18 @@ class Payslip extends Model
 
     protected $fillable = [];
     
-    protected static function newFactory()
+    /**
+     * changes while using uuid
+     */
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected static function boot()
     {
-        return \Modules\Payslip\Database\factories\PayslipFactory::new();
+        parent::boot();
+
+        static::creating(function($model){
+            $model->id = (string) \Illuminate\Support\Str::uuid();
+        });
     }
 }
