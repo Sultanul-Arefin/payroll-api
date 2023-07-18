@@ -47,4 +47,8 @@ class PayslipController extends Controller
     function preview_payslip() {
         
     }
+
+    function payslips() {
+        return 'payslips';
+    }
 }
