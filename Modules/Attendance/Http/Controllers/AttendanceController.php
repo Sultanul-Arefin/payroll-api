@@ -59,14 +59,14 @@ class AttendanceController extends Controller
                     'out_time' => $request->out_time
                 ]);
                 return apiResponse(
-                    data: $attendance_details,
+                    data: [],
                     message: 'This Slot Successfully Added',
                     status: 'success'
                 );
 
             }else{
                 return apiResponse(
-                    data: $checkIfSameTimeRangeAttendanceExist,
+                    data: [],
                     message: 'This Time Slot Is Already Booked!',
                     status: 'warning',
                     statusCode: 422
