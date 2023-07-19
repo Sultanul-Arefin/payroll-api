@@ -98,6 +98,16 @@ class RepositoryServiceProvider extends ServiceProvider
             DesignationInterface::class,
             DesignationRepository::class
         );
+
+        $this->app->bind(
+            LeaveRepositoryInterface::class,
+            LeaveRepository::class
+        );
+
+        $this->app->bind(
+            PayslipRepositoryInterface::class,
+            PayslipRepository::class
+        );
     }
 
     /**
