@@ -24,7 +24,7 @@ class CompanyService{
         $date_range = new DatePeriod($start_date, $interval, $end_date);
 
         foreach($date_range as $date){
-            // here friday in the index 5
+            // weekend days count [monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6, sunday:7]
             foreach($requestDays as $days){
                 if($date->format('N') == $days){
                     $week_days[] = $date->format('Y-m-d');

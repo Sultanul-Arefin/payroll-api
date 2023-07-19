@@ -26,6 +26,7 @@ class UserResource extends JsonResource
                     'email'
                 ])
             ),
+            'status' => $this->status,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'user_details' => $this->user_details
         ];

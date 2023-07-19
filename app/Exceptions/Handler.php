@@ -104,6 +104,14 @@ class Handler extends ExceptionHandler
             ];
             return response()->json($response, 404);
         }
+        if ($exception instanceof CustomException) {//custom exception handle if need anywhere
+            $response = [
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+                'data' => []
+            ];
+            return response()->json($response, $exception->getCode());
+        }
         return parent::render($request, $exception);
     }
 }

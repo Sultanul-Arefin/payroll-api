@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Employee\Entities\Employee;
 use Modules\User\Entities\UserDetails;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
+use App\Exceptions\CustomException;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
@@ -58,5 +59,27 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function userDetailsUpdate($user_id,$attributes){
         return UserDetails::where('user_id',$user_id)?->update($attributes);
+    }
+
+    /**
+     * @param object $user
+     * @param int $statusTypes
+     * @return bool
+     */
+    public function userStatus(object $user, int $statusTypes): bool
+    {
+        // TODO: Implement userStatus() method.
+        if ($statusTypes === User::USER_ACTIVE){
+            $user = $user->update([
+                'status' => User::USER_ACTIVE
+            ]);
+        }elseif($statusTypes === User::USER_DISABLE){
+            $user = $user->update([
+                'status' => User::USER_DISABLE
+            ]);
+        }else{
+            throw new CustomException("not allow employee status value", 422);
+        }
+        return $user;
     }
 }
