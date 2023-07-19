@@ -19,4 +19,12 @@ interface UserRepositoryInterface
     ): CursorPaginator;
 
     public function userDetailsUpdate($user_id,$attributes);
+
+    /**
+     * user status active or inactive
+     * @param object $user
+     * @param int $statusTypes
+     * @return bool
+     */
+    public function userStatus(object $user, int $statusTypes): bool;
 }
