@@ -2,6 +2,8 @@
 
 namespace Modules\Payslip\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -9,6 +11,7 @@ use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
+use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
 class PayslipController extends Controller
 {
@@ -23,17 +26,55 @@ class PayslipController extends Controller
         $request->validate([
             'employee_id' => 'required'
         ]);
-        $rows = 15;
-        if(request()?->has('rows')){
-            $rows = (int) request('rows');
-        }
-        return SalaryItemsCategoryResource::collection(
-            $this->payslipRepositoryInterface->getSalaryItemsCategory(
-                ['*'],
-                [],
-                $rows
-            )
+        $user = User::where('id', request('employee_id'))->first();
+        return apiResponse(
+            data: [
+                // 'all_items' => $user->salary_items?->map(function($s_items){
+                //     return [
+                //         // 'id' => $s_items->id,
+                //         'name' => $s_items->salaryItemsName?->name,
+                //         'value' => $s_items->amount
+                //     ];
+                // }),
+                'category_wise_value' => SalaryItemsCategory::query()
+                                    ->whereHas(
+                                        'salaryItemsName', fn(Builder $query) => $query
+                                            ->whereHas(
+                                                'employeeSalaryItem', fn(Builder $query) => $query
+                                                    ->where('company_id', auth()->user()->company_id)
+                                                    ->where('employee_id', $user->id)
+                                            )
+                                    )
+                                    ->withSum(
+                                        'salaryItemsName.employeeSalaryItem as amount', 
+                                        'id'
+                                    )
+                                    ->get()
+                // 'category_wise_value' => $user->salary_items?->map(function($items){
+                //     return [
+                //         'name' => $items?->salaryItemsName?->salaryItemsCategory?->name,
+                //         'value' => $items?->salaryItemsName?->salaryItemsCategory?->salaryItemsName?->map(function($new_items){
+                //             $new_items->load('employeeSalaryItem');
+                //             return $new_items->employeeSalaryItem->sum('amount');
+                //         })
+                //     ];
+                // })
+                // 'category_wise_value' => $user->salary_items?->salaryItemsName?->salaryItemsCategory
+            ],
+            message: 'success',
+            statusCode: 200
         );
+        // $rows = 15;
+        // if(request()?->has('rows')){
+        //     $rows = (int) request('rows');
+        // }
+        // return SalaryItemsCategoryResource::collection(
+        //     $this->payslipRepositoryInterface->getSalaryItemsCategory(
+        //         ['*'],
+        //         [],
+        //         $rows
+        //     )
+        // );
     }
 
     function run_payslip(Request $request) {

@@ -15,6 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\User\Entities\UserDetails;
@@ -104,6 +105,13 @@ class User extends Authenticatable
      */
     function tasks_associated(): HasMany {
         return $this->hasMany(TaskAssociatedEmployee::class, 'user_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    function salary_items(): HasMany {
+        return $this->hasMany(EmployeeSalaryItem::class, 'employee_id', 'id');
     }
 
     /**
