@@ -21,12 +21,54 @@ class PayslipController extends Controller
     ) {
         
     }
+
+    function employee_salary_items(Request $request) {
+        $request->validate([
+            'employee_id' => 'required'
+        ]);
+        $user = User::where('id', request('employee_id'))->first();
+
+        return apiResponse(
+            data: [
+                'all_items' => $user->salary_items?->map(function($s_items){
+                    return [
+                        // 'id' => $s_items->id,
+                        'name' => $s_items->salaryItemsName?->name,
+                        'value' => $s_items->amount
+                    ];
+                }),
+            ],
+            message: 'success',
+            statusCode: 200
+        );
+    }
     public function salary_information_before_running_payslip(Request $request)
     {
         $request->validate([
             'employee_id' => 'required'
         ]);
         $user = User::where('id', request('employee_id'))->first();
+
+        // category wise value
+        $category_wise_value = SalaryItemsCategory::query()
+                    ->whereHas(
+                        'salaryItemsName', fn(Builder $query) => $query
+                            ->whereHas(
+                                'employeeSalaryItem', fn(Builder $query) => $query
+                                    ->where('company_id', auth()->user()->company_id)
+                                    ->where('employee_id', $user->id)
+                            )
+                    )
+                    ->with(
+                        'salaryItemsName.employeeSalaryItem'
+                    )
+                    ->get();
+        return $category_wise_value;
+        foreach($category_wise_value as $cwv){
+
+        }
+        
+
         return apiResponse(
             data: [
                 // 'all_items' => $user->salary_items?->map(function($s_items){
@@ -45,10 +87,14 @@ class PayslipController extends Controller
                                                     ->where('employee_id', $user->id)
                                             )
                                     )
-                                    ->withSum(
-                                        'salaryItemsName.employeeSalaryItem as amount', 
-                                        'id'
+                                    ->with(
+                                        'salaryItemsName.employeeSalaryItem'
                                     )
+                                    // ->with(
+                                    //     'salaryItemsName', function($q){
+                                    //         $q->withSum('employeeSalaryItem', 'amount');
+                                    //     }
+                                    // )
                                     ->get()
                 // 'category_wise_value' => $user->salary_items?->map(function($items){
                 //     return [
