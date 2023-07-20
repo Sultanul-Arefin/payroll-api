@@ -53,6 +53,16 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                         );
                 })
             )
+            ->when(
+                !is_null(request('is_activated')) && request('is_activated') == User::USER_DISABLE,
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_DISABLE
+                        );
+                })
+            )
             ->with($relations)
             ->latest();
     }
