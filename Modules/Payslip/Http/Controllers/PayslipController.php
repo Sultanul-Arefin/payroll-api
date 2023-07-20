@@ -7,6 +7,8 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Redis;
+use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
 use Modules\Payslip\Http\Services\PayslipService;
@@ -41,6 +43,27 @@ class PayslipController extends Controller
             message: 'success',
             statusCode: 200
         );
+    }
+
+    function employee_salary_items_calculation(Request $request) {
+        $request->validate([
+            'employee_id' => 'required'
+        ]);
+        $user = User::where('id', request('employee_id'))->first();
+        $salary_category = SalaryItemsCategory::query()
+                            ->whereHas(
+                                'salaryItemsName', fn(Builder $query) => $query
+                                    ->whereHas(
+                                        'employeeSalaryItem', fn(Builder $query) => $query
+                                            ->where('company_id', auth()->user()->company_id)
+                                            ->where('employee_id', $user->id)
+                                    )
+                            )
+                            ->get();
+        return CategoryResource::collection(
+            $salary_category
+        );
+        return $salary_category;
     }
     public function salary_information_before_running_payslip(Request $request)
     {
