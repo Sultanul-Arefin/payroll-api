@@ -5,7 +5,7 @@ namespace Modules\Company\Http\Traits;
 use Illuminate\Support\Facades\Storage;
 
 trait CompanyTrait{
-    
+
     public function upload_logo($request)
     {
         if($_FILES['company_logo']['name'] != ''){

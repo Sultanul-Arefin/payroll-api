@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\Http\Resources;
+namespace Modules\Payslip\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 
-class UserResource extends JsonResource
+class PayslipResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,13 +22,11 @@ class UserResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'name',
-                    'email'
+                    'month'
                 ])
             ),
-            'status' => $this->status,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'user_details' => $this->user_details
+            'employee' => $this->employee?->only('name', 'email'),
+            'payment_date' => date('Y-m-d H:i:s')
         ];
     }
 }

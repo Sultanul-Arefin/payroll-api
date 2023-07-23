@@ -55,7 +55,7 @@ class UserController extends Controller
             data: $user,
             message:"Successfully get User",
             status: 'success'
-        ); 
+        );
     }
 
     /**
@@ -75,7 +75,7 @@ class UserController extends Controller
     public function store(UserStoreRequest $request)
     {
         $message = DB::transaction(function ()use($request){
-            
+
             $user = $this->user_repo->create([
                         'designation_id' => $request->designation_id,
                         'assign_to' => $request->assign_to,
@@ -86,7 +86,7 @@ class UserController extends Controller
                         'password' => $request->password,
                     ]);
             $user->assignRole('employee');
-            
+
             $user_details = UserDetails::create([
                 'user_id' => $user->id,
                 'user_area' => $request->user_area,
@@ -114,7 +114,7 @@ class UserController extends Controller
                 return null;
             }
         });
-        
+
 
         return apiResponse(
             data: null,
@@ -152,7 +152,7 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
         DB::transaction(function ()use($request,$user){
-            
+
             $user_details = UserDetails::where('user_id',$user->id)->first();
 
             $user_image = $user_details->user_image;
@@ -178,7 +178,7 @@ class UserController extends Controller
             if($prev_role){
                 $user->syncRoles($request->role);
             }
-            
+
             $user_details = $this->user_repo->userDetailsUpdate($user->id,[
                 'user_area' => $request->user_area,
                 'user_phone' => $request->user_phone,
@@ -197,7 +197,7 @@ class UserController extends Controller
                 'user_image' => $user_image,
             ]);
         });
-        
+
 
         return apiResponse(
             data: null,
@@ -205,7 +205,14 @@ class UserController extends Controller
             status: 'success'
         );
     }
-
+    public function userStatus(User $user, Request $request)
+    {
+        $request->validate([
+            'status' => 'required|integer|in:0,1'
+        ]);
+       $this->user_repo->userStatus($user, $request->status);
+       return apiResponse(null, 'Successfully Employee Status Updated', 'success');
+    }
     /**
      * Remove the specified resource from storage.
      * @param int $id

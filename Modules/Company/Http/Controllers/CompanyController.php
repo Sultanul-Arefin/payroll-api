@@ -13,13 +13,17 @@ use Modules\Company\Http\Requests\CompanyUpdateRequest;
 use Illuminate\Support\Facades\Storage;
 use Modules\Company\Entities\AnnualHoliday;
 use Modules\Company\Entities\WeeklyHoliday;
+use Modules\Company\Http\Services\CompanyService;
 use Modules\Company\Http\Traits\CompanyTrait;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {
     use CompanyTrait, ImageUploads;
-    public function __construct(private CompanyRepositoryInterface $companyRepo){
+    public function __construct(
+        private CompanyRepositoryInterface $companyRepo,
+        public CompanyService $companyService
+    ){
     }
 
     public function index()
@@ -121,7 +125,7 @@ class CompanyController extends Controller
 
             return $company;
         });
-      
+
 
         return apiResponse(
             data: $company_update,
@@ -134,9 +138,10 @@ class CompanyController extends Controller
     public function add_weekly_holidays(Request $request)
     {
         $request->validate([
-            'dates' => 'required|array'
+            'weekDays' => 'required|array'
         ]);
-        $dates = collect($request->dates);
+        $weekendDates = $this->companyService->yearlyWeekendDays($request->weekDays);
+        $dates = collect($weekendDates);
         $dates->each(function($item, $key){
             WeeklyHoliday::create([
                 'dates' => $item,

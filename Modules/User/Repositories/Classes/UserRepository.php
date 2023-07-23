@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Employee\Entities\Employee;
 use Modules\User\Entities\UserDetails;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
+use App\Exceptions\CustomException;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
@@ -52,11 +53,77 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                         );
                 })
             )
+            ->when(
+                !is_null(request('is_activated')) && request('is_activated') == User::USER_DISABLE,
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_DISABLE
+                        );
+                })
+            )
+            ->when(
+                !is_null(request('is_activated')) && request('is_activated') == User::USER_ACTIVE,
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_ACTIVE
+                        );
+                })
+            )
+            ->when(
+                is_null(request('is_activated')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_ACTIVE
+                        );
+                })
+            )
+            ->when(
+                !is_null(request('search')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where('name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('email', 'LIKE', '%' . request('search') . '%')
+                        ->orWhereRelation(
+                            'user_details',
+                            'user_phone',
+                            'LIKE',
+                            '%' . request('search') . '%' 
+                        );
+                })
+            )
             ->with($relations)
             ->latest();
     }
 
     public function userDetailsUpdate($user_id,$attributes){
         return UserDetails::where('user_id',$user_id)?->update($attributes);
+    }
+
+    /**
+     * @param object $user
+     * @param int $statusTypes
+     * @return bool
+     */
+    public function userStatus(object $user, int $statusTypes): bool
+    {
+        // TODO: Implement userStatus() method.
+        if ($statusTypes === User::USER_ACTIVE){
+            $user = $user->update([
+                'status' => User::USER_ACTIVE
+            ]);
+        }elseif($statusTypes === User::USER_DISABLE){
+            $user = $user->update([
+                'status' => User::USER_DISABLE
+            ]);
+        }else{
+            throw new CustomException("not allow employee status value", 422);
+        }
+        return $user;
     }
 }
