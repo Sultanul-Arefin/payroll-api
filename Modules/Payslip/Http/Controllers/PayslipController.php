@@ -60,8 +60,8 @@ class PayslipController extends Controller
         return CategoryResource::collection(
             $salary_category
         );
-        return $salary_category;
     }
+    
     public function salary_information_before_running_payslip(Request $request)
     {
         $request->validate([
