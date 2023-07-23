@@ -31,15 +31,12 @@ class PayslipController extends Controller
         $user = User::where('id', request('employee_id'))->first();
 
         return apiResponse(
-            data: [
-                'all_items' => $user->salary_items?->map(function($s_items){
-                    return [
-                        // 'id' => $s_items->id,
-                        'name' => $s_items->salaryItemsName?->name,
-                        'value' => $s_items->amount
-                    ];
-                }),
-            ],
+            data: $user->salary_items?->map(function($s_items){
+                return [
+                    'name' => $s_items->salaryItemsName?->name,
+                    'value' => $s_items->amount
+                ];
+            }),
             message: 'success',
             statusCode: 200
         );
