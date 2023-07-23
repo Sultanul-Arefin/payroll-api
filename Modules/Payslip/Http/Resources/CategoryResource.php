@@ -26,6 +26,8 @@ class CategoryResource extends JsonResource
                     'id'
                 ])
             ),
+            'category_id' => $this->id,
+            'category_name' => $this->name,
             'amount' => $this->getAmount($this->id)
         ];
     }
@@ -43,23 +45,6 @@ class CategoryResource extends JsonResource
             )
             ->where('company_id', auth()->user()->company_id)
             ->where('employee_id', request('employee_id'))
-            // ->withSum('salaryItemsName.salaryItemsCategory', 'amount')
             ->get()->sum('amount');
-    }
-
-    function getCategoryItems($category_id) {
-        return EmployeeSalaryItem::query()
-            ->whereHas(
-                'salaryItemsName', function(Builder $builder)use($category_id){
-                    $builder->whereHas(
-                        'salaryItemsCategory', function(Builder $builder)use($category_id){
-                            $builder->where('id', $category_id);
-                        }
-                    );
-                }
-            )
-            ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', request('employee_id'))
-            ->get();
     }
 }
