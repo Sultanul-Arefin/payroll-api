@@ -22,5 +22,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::post('user',[UserController::class, 'store'])->name('add_user');
         Route::post('user/{user}',[UserController::class, 'update'])->name('update_user');
         Route::post('user/{user}/status',[UserController::class, 'userStatus'])->name('user_status');
+        Route::post('attach/store',[UserController::class, 'storeDocument'])->name('contract-document');
+        Route::get('attach/delete/{id}',[UserController::class, 'deleteDocument']);
+
     });
 });

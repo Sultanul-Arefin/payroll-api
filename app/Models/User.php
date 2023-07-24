@@ -33,6 +33,7 @@ class User extends Authenticatable
     public const ADMIN = 2;
     public const EMPLOYEE = 3;
 
+
     protected string $guard_name = 'sanctum';
 
     /**
