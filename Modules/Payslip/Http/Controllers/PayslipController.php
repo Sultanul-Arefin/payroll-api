@@ -24,6 +24,21 @@ class PayslipController extends Controller
         
     }
 
+    function request_for_payslip(Request $request) {
+        $request->validate([
+            'employee_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d',
+            'payment_date' =>  'required|date|date_format:Y-m-d'
+        ]);
+
+        return apiResponse(
+            data: $request->all(),
+            message: 'success',
+            statusCode: 200
+        );
+    }
+
     function employee_salary_items(Request $request) {
         $request->validate([
             'employee_id' => 'required'
