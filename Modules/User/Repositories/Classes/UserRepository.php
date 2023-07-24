@@ -58,6 +58,50 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                         );
                 })
             )
+            ->when(
+                !is_null(request('is_activated')) && request('is_activated') == User::USER_DISABLE,
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_DISABLE
+                        );
+                })
+            )
+            ->when(
+                !is_null(request('is_activated')) && request('is_activated') == User::USER_ACTIVE,
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_ACTIVE
+                        );
+                })
+            )
+            ->when(
+                is_null(request('is_activated')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where(
+                            'status',
+                            User::USER_ACTIVE
+                        );
+                })
+            )
+            ->when(
+                !is_null(request('search')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where('name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('email', 'LIKE', '%' . request('search') . '%')
+                        ->orWhereRelation(
+                            'user_details',
+                            'user_phone',
+                            'LIKE',
+                            '%' . request('search') . '%' 
+                        );
+                })
+            )
             ->with($relations)
             ->latest();
     }

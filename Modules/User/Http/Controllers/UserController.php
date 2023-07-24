@@ -218,9 +218,9 @@ class UserController extends Controller
     public function userStatus(User $user, Request $request):JsonResponse
     {
         $request->validate([
-            'type' => 'required|integer|min:0|max:1'
+            'status' => 'required|integer|in:0,1'
         ]);
-       $this->user_repo->userStatus($user, $request->type);
+       $this->user_repo->userStatus($user, $request->status);
        return apiResponse(null, 'Successfully Employee Status Updated', 'success');
     }
     public function storeDocument(Request $request)
