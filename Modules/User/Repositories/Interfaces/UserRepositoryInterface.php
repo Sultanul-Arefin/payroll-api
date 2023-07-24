@@ -27,4 +27,6 @@ interface UserRepositoryInterface
      * @return bool
      */
     public function userStatus(object $user, int $statusTypes): bool;
+
+    public function userDocument($request);
 }

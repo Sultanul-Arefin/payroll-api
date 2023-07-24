@@ -7,22 +7,25 @@ use App\Models\User;
 use App\Notifications\UserCreateMailFailedNotification;
 use Exception;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Modules\User\Emails\SendPassword;
+use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
 use Modules\User\Http\Requests\UserStoreRequest;
 use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
 use Modules\User\Jobs\UserCreateMailJob;
+use App\Http\Traits\Attachment;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
 {
-    use ImageUploads;
+    use ImageUploads, Attachment;
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -205,13 +208,42 @@ class UserController extends Controller
             status: 'success'
         );
     }
-    public function userStatus(User $user, Request $request)
+
+    /**
+     * employee active or inactive
+     * @param User $user
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userStatus(User $user, Request $request):JsonResponse
     {
         $request->validate([
             'type' => 'required|integer|min:0|max:1'
         ]);
        $this->user_repo->userStatus($user, $request->type);
        return apiResponse(null, 'Successfully Employee Status Updated', 'success');
+    }
+    public function storeDocument(Request $request)
+    {
+        $request->validate([
+            'file_name' => 'required|file|max:2048|mimes:jpg,png,pdf,docx',
+            'heading_type' => 'required',
+            'item_type' => 'required'
+        ]);
+        if($this->user_repo->userDocument($request)){
+            return apiResponse(
+                data: null,
+                message: 'Successfully Document Stored',
+                status: 'success'
+            );
+        }
+    }
+    public function deleteDocument($id){
+       $userAttachment =  UserAttachment::find($id);
+        if($this->deleteAttachment( $userAttachment->file_name)){
+            $userAttachment->delete();
+            return apiResponse(null, 'Successfully Employee Document Deleted', 'success');
+        }
     }
     /**
      * Remove the specified resource from storage.

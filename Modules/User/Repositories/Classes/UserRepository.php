@@ -6,13 +6,18 @@ use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Mockery\Exception;
 use Modules\Employee\Entities\Employee;
+use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
+use Modules\User\Http\Requests\UserStoreRequest;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use App\Exceptions\CustomException;
+use App\Http\Traits\Attachment;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
+    use Attachment;
     /**
      * User Repository constructor.
      *
@@ -81,5 +86,41 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             throw new CustomException("not allow employee status value", 422);
         }
         return $user;
+    }
+    public function userDocument($request)
+    {
+
+        if($request->hasFile('file_name')){
+          $data = $this->uploadAttachment($request->file_name, 'contract_documents');
+          if($data['fileName']){
+              try {
+                  $attach = UserAttachment::create([
+                      'user_id' => auth()->user()->id,
+                      'file_name' => $data['fileNadme'],
+                      'heading_type' => UserAttachment::HEADING_TYPE[$request->heading_type],
+                      'item_type' => $this->itemType($request->item_type, $request->heading_type)
+                  ]);
+              }catch (\Exception $ex){
+                  $this->deleteAttachment($data['fileName']);
+                  throw new CustomException('Something Wrong, Please try again', 404);
+              }
+           }else{
+               throw new CustomException('Your File Not Accepted', 404);
+           }
+        }
+        return $attach;
+    }
+    public function itemType($itemsName, $headingType){
+
+        switch ($headingType){
+            case 'contract': return UserAttachment::CONTRACT_ITEM_TYPE[$itemsName];
+            break;
+            case 'official' : return UserAttachment::OFFICIAL_ITEM_TYPE[$itemsName];
+            break;
+            case 'others' : return UserAttachment::OTHERS_ITEM_TYPE[$itemsName];
+            break;
+            default: return false;
+        }
+
     }
 }
