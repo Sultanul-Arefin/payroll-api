@@ -11,6 +11,12 @@ class Payslip extends Model
 {
     use HasFactory;
 
+    public const EMAIL_SENT = 1;
+    public const EMAIL_NOT_SENT = 0;
+
+    public const NOTIFICATION_SENT = 1;
+    public const NOTIFICATION_NOT_SENT = 0;
+
     protected $fillable = [];
     
     /**
