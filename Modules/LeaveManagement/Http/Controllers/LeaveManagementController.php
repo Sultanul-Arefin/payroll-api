@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\LeaveManagement\Http\Requests\LeaveStoreRequest;
+use Modules\LeaveManagement\Http\Resources\LeaveListResource;
 use Modules\LeaveManagement\Http\Resources\LeaveResource;
 use Modules\LeaveManagement\Http\Services\CompanyService;
 use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
@@ -33,6 +34,11 @@ class LeaveManagementController extends Controller
         $existDates = $this->isHolidayExist($request->dates);//params pass to date for checking holiday exist or not
         $leaveStore = $this->leaveRepository->leave_store($request, $existDates);
         return apiResponse(null, 'Successfully Leave Stored', 'success', '201');
+    }
+    public function leave_list(){
+       $LeaveList =  $this->leaveRepository->leave_list();
+       $LeavesCollection =  LeaveListResource::collection($LeaveList);
+        return apiResponse($LeavesCollection, 'Successfully Get Leave List', 'success', '200');
     }
 
 }

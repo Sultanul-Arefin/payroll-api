@@ -17,4 +17,6 @@ interface LeaveRepositoryInterface
      */
     public function leave_store($request, $existDates);
 
+    public function leave_list();
+
 }
