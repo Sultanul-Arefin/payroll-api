@@ -17,7 +17,18 @@ class Payslip extends Model
     public const NOTIFICATION_SENT = 1;
     public const NOTIFICATION_NOT_SENT = 0;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'employee_id',
+        'company_id',
+        'month',
+        'amount',
+        'email_flag',
+        'notification_flag',
+        'first_date',
+        'last_date',
+        'payment_date',
+        'hours_worked'
+    ];
     
     /**
      * changes while using uuid
