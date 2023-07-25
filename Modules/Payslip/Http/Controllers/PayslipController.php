@@ -8,6 +8,8 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Redis;
+use Modules\Payslip\Entities\Payslip;
+use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
@@ -160,11 +162,34 @@ class PayslipController extends Controller
 
     function run_payslip(Request $request) {
         $request->validate([
-            'employee_id' => 'required',
-            'from_date' => 'required|date_format:Y-m-d',
-            'to_date' => 'required|date_format:Y-m-d',
-            'payment_date' => 'required|date_format:Y-m-d'
+            'employee_id'   => 'required',
+            'from_date'     => 'required|date_format:Y-m-d',
+            'to_date'       => 'required|date_format:Y-m-d',
+            'payment_date'  => 'required|date_format:Y-m-d'
         ]);
+
+        $payslip = Payslip::create([
+            'employee_id' => $request->employee_id,
+            'company_id' => auth()->user()->company_id,
+            'month' => 'July',
+            'amount' => 20000,
+            'first_date' => $request->from_date,
+            'last_date' => $request->to_date,
+            'payment_date' => $request->payment_date,
+            'hours_worked' => 148
+        ]);
+        PayslipDetail::create([
+            'payslip_id' => $payslip->id,
+            'salary_item_id' => 1,
+            'amount' => 200
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Payslip Created Successfully',
+            status: 'success',
+            statusCode: 201
+        );
     }
 
     function preview_payslip() {
