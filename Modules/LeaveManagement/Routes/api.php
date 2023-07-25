@@ -7,5 +7,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
 
         Route::get('leave-types', [LeaveManagementController::class, 'leave_types']);
         Route::post('leave-store', [LeaveManagementController::class, 'leave_store']);
+        Route::get('leave-list', [LeaveManagementController::class, 'leave_list']);
+
     });
 });

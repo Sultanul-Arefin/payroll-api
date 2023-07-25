@@ -65,5 +65,8 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
         return $userLeave;
 
     }
+    public function leave_list(){
+       return UserLeave::with('user', 'leave_types', 'leave_details')->get();
+    }
 
 }
