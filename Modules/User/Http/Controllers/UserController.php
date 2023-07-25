@@ -49,6 +49,8 @@ class UserController extends Controller
         );
     }
 
+
+
     public function findById(User $user){
         $user->user_details = $user->user_details;
         return apiResponse(
@@ -221,5 +223,28 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function user_status_update(Request $request , User $user){
+        $updateStatus=User::find($user->id);
+        
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'status'=>'required|integer|in:0,1'    
+        ]);
+
+     
+      
+        $status=User::where('id',$user->id)->update([
+            
+            'status'=>$request->status
+        ]);
+     
+        return response()->json([
+            'status'=>true,
+            'message'=>'status Change Successfully',
+            
+        
+        ],200);
     }
 }
