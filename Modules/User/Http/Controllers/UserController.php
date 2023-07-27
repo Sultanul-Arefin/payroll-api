@@ -21,11 +21,14 @@ use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
 use Modules\User\Jobs\UserCreateMailJob;
 use App\Http\Traits\Attachment;
+use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
 {
-    use ImageUploads, Attachment;
+    use ImageUploads, 
+        Attachment,
+        UserTrait;
     /**
      * Display a listing of the resource.
      * @return Renderable
