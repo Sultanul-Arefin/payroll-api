@@ -16,6 +16,7 @@ class LeaveListResource extends JsonResource
             'id' => $this->id,
             'leave_type' => $this->leave_type,
             'user_id' => $this->user_id,
+            'leave_status' => $this->status,
             'leave_type_name' => $this->leave_types->name,
             'employee_name' => $this->user->name,
             'employee_email' => $this->user->email,
