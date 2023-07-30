@@ -43,6 +43,24 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
         return $this->model
             ::query()
             ->where('company_id', auth()->user()->company_id)
+            ->when(
+                !is_null(request('search')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->whereRelation(
+                            'employee', 
+                            'name',
+                            'LIKE',
+                             '%' . request('search') . '%'
+                        )
+                        ->orWhereRelation(
+                            'employee',
+                            'email', 
+                            'LIKE',
+                             '%' . request('search') . '%'
+                        );
+                })
+            )
             ->with($relations)
             ->latest();
     }
