@@ -206,7 +206,9 @@ class PayslipController extends Controller
         return PayslipResource::collection(
             $this->payslipRepositoryInterface->allWithSearch(
                 ['*'],
-                [],
+                [
+                    'employee'
+                ],
                 $rows
             )
         );
