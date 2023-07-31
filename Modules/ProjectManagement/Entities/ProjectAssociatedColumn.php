@@ -14,7 +14,8 @@ class ProjectAssociatedColumn extends Model
     protected $fillable = [
         'project_id',
         'project_column_name',
-        'created_by'
+        'created_by',
+        'column_position'
     ];
     
     protected static function newFactory()

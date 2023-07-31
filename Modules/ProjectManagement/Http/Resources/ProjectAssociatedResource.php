@@ -22,14 +22,8 @@ class ProjectAssociatedResource extends JsonResource
         return [
             'id' => $this->id,
             'column' => $this->project_column_name,
-            // 'column' => $this->getColumnName($this->project_column),
-            // 'taskssss' => $this->tasks,
-            // 'tasks' => $this->getTasks($this->tasks),
+            'column_position' => $this->column_position,
             'tasks' => app(TaskController::class)->getTaskDetails($this->tasks)
-            // 'tasks' => $this->tasks
-            // 'tasks' => TaskResource::collection($this->tasks)
-            // 'column' => $this->info($this, $this->project_column),
-            // 'columnss' => ProjectColumnResource::collection($this->project_column)
         ];
     }
 

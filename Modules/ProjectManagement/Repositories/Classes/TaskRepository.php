@@ -41,7 +41,7 @@ class TaskRepository extends BaseRepository implements TaskInterface
         return ProjectAssociatedColumn
             ::query()
             ->where('project_id', $project_id)
-            // ->groupBy('project_column_id')
+            ->orderBy('column_position', 'ASC')
             ->with($relations)
             ->latest('id');
     }
