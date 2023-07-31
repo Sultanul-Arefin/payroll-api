@@ -24,6 +24,7 @@ return new class extends Migration
                 ->foreignId('created_by')
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
+            $table->integer('column_position');
             $table->timestamps();
         });
     }

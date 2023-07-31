@@ -33,7 +33,6 @@ class TaskController extends Controller
             $rows = (int) request('rows');
         }
 
-        // return TaskResource::collection(
         return ProjectAssociatedResource::collection(
             $this->taskRepo->allWithSearch(
                 $id,
