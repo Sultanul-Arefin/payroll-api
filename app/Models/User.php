@@ -15,6 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
+use Modules\Department\Entities\Department;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
@@ -120,6 +121,13 @@ class User extends Authenticatable
      */
     function paslips(): HasMany {
         return $this->hasMany(Payslip::class, 'employee_id', 'id');
+    }
+
+    /**
+     * @return belongsTo
+     */
+    function department(): BelongsTo {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
 
     /**
