@@ -20,6 +20,7 @@ class LeaveListResource extends JsonResource
             'leave_type_name' => $this->leave_types->name,
             'employee_name' => $this->user->name,
             'employee_email' => $this->user->email,
+            'employee_leave_message' => $this->leave_message,
             'leave_details' => LeaveDetailsResources::collection($this->whenLoaded('leave_details')),
             'employee_department' => $this->getDepartment($this->user?->department?->only('department_name'))
         ];
