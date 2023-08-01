@@ -10,6 +10,7 @@ use Modules\Designation\Entities\Designation;
 use Modules\Designation\Http\Requests\DesignationStoreRequest;
 use Modules\Designation\Http\Requests\DesignationUpdateRequest;
 use Modules\Designation\Repositories\Interfaces\DesignationInterface;
+use App\Models\User;
 
 class DesignationController extends Controller
 {
@@ -129,8 +130,24 @@ class DesignationController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy(Designation $designation)
+    { 
+        $users= User::where('designation_id', $designation->id)->get();
+    
+        if( count($users) > 0){
+            return apiResponse(
+                data: null,
+                message:  "Designation id already exist",
+                status: 'Not Deleted!'
+            );
+        }
+        else{
+            $designation=Designation::where('id', $designation->id)->delete();
+        }return apiResponse(
+            data: null,
+            message:  "Successfully delete designation ",
+            status: 'success'
+        );
     }
+    
 }
