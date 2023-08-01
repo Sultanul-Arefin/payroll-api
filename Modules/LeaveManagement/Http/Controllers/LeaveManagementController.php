@@ -45,7 +45,7 @@ class LeaveManagementController extends Controller
     }
     public function leave_status(Request $request){
         $request->validate([
-            'user_leave_id' => 'required',
+            'user_leave_id' => 'required|exists:users,id',
             'status' => 'required|in:1,3',
             'action_message' => 'required'
         ]);

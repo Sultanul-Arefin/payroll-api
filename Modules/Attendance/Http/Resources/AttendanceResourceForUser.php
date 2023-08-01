@@ -23,7 +23,12 @@ class AttendanceResourceForUser extends JsonResource
             'id' => $this->id,
             'date' => $this->dates,
             'status' => $this->getStatus($this->status),
-            // 'value' => $this->getValue($this)
+            'details' => $this->attendance_details->map(function($attendance){
+                return [
+                    'in_time' => $attendance->in_time,
+                    'out_time' => $attendance->out_time
+                ];
+            })
         ];
     }
 

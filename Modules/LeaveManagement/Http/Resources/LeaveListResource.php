@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Modules\LeaveManagement\Entities\UserLeave;
 
 class LeaveListResource extends JsonResource
 {
@@ -14,10 +15,11 @@ class LeaveListResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'leave_type' => $this->leave_type,
             'user_id' => $this->user_id,
-            'leave_status' => $this->status,
-            'leave_type_name' => $this->leave_types->name,
+            'leave_status' => $this->status === UserLeave::APPROVED 
+                                    ? 'Approved' : ($this->status === UserLeave::PENDING
+                                    ? 'Pending' : 'Denied'),
+            'leave_type_name' => $this->salary_item->name,
             'employee_name' => $this->user->name,
             'employee_email' => $this->user->email,
             'employee_leave_message' => $this->leave_message,
