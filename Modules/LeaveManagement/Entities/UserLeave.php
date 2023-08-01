@@ -23,7 +23,7 @@ class UserLeave extends Model
     public function leave_details(){
         return $this->hasMany(UserLeaveDetail::class, 'user_leaves_id', 'id');
     }
-    public function leave_types(){
+    public function salary_item(){
         return $this->belongsTo(SalaryItemsName::class, 'leave_type', 'id');
     }
 }
