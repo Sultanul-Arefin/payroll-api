@@ -46,15 +46,15 @@ class ProjectController extends Controller
                 'company_id' => auth()->user()->company_id,
                 'department_id' => 1
             ]);
-            $index = 0;
-            foreach(default_project_columns() as $key => $value){
-                ProjectAssociatedColumn::create([
-                    'project_id' => $project->id,
-                    'project_column_name' => $value,
-                    'created_by' => auth()->user()->id,
-                    'column_position' => ++$index
-                ]);
-            }
+            // $index = 0;
+            // foreach(default_project_columns() as $key => $value){
+            //     ProjectAssociatedColumn::create([
+            //         'project_id' => $project->id,
+            //         'project_column_name' => $value,
+            //         'created_by' => auth()->user()->id,
+            //         'column_position' => ++$index
+            //     ]);
+            // }
             return $project;
         });
         return apiResponse(
