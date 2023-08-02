@@ -91,10 +91,10 @@ class Handler extends ExceptionHandler
         if ($exception instanceof RouteNotFoundException) {
             $response = [
                 'status' => 'error',
-                'message' => 'Bearer Token Not Found!',
+                'message' => 'Unauthenticated Request!',
                 'data' => []
             ];
-            return response()->json($response, 404);
+            return response()->json($response, 401);
         }
         if ($exception instanceof MethodNotAllowedHttpException) {
             $response = [
