@@ -24,6 +24,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('add_department');
         Route::post('department/{department}', [DepartmentController::class, 'update'])
             ->name('update_department');
-        Route::get('department/destroy/{department}', [DepartmentController::class, 'destroy']);
+        Route::delete('department/destroy/{department}', [DepartmentController::class, 'destroy']);
     });
 });

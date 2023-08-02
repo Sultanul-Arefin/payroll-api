@@ -93,20 +93,20 @@ class DepartmentController extends Controller
       $users= User::where('department_id', $department->id)->get();
 
       
-       if(count($users) > 0){
-        return apiResponse(
-            data: null,
-            message:  "Department id already exist",
-            status: 'Error!'
-        );
+       if(count($users) > 0)
+       {
+            return apiResponse(
+                data: null,
+                message:  "Department id already exist",
+                status: 'Error!'
+            );
        }
-       $department=Department::where('id', $department->id)->delete();
-       return apiResponse(
-        data: null,
-        message:  "Department delete successfully",
-        status: 'success!'
-       );
-    
+            $department=Department::where('id', $department->id)->delete();
+            return apiResponse(
+                data: null,
+                message:  "Department delete successfully",
+                status: 'success!'
+            );
 
     }
 }

@@ -134,16 +134,18 @@ class DesignationController extends Controller
     { 
         $users= User::where('designation_id', $designation->id)->get();
     
-        if( count($users) > 0){
+        if( count($users) > 0)
+        {
             return apiResponse(
                 data: null,
                 message:  "Designation id already exist",
-                status: 'Not Deleted!'
+                status: 'Error!'
             );
         }
-        else{
+        
             $designation=Designation::where('id', $designation->id)->delete();
-        }return apiResponse(
+    
+            return apiResponse(
             data: null,
             message:  "Successfully delete designation ",
             status: 'success'
