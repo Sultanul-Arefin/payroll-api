@@ -94,7 +94,7 @@ class Handler extends ExceptionHandler
                 'message' => 'Unauthenticated Request!',
                 'data' => []
             ];
-            return response()->json($response, 401);
+            return response()->json($response, 404);
         }
         if ($exception instanceof MethodNotAllowedHttpException) {
             $response = [
