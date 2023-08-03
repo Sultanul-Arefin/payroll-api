@@ -261,14 +261,14 @@ class UserController extends Controller
     }
 
     public function user_status_update(Request $request , User $user){
-        $updateStatus=User::find($user->id);
+       
         
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'status'=>'required|integer|in:0,1'    
         ]);
 
-     
+        $updateStatus=User::find($user->id);
       
         $status=User::where('id',$user->id)->update([
             

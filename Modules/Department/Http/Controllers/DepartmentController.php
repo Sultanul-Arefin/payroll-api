@@ -3,6 +3,7 @@
 namespace Modules\Department\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Modules\Department\Entities\Department;
 use Modules\Department\Http\Requests\StoreDepartment;
@@ -85,5 +86,27 @@ class DepartmentController extends Controller
             ],
             'Department updated successfully'
         );
+    }
+
+    public function destroy(Department $department){
+
+      $users= User::where('department_id', $department->id)->get();
+
+      
+       if(count($users) > 0)
+       {
+            return apiResponse(
+                data: null,
+                message:  "Department id already exist",
+                status: 'Error!'
+            );
+       }
+            $department=Department::where('id', $department->id)->delete();
+            return apiResponse(
+                data: null,
+                message:  "Department delete successfully",
+                status: 'success!'
+            );
+
     }
 }

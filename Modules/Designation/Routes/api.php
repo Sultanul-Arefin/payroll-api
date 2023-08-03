@@ -20,5 +20,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::get('designation/{designation}',[DesignationController::class, 'show'])->name('designation_show');
         Route::post('designation',[DesignationController::class, 'store'])->name('add_designation');
         Route::post('designation/{designation}',[DesignationController::class, 'update'])->name('update_designation');
+        Route::delete('designation/destroy/{designation}',[DesignationController::class, 'destroy']);
     });
 });
+
+
