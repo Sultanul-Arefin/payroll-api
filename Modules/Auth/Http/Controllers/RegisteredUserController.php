@@ -15,10 +15,6 @@ use Modules\User\Entities\UserDetails;
 
 class RegisteredUserController extends Controller
 {
-    public function sahin()
-    {
-        return 'dhore fel';
-    }
     /**
      * Handle an incoming registration request.
      *
