@@ -41,6 +41,12 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
+        /**
+         * we have to check for the machine, & web attendance
+         * for the machine attendance, in_time & out_time will not come together
+         * we'll check for the web, & machine attendane
+         * we'll insert, & show the value accordingly
+         */
         $request->validate([
             'dates' => 'required',
             'in_time' => 'required',
