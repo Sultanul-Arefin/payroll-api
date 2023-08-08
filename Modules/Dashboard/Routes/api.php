@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-
+use Modules\Dashboard\Http\Controllers\DashboardController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,6 +13,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/dashboard', function (Request $request) {
-    return $request->user();
+Route::middleware(['json.response'])->prefix('v1')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function(){
+
+        Route::prefix('/dashboard')->group(function(){
+            Route::get('/total/employee', [DashboardController::class, 'totalEmployee']);
+        });
+
+
+    });
 });
