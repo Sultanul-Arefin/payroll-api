@@ -2,8 +2,10 @@
 
 namespace Modules\Payslip\Http\Services;
 
+use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
+use Modules\Payslip\Entities\PayslipDetail;
 
 class PayslipService
 {
@@ -18,5 +20,25 @@ class PayslipService
             )
             ->get();
         return $data;
+    }
+
+    function get_total_amount($employee_id) {
+        $employee_associated_amount = EmployeeSalaryItem::query()
+                                    ->where('employee_id', $employee_id)
+                                    ->sum('amount');
+        return $employee_associated_amount;
+    }
+
+    function add_payslip_details($payslip_id, $employee_id) {
+        $employee_associated_amount = EmployeeSalaryItem::query()
+                                    ->where('employee_id', $employee_id)
+                                    ->get();
+        foreach($employee_associated_amount as $value){
+            PayslipDetail::create([
+                'payslip_id' => $payslip_id,
+                'salary_item_id' => $value->id,
+                'amount' => $value->amount
+            ]);
+        }
     }
 }
