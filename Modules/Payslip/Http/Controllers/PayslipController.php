@@ -3,10 +3,12 @@
 namespace Modules\Payslip\Http\Controllers;
 
 use App\Models\User;
+use DateTime;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetail;
@@ -22,9 +24,7 @@ class PayslipController extends Controller
     function __construct(
         public PayslipService $payslipService,
         public PayslipRepositoryInterface $payslipRepositoryInterface
-    ) {
-        
-    }
+    ) {}
 
     function request_for_payslip(Request $request) {
         $request->validate([
@@ -87,21 +87,25 @@ class PayslipController extends Controller
             'payment_date'  => 'required|date_format:Y-m-d'
         ]);
 
-        $payslip = Payslip::create([
-            'employee_id' => $request->employee_id,
-            'company_id' => auth()->user()->company_id,
-            'month' => 'July',
-            'amount' => 20000,
-            'first_date' => $request->from_date,
-            'last_date' => $request->to_date,
-            'payment_date' => $request->payment_date,
-            'hours_worked' => 148
-        ]);
-        PayslipDetail::create([
-            'payslip_id' => $payslip->id,
-            'salary_item_id' => 1,
-            'amount' => 200
-        ]);
+        $get_amount = $this->payslipService->get_total_amount($request->employee_id);
+
+        $calculation = DB::transaction(function() use($request, $get_amount){
+            /** create payslip */
+            $payslip = Payslip::create([
+                'employee_id' => $request->employee_id,
+                'company_id' => auth()->user()->company_id,
+                'month' => (new DateTime($request->from_date))->format('F'), // month name
+                'amount' => $get_amount,
+                'first_date' => $request->from_date,
+                'last_date' => $request->to_date,
+                'payment_date' => $request->payment_date,
+                'hours_worked' => 148
+            ]);
+
+            /** add the payslip details */
+            $payslip_details = $this->payslipService->add_payslip_details($payslip->id, $request->employee_id);
+            return $payslip;
+        });
 
         return apiResponse(
             data: null,
