@@ -18,6 +18,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
         Route::prefix('/dashboard')->group(function(){
             Route::get('/total/employee', [DashboardController::class, 'totalEmployee']);
+            Route::get('/total/department', [DashboardController::class, 'totalDepartment']);
         });
 
 

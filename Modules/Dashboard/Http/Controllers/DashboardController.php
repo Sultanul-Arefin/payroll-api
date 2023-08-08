@@ -8,6 +8,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Department\Entities\Department;
 use Modules\LeaveManagement\Http\Resources\EmployeeResource;
 
 class DashboardController extends Controller
@@ -28,10 +29,17 @@ class DashboardController extends Controller
     public function totalEmployee() : JsonResponse
     {
 
-       $data =  User::where('company_id', auth()->user()->id)
+       $data =  User::where('company_id', auth()->user()->company_id)
            ->where('status', 1)
            ->selectRaw('COUNT(*) as count')
            ->first();
+        return response()->json(['data'=>$data]);
+    }
+    public function totalDepartment() : JsonResponse
+    {
+        $data = Department::where('company_id', auth()->user()->company_id)
+            ->selectRaw('COUNT(*) as count')
+            ->first();
         return response()->json(['data'=>$data]);
     }
 }
