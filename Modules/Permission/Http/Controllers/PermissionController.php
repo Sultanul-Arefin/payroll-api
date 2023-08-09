@@ -2,78 +2,77 @@
 
 namespace Modules\Permission\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Permission\Entities\Permission;
+use stdClass;
 
 class PermissionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     * @return Renderable
+     * @return JsonResponse
      */
-    public function index()
+    public function userPermissions($id=null)
     {
-        return view('permission::index');
-    }
+        if(empty($id)){
+            $id = auth()->user()->id;
+        }
+        // if (!($user = $this->userRepo->findById($id))) {
+        //     return $this->apiResponse([], 'User Not Found', 'error', 404);
+        // }
+        if(!($user = User::where('id', $id)->first())){
+            return apiResponse([], 'User Not Found', 'error', 404);
+        }
+        $permissions = $user->getAllPermissions();
+        
+        $data = [];
+        $result_object = new stdClass();
+        foreach($permissions as $value){
+            if($value->parent_id === NULL){
+                $permis = Permission::where('parent_id', $value->id)->get();
+                $permission_value = [];
+                foreach($permis as $val){
+                    array_push($permission_value, $val->name);
+                }
+                $result_object->{$value->name} = $permission_value;
+            }
+            else{
+                $parent = Permission::where('id', $value->parent_id)->first();
+                $permis = Permission::where('parent_id', $value->id)->get();
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('permission::create');
-    }
+                $data = [];
+                
+                if(!property_exists($result_object, $parent->name)){
+                    $result_object->{$parent->name} = [$value->name];
+                } else{
+                    if(in_array($value->name, $result_object->{$parent->name})){
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+                    } else{
+                        array_push($result_object->{$parent->name}, $value->name);
+                    }
+                }
+            }
+        }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('permission::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('permission::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
+        // add endpoint for parent route
+        $url = '';
+        if(!empty($result_object)){
+            foreach($result_object as $key => $value){
+                $endpoint = Permission::where('name', $key)->first();
+                $url = $endpoint->display_endpoint;
+                if(!is_null($url)){
+                    $url = $endpoint->display_endpoint;
+                    break;
+                }
+                // array_push($result_object->{$key}, $endpoint->display_endpoint);
+            }
+        }
+        return apiResponse(
+            [
+                'permissions'   => $result_object,
+                'redirect_url'  => $url
+            ]);
     }
 }
