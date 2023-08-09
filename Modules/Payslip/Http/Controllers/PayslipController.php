@@ -88,6 +88,7 @@ class PayslipController extends Controller
         ]);
 
         $get_amount = $this->payslipService->get_total_amount($request->employee_id);
+        return $get_amount;
 
         $calculation = DB::transaction(function() use($request, $get_amount){
             /** create payslip */
