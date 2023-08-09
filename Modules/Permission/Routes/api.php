@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\Permission\Http\Controllers\PermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +13,9 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::middleware('auth:api')->get('/permission', function (Request $request) {
-    return $request->user();
-});
+Route::middleware(['auth:sanctum', 'json.response'])
+    ->prefix('v1')
+    ->group(function () {
+        Route::get('/permissions/users/{user?}', [PermissionController::class,'userPermissions'])
+            ->name('permissions.user.index');
+    });
