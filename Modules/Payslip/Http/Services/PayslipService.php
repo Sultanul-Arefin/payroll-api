@@ -25,6 +25,11 @@ class PayslipService
     function get_total_amount($employee_id) {
         $employee_associated_amount = EmployeeSalaryItem::query()
                                     ->where('employee_id', $employee_id)
+                                    ->whereHas(
+                                        'salaryItemsName', function(Builder $builder){
+                                            $builder->whereNotIn('salary_items_category_id', [1,2]);
+                                        }
+                                    )
                                     ->sum('amount');
         return $employee_associated_amount;
     }
