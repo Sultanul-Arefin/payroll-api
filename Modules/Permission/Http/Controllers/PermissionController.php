@@ -17,54 +17,21 @@ class PermissionController extends Controller
      */
     public function userPermissions($id=null)
     {
-        // $response = {
-        //     "data": {
-        //         "permissions": [
-        //             {
-        //                 "id": "dashboard",
-        //                 "children": [
-        //                     {
-        //                         "id": "dashboard.index"
-        //                     }
-        //                 ]
-        //             },
-        //             {
-        //                 "id": "configuration",
-        //                 "children": [
-        //                     {
-        //                         "id": "company.index"
-        //                     },
-        //                     {
-        //                         "id": "department.index"
-        //                     },
-        //                     {
-        //                         "id": "designation.index"
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // };
         $response = [
             [
-                "id" => "dashboard",
-                "childeren" => [
-                    [
-                        "id" => "dashboard"
-                    ]
-                ]
+                "id" => "home"
             ],
             [
                 "id" => "configuration",
-                "childeren" => [
+                "children" => [
                     [
-                        "id" => "company"
+                        "id" => "company_details"
                     ],
                     [
-                        "id" => "department"
+                        "id" => "add_department"
                     ],
                     [
-                        "id" => "designation"
+                        "id" => "add_designation"
                     ]
                 ]
             ]
@@ -88,6 +55,8 @@ class PermissionController extends Controller
         $data = PermissionResource::collection($filteringPermission);//return parent with all children under e parent
         return apiResponse($data, 'successfully has been fetch permission data', 200);
 
+        return $permissions;
+        $data = [];
         $result_object = new stdClass();
         foreach($permissions as $value){
             if($value->parent_id === NULL){
