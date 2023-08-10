@@ -16,40 +16,12 @@ class PermissionController extends Controller
      */
     public function userPermissions($id=null)
     {
-        // $response = {
-        //     "data": {
-        //         "permissions": [
-        //             {
-        //                 "id": "dashboard",
-        //                 "children": [
-        //                     {
-        //                         "id": "dashboard.index"
-        //                     }
-        //                 ]
-        //             },
-        //             {
-        //                 "id": "configuration",
-        //                 "children": [
-        //                     {
-        //                         "id": "company.index"
-        //                     },
-        //                     {
-        //                         "id": "department.index"
-        //                     },
-        //                     {
-        //                         "id": "designation.index"
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // };
         $response = [
             [
-                "id" => "dashboard",
+                "id" => "home",
                 "childeren" => [
                     [
-                        "id" => "dashboard"
+                        "id" => "home"
                     ]
                 ]
             ],
@@ -57,13 +29,13 @@ class PermissionController extends Controller
                 "id" => "configuration",
                 "childeren" => [
                     [
-                        "id" => "company"
+                        "id" => "company details"
                     ],
                     [
-                        "id" => "department"
+                        "id" => "add department"
                     ],
                     [
-                        "id" => "designation"
+                        "id" => "add designation"
                     ]
                 ]
             ]
@@ -83,7 +55,7 @@ class PermissionController extends Controller
             return apiResponse([], 'User Not Found', 'error', 404);
         }
         $permissions = $user->getAllPermissions();
-        
+        return $permissions;
         $data = [];
         $result_object = new stdClass();
         foreach($permissions as $value){
