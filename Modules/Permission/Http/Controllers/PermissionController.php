@@ -91,7 +91,7 @@ class PermissionController extends Controller
         $result_object = new stdClass();
         foreach($permissions as $value){
             if($value->parent_id === NULL){
-                $permis = Permission::where('parent_id', $value->id)->get();
+                $permis = Permission::select('name')->where('parent_id', $value->id)->get();
                 $permission_value = [];
                 foreach($permis as $val){
                     array_push($permission_value, $val->name);
