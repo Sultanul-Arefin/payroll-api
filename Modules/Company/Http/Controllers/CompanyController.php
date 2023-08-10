@@ -3,6 +3,7 @@
 namespace Modules\Company\Http\Controllers;
 
 use App\Http\Traits\ImageUploads;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -141,7 +142,13 @@ class CompanyController extends Controller
             'weekDays' => 'required|array'
         ]);
         $weekendDates = $this->companyService->yearlyWeekendDays($request->weekDays);
-        $dates = collect($weekendDates);
+        $existWeeklyHolidays =  WeeklyHoliday::where('company_id', auth()->user()->company_id)
+           ->whereYear('dates', Carbon::now()->year)
+            ->pluck('dates')
+            ->toArray();
+        $uniqueDates = array_diff($weekendDates, $existWeeklyHolidays);
+        $dates = collect($uniqueDates);
+
         $dates->each(function($item, $key){
             WeeklyHoliday::create([
                 'dates' => $item,

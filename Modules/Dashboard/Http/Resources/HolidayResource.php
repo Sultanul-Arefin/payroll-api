@@ -12,7 +12,7 @@ class HolidayResource extends JsonResource
     {
         return [
             'date' => $this->dates,
-            'holiday_type' => $this->holiday_type
+            'title' => $this->holiday_type
         ];
     }
 }
