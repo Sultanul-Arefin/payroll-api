@@ -16,6 +16,63 @@ class PermissionController extends Controller
      */
     public function userPermissions($id=null)
     {
+        // $response = {
+        //     "data": {
+        //         "permissions": [
+        //             {
+        //                 "id": "dashboard",
+        //                 "children": [
+        //                     {
+        //                         "id": "dashboard.index"
+        //                     }
+        //                 ]
+        //             },
+        //             {
+        //                 "id": "configuration",
+        //                 "children": [
+        //                     {
+        //                         "id": "company.index"
+        //                     },
+        //                     {
+        //                         "id": "department.index"
+        //                     },
+        //                     {
+        //                         "id": "designation.index"
+        //                     }
+        //                 ]
+        //             }
+        //         ]
+        //     }
+        // };
+        $response = [
+            [
+                "id" => "dashboard",
+                "childeren" => [
+                    [
+                        "id" => "dashboard"
+                    ]
+                ]
+            ],
+            [
+                "id" => "configuration",
+                "childeren" => [
+                    [
+                        "id" => "company"
+                    ],
+                    [
+                        "id" => "department"
+                    ],
+                    [
+                        "id" => "designation"
+                    ]
+                ]
+            ]
+        ];
+        return apiResponse(
+            [
+                'permssions' => $response
+            ]
+        );
         if(empty($id)){
             $id = auth()->user()->id;
         }
