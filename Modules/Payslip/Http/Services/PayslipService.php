@@ -22,7 +22,7 @@ class PayslipService
         return $data;
     }
 
-    function get_total_amount($employee_id) {
+    function get_total_amount_except_basic_attendance($employee_id) {
         $employee_associated_amount = EmployeeSalaryItem::query()
                                     ->where('employee_id', $employee_id)
                                     ->whereHas(
