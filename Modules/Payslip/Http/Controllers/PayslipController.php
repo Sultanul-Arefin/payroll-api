@@ -91,7 +91,6 @@ class PayslipController extends Controller
         /** 
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-        return $get_total_amount_except_basic_attendance;
 
         $calculation = DB::transaction(function() use($request, $get_total_amount_except_basic_attendance){
             /** create payslip */
