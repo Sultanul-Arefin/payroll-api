@@ -65,14 +65,14 @@ class PayslipController extends Controller
         ]);
         $user = User::where('id', request('employee_id'))->first();
         $salary_category = SalaryItemsCategory::query()
-                            ->whereHas(
-                                'salaryItemsName', fn(Builder $query) => $query
-                                    ->whereHas(
-                                        'employeeSalaryItem', fn(Builder $query) => $query
-                                            ->where('company_id', auth()->user()->company_id)
-                                            ->where('employee_id', $user->id)
-                                    )
-                            )
+                            // ->whereHas(
+                            //     'salaryItemsName', fn(Builder $query) => $query
+                            //         ->whereHas(
+                            //             'employeeSalaryItem', fn(Builder $query) => $query
+                            //                 ->where('company_id', auth()->user()->company_id)
+                            //                 ->where('employee_id', $user->id)
+                            //         )
+                            // )
                             ->get();
         return CategoryResource::collection(
             $salary_category
@@ -87,15 +87,19 @@ class PayslipController extends Controller
             'payment_date'  => 'required|date_format:Y-m-d'
         ]);
 
-        $get_amount = $this->payslipService->get_total_amount($request->employee_id);
+        $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
+        /** 
+         * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
+         */
+        return $get_total_amount_except_basic_attendance;
 
-        $calculation = DB::transaction(function() use($request, $get_amount){
+        $calculation = DB::transaction(function() use($request, $get_total_amount_except_basic_attendance){
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
                 'company_id' => auth()->user()->company_id,
                 'month' => (new DateTime($request->from_date))->format('F'), // month name
-                'amount' => $get_amount,
+                'amount' => $get_total_amount_except_basic_attendance,
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
                 'payment_date' => $request->payment_date,
