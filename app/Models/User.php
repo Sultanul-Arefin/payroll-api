@@ -18,6 +18,7 @@ use Modules\Company\Entities\Company;
 use Modules\Department\Entities\Department;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
+use Modules\Permission\Entities\Permission;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
@@ -140,4 +141,5 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+
 }

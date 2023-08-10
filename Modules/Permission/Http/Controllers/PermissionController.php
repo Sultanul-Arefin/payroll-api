@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Permission\Entities\Permission;
+use Modules\Permission\Http\Resources\PermissionResource;
 use stdClass;
 
 class PermissionController extends Controller
@@ -35,21 +36,25 @@ class PermissionController extends Controller
                 ]
             ]
         ];
-        return apiResponse(
-            [
-                'permssions' => $response
-            ]
-        );
+
         if(empty($id)){
             $id = auth()->user()->id;
         }
-        // if (!($user = $this->userRepo->findById($id))) {
-        //     return $this->apiResponse([], 'User Not Found', 'error', 404);
-        // }
+
         if(!($user = User::where('id', $id)->first())){
             return apiResponse([], 'User Not Found', 'error', 404);
         }
+
         $permissions = $user->getAllPermissions();
+        $filteringPermission = []; //only parent data store in array
+        foreach($permissions as $permission){
+            if($permission->parent_id === null){
+                array_push($filteringPermission, $permission);
+            }
+        }
+        $data = PermissionResource::collection($filteringPermission);//return parent with all children under e parent
+        return apiResponse($data, 'successfully has been fetch permission data', 200);
+
         return $permissions;
         $data = [];
         $result_object = new stdClass();
@@ -67,7 +72,7 @@ class PermissionController extends Controller
                 $permis = Permission::where('parent_id', $value->id)->get();
 
                 $data = [];
-                
+
                 if(!property_exists($result_object, $parent->name)){
                     $result_object->{$parent->name} = [$value->name];
                 } else{
