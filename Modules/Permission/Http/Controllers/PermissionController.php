@@ -18,24 +18,19 @@ class PermissionController extends Controller
     {
         $response = [
             [
-                "id" => "home",
-                "childeren" => [
-                    [
-                        "id" => "home"
-                    ]
-                ]
+                "id" => "home"
             ],
             [
                 "id" => "configuration",
-                "childeren" => [
+                "children" => [
                     [
-                        "id" => "company details"
+                        "id" => "company_details"
                     ],
                     [
-                        "id" => "add department"
+                        "id" => "add_department"
                     ],
                     [
-                        "id" => "add designation"
+                        "id" => "add_designation"
                     ]
                 ]
             ]
