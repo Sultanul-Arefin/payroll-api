@@ -31,8 +31,10 @@ class SalaryItemsCategoryController extends Controller
         );
     }
 
-    public function getSalaryItemsValue()
+    public function getSalaryItemsValue(Request $request)
     {
-        return 'items';
+        $request->validate([
+            'salary_items_category_id' => 'required|exists:salary_items_categories,id'
+        ]);
     }
 }
