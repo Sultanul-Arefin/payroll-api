@@ -33,7 +33,9 @@ class User extends Authenticatable
 
     public const SUPER_ADMIN = 1;
     public const ADMIN = 2;
-    public const EMPLOYEE = 3;
+    public const DEPARTMENT_MANAGER = 3;
+    public const HR = 4;
+    public const EMPLOYEE = 5;
 
 
     protected string $guard_name = 'sanctum';
