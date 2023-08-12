@@ -92,6 +92,7 @@ class UserController extends Controller
                         'email' => $request->email,
                         'company_id' => auth()->user()->company_id,
                         'password' => $request->password,
+                        'user_role' => User::EMPLOYEE
                     ]);
             $user->assignRole('employee');
 
