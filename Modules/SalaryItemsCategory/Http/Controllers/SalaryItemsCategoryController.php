@@ -30,4 +30,9 @@ class SalaryItemsCategoryController extends Controller
             )
         );
     }
+
+    public function getSalaryItemsValue()
+    {
+        return 'items';
+    }
 }
