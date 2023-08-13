@@ -15,18 +15,23 @@ class SalaryItemsNamesSeeder extends Seeder
     {
         $categories = [
             [
+                'Basic',
                 'Ordinary Time',
+            ],
+            [
+                // 'Ordinary Time',
                 'Annual Leave',
                 'Sick Leave',
                 'Absent',
                 'Unpaid Sick Leave'
             ],
             [
-                'Item 3',
-                'Item 4'
+                'Taxable Allowance 1',
+                'Taxable Allowance 2'
             ],
             [
-                'Item 1'
+                'Non Taxable Allowance 1',
+                'Non Taxable Allowance 2'
             ],
             'Non-Taxable Allowances',
             'Income Taxes',
