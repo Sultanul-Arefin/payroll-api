@@ -28,7 +28,8 @@ class UserResource extends JsonResource
             ),
             'status' => $this->status,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'user_details' => $this->user_details
+            'user_details' => $this->user_details,
+            'user_image' => env('APP_URL').'/storage/'.$this->user_details->user_image
         ];
     }
 }

@@ -11,7 +11,7 @@ class UserDetails extends Model
 {
     use HasFactory;
     public const USER_IMAGE_PATH = 'uploads/users/photo/';
-    
+
     protected $fillable = [
         'user_id',
         'user_area',
@@ -43,5 +43,8 @@ class UserDetails extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function getImageUserAttribute(){
+       return $this->user_image;
     }
 }
