@@ -62,7 +62,7 @@ class UserController extends Controller
         $user->user_details['gender_value'] = $user->user_details?->gender == 0 ? 'Female' : 'Male';
         $user->department_name = $user->department?->department_name;
         $user->designation_name = $user->designation?->name;
-        $user->assign_to_name = $user->assign_to?->name;
+        $user->assign_to_name = $user->assign_to_user?->name;
         return apiResponse(
             data: $user,
             message:"Successfully get User",
