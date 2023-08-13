@@ -47,4 +47,9 @@ class UserDetails extends Model
     public function getImageUserAttribute(){
        return $this->user_image;
     }
+
+    public function getChangedUserImageAttribute()
+    {
+        return $this->user_image ? env('APP_URL') . '/' . 'storage/'.$this->user_image : null;
+    }
 }

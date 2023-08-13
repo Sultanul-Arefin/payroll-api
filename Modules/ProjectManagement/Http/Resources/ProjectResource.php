@@ -2,11 +2,15 @@
 
 namespace Modules\ProjectManagement\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
+use Modules\ProjectManagement\Entities\Task;
+use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 
 class ProjectResource extends JsonResource
 {
@@ -25,7 +29,38 @@ class ProjectResource extends JsonResource
                     'project_title',
                     'project_description'
                 ])
-            )
+            ),
+            'assigned_employees' => $this->getAssignedEmployees($this->id),
+            // 'assigned_employees' => $this->project_associated_colums->each(function($item){
+            //     return $item->tasks->each(function($emp_item){
+            //         return $emp_item->associated_users->each(function($item){
+            //             return $item->user_info;
+            //         });
+            //     });
+            // })
         ];
+    }
+
+    public function getAssignedEmployees($project_id)
+    {
+        $employees = [];
+        $tasks = Task::where('project_id', $project_id)->get();
+        if($tasks){
+            foreach($tasks as $value){
+                $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->get();
+                if($task_associated_employees){
+                    foreach($task_associated_employees as $value){
+                        $user = User::where('id', $value->id)->first();
+                        array_push(
+                            $employees, [
+                                'user_name' => $user?->name,
+                                'user_image' => $user?->user_details?->changed_user_image
+                            ]
+                        );
+                    }
+                }
+            }
+        }
+        return $employees;
     }
 }

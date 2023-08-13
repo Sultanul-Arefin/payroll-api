@@ -44,6 +44,13 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
             ::query()
             ->where('company_id', auth()->user()->company_id)
             ->when(
+                !is_null(request('employee_id')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query
+                        ->where('employee_id', request('employee_id'));
+                })
+            )
+            ->when(
                 !is_null(request('search')),
                 fn(Builder $builder) => $builder->where(function($query){
                     $query
