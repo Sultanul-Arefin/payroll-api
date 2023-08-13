@@ -87,18 +87,47 @@ class PayslipController extends Controller
             'payment_date'  => 'required|date_format:Y-m-d'
         ]);
 
-        $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
+        $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
+        $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id);
+        $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id);
+        $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id);
+        $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id);
+        $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id);
+        $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id);
+        $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id);
+
+        $total_pay = $get_basic - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic
+        $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
+        $gross_pay_after_tax = $gross_pay_before_tax - ($get_income_taxes + $get_additional_taxes_tax_top_up); // have to deduct (income tax & additional taxes tax top up) from previous value
+        $pay_due_before_deductions = $gross_pay_after_tax + $get_non_taxable_allowance; // have to add previous value with non taxable allowance
+        $total_employee_contribution_for_deduction = $get_government_deduction + $get_other_complimentary_deduction; // employee contribution
+        $total_company_contribution_for_deduction = $get_government_deduction + $get_other_complimentary_deduction; // company contribution
+
+        $total_amount = $pay_due_before_deductions - $total_employee_contribution_for_deduction;
+
+        // return [
+        //     'a' => $get_basic,
+        //     'b' => $get_staff_deduction_sick_absent,
+        //     'c' => $get_taxable_allowance,
+        //     'd' => $get_non_taxable_allowance,
+        //     'e' => $get_income_taxes,
+        //     'f' => $get_additional_taxes_tax_top_up,
+        //     'g' => $get_government_deduction,
+        //     'h' => $get_other_complimentary_deduction
+        // ];
+
+        // $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
         /** 
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
 
-        $calculation = DB::transaction(function() use($request, $get_total_amount_except_basic_attendance){
+        $calculation = DB::transaction(function() use($request, $total_amount){
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
                 'company_id' => auth()->user()->company_id,
                 'month' => (new DateTime($request->from_date))->format('F'), // month name
-                'amount' => $get_total_amount_except_basic_attendance,
+                'amount' => $total_amount,
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
                 'payment_date' => $request->payment_date,
