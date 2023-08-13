@@ -110,7 +110,7 @@ class User extends Authenticatable
     /**
      * @return belongsTo
      */
-    public function assign_to(): BelongsTo
+    public function assign_to_user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assign_to', 'id');
     }
