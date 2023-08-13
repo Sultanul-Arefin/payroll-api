@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Company\Entities\Company;
 use Modules\Department\Entities\Department;
+use Modules\Designation\Entities\Designation;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Permission\Entities\Permission;
@@ -107,6 +108,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return belongsTo
+     */
+    public function assign_to(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assign_to', 'id');
+    }
+
+    /**
      * @return HasMany
      */
     function tasks_associated(): HasMany {
@@ -132,6 +141,13 @@ class User extends Authenticatable
      */
     function department(): BelongsTo {
         return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
+
+    /**
+     * @return belongsTo
+     */
+    function designation(): BelongsTo {
+        return $this->belongsTo(Designation::class, 'designation_id', 'id');
     }
 
     /**
