@@ -2,6 +2,7 @@
 namespace Modules\LeaveManagement\Repositories\Classes;
 
 use App\Repositories\RepositoryClasses\BaseRepository;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\LeaveManagement\Entities\UserLeave;
@@ -66,7 +67,14 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
 
     }
     public function leave_list(){
-       return UserLeave::with('user', 'salary_item', 'leave_details')->get();
+       return UserLeave::query()
+            ->when(
+                !is_null(request('employee_id')),
+                fn(Builder $builder) => $builder->where(function($query){
+                    $query->where('user_id', request('employee_id'));
+                })
+            )
+            ->with('user', 'salary_item', 'leave_details')->get();
     }
 
 }

@@ -15,18 +15,18 @@ class RoleAndPermissionSeeder extends Seeder
     public function run(): void
     {
         // create permissions
-        $dashboard = Permission::create([
-            // dashboard
-            'name' => 'dashboard',
-            'display_name' => 'Dashboard',
+        $home = Permission::create([
+            // home
+            'name' => 'home',
+            'display_name' => 'Home',
             'guard_name' => 'sanctum',
-            'display_endpoint' => 'dashboard'
+            'display_endpoint' => 'home'
         ]);
         Permission::create([
-            'name' => 'dashboard.index',
-            'display_name' => 'Dashboard',
+            'name' => 'home.index',
+            'display_name' => 'Home',
             'guard_name' => 'sanctum',
-            'parent_id' => $dashboard->id
+            'parent_id' => $home->id
         ]);
         $configuration = Permission::create([
             'name' => 'configuration',
@@ -88,6 +88,24 @@ class RoleAndPermissionSeeder extends Seeder
             'guard_name' => 'sanctum',
             'display_endpoint' => 'attendance'
         ]);
+        Permission::create([
+            'name' => 'attendance.index',
+            'display_name' => 'Attendance',
+            'guard_name' => 'sanctum',
+            'parent_id' => $attendance->id
+        ]);
+        Permission::create([
+            'name' => 'leave',
+            'display_name' => 'Leave',
+            'guard_name' => 'sanctum',
+            'parent_id' => $attendance->id
+        ]);
+        Permission::create([
+            'name' => 'holiday',
+            'display_name' => 'Holiday',
+            'guard_name' => 'sanctum',
+            'parent_id' => $attendance->id
+        ]);
         $payroll = Permission::create([
             'name' => 'payroll',
             'display_name' => 'Payroll',
@@ -95,10 +113,16 @@ class RoleAndPermissionSeeder extends Seeder
             'display_endpoint' => 'payroll'
         ]);
         $project = Permission::create([
-            'name' => 'project',
-            'display_name' => 'Project',
+            'name' => 'projects',
+            'display_name' => 'Projects',
             'guard_name' => 'sanctum',
-            'display_endpoint' => 'project'
+            'display_endpoint' => 'projects'
+        ]);
+        Permission::create([
+            'name' => 'projects.index',
+            'display_name' => 'Projects Index',
+            'guard_name' => 'sanctum',
+            'parent_id' => $project->id
         ]);
 
         $role = Role::query()->create([
@@ -127,5 +151,6 @@ class RoleAndPermissionSeeder extends Seeder
             'name' => 'employee',
             'guard_name' => 'sanctum'
         ]);
+        $role->givePermissionTo(Permission::whereIn('id', [1,2,7,8,12,13,14,15,16,17,18])->get());
     }
 }
