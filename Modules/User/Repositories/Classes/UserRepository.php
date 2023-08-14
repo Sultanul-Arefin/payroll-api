@@ -98,7 +98,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                             'user_details',
                             'user_phone',
                             'LIKE',
-                            '%' . request('search') . '%' 
+                            '%' . request('search') . '%'
                         );
                 })
             )
@@ -140,7 +140,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
               try {
                   $attach = UserAttachment::create([
                       'user_id' => auth()->user()->id,
-                      'file_name' => $data['fileNadme'],
+                      'file_name' => $data['fileName'],
                       'heading_type' => UserAttachment::HEADING_TYPE[$request->heading_type],
                       'item_type' => $this->itemType($request->item_type, $request->heading_type)
                   ]);
@@ -154,6 +154,32 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
         return $attach;
     }
+    public function multipleStoreAttachment($request, $userId)
+    {
+
+        if($request->hasFile('file_name')){
+            $data = $this->uploadMultipleAttachment($request->file_name, 'contract_documents');
+            if($data['fileName']){
+                try {
+                    foreach($data['fileName'] as $fileName){
+                        $attach = UserAttachment::create([
+                            'user_id' => $userId,
+                            'file_name' => $fileName,
+                            'heading_type' => UserAttachment::HEADING_TYPE[$request->heading_type],
+                            'item_type' => $this->itemType($request->item_type, $request->heading_type)
+                        ]);
+                    }
+                }catch (\Exception $ex){
+                  //  $this->deleteMultipleAttachment($data['fileName']);
+                    throw new CustomException('Something Wrong, Please try again', 404);
+                }
+            }else{
+                throw new CustomException('Your File Not Accepted', 404);
+            }
+        }
+        return $data['fileName'];
+    }
+
     public function itemType($itemsName, $headingType){
 
         switch ($headingType){

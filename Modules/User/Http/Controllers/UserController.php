@@ -26,7 +26,7 @@ use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
 {
-    use ImageUploads, 
+    use ImageUploads,
         Attachment,
         UserTrait;
     /**
@@ -119,10 +119,15 @@ class UserController extends Controller
                 'tin' => $request->tin,
                 'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
             ]);
+            //multiple file store
+            if($request->hasFile('file_name')){
+               $allFileName =  $this->user_repo->multipleStoreAttachment($request, $user->id);//return array
+            }
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
                 return "Successfully sent";
             }catch(Exception $e){
+                $this->deleteMultipleAttachment($allFileName); // when exception throw then called delete stored storage file
                 $user->notify(new UserCreateMailFailedNotification($request->email));
                 return null;
             }
@@ -266,25 +271,25 @@ class UserController extends Controller
     }
 
     public function user_status_update(Request $request , User $user){
-       
-        
+
+
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'status'=>'required|integer|in:0,1'    
+            'status'=>'required|integer|in:0,1'
         ]);
 
         $updateStatus=User::find($user->id);
-      
+
         $status=User::where('id',$user->id)->update([
-            
+
             'status'=>$request->status
         ]);
-     
+
         return response()->json([
             'status'=>true,
             'message'=>'status Change Successfully',
-            
-        
+
+
         ],200);
     }
 }
