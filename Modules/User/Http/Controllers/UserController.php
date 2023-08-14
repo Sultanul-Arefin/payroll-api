@@ -21,6 +21,8 @@ use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
 use Modules\User\Jobs\UserCreateMailJob;
 use App\Http\Traits\Attachment;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
@@ -123,6 +125,8 @@ class UserController extends Controller
             if($request->hasFile('file_name')){
                $allFileName =  $this->user_repo->multipleStoreAttachment($request, $user->id);//return array
             }
+            // add salary items
+            return $this->add_salary_items($request->all(), $user->id);
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
                 return "Successfully sent";
@@ -133,12 +137,82 @@ class UserController extends Controller
             }
         });
 
-
         return apiResponse(
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email": "Mail could not sent",
             status: 'success'
         );
+    }
+
+    public function add_salary_items($salary_items, $employee_id)
+    {
+        if($salary_items['wages'] == null){
+            $item_id = $this->check_salary_items('Wages');
+            $this->add_items_with_employee($item_id, $salary_items['wages'], $employee_id);
+        }
+        if($salary_items['wages']){
+            $item_id = $this->check_salary_items('Wages');
+            $this->add_items_with_employee($item_id, $salary_items['wages'], $employee_id);
+        }
+        if($salary_items['ordinary_time_rate']){
+            $item_id = $this->check_salary_items('Ordinary Time Rate');
+            $this->add_items_with_employee($item_id, $salary_items['ordinary_time_rate'], $employee_id);
+        }
+        if($salary_items['maternity_time_rate']){
+            $item_id = $this->check_salary_items('Maternity Time Rate');
+            $this->add_items_with_employee($item_id, $salary_items['maternity_time_rate'], $employee_id);
+        }
+        if($salary_items['paid_sick_leave_rate']){
+            $item_id = $this->check_salary_items('Paid Sick Leave Rate');
+            $this->add_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
+        }
+        if($salary_items['unpaid_sick_leave_rate']){
+            $item_id = $this->check_salary_items('Unpaid Sick Leave Rate');
+            $this->add_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
+        }
+        if($salary_items['holiday_rate']){
+            $item_id = $this->check_salary_items('Holiday Rate');
+            $this->add_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
+        }
+        if($salary_items['absent']){
+            $item_id = $this->check_salary_items('Absent');
+            $this->add_items_with_employee($item_id, $salary_items['absent'], $employee_id);
+        }
+        if($salary_items['bonus']){
+            $item_id = $this->check_salary_items('Bonus');
+            $this->add_items_with_employee($item_id, $salary_items['bonus'], $employee_id);
+        }
+        if($salary_items['overtime_rate']){
+            $item_id = $this->check_salary_items('Overtime Rate');
+            $this->add_items_with_employee($item_id, $salary_items['overtime_rate'], $employee_id);
+        }
+        if($salary_items['double_overtime_rate']){
+            $item_id = $this->check_salary_items('Double Overtime Rate');
+            $this->add_items_with_employee($item_id, $salary_items['double_overtime_rate'], $employee_id);
+        }
+        if($salary_items['recuperated_hour']){
+            $item_id = $this->check_salary_items('Recuperated Hour');
+            $this->add_items_with_employee($item_id, $salary_items['recuperated_hour'], $employee_id);
+        }
+    }
+
+    public function check_salary_items($item_name)
+    {
+        $name = SalaryItemsName::query()
+                    ->where('company_id', auth()->user()->company_id)
+                    ->where('name', 'like', '%' . $item_name . '%')
+                    ->first();
+        return $name->id;
+    }
+
+    public function add_items_with_employee($item_id, $amount, $employee_id)
+    {
+        EmployeeSalaryItem::create([
+            'salary_item_id' => $item_id,
+            'employee_id' => $employee_id,
+            'company_id' => auth()->user()->company_id,
+            'amount' => $amount
+        ]);
     }
 
     /**

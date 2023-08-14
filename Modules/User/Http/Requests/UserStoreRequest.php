@@ -19,6 +19,17 @@ class UserStoreRequest extends FormRequest
             'password' => 'required',
             'user_city' => 'required',
             'user_phone' => 'required',
+            'wages' => 'nullable',
+            'ordinary_time_rate' => 'required',
+            'maternity_time_rate' => 'required',
+            'paid_sick_leave_rate' => 'required',
+            'unpaid_sick_leave_rate' => 'required',
+            'holiday_rate' => 'required',
+            'absent' => 'required',
+            'bonus' => 'required',
+            'overtime_rate' => 'required',
+            'double_overtime_rate' => 'required',
+            'recuperated_hour' => 'required'
             // 'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
         ];
     }
