@@ -146,7 +146,7 @@ class UserController extends Controller
 
     public function add_salary_items($salary_items, $employee_id)
     {
-        if($salary_items['wages'] == 0){
+        if($salary_items['wages'] == null){
             $item_id = $this->check_salary_items('Wages');
             $this->add_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
