@@ -36,12 +36,13 @@ class PayslipService
 
     function add_payslip_details($payslip_id, $employee_id) {
         $employee_associated_amount = EmployeeSalaryItem::query()
+                                    // ->whereHas(
+                                    //     'salaryItemsName', function(Builder $builder){
+                                    //         $builder->whereNotIn('salary_items_category_id', [1,2]);
+                                    //     }
+                                    // )
                                     ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->whereNotIn('salary_items_category_id', [1,2]);
-                                        }
-                                    )
+                                    ->whereNotNull('amount')
                                     ->get();
         foreach($employee_associated_amount as $value){
             PayslipDetail::create([

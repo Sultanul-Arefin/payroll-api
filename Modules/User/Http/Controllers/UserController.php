@@ -126,7 +126,7 @@ class UserController extends Controller
                $allFileName =  $this->user_repo->multipleStoreAttachment($request, $user->id);//return array
             }
             // add salary items
-            return $this->add_salary_items($request->all(), $user->id);
+            $this->add_salary_items($request->all(), $user->id);
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
                 return "Successfully sent";
