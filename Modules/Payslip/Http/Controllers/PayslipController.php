@@ -147,8 +147,14 @@ class PayslipController extends Controller
         );
     }
 
-    function preview_payslip() {
-        
+    function preview_payslip(Payslip $payslip) {
+        return apiResponse(
+            data: [
+                'user_info' => $payslip?->employee,
+                'company_info' => $payslip?->employee?->company,
+                'payslip_info' => $payslip
+            ]
+        );
     }
 
     function payslips() {
