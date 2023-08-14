@@ -10,11 +10,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Modules\Auth\Http\Services\UserServices;
 use Modules\Company\Entities\Company;
 use Modules\User\Entities\UserDetails;
 
 class RegisteredUserController extends Controller
 {
+
+    public function __construct(
+        private UserServices $userServices
+    )
+    {
+    }
     /**
      * Handle an incoming registration request.
      *
@@ -50,6 +57,12 @@ class RegisteredUserController extends Controller
                 // 'user_image' => $request->user_address ?? null,
             ]);
             $user->assignRole('super-admin');
+
+            // seeding the database
+            $this->userServices->salary_items_name_seeder($company->id);
+            $this->userServices->leave_salary_items($company->id);
+            $this->userServices->department_seeder($company->id);
+            $this->userServices->designation_seeder($company->id);
             return $user;
         });
 
