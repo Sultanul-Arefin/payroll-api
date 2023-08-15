@@ -88,6 +88,9 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
+        if(!$request->has('wages')){
+            $request->merge(['wages' => null]);
+        }
         $message = DB::transaction(function ()use($request){
 
             $user = $this->user_repo->create([
