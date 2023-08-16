@@ -65,6 +65,12 @@ class RoleAndPermissionSeeder extends Seeder
             'parent_id' => $employee->id
         ]);
         Permission::create([
+            'name' => 'employee.profile',
+            'display_name' => 'Employee Profile',
+            'guard_name' => 'sanctum',
+            'parent_id' => $employee->id
+        ]);
+        Permission::create([
             'name' => 'employee.store',
             'display_name' => 'Employee Store',
             'guard_name' => 'sanctum',
