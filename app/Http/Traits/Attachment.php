@@ -45,7 +45,6 @@ trait Attachment{
                 Storage::disk('public')->delete($fileName);
             }else{
                 throw new CustomException('Something Wrong!');
-                 break;
             }
         }
 
