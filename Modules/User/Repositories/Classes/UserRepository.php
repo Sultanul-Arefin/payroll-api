@@ -131,18 +131,17 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
         return $user;
     }
-    public function userDocument($request)
+    public function userDocument($request_file_name, $heading_type, $item_type)
     {
 
-        if($request->hasFile('file_name')){
-          $data = $this->uploadAttachment($request->file_name, 'contract_documents');
+          $data = $this->uploadAttachment($request_file_name, ('employees/'.$heading_type));
           if($data['fileName']){
               try {
                   $attach = UserAttachment::create([
                       'user_id' => auth()->user()->id,
                       'file_name' => $data['fileName'],
-                      'heading_type' => UserAttachment::HEADING_TYPE[$request->heading_type],
-                      'item_type' => $this->itemType($request->item_type, $request->heading_type)
+                      'heading_type' => UserAttachment::HEADING_TYPE[$heading_type],
+                      'item_type' => $this->itemType($heading_type, $item_type)
                   ]);
               }catch (\Exception $ex){
                   $this->deleteAttachment($data['fileName']);
@@ -151,8 +150,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
            }else{
                throw new CustomException('Your File Not Accepted', 404);
            }
-        }
         return $attach;
+
     }
     public function multipleStoreAttachment($request, $userId)
     {
@@ -180,17 +179,19 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $data['fileName'];
     }
 
-    public function itemType($itemsName, $headingType){
-
-        switch ($headingType){
-            case 'contract': return UserAttachment::CONTRACT_ITEM_TYPE[$itemsName];
-            break;
-            case 'official' : return UserAttachment::OFFICIAL_ITEM_TYPE[$itemsName];
-            break;
-            case 'others' : return UserAttachment::OTHERS_ITEM_TYPE[$itemsName];
-            break;
-            default: return false;
+    public function itemType($heading_type, $item_type){
+        try {
+            switch ($heading_type){
+                case 'contract': return UserAttachment::CONTRACT_ITEM_TYPE[$item_type];
+                    break;
+                case 'official' : return UserAttachment::OFFICIAL_ITEM_TYPE[$item_type];
+                    break;
+                case 'others' : return UserAttachment::OTHERS_ITEM_TYPE[$item_type];
+                    break;
+                default: return false;
+            }
+        }catch (\Exception $ex){
+            throw new CustomException('tme ting error', 404);
         }
-
     }
 }

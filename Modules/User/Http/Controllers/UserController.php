@@ -2,6 +2,7 @@
 
 namespace Modules\User\Http\Controllers;
 
+use App\Exceptions\CustomException;
 use App\Http\Traits\ImageUploads;
 use App\Models\User;
 use App\Notifications\UserCreateMailFailedNotification;
@@ -88,57 +89,121 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
+
         if(!$request->has('wages')){
             $request->merge(['wages' => null]);
         }
-        $message = DB::transaction(function ()use($request){
 
-            $user = $this->user_repo->create([
-                        'designation_id' => $request->designation_id,
-                        'assign_to' => $request->assign_to,
-                        'department_id' => $request->department_id,
-                        'name' => $request->name,
-                        'email' => $request->email,
-                        'company_id' => auth()->user()->company_id,
-                        'password' => $request->password,
-                        'user_role' => User::EMPLOYEE
-                    ]);
-            $user->assignRole('employee');
+        try{
+            $allFile = []; // all file name store into array
+            $message = DB::transaction(function ()use($request, $allFile){
 
-            $user_details = UserDetails::create([
-                'user_id' => $user->id,
-                'user_area' => $request->user_area,
-                'user_city' => $request->user_city,
-                'zip_code' => $request->zip_code,
-                'country_id' => $request->country_id,
-                'user_phone' => $request->user_phone,
-                'gender' => $request->gender,
-                'nid' => $request->nid,
-                'passport' => "assport",
-                'date_of_birth' => $request->date_of_birth,
-                'joining_date' => $request->joining_date,
-                'payment_type' => $request->payment_type,
-                'bank_name' => $request->bank_name,
-                'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
-                'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
-                'tin' => $request->tin,
-                'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
-            ]);
-            //multiple file store
-            if($request->hasFile('file_name')){
-               $allFileName =  $this->user_repo->multipleStoreAttachment($request, $user->id);//return array
-            }
-            // add salary items
-            $this->add_salary_items($request->all(), $user->id);
+                $user = $this->user_repo->create([
+                            'designation_id' => $request->designation_id,
+                            'assign_to' => $request->assign_to,
+                            'department_id' => $request->department_id,
+                            'name' => $request->name,
+                            'email' => $request->email,
+                            'company_id' => auth()->user()->company_id,
+                            'password' => $request->password,
+                            'user_role' => User::EMPLOYEE
+                        ]);
+                $user->assignRole('employee');
+
+                $user_details = UserDetails::create([
+                    'user_id' => $user->id,
+                    'user_area' => $request->user_area,
+                    'user_city' => $request->user_city,
+                    'zip_code' => $request->zip_code,
+                    'country_id' => $request->country_id,
+                    'user_phone' => $request->user_phone,
+                    'gender' => $request->gender,
+                    'nid' => $request->nid,
+                    'passport' => "assport",
+                    'date_of_birth' => $request->date_of_birth,
+                    'joining_date' => $request->joining_date,
+                    'payment_type' => $request->payment_type,
+                    'bank_name' => $request->bank_name,
+                    'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
+                    'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
+                    'tin' => $request->tin,
+                    'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+                ]);
+                //file one
+                if($request->hasFile('contract_letter')){
+                    $allFileName =  $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter');
+                    array_push($allFile, $allFileName);
+                }
+                //file two
+                if($request->hasFile('national_id_card')){
+                    $allFileName =  $this->user_repo->userDocument($request->nid_card, 'contract', 'national_id_card433');
+                    array_push($allFile, $allFileName);
+                }
+                //file three
+                if($request->hasFile('cv')){
+                    $allFileName =  $this->user_repo->userDocument($request->cv, 'contract', 'cv');
+                    array_push($allFile, $allFileName);
+                }
+                //file four
+                if($request->hasFile('change_contact_letter')){
+                    $allFileName =  $this->user_repo->userDocument($request->change_contact_letter, 'contract', 'change_contact_letter');
+                    array_push($allFile, $allFileName);
+                }
+                //file five
+                if($request->hasFile('passport')){
+                    $allFileName =  $this->user_repo->userDocument($request->passport, 'official', 'passport');
+                    array_push($allFile, $allFileName);
+                }
+                //file six
+                if($request->hasFile('visa')){
+                    $allFileName =  $this->user_repo->userDocument($request->visa, 'official', 'visa');
+                    array_push($allFile, $allFileName);
+                }
+                //file seven
+                if($request->hasFile('work_permit')){
+                    $allFileName =  $this->user_repo->userDocument($request->work_permit, 'official', 'work_permit');
+                    array_push($allFile, $allFileName);
+                }
+                //file eight
+                if($request->hasFile('other_docs_1')){
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_1, 'others', 'other_docs_1');
+                    array_push($allFile, $allFileName);
+                }
+                //file ten
+                if($request->hasFile('other_docs_2')){
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_2, 'others', 'other_docs_2');
+                    array_push($allFile, $allFileName);
+                }
+                //file eleven
+                if($request->hasFile('other_docs_3')){
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_3, 'others', 'other_docs_3');
+                    array_push($allFile, $allFileName);
+                }
+                //file nine
+                if($request->hasFile('other_docs_4')){
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_4, 'others', 'other_docs_4');
+                    array_push($allFile, $allFileName);
+                }
+                //file nine
+                if($request->hasFile('other_docs_5')){
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_5, 'others', 'other_docs_5');
+                    array_push($allFile, $allFileName);
+                }
+
+                // add salary items
+                $this->add_salary_items($request->all(), $user->id);
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
                 return "Successfully sent";
             }catch(Exception $e){
-                $this->deleteMultipleAttachment($allFileName); // when exception throw then called delete stored storage file
                 $user->notify(new UserCreateMailFailedNotification($request->email));
                 return null;
             }
         });
+        }catch (\Exception $ex){
+            $this->deleteMultipleAttachment($allFile); // if exception throw, it will call and delete recent stored file form storage
+            throw new CustomException('something wrong, please try again');
+        }
 
         return apiResponse(
             data: null,
