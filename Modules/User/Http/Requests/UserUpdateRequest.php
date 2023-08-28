@@ -23,7 +23,19 @@ class UserUpdateRequest extends FormRequest
             'payment_type' => 'required',
             'user_city' => 'required',
             'user_phone' => 'required',
-            // 'user_image' => 'required|mimes:jpg,jpeg,png|max:2048',
+            'user_image' => 'mimes:jpg,jpeg,png|max:2048',
+            'contract_letter' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'national_id_card' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'cv' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'change_contact_letter' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'passport_file' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'visa' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'work_permit' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'other_docs_1' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'other_docs_2' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'other_docs_3' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'other_docs_4' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'other_docs_5' => 'mimes:jpg,jpeg,png,pdf,docx|max:2048',
         ];
     }
 

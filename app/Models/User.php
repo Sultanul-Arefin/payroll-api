@@ -169,5 +169,8 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    public function userAttachment(){
+        return $this->hasMany(UserAttachment::class, 'user_id', 'id');
+    }
 
 }
