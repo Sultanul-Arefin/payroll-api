@@ -15,6 +15,10 @@ trait Attachment{
         }
          return ['fileName' => $finalFilePath, 'message' => 'somethings..'];
     }
+    public function updateAttachment($file,  $storagePath=''){
+       $result = $this->uploadAttachment($file,  $storagePath);
+       return $result['fileName'];
+    }
     public function deleteAttachment($fileName){
         $existFile =  Storage::disk('public')->exists($fileName);
         if (!empty($existFile)){

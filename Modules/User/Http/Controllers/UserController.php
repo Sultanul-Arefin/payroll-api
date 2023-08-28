@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Mail;
 use Modules\User\Emails\SendPassword;
 use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
-use Modules\User\Http\Requests\UserStoreAttachmentRequest;
 use Modules\User\Http\Requests\UserStoreRequest;
 use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
@@ -88,16 +87,15 @@ class UserController extends Controller
      * @param Request $request
      * @return Renderable
      */
-    public function store(UserStoreRequest $request, UserStoreAttachmentRequest $req)
+    public function store(UserStoreRequest $request)
     {
-
         if(!$request->has('wages')){
             $request->merge(['wages' => null]);
         }
 
         try{
             $allFile = []; // all file name store into array
-            $message = DB::transaction(function ()use($request,$req, $allFile){
+            $message = DB::transaction(function ()use($request, $allFile){
 
                 $user = $this->user_repo->create([
                             'designation_id' => $request->designation_id,
@@ -120,7 +118,6 @@ class UserController extends Controller
                     'user_phone' => $request->user_phone,
                     'gender' => $request->gender,
                     'nid' => $request->nid,
-                    'passport' => "assport",
                     'date_of_birth' => $request->date_of_birth,
                     'joining_date' => $request->joining_date,
                     'payment_type' => $request->payment_type,
@@ -132,62 +129,62 @@ class UserController extends Controller
                 ]);
                 //file one
                 if($request->hasFile('contract_letter')){
-                    $allFileName =  $this->user_repo->userDocument($req->contract_letter, 'contract', 'contract_letter');
+                    $allFileName =  $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter');
                     array_push($allFile, $allFileName);
                 }
                 //file two
                 if($request->hasFile('national_id_card')){
-                    $allFileName =  $this->user_repo->userDocument($req->nid_card, 'contract', 'national_id_card433');
+                    $allFileName =  $this->user_repo->userDocument($request->nid_card, 'contract', 'national_id_card433');
                     array_push($allFile, $allFileName);
                 }
                 //file three
                 if($request->hasFile('cv')){
-                    $allFileName =  $this->user_repo->userDocument($req->cv, 'contract', 'cv');
+                    $allFileName =  $this->user_repo->userDocument($request->cv, 'contract', 'cv');
                     array_push($allFile, $allFileName);
                 }
                 //file four
-                if($request->hasFile('change_contact_letter')){
-                    $allFileName =  $this->user_repo->userDocument($req->change_contact_letter, 'contract', 'change_contact_letter');
+                if($request->hasFile('change_contract_letter')){
+                    $allFileName =  $this->user_repo->userDocument($request->change_contract_letter, 'contract', 'change_contact_letter');
                     array_push($allFile, $allFileName);
                 }
                 //file five
-                if($request->hasFile('passport')){
-                    $allFileName =  $this->user_repo->userDocument($req->passport, 'official', 'passport');
+                if($request->hasFile('passports')){
+                    $allFileName =  $this->user_repo->userDocument($request->passport, 'official', 'passport');
                     array_push($allFile, $allFileName);
                 }
                 //file six
                 if($request->hasFile('visa')){
-                    $allFileName =  $this->user_repo->userDocument($req->visa, 'official', 'visa');
+                    $allFileName =  $this->user_repo->userDocument($request->visa, 'official', 'visa');
                     array_push($allFile, $allFileName);
                 }
                 //file seven
                 if($request->hasFile('work_permit')){
-                    $allFileName =  $this->user_repo->userDocument($req->work_permit, 'official', 'work_permit');
+                    $allFileName =  $this->user_repo->userDocument($request->work_permit, 'official', 'work_permit');
                     array_push($allFile, $allFileName);
                 }
                 //file eight
                 if($request->hasFile('other_docs_1')){
-                    $allFileName =  $this->user_repo->userDocument($req->other_docs_1, 'others', 'other_docs_1');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_1, 'others', 'other_docs_1');
                     array_push($allFile, $allFileName);
                 }
                 //file ten
                 if($request->hasFile('other_docs_2')){
-                    $allFileName =  $this->user_repo->userDocument($req->other_docs_2, 'others', 'other_docs_2');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_2, 'others', 'other_docs_2');
                     array_push($allFile, $allFileName);
                 }
                 //file eleven
                 if($request->hasFile('other_docs_3')){
-                    $allFileName =  $this->user_repo->userDocument($req->other_docs_3, 'others', 'other_docs_3');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_3, 'others', 'other_docs_3');
                     array_push($allFile, $allFileName);
                 }
                 //file nine
                 if($request->hasFile('other_docs_4')){
-                    $allFileName =  $this->user_repo->userDocument($req->other_docs_4, 'others', 'other_docs_4');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_4, 'others', 'other_docs_4');
                     array_push($allFile, $allFileName);
                 }
                 //file nine
                 if($request->hasFile('other_docs_5')){
-                    $allFileName =  $this->user_repo->userDocument($req->other_docs_5, 'others', 'other_docs_5');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_5, 'others', 'other_docs_5');
                     array_push($allFile, $allFileName);
                 }
 
@@ -312,6 +309,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
+
         DB::transaction(function ()use($request,$user){
 
             $user_details = UserDetails::where('user_id',$user->id)->first();
@@ -357,6 +355,55 @@ class UserController extends Controller
                 'tin' => $request->tin,
                 'user_image' => $user_image,
             ]);
+
+            $allFileArr = [];
+            //all requested files are storing into empty associative array like [input name => file]
+            foreach ($request->allFiles() as $key => $file){
+                $allFileArr[$key] = $file;
+            }
+            //existing files are update
+            if($user->userAttachment){
+                //loop all existing file from userAttachment DB under a user
+                foreach ($user->userAttachment as $value){
+                    foreach ( $allFileArr as $key => $file){ //loop all requested files from new associative array
+                        //check existing DB item_type and requested file_name type are same or not,  and existing heading_type equal 1 or not
+                        if ($value->item_type === ( isset(UserAttachment::CONTRACT_ITEM_TYPE[$key]) ? UserAttachment::CONTRACT_ITEM_TYPE[$key] : null) && $value->heading_type === 1){
+                            $this->deleteAttachment($value->file_name);
+                            $value->update([
+                                'file_name' => $this->updateAttachment($file, ('employees/contract'))
+                            ]);
+                            unset($allFileArr[$key]);//remove element from new array
+                        }
+                        if ($value->item_type === ( isset(UserAttachment::OFFICIAL_ITEM_TYPE[$key]) ? UserAttachment::OFFICIAL_ITEM_TYPE[$key] : null) && $value->heading_type === 2){
+                            $this->deleteAttachment($value->file_name);
+                            $value->update([
+                                'file_name' => $this->updateAttachment($file, ('employees/contract'))
+                            ]);
+                            unset($allFileArr[$key]);//remove element from new array
+                        }
+                        if ($value->item_type === ( isset(UserAttachment::OTHERS_ITEM_TYPE[$key]) ? UserAttachment::OTHERS_ITEM_TYPE[$key] : null) && $value->heading_type === 3){
+                            $this->deleteAttachment($value->file_name);
+                            $value->update([
+                                'file_name' => $this->updateAttachment($file, ('employees/contract'))
+                            ]);
+                            unset($allFileArr[$key]);
+                        }
+                    }
+                }
+            }
+            //new requested files are stored
+            foreach ($allFileArr as $key => $file){
+                if($key === 'contract_letter' || $key === 'national_id_card' || $key === 'cv' || $key === 'change_contract_letter'){
+                    $this->user_repo->userDocument($file, 'contract', $key);
+                }
+                if($key === 'passport_file' || $key === 'visa' || $key === 'work_permit' || $key === 'immigration_application'){
+                    $this->user_repo->userDocument($file, 'official', $key);
+                }
+                if($key === 'other_docs_1' || $key === 'other_docs_2' || $key === 'other_docs_3' || $key === 'other_docs_4' || $key === 'other_docs_5'){
+                    $this->user_repo->userDocument($file, 'others', $key);
+                }
+            }
+
         });
 
 

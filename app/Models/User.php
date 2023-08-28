@@ -21,6 +21,7 @@ use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Permission\Entities\Permission;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
+use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -159,6 +160,9 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+    public function userAttachment(){
+        return $this->hasMany(UserAttachment::class, 'user_id', 'id');
     }
 
 }
