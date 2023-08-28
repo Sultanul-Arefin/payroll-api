@@ -109,6 +109,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany
+     */
+    public function user_attachments(): HasMany
+    {
+        return $this->hasMany(UserAttachment::class, 'user_id', 'id');
+    }
+
+    /**
      * @return belongsTo
      */
     public function assign_to_user(): BelongsTo
