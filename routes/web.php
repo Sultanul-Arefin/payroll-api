@@ -26,3 +26,10 @@ Route::get('test', function(){
         statusCode: 200
     );
 });
+Route::get('test2', function(){
+    return apiResponse(
+        data: [
+            'name' => 'payroll'
+        ]
+    );
+});
