@@ -28,5 +28,5 @@ interface UserRepositoryInterface
      */
     public function userStatus(object $user, int $statusTypes): bool;
 
-    public function userDocument($request, $heading_type, $item_type);
+    public function userDocument($request, $heading_type, $item_type, $user_id);
 }

@@ -93,6 +93,7 @@ class UserController extends Controller
             $request->merge(['wages' => null]);
         }
 
+
         try{
             $allFile = []; // all file name store into array
             $message = DB::transaction(function ()use($request, $allFile){
@@ -129,62 +130,62 @@ class UserController extends Controller
                 ]);
                 //file one
                 if($request->hasFile('contract_letter')){
-                    $allFileName =  $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter');
+                    $allFileName =  $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file two
                 if($request->hasFile('national_id_card')){
-                    $allFileName =  $this->user_repo->userDocument($request->nid_card, 'contract', 'national_id_card433');
+                    $allFileName =  $this->user_repo->userDocument($request->national_id_card, 'contract', 'national_id_card', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file three
                 if($request->hasFile('cv')){
-                    $allFileName =  $this->user_repo->userDocument($request->cv, 'contract', 'cv');
+                    $allFileName =  $this->user_repo->userDocument($request->cv, 'contract', 'cv', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file four
                 if($request->hasFile('change_contract_letter')){
-                    $allFileName =  $this->user_repo->userDocument($request->change_contract_letter, 'contract', 'change_contact_letter');
+                    $allFileName =  $this->user_repo->userDocument($request->change_contract_letter, 'contract', 'change_contact_letter', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file five
                 if($request->hasFile('passports')){
-                    $allFileName =  $this->user_repo->userDocument($request->passport, 'official', 'passport');
+                    $allFileName =  $this->user_repo->userDocument($request->passport, 'official', 'passport', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file six
                 if($request->hasFile('visa')){
-                    $allFileName =  $this->user_repo->userDocument($request->visa, 'official', 'visa');
+                    $allFileName =  $this->user_repo->userDocument($request->visa, 'official', 'visa', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file seven
                 if($request->hasFile('work_permit')){
-                    $allFileName =  $this->user_repo->userDocument($request->work_permit, 'official', 'work_permit');
+                    $allFileName =  $this->user_repo->userDocument($request->work_permit, 'official', 'work_permit', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file eight
                 if($request->hasFile('other_docs_1')){
-                    $allFileName =  $this->user_repo->userDocument($request->other_docs_1, 'others', 'other_docs_1');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_1, 'others', 'other_docs_1', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file ten
                 if($request->hasFile('other_docs_2')){
-                    $allFileName =  $this->user_repo->userDocument($request->other_docs_2, 'others', 'other_docs_2');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_2, 'others', 'other_docs_2', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file eleven
                 if($request->hasFile('other_docs_3')){
-                    $allFileName =  $this->user_repo->userDocument($request->other_docs_3, 'others', 'other_docs_3');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_3, 'others', 'other_docs_3', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file nine
                 if($request->hasFile('other_docs_4')){
-                    $allFileName =  $this->user_repo->userDocument($request->other_docs_4, 'others', 'other_docs_4');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_4, 'others', 'other_docs_4', $user->id);
                     array_push($allFile, $allFileName);
                 }
                 //file nine
                 if($request->hasFile('other_docs_5')){
-                    $allFileName =  $this->user_repo->userDocument($request->other_docs_5, 'others', 'other_docs_5');
+                    $allFileName =  $this->user_repo->userDocument($request->other_docs_5, 'others', 'other_docs_5', $user->id);
                     array_push($allFile, $allFileName);
                 }
 

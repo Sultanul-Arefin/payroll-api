@@ -131,14 +131,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
         return $user;
     }
-    public function userDocument($request_file_name, $heading_type, $item_type)
+    public function userDocument($request_file_name, $heading_type, $item_type, $user_id)
     {
-
           $data = $this->uploadAttachment($request_file_name, ('employees/'.$heading_type));
           if($data['fileName']){
               try {
                   $attach = UserAttachment::create([
-                      'user_id' => auth()->user()->id,
+                      'user_id' => $user_id,
                       'file_name' => $data['fileName'],
                       'heading_type' => UserAttachment::HEADING_TYPE[$heading_type],
                       'item_type' => $this->itemType($heading_type, $item_type)
