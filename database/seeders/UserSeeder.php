@@ -36,6 +36,46 @@ class UserSeeder extends Seeder
             'package_id' => 1
         ]);
         $user->assignRole('super-admin');
+        /** User 1 */
+        $user = User::factory()->create([
+            'email' => 'fahimsultan@bfin.it',
+            'name' => 'FahimSultan',
+            'email_verified_at' => now(),
+            'status' => User::USER_ACTIVE,
+            'password' => 'password', // password
+            'company_id' => 1
+        ]);
+        UserDetails::create([
+            'user_id' => $user->id,
+            'user_city' => 'Dhaka, Bangladesh',
+            'user_phone' => '1234567890',
+            // 'user_image' => $request->user_address ?? null,
+        ]);
+        CompanyAssociatedWithPackage::create([
+            'company_id' => 1,
+            'package_id' => 1
+        ]);
+        $user->assignRole('employee');
+        /** User 2 */
+        $user = User::factory()->create([
+            'email' => 'arefin@bfin.it',
+            'name' => 'Arefin',
+            'email_verified_at' => now(),
+            'status' => User::USER_ACTIVE,
+            'password' => 'password', // password
+            'company_id' => 1
+        ]);
+        UserDetails::create([
+            'user_id' => $user->id,
+            'user_city' => 'Dhaka, Bangladesh',
+            'user_phone' => '1234567890',
+            // 'user_image' => $request->user_address ?? null,
+        ]);
+        CompanyAssociatedWithPackage::create([
+            'company_id' => 1,
+            'package_id' => 1
+        ]);
+        $user->assignRole('super-admin');
         // User::factory()->count(10)->create();
     }
 }

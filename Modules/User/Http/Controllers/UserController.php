@@ -310,7 +310,6 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-
         DB::transaction(function ()use($request,$user){
 
             $user_details = UserDetails::where('user_id',$user->id)->first();
@@ -329,7 +328,6 @@ class UserController extends Controller
                 'designation_id' => $request->designation_id,
                 'department_id' => $request->department_id,
                 'assign_to' => $request->assign_to,
-                'status' => $request->status,
                 'company_id' => auth()->user()->company_id,
             ]);
 

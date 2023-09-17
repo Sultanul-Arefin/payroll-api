@@ -18,3 +18,18 @@ Route::get('/', function () {
 });
 
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::get('test', function(){
+    return apiResponse(
+        data: null,
+        message: 'Success',
+        status: 'success',
+        statusCode: 200
+    );
+});
+Route::get('test2', function(){
+    return apiResponse(
+        data: [
+            'name' => 'payroll'
+        ]
+    );
+});
