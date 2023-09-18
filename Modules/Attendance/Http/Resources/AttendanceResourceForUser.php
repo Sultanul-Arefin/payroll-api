@@ -43,9 +43,4 @@ class AttendanceResourceForUser extends JsonResource
         }
         return 'approved';
     }
-
-    public function getValue($value)
-    {
-        return $value->dates;
-    }
 }

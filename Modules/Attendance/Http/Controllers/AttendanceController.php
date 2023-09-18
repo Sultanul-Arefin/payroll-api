@@ -24,12 +24,11 @@ class AttendanceController extends Controller
             $rows = (int) request('rows');
         }
 
-        // return TaskResource::collection(
-            return AttendanceResourceForUser::collection(
-                $this->attendanceRepo->allWithSearch(
-                    ['*'],
-                    [],
-                    $rows
+        return AttendanceResourceForUser::collection(
+            $this->attendanceRepo->allWithSearch(
+                ['*'],
+                [],
+                $rows
             )
         );
     }
