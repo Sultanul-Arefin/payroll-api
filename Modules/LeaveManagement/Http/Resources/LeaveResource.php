@@ -14,7 +14,7 @@ class LeaveResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name ' => $this->name,
+            'name' => $this->name,
            // 'types' => new LeaveTypesResource($this->whenLoaded('salary_items_name'))
         ];
     }
