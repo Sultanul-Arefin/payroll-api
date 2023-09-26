@@ -69,7 +69,6 @@ class UserController extends Controller
         $user->designation_name = $user->designation?->name;
         $user->assign_to_name = $user->assign_to_user?->name;
         $user->user_attachments = $user->user_attachments;
-        return $user;
         return apiResponse(
             data: $user,
             message:"Successfully get User",
