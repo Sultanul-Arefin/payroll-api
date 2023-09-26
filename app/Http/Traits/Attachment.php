@@ -21,12 +21,8 @@ trait Attachment{
     }
     public function deleteAttachment($fileName){
         $existFile =  Storage::disk('public')->exists($fileName);
-        if (!empty($existFile)){
-            Storage::disk('public')->delete($fileName);
-            return true;
-        }else{
-            throw new CustomException('Something Wrong!');
-            return false;
+        if ($existFile){
+            return Storage::disk('public')->delete($fileName);
         }
     }
     public function uploadMultipleAttachment($files, string $storagePath=''){

@@ -24,6 +24,7 @@ use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -171,6 +172,12 @@ class User extends Authenticatable
     }
     public function userAttachment(){
         return $this->hasMany(UserAttachment::class, 'user_id', 'id');
+    }
+    public function userRole(): Attribute
+    {
+        return Attribute::make(
+            get:fn($value) => ($value.'3')
+        );
     }
 
 }

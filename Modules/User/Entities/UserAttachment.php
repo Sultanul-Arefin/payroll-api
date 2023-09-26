@@ -4,6 +4,7 @@ namespace Modules\User\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class UserAttachment extends Model
 {
@@ -19,5 +20,12 @@ class UserAttachment extends Model
     protected static function newFactory()
     {
         return \Modules\User\Database\factories\UserAttachmentFactory::new();
+    }
+
+    protected function fileName() : Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => ($value ? env('APP_URL') . '/' .$value : null)
+        );
     }
 }

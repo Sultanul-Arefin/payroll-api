@@ -27,6 +27,7 @@ use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
+
 class UserController extends Controller
 {
     use ImageUploads,
@@ -61,11 +62,14 @@ class UserController extends Controller
 
 
     public function findById(User $user){
+
         $user->user_details = $user->user_details;
         $user->user_details['gender_value'] = $user->user_details?->gender == 0 ? 'Female' : 'Male';
         $user->department_name = $user->department?->department_name;
         $user->designation_name = $user->designation?->name;
         $user->assign_to_name = $user->assign_to_user?->name;
+        $user->user_attachments = $user->user_attachments;
+        return $user;
         return apiResponse(
             data: $user,
             message:"Successfully get User",
@@ -336,7 +340,6 @@ class UserController extends Controller
             if($prev_role){
                 $user->syncRoles($request->role);
             }
-
             $user_details = $this->user_repo->userDetailsUpdate($user->id,[
                 'user_area' => $request->user_area,
                 'user_phone' => $request->user_phone,
@@ -362,6 +365,7 @@ class UserController extends Controller
             }
             //existing files are update
             if($user->userAttachment){
+              //  return 'inside attachement' ;
                 //loop all existing file from userAttachment DB under a user
                 foreach ($user->userAttachment as $value){
                     foreach ( $allFileArr as $key => $file){ //loop all requested files from new associative array
@@ -376,14 +380,14 @@ class UserController extends Controller
                         if ($value->item_type === ( isset(UserAttachment::OFFICIAL_ITEM_TYPE[$key]) ? UserAttachment::OFFICIAL_ITEM_TYPE[$key] : null) && $value->heading_type === 2){
                             $this->deleteAttachment($value->file_name);
                             $value->update([
-                                'file_name' => $this->updateAttachment($file, ('employees/contract'))
+                                'file_name' => $this->updateAttachment($file, ('employees/official'))
                             ]);
                             unset($allFileArr[$key]);//remove element from new array
                         }
                         if ($value->item_type === ( isset(UserAttachment::OTHERS_ITEM_TYPE[$key]) ? UserAttachment::OTHERS_ITEM_TYPE[$key] : null) && $value->heading_type === 3){
                             $this->deleteAttachment($value->file_name);
                             $value->update([
-                                'file_name' => $this->updateAttachment($file, ('employees/contract'))
+                                'file_name' => $this->updateAttachment($file, ('employees/others'))
                             ]);
                             unset($allFileArr[$key]);
                         }
@@ -392,14 +396,17 @@ class UserController extends Controller
             }
             //new requested files are stored
             foreach ($allFileArr as $key => $file){
+             //   return 'outise attachement';
+
+              //  return $request->all();
                 if($key === 'contract_letter' || $key === 'national_id_card' || $key === 'cv' || $key === 'change_contract_letter'){
-                    $this->user_repo->userDocument($file, 'contract', $key);
+                    $this->user_repo->userDocument($file, 'contract', $key, $user->id);
                 }
                 if($key === 'passport_file' || $key === 'visa' || $key === 'work_permit' || $key === 'immigration_application'){
-                    $this->user_repo->userDocument($file, 'official', $key);
+                    $this->user_repo->userDocument($file, 'official', $key, $user->id);
                 }
                 if($key === 'other_docs_1' || $key === 'other_docs_2' || $key === 'other_docs_3' || $key === 'other_docs_4' || $key === 'other_docs_5'){
-                    $this->user_repo->userDocument($file, 'others', $key);
+                    $this->user_repo->userDocument($file, 'others', $key, $user->id);
                 }
             }
 
