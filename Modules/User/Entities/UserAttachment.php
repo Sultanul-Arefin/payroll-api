@@ -15,7 +15,7 @@ class UserAttachment extends Model
     public const OFFICIAL_ITEM_TYPE = ['passport_file' => 1, 'visa' => 2, 'work_permit' => 3, 'immigration_application' => 4];
     public const OTHERS_ITEM_TYPE = ['other_docs_1' => 1, 'other_docs_2' => 2, 'other_docs_3' => 3, 'other_docs_4' => 4, 'other_docs_5' => 5];
 
-    protected $fillable = ['user_id', 'file_name', 'heading_type', 'item_type', 'company_id'];
+    protected $fillable = ['user_id', 'file_name', 'heading_type', 'item_type',  'company_id'];
 
     protected static function newFactory()
     {
@@ -25,7 +25,7 @@ class UserAttachment extends Model
     protected function fileName() : Attribute
     {
         return Attribute::make(
-            get: fn($value) => ($value ? env('APP_URL') . '/' .$value : null)
+            get: fn($value) => ($value ? env('APP_URL') . '/storage/' .$value : null)
         );
     }
 }
