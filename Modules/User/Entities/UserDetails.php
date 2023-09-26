@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class UserDetails extends Model
 {
@@ -51,5 +52,11 @@ class UserDetails extends Model
     public function getChangedUserImageAttribute()
     {
         return $this->user_image ? env('APP_URL') . '/' . 'storage/'.$this->user_image : null;
+    }
+    protected function fineName():Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => strtoupper($value)
+        );
     }
 }
