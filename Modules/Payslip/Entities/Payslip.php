@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payslip extends Model
 {
@@ -64,5 +65,12 @@ class Payslip extends Model
      */
     function employee(): BelongsTo {
         return $this->belongsTo(User::class, 'employee_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    function payslip_details(): HasMany {
+        return $this->hasMany(PayslipDetail::class, 'payslip_id', 'id');
     }
 }
