@@ -15,6 +15,7 @@ use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
+use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
@@ -121,7 +122,7 @@ class PayslipController extends Controller
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
 
-        $calculation = DB::transaction(function() use($request, $total_amount){
+        $calculation = DB::transaction(function() use($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount){
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
@@ -131,7 +132,17 @@ class PayslipController extends Controller
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
                 'payment_date' => $request->payment_date,
-                'hours_worked' => 148
+                'hours_worked' => 148,
+                'wages' => $get_basic,
+                'leave_decution' => $get_staff_deduction_sick_absent,
+                'total_pay_value' => $total_pay,
+                'taxable_allowance' => $get_taxable_allowance,
+                'gross_pay_before_tax' => $gross_pay_before_tax,
+                'tax_value' => $get_income_taxes,
+                'post_tax_value' => $get_additional_taxes_tax_top_up,
+                'non_taxable_allowance' => $get_non_taxable_allowance,
+                'pay_deduction' => $pay_due_before_deductions,
+                'net_pay' => $total_amount
             ]);
 
             /** add the payslip details */
@@ -152,7 +163,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => $payslip?->employee,
                 'company_info' => $payslip?->employee?->company,
-                'payslip_info' => $payslip
+                'payslip_info' => new ViewPayslipResource($payslip)
             ]
         );
     }
