@@ -24,13 +24,23 @@ return new class extends Migration
                 ->constrained('companies', 'id')
                 ->cascadeOnDelete();
             $table->string('month');
-            $table->double('amount', 8, 2); // can store total 8 digits, 6 digits before decimal, & 2 after decimal
             $table->integer('email_flag')->default(Payslip::EMAIL_NOT_SENT);
             $table->integer('notification_flag')->default(Payslip::NOTIFICATION_NOT_SENT);
             $table->date('first_date');
             $table->date('last_date');
             $table->date('payment_date');
-            $table->double('hours_worked', 6, 2); // can store total 6 digits, 4 digits before point, & 2 after point
+            $table->double('hours_worked', 6, 2)->nullable(); // can store total 6 digits, 4 digits before point, & 2 after point
+            // $table->double('amount', 8, 2); // can store total 8 digits, 6 digits before decimal, & 2 after decimal
+            $table->double('wages', 8, 2); // wages_val -> basic/basic rate calculation with hour
+            $table->double('leave_deduction', 8, 2)->default(0.00); // deduction_val -> leave related deduction calculation
+            $table->double('total_pay_value', 8, 2); // total_pay_val -> wages - leave_deduction
+            $table->double('taxable_allowance', 8, 2)->default(0.00); // allowance_val -> taxable allowance
+            $table->double('gross_pay_before_tax', 8, 2); // gross_pay_before_tax
+            $table->double('tax_value', 8, 2)->default(0.00); // tax_val -> income tax
+            $table->double('post_tax_value', 8, 2)->default(0.00); // post_tax_val -> other/top-up tax
+            $table->double('non_taxable_allowance', 8, 2)->default(0.00); // non_tax_val -> non taxable allowance
+            $table->double('pay_deduction', 8, 2)->default(0.00); // pay_deduction -> pay due before deduction
+            $table->double('net_pay', 8, 2)->default(0.00); // net_pay -> net pay before company & government contribution -> main salary
             $table->timestamps();
         });
     }
