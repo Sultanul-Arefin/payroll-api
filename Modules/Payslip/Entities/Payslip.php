@@ -21,13 +21,23 @@ class Payslip extends Model
         'employee_id',
         'company_id',
         'month',
-        'amount',
+        // 'amount',
         'email_flag',
         'notification_flag',
         'first_date',
         'last_date',
         'payment_date',
-        'hours_worked'
+        'hours_worked',
+        'wages',
+        'leave_deduction',
+        'total_pay_value',
+        'taxable_allowance',
+        'gross_pay_before_tax',
+        'tax_value',
+        'post_tax_value',
+        'non_taxable_allowance',
+        'pay_deduction',
+        'net_pay'
     ];
     
     /**
