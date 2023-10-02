@@ -32,7 +32,45 @@ class ViewPayslipResource extends JsonResource
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'pay_due_before_deduction' => $this->pay_deduction,
             'staff_social_charges' => 0.00,
-            'total_net_pay' => $this->net_pay
+            'total_net_pay' => $this->net_pay,
+            'overall_calculation' => $this->overall_calculation()
+        ];
+    }
+
+    function overall_calculation() {
+        return [
+            'monthly' => [
+                [
+                    'hours' => 148,
+                    'overtime_hours' => 0,
+                    'total_fixed_pay' => 8400,
+                    'taxable_allowances' => 12000,
+                    'non_taxable_allowances' => 9500,
+                    'total_gross_pay' => 30000,
+                    'taxable_gross_pay' => 20400,
+                    'ytd_tax_paid' => 0,
+                    'total_staff_contribution' => 0,
+                    'total_company_contribution' => 0,
+                    'total_staff_cost' => 30000,
+                    'total_net_pay' => 30000
+                ]
+            ],
+            'yearly' => [
+                [
+                    'hours' => 148,
+                    'overtime_hours' => 0,
+                    'total_fixed_pay' => 8400,
+                    'taxable_allowances' => 12000,
+                    'non_taxable_allowances' => 9500,
+                    'total_gross_pay' => 30000,
+                    'taxable_gross_pay' => 20400,
+                    'ytd_tax_paid' => 0,
+                    'total_staff_contribution' => 0,
+                    'total_company_contribution' => 0,
+                    'total_staff_cost' => 30000,
+                    'total_net_pay' => 30000
+                ]
+            ]
         ];
     }
 }
