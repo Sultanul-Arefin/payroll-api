@@ -21,11 +21,11 @@ class CategoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-            $this->merge(
-                Arr::only(parent::toArray($request), [
-                    'id'
-                ])
-            ),
+            // $this->merge(
+            //     Arr::only(parent::toArray($request), [
+            //         'id'
+            //     ])
+            // ),
             'category_id' => $this->id,
             'category_name' => $this->name,
             'amount' => $this->getAmount($this->id)
