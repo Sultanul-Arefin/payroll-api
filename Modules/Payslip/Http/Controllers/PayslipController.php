@@ -77,7 +77,15 @@ class PayslipController extends Controller
                             ->get();
         return CategoryResource::collection(
             $salary_category
-        );
+        )->additional([
+            'meta' => [
+                'total_pay' => 1,
+                'gross_pay_before_tax' => 2,
+                'gross_pay_after_tax' => 3,
+                'pay_due_before_deduction' => 4,
+                'net_pay' => 5000
+            ]
+        ]);
     }
 
     function run_payslip(Request $request) {

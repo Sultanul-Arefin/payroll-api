@@ -21,6 +21,10 @@ class ViewPayslipResource extends JsonResource
         return [
             'items_details' => $this->payslip_details,
             'payment_date' => date('Y-m-d H:i:s'),
+            'fixed_pay_details' => $this->taxable_allowance,
+            'additional_pay' => $this->taxable_allowance,
+            'wage_deduction' => $this->taxable_allowance,
+            'total_fixed_pay' => $this->taxable_allowance,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
             'total_gross_pay' => $this->gross_pay_before_tax,
