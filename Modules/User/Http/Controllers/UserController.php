@@ -324,13 +324,12 @@ class UserController extends Controller
                     $this->deleteImage($user_details->user_image);
                 }
                 $user_image = $this->imageUpload($request,UserDetails::USER_IMAGE_PATH);
-
             }
             $user_update = $this->user_repo->update($user->id,[
-                'name' => $request->name,
-                'designation_id' => $request->designation_id,
-                'department_id' => $request->department_id,
-                'assign_to' => $request->assign_to,
+                'name' => $request->name ?? $user->name,
+                'designation_id' => $request->designation_id ?? $user->designation_id,
+                'department_id' => $request->department_id ?? $user->department_id,
+                'assign_to' => $request->assign_to ?? $user->assign_to,
                 'company_id' => auth()->user()->company_id,
             ]);
 
@@ -340,20 +339,20 @@ class UserController extends Controller
                 $user->syncRoles($request->role);
             }
             $user_details = $this->user_repo->userDetailsUpdate($user->id,[
-                'user_area' => $request->user_area,
-                'user_phone' => $request->user_phone,
-                'user_city' => $request->user_city,
-                'zip_code' => $request->zip_code,
-                'country_id' => $request->country_id,
-                'gender' => $request->gender,
-                'passport' => $request->passport,
-                'date_of_birth' => $request->date_of_birth,
-                'joining_date' => $request->joining_date,
-                'payment_type' => $request->payment_type,
-                'bank_name' => $request->bank_name,
-                'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
-                'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
-                'tin' => $request->tin,
+                'user_area' => $request->user_area ?? $user->user_details->user_area,
+                'user_phone' => $request->user_phone ?? $user->user_details->user_phone,
+                'user_city' => $request->user_city ?? $user->user_details->user_city,
+                'zip_code' => $request->zip_code ?? $user->user_details->zip_code,
+                'country_id' => $request->country_id ?? $user->user_details->country_id,
+                'gender' => $request->gender ?? $user->user_details->gender,
+                'passport' => $request->passport ?? $user->user_details->passport,
+                'date_of_birth' => $request->date_of_birth ?? $user->user_details->date_of_birth,
+                'joining_date' => $request->joining_date ?? $user->user_details->joining_date,
+                'payment_type' => $request->payment_type ?? $user->user_details->payment_type,
+                'bank_name' => $request->bank_name ?? $user->user_details->bank_name,
+                'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code ?? $user->user_details->bank_bic_or_swift_code,
+                'bank_iban_or_account_no' => $request->bank_iban_or_account_no ?? $user->user_details->bank_iban_or_account_no,
+                'tin' => $request->tin ?? $user->user_details->tin,
                 'user_image' => $user_image,
             ]);
 

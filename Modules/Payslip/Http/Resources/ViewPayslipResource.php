@@ -70,7 +70,8 @@ class ViewPayslipResource extends JsonResource
                     'total_staff_cost' => 30000,
                     'total_net_pay' => 30000
                 ]
-            ]
+            ],
+            'total_net_pay' => $this->net_pay
         ];
     }
 }
