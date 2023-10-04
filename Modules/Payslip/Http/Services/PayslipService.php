@@ -47,7 +47,7 @@ class PayslipService
         foreach($employee_associated_amount as $value){
             PayslipDetail::create([
                 'payslip_id' => $payslip_id,
-                'salary_item_id' => $value->id,
+                'salary_item_id' => $value->salary_item_id,
                 'amount' => $value->amount
             ]);
         }

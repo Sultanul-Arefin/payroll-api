@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Payslip extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     public const EMAIL_SENT = 1;
     public const EMAIL_NOT_SENT = 0;
@@ -44,17 +45,17 @@ class Payslip extends Model
     /**
      * changes while using uuid
      */
-    protected $keyType = 'string';
-    public $incrementing = false;
+    // protected $keyType = 'string';
+    // public $incrementing = false;
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function($model){
-            $model->id = (string) \Illuminate\Support\Str::uuid();
-        });
-    }
+    //     static::creating(function($model){
+    //         $model->id = (string) \Illuminate\Support\Str::uuid();
+    //     });
+    // }
 
     /**
      * other methods
