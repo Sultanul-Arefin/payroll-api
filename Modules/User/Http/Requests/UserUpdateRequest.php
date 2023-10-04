@@ -14,10 +14,10 @@ class UserUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-            'designation_id' => 'required',
-            'assign_to' => 'required',
-            'department_id' => 'required',
+            'name' => 'nullable',
+            'designation_id' => 'nullable',
+            'assign_to' => 'nullable',
+            'department_id' => 'nullable',
             'zip_code' => 'required',
             'gender' => 'required',
             'payment_type' => 'required',
