@@ -3,6 +3,7 @@
 namespace Modules\SalaryItemsCategory\Repositories\Classes;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInterface;
 
@@ -37,6 +38,13 @@ class SalaryItemsCategoryRepository extends BaseRepository implements SalaryItem
     {
         return $this->model
             ::query()
+            ->when(
+                !is_null(request('add_new_salary_item')) || !is_null(request('add_new_payslip_item')),
+                fn(Builder $builder) => $builder->whereNotIn(
+                    'id',
+                    [1,2]
+                )
+            )
             ->with($relations)
             ->latest();
     }
