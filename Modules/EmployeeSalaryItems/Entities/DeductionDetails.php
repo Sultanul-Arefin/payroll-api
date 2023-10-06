@@ -9,7 +9,11 @@ class DeductionDetails extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'employee_salary_item_id',
+        'employee_amount',
+        'government_or_company_amount'
+    ];
     
     protected static function newFactory()
     {
