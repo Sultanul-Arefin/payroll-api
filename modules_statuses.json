@@ -14,5 +14,6 @@
     "Attendance": true,
     "Designation": true,
     "LeaveManagement": true,
-    "Dashboard": true
+    "Dashboard": true,
+    "Notification": true
 }
