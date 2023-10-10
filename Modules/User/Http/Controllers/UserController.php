@@ -25,6 +25,8 @@ use App\Http\Traits\Attachment;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Http\Traits\UserTrait;
+use Modules\User\Notifications\UserCreatedNotificationToAdmin;
+use Modules\User\Notifications\UserCreatedNotificationToUser;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 
@@ -196,6 +198,10 @@ class UserController extends Controller
                 $this->add_salary_items($request->all(), $user->id);
             try{
                 UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
+
+                // Created Notification
+                $user->notify(new UserCreatedNotificationToUser(auth()->user(), $user));
+                auth()->user()->notify(new UserCreatedNotificationToAdmin(auth()->user(), $user));
                 return "Successfully sent";
             }catch(Exception $e){
                 $user->notify(new UserCreateMailFailedNotification($request->email));
