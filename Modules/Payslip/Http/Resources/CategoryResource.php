@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 
 class CategoryResource extends JsonResource
@@ -33,18 +34,76 @@ class CategoryResource extends JsonResource
     }
 
     function getAmount($category_id) {
-        return EmployeeSalaryItem::query()
-            ->whereHas(
-                'salaryItemsName', function(Builder $builder)use($category_id){
-                    $builder->whereHas(
-                        'salaryItemsCategory', function(Builder $builder)use($category_id){
-                            $builder->where('id', $category_id);
-                        }
-                    );
-                }
-            )
-            ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', request('employee_id'))
-            ->get()->sum('amount');
+        if($category_id == 7){
+            return [
+                'employee_government_deduction' => 0.00,
+                'other_complimentary_deduction' => 0.00,
+                'employee_deduction' => 0.00
+            ];
+            return DeductionDetails::query()
+                ->whereHas(
+                    'employee_salary_item', function(Builder $builder)use($category_id){
+                        $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', request('employee_id'))
+                        ->whereHas(
+                            'salaryItemsName', function(Builder $builder)use($category_id){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                        $builder->where('id', $category_id);
+                                    }
+                                );
+                            }
+                        );
+                    }
+                )
+                ->get()->sum('employee_amount as emp_amount');
+            return EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function(Builder $builder)use($category_id){
+                        $builder->whereHas(
+                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                $builder->where('id', $category_id);
+                            }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('employee_id', request('employee_id'))
+                ->get()->sum('amount');
+        } elseif($category_id == 8){
+            return [
+                'company_governemnt_contribution' => 0.00,
+                'company_other_complimentary_contribution' => 0.00,
+                'company_contribution' => 0.00
+            ];
+            return EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function(Builder $builder)use($category_id){
+                        $builder->whereHas(
+                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                $builder->where('id', $category_id);
+                            }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('employee_id', request('employee_id'))
+                ->get()->sum('amount');
+        } else{
+            return EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function(Builder $builder)use($category_id){
+                        $builder->whereHas(
+                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                $builder->where('id', $category_id);
+                            }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('employee_id', request('employee_id'))
+                ->get()->sum('amount');
+        }
     }
 }

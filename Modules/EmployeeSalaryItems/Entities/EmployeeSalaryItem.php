@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class EmployeeSalaryItem extends Model
@@ -44,5 +45,12 @@ class EmployeeSalaryItem extends Model
      */
     function employee(): BelongsTo {
         return $this->belongsTo(User::class, 'employee_id', 'id');
+    }
+
+    /**
+     * @return hasMany
+     */
+    function deduction_details(): HasMany {
+        return $this->hasMany(DeductionDetails::class, 'employee_salary_item_id', 'id');
     }
 }
