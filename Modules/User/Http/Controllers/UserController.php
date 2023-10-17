@@ -22,8 +22,10 @@ use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Http\Resources\UserResource;
 use Modules\User\Jobs\UserCreateMailJob;
 use App\Http\Traits\Attachment;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
+use Modules\User\Http\Resources\UserBasicSalaryResource;
 use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Notifications\UserCreatedNotificationToAdmin;
 use Modules\User\Notifications\UserCreatedNotificationToUser;
@@ -64,13 +66,21 @@ class UserController extends Controller
 
 
     public function findById(User $user){
-
+        
         $user->user_details = $user->user_details;
         $user->user_details['gender_value'] = $user->user_details?->gender == 0 ? 'Female' : 'Male';
+        $user->user_details['user_image'] = $user->user_details?->user_image ? env('APP_URL') . '/' . 'storage/'.$user->user_details?->user_image : null;
         $user->department_name = $user->department?->department_name;
         $user->designation_name = $user->designation?->name;
         $user->assign_to_name = $user->assign_to_user?->name;
         $user->user_attachments = $user->user_attachments;
+        $items = SalaryItemsName::query()
+                ->whereHas('employeeSalaryItem', function(Builder $builder)use($user){
+                    $builder->where('employee_id', $user->id);
+                })
+                ->where('salary_items_category_id',1)
+                ->get();
+        $user->salary_items = UserBasicSalaryResource::collection($items);
         return apiResponse(
             data: $user,
             message:"Successfully get User",
