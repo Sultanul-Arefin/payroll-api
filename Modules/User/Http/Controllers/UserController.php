@@ -301,6 +301,81 @@ class UserController extends Controller
         ]);
     }
 
+    // update salary items
+    public function update_salary_items($salary_items, $employee_id)
+    {
+        if($salary_items['wages'] == null){
+            $item_id = $this->check_salary_items_for_update('Wages');
+            $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
+        }
+        if($salary_items['wages']){
+            $item_id = $this->check_salary_items_for_update('Wages');
+            $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
+        }
+        if($salary_items['ordinary_time_rate']){
+            $item_id = $this->check_salary_items_for_update('Ordinary Time Rate');
+            $this->update_items_with_employee($item_id, $salary_items['ordinary_time_rate'], $employee_id);
+        }
+        if($salary_items['maternity_time_rate']){
+            $item_id = $this->check_salary_items_for_update('Maternity Time Rate');
+            $this->update_items_with_employee($item_id, $salary_items['maternity_time_rate'], $employee_id);
+        }
+        if($salary_items['paid_sick_leave_rate']){
+            $item_id = $this->check_salary_items_for_update('Paid Sick Leave Rate');
+            $this->update_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
+        }
+        if($salary_items['unpaid_sick_leave_rate']){
+            $item_id = $this->check_salary_items_for_update('Unpaid Sick Leave Rate');
+            $this->update_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
+        }
+        if($salary_items['holiday_rate']){
+            $item_id = $this->check_salary_items_for_update('Holiday Rate');
+            $this->update_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
+        }
+        if($salary_items['absent']){
+            $item_id = $this->check_salary_items_for_update('Absent');
+            $this->update_items_with_employee($item_id, $salary_items['absent'], $employee_id);
+        }
+        if($salary_items['bonus']){
+            $item_id = $this->check_salary_items_for_update('Bonus');
+            $this->update_items_with_employee($item_id, $salary_items['bonus'], $employee_id);
+        }
+        if($salary_items['overtime_rate']){
+            $item_id = $this->check_salary_items_for_update('Overtime Rate');
+            $this->update_items_with_employee($item_id, $salary_items['overtime_rate'], $employee_id);
+        }
+        if($salary_items['double_overtime_rate']){
+            $item_id = $this->check_salary_items_for_update('Double Overtime Rate');
+            $this->update_items_with_employee($item_id, $salary_items['double_overtime_rate'], $employee_id);
+        }
+        if($salary_items['recuperated_hour']){
+            $item_id = $this->check_salary_items_for_update('Recuperated Hour');
+            $this->update_items_with_employee($item_id, $salary_items['recuperated_hour'], $employee_id);
+        }
+    }
+
+    public function check_salary_items_for_update($item_name)
+    {
+        $name = SalaryItemsName::query()
+                    ->where('company_id', auth()->user()->company_id)
+                    ->where('name', 'like', '%' . $item_name . '%')
+                    ->first();
+        return $name->id;
+    }
+
+    public function update_items_with_employee($item_id, $amount, $employee_id)
+    {
+        EmployeeSalaryItem::where('salary_item_id', $item_id)->where('employee_id', $employee_id)->where('company_id', auth()->user()->company_id)->update([
+            'amount' => $amount
+        ]);
+        // EmployeeSalaryItem::create([
+        //     'salary_item_id' => $item_id,
+        //     'employee_id' => $employee_id,
+        //     'company_id' => auth()->user()->company_id,
+        //     'amount' => $amount
+        // ]);
+    }
+
     /**
      * Show the specified resource.
      * @param int $id
@@ -423,6 +498,9 @@ class UserController extends Controller
                     $this->user_repo->userDocument($file, 'others', $key, $user->id);
                 }
             }
+
+            // update salary items
+            $this->update_salary_items($request->all(), $user->id);
 
         });
 
