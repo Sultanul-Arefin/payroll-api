@@ -2,12 +2,14 @@
 
 namespace Modules\Attendance\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceDetail;
+use Modules\Attendance\Http\Resources\AttendanceResourceForAdmin;
 use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
 use Modules\Attendance\Http\Services\AttendanceService;
 use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
@@ -101,45 +103,32 @@ class AttendanceController extends Controller
             status: 'success'
         );
     }
-
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('attendance::show');
+    
+    function requested_attendance() {
+        $current_date = Carbon::now();
+        $current_month = $current_date->month;
+        $current_year = $current_date->year;
+        $requested_attendance = Attendance::query()
+                        // ->whereYear('dates', $current_year)
+                        // ->whereMonth('dates', $current_month)
+                        ->where('status', Attendance::PENDING)
+                        ->groupBy('dates')
+                        ->orderBy('dates')
+                        ->get();
+        return AttendanceResourceForAdmin::collection($requested_attendance);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('attendance::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
+    function approve_all_attendance_by_date(Request $request) {
+        $request->validate([
+            'date' => 'required'
+        ]);
+        Attendance::where('dates', $request->date)->update([
+            'status' => Attendance::PRESENT
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'Attendance Successfully Approved',
+            status: 'success'
+        );
     }
 }
