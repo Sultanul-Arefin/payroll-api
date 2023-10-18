@@ -485,9 +485,7 @@ class UserController extends Controller
             }
             //new requested files are stored
             foreach ($allFileArr as $key => $file){
-             //   return 'outise attachement';
 
-              //  return $request->all();
                 if($key === 'contract_letter' || $key === 'national_id_card' || $key === 'cv' || $key === 'change_contract_letter'){
                     $this->user_repo->userDocument($file, 'contract', $key, $user->id);
                 }
