@@ -18,6 +18,7 @@ use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
 use Modules\Payslip\Http\Resources\ViewFrenchPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
+use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
@@ -156,6 +157,9 @@ class PayslipController extends Controller
 
             /** add the payslip details */
             $payslip_details = $this->payslipService->add_payslip_details($payslip->id, $request->employee_id);
+
+            /** notification to user */
+            $payslip->employee->notify(new PayslipCreatedNotificationToUser(auth()->user(), $payslip));
             return $payslip;
         });
 
