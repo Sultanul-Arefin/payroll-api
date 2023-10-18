@@ -11,6 +11,9 @@ use Modules\Designation\Http\Requests\DesignationStoreRequest;
 use Modules\Designation\Http\Requests\DesignationUpdateRequest;
 use Modules\Designation\Repositories\Interfaces\DesignationInterface;
 use App\Models\User;
+use Illuminate\Support\Facades\Notification;
+use Modules\Designation\Notifications\DesignationCreatedNotification;
+use Modules\Role\Entities\Role;
 
 class DesignationController extends Controller
 {
@@ -54,6 +57,8 @@ class DesignationController extends Controller
                         'company_id' => auth()->user()->company_id,
                         'name' => $request->name,
                     ]);
+            $super_admins = Role::where('name', 'super-admin')->first()->users;
+            Notification::send($super_admins, new DesignationCreatedNotification(auth()->user(), $designation));
         }catch(Exception $e){
             return apiResponse(
                 data: null,
