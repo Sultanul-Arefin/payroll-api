@@ -33,7 +33,12 @@ class AttendanceController extends Controller
                 [],
                 $rows
             )
-        );
+        )->additional([
+            'meta' => [
+                'attendance_type_key' => auth()->user()->user_details?->attendance_type,
+                'attendance_type_value' => auth()->user()->user_details?->attendance_type == UserDetails::WEB_ATTENDANCE ? 'web' : 'machine',
+            ]
+        ]);
     }
 
     /**
