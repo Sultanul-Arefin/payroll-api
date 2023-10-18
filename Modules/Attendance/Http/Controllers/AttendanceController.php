@@ -13,6 +13,7 @@ use Modules\Attendance\Http\Resources\AttendanceResourceForAdmin;
 use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
 use Modules\Attendance\Http\Services\AttendanceService;
 use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
+use Modules\User\Entities\UserDetails;
 
 class AttendanceController extends Controller
 {
@@ -42,6 +43,16 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
+        if(auth()->user()->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE){
+            return apiResponse(
+                data: [
+                    'message' => 'You\'re not allowed to give web attendance! Please Contact with HR or Admin for changing your attendance to web!',
+                ],
+                message: 'You\'re not allowed to give web attendance! Please Contact with HR or Admin for changing your attendance to web!',
+                status: 'error',
+                statusCode: 422
+            );
+        }
         /**
          * we have to check for the machine, & web attendance
          * for the machine attendance, in_time & out_time will not come together
