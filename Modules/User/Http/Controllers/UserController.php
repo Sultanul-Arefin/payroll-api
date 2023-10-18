@@ -80,7 +80,9 @@ class UserController extends Controller
                 })
                 ->where('salary_items_category_id',1)
                 ->get();
-        $user->salary_items = UserBasicSalaryResource::collection($items);
+        $user->salary_items = $items->map(function($item) use($user){
+            return new UserBasicSalaryResource($item, $user->id);
+        });
         return apiResponse(
             data: $user,
             message:"Successfully get User",
