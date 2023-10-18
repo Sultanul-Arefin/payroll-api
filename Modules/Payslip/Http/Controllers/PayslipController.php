@@ -15,6 +15,7 @@ use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
+use Modules\Payslip\Http\Resources\ViewFrenchPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
@@ -172,6 +173,16 @@ class PayslipController extends Controller
                 'user_info' => $payslip?->employee,
                 'company_info' => $payslip?->employee?->company,
                 'payslip_info' => new ViewPayslipResource($payslip)
+            ]
+        );
+    }
+
+    function preview_french_payslip(Payslip $payslip) {
+        return apiResponse(
+            data: [
+                'user_info' => $payslip?->employee,
+                'company_info' => $payslip?->employee?->company,
+                'payslip_info' => new ViewFrenchPayslipResource($payslip)
             ]
         );
     }
