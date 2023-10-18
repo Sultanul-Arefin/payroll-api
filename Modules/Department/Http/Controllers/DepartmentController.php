@@ -5,12 +5,15 @@ namespace Modules\Department\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Notification;
 use Modules\Department\Entities\Department;
 use Modules\Department\Http\Requests\StoreDepartment;
 use Modules\Department\Http\Requests\UpdateDepartment;
 use Modules\Department\Http\Resources\AllDepartmentResource;
 use Modules\Department\Http\Resources\DepartmentResource;
+use Modules\Department\Notifications\DepartmentCreatedNotification;
 use Modules\Department\Repositories\Interfaces\DepartmentRepositoryInterface;
+use Modules\Role\Entities\Role;
 
 class DepartmentController extends Controller
 {
@@ -60,6 +63,8 @@ class DepartmentController extends Controller
             'company_id' => auth()->user()->company_id,
             'parent_id' => $request->parent_id ?? null,
         ]);
+        $super_admins = Role::where('name', 'super-admin')->first()->users;
+        Notification::send($super_admins, new DepartmentCreatedNotification(auth()->user(), $department));
 
         return $this->apiResponse(
             [
