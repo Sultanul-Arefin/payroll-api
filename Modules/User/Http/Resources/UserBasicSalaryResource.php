@@ -10,6 +10,14 @@ use JsonSerializable;
 
 class UserBasicSalaryResource extends JsonResource
 {
+    public $user_id;
+
+    public function __construct($resource, $user_id)
+    {
+        parent::__construct($resource);
+        $this->user_id = $user_id;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -25,7 +33,8 @@ class UserBasicSalaryResource extends JsonResource
                     'name'
                 ])
             ),
-            'amount' => $this->employeeSalaryItem->where('employee_id', auth()->user()->id)->first()?->amount
+            // 'user_id' => $this->user_id,
+            'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount
         ];
     }
 }
