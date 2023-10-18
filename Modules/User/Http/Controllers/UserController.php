@@ -144,6 +144,8 @@ class UserController extends Controller
                     'bank_iban_or_account_no' => $request->bank_iban_or_account_no,
                     'tin' => $request->tin,
                     'user_image' => $this->imageUpload($request,UserDetails::USER_IMAGE_PATH),
+                    'payslip_type' => $request->payslip_type == UserDetails::FRENCH_PAYSLIP ? UserDetails::FRENCH_PAYSLIP : UserDetails::UNIVERSAL_PAYSLIP,
+                    'attendance_type' => $request->attendance_type == UserDetails::MACHINE_ATTENDANCE ? UserDetails::MACHINE_ATTENDANCE : UserDetails::WEB_ATTENDANCE
                 ]);
                 //file one
                 if($request->hasFile('contract_letter')){
@@ -370,12 +372,6 @@ class UserController extends Controller
         EmployeeSalaryItem::where('salary_item_id', $item_id)->where('employee_id', $employee_id)->where('company_id', auth()->user()->company_id)->update([
             'amount' => $amount
         ]);
-        // EmployeeSalaryItem::create([
-        //     'salary_item_id' => $item_id,
-        //     'employee_id' => $employee_id,
-        //     'company_id' => auth()->user()->company_id,
-        //     'amount' => $amount
-        // ]);
     }
 
     /**
@@ -441,12 +437,13 @@ class UserController extends Controller
                 'passport' => $request->passport ?? $user->user_details->passport,
                 'date_of_birth' => $request->date_of_birth ?? $user->user_details->date_of_birth,
                 'joining_date' => $request->joining_date ?? $user->user_details->joining_date,
-                'payment_type' => $request->payment_type ?? $user->user_details->payment_type,
                 'bank_name' => $request->bank_name ?? $user->user_details->bank_name,
                 'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code ?? $user->user_details->bank_bic_or_swift_code,
                 'bank_iban_or_account_no' => $request->bank_iban_or_account_no ?? $user->user_details->bank_iban_or_account_no,
                 'tin' => $request->tin ?? $user->user_details->tin,
                 'user_image' => $user_image,
+                'payslip_type' => $request->payslip_type ?? $user->user_details->payslip_type,
+                'attendance_type' => $request->attendance_type ?? $user->user_details->attendance_type
             ]);
 
             $allFileArr = [];

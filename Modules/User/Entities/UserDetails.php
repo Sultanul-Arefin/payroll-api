@@ -13,6 +13,12 @@ class UserDetails extends Model
     use HasFactory;
     public const USER_IMAGE_PATH = 'uploads/users/photo/';
 
+    public const UNIVERSAL_PAYSLIP = 1;
+    public const FRENCH_PAYSLIP = 2;
+    
+    public const WEB_ATTENDANCE = 1;
+    public const MACHINE_ATTENDANCE = 2;
+
     protected $fillable = [
         'user_id',
         'user_area',
@@ -25,12 +31,13 @@ class UserDetails extends Model
         'passport',
         'date_of_birth',
         'joining_date',
-        'payment_type',
         'bank_name',
         'bank_bic_or_swift_code',
         'bank_iban_or_account_no',
         'tin',
         'user_image',
+        'payslip_type',
+        'attendance_type'
     ];
 
     protected static function newFactory()
