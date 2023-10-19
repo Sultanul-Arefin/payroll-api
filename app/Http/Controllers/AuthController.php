@@ -37,7 +37,7 @@ class AuthController extends Controller
         $user_details = DB::table('companies')
                             ->join('users','users.company_id','companies.id')
                             ->join('user_details','users.id','user_details.user_id')
-                            ->join('roles','roles.id','users.user_role')
+                            ->join('roles','roles.id','users.role_id')
                             ->select('user_details.user_image','companies.company_name','companies.company_logo','roles.name as role_name')
                             ->where('users.id',$user->id)
                             ->first();
