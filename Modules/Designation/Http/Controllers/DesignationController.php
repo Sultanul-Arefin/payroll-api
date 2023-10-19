@@ -57,8 +57,9 @@ class DesignationController extends Controller
                         'company_id' => auth()->user()->company_id,
                         'name' => $request->name,
                     ]);
-            $super_admins = Role::where('name', 'super-admin')->first()->users;
-            Notification::send($super_admins, new DesignationCreatedNotification(auth()->user(), $designation));
+            // $super_admins = Role::where('name', 'super-admin')->first()->users;
+            $admins = User::where('role_id', User::ADMIN)->get();
+            Notification::send($admins, new DesignationCreatedNotification(auth()->user(), $designation));
         }catch(Exception $e){
             return apiResponse(
                 data: null,
