@@ -29,8 +29,8 @@ return new class extends Migration
                     ->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
-            $table->integer('status')->default(User::USER_ACTIVE);
-            $table->integer('user_role')->default(User::SUPER_ADMIN);
+            $table->integer('status')->default(User::USER_PENDING);
+            $table->integer('user_role')->nullable();
             $table->integer('company_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
