@@ -4,6 +4,7 @@ namespace Modules\User\Http\Traits;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 trait UserTrait
 {
@@ -20,6 +21,23 @@ trait UserTrait
             message: 'User Get Successfully!',
             status: 'success',
             statusCode: 200
+        );
+    }
+
+    function activate_user(Request $request) {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'role_id' => 'required|integer|in:1,2,3',
+            'password' => 'required|string|max:30'
+        ]);
+        $update_user = User::where('id', $request->user_id)->update([
+            'user_role' => $request->role_id,
+            'status' => User::USER_ACTIVE,
+            'password' => Hash::make($request->password)
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'User Successfully Updated'
         );
     }
 }
