@@ -31,7 +31,7 @@ trait UserTrait
             'password' => 'required|string|max:30'
         ]);
         $update_user = User::where('id', $request->user_id)->update([
-            'user_role' => $request->role_id,
+            'role_id' => $request->role_id,
             'status' => User::USER_ACTIVE,
             'password' => Hash::make($request->password)
         ]);
