@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\Role\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,8 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/role', function (Request $request) {
-    return $request->user();
+Route::middleware(['json.response'])->prefix('v1')->group(function(){
+    Route::middleware(['auth:sanctum'])->group(function(){
+        Route::get('roles',[RoleController::class, 'index'])->name('role_list');
+    });
 });
