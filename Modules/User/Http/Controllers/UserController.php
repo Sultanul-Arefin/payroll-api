@@ -209,7 +209,7 @@ class UserController extends Controller
                 // add salary items
                 $this->add_salary_items($request->all(), $user->id);
             try{
-                UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
+                // UserCreateMailJob::dispatch($request->name, $user->password, $user->email);
 
                 // Created Notification
                 $user->notify(new UserCreatedNotificationToUser(auth()->user(), $user));
