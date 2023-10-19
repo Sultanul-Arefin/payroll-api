@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->integer('status')->default(User::USER_PENDING);
-            $table->integer('user_role')->nullable();
+            $table->integer('role_id')->nullable();
             $table->integer('company_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->default(Hash::make('password'));
