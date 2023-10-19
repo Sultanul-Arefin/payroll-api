@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash;
 
 return new class extends Migration
 {
@@ -29,11 +30,11 @@ return new class extends Migration
                     ->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
-            $table->integer('status')->default(User::USER_ACTIVE);
-            $table->integer('user_role')->default(User::SUPER_ADMIN);
+            $table->integer('status')->default(User::USER_PENDING);
+            $table->integer('role_id')->nullable();
             $table->integer('company_id');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->default(Hash::make('password'));
             $table->rememberToken();
             $table->timestamp('last_login')->nullable();
             $table->timestamps();

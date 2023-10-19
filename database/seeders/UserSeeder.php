@@ -23,7 +23,8 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
-            'company_id' => Company::factory()
+            'company_id' => Company::factory(),
+            'role_id' => User::ADMIN
         ]);
         UserDetails::create([
             'user_id' => $user->id,
@@ -35,7 +36,6 @@ class UserSeeder extends Seeder
             'company_id' => 1,
             'package_id' => 1
         ]);
-        $user->assignRole('super-admin');
         /** User 1 */
         $user = User::factory()->create([
             'email' => 'fahimsultan@bfin.it',
@@ -43,7 +43,8 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
-            'company_id' => 1
+            'company_id' => 1,
+            'role_id' => User::DEPARTMENT_MANAGER
         ]);
         UserDetails::create([
             'user_id' => $user->id,
@@ -55,7 +56,6 @@ class UserSeeder extends Seeder
             'company_id' => 1,
             'package_id' => 1
         ]);
-        $user->assignRole('employee');
         /** User 2 */
         $user = User::factory()->create([
             'email' => 'arefin@bfin.it',
@@ -63,7 +63,8 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
-            'company_id' => 1
+            'company_id' => 1,
+            'role_id' => User::EMPLOYEE
         ]);
         UserDetails::create([
             'user_id' => $user->id,
@@ -75,7 +76,6 @@ class UserSeeder extends Seeder
             'company_id' => 1,
             'package_id' => 1
         ]);
-        $user->assignRole('super-admin');
         // User::factory()->count(10)->create();
     }
 }

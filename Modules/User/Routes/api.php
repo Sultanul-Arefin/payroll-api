@@ -27,6 +27,11 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::post('attach/store',[UserController::class, 'storeDocument'])->name('contract-document');
         Route::get('attach/delete/{id}',[UserController::class, 'deleteDocument']);
 
+        /**
+         * Staff Interaction Panel
+         */
+        Route::post('activate-user', [UserController::class, 'activate_user']);
+
         // Route for payslip
         Route::get('user-info-for-payslip', [UserController::class, 'user_info_for_payslip'])->name('user-info-for-payslip');
 
