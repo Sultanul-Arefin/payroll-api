@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller;
 use Modules\Company\Entities\AnnualHoliday;
 use Modules\Department\Entities\Department;
 use Modules\Dashboard\Http\Resources\HolidayResource;
-
+use Modules\Payslip\Entities\Payslip;
 
 class DashboardController extends Controller
 {
@@ -53,5 +53,19 @@ class DashboardController extends Controller
     {
        $holidays = AnnualHoliday::where('company_id', auth()->user()->company_id)->get();
        return HolidayResource::collection($holidays);
+    }
+
+    function total_paid_salary() {
+        $data = Payslip::where('company_id', auth()->user()->company_id)
+            ->selectRaw('SUM(total_pay_value) as total_paid_salary')
+            ->first();
+        return response()->json(['data'=>$data]);
+    }
+
+    function total_staff_cost() {
+        $data = Payslip::where('company_id', auth()->user()->company_id)
+            ->selectRaw('SUM(gross_pay_before_tax) as total_staff_cost')
+            ->first();
+        return response()->json(['data'=>$data]);
     }
 }
