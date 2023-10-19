@@ -122,7 +122,6 @@ class UserController extends Controller
                             'name' => $request->name,
                             'email' => $request->email,
                             'company_id' => auth()->user()->company_id,
-                            'password' => $request->password,
                             'status' => User::USER_PENDING
                         ]);
 
