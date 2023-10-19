@@ -8,6 +8,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Modules\Company\Entities\AnnualHoliday;
 use Modules\Department\Entities\Department;
 use Modules\Dashboard\Http\Resources\HolidayResource;
@@ -67,5 +68,22 @@ class DashboardController extends Controller
             ->selectRaw('SUM(gross_pay_before_tax) as total_staff_cost')
             ->first();
         return response()->json(['data'=>$data]);
+    }
+
+    function last_12_months_data() {
+        $last12MonthsData = DB::table('payslips')
+            ->select(
+                DB::raw('SUM(total_pay_value) as total_gross_pay'),
+                DB::raw('SUM(gross_pay_before_tax) as total_staff_cost')
+            )
+            ->whereBetween('payment_date', [
+                now()->subMonths(11)->startOfMonth(),  // Start of 12 months ago
+                now()->startOfMonth()  // Start of the current month
+            ])
+            ->groupBy('payment_date')
+            ->get();
+        return response()->json([
+            'data' => $last12MonthsData
+        ]);
     }
 }
