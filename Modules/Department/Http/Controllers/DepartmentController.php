@@ -63,8 +63,9 @@ class DepartmentController extends Controller
             'company_id' => auth()->user()->company_id,
             'parent_id' => $request->parent_id ?? null,
         ]);
-        $super_admins = Role::where('name', 'super-admin')->first()->users;
-        Notification::send($super_admins, new DepartmentCreatedNotification(auth()->user(), $department));
+        // $admins = Role::where('name', 'ADMIN')->first()->users;
+        $admins = User::where('role_id', User::ADMIN)->get();
+        Notification::send($admins, new DepartmentCreatedNotification(auth()->user(), $department));
 
         return $this->apiResponse(
             [
