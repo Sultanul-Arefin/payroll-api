@@ -56,7 +56,7 @@ class User extends Authenticatable
         'status',
         'last_login',
         'company_id',
-        'user_role'
+        'role_id'
     ];
 
     /**
@@ -77,6 +77,7 @@ class User extends Authenticatable
     protected $casts = [
         'status' => 'integer',
         'email_verified_at' => 'datetime',
+        'role_id' => 'integer'
     ];
 
     function setPasswordAttribute($value) {
