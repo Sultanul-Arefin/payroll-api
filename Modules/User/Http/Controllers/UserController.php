@@ -123,9 +123,8 @@ class UserController extends Controller
                             'email' => $request->email,
                             'company_id' => auth()->user()->company_id,
                             'password' => $request->password,
-                            'user_role' => User::EMPLOYEE
+                            'status' => User::USER_PENDING
                         ]);
-                $user->assignRole('employee');
 
                 $user_details = UserDetails::create([
                     'user_id' => $user->id,
@@ -422,11 +421,6 @@ class UserController extends Controller
                 'company_id' => auth()->user()->company_id,
             ]);
 
-            // update the roles
-            $prev_role = $user->getRoleNames();
-            if($prev_role){
-                $user->syncRoles($request->role);
-            }
             $user_details = $this->user_repo->userDetailsUpdate($user->id,[
                 'user_area' => $request->user_area ?? $user->user_details->user_area,
                 'user_phone' => $request->user_phone ?? $user->user_details->user_phone,
