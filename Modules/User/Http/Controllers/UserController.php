@@ -122,7 +122,8 @@ class UserController extends Controller
                             'name' => $request->name,
                             'email' => $request->email,
                             'company_id' => auth()->user()->company_id,
-                            'status' => User::USER_PENDING
+                            'status' => User::USER_PENDING,
+                            'employee_type' => $request->employee_type
                         ]);
 
                 $user_details = UserDetails::create([
@@ -417,6 +418,7 @@ class UserController extends Controller
                 'designation_id' => $request->designation_id ?? $user->designation_id,
                 'department_id' => $request->department_id ?? $user->department_id,
                 'assign_to' => $request->assign_to ?? $user->assign_to,
+                'employee_type' => $request->employee_type ?? $user->employee_type,
                 'company_id' => auth()->user()->company_id,
             ]);
 
