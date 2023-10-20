@@ -38,6 +38,11 @@ class User extends Authenticatable
     public const DEPARTMENT_MANAGER = 2;
     public const EMPLOYEE = 3;
 
+    public const EMPLOYEE_TYPE_FULL_TIME = 1;
+    public const EMPLOYEE_TYPE_PART_TIME = 2;
+    public const EMPLOYEE_TYPE_FLEXI_TIME = 3;
+    public const EMPLOYEE_TYPE_CONTRACTUAL = 4;
+
 
     protected string $guard_name = 'sanctum';
 
@@ -56,7 +61,8 @@ class User extends Authenticatable
         'status',
         'last_login',
         'company_id',
-        'role_id'
+        'role_id',
+        'employee_type'
     ];
 
     /**
