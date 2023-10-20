@@ -81,11 +81,11 @@ class PayslipController extends Controller
             $salary_category
         )->additional([
             'meta' => [
-                'total_pay' => 1,
-                'gross_pay_before_tax' => 2,
-                'gross_pay_after_tax' => 3,
-                'pay_due_before_deduction' => 4,
-                'net_pay' => 5000
+                'total_pay' => $this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id),
+                'gross_pay_before_tax' => ($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id),
+                'gross_pay_after_tax' => (($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id)),
+                'pay_due_before_deduction' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
+                'net_pay' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id)
             ]
         ]);
     }
