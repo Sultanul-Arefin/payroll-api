@@ -18,6 +18,7 @@ class UserUpdateRequest extends FormRequest
             'designation_id' => 'nullable',
             'assign_to' => 'nullable',
             'department_id' => 'nullable',
+            'employee_type' => 'nullable',
             'zip_code' => 'nullable',
             'gender' => 'nullable',
             'payment_type' => 'nullable',

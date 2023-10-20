@@ -24,7 +24,8 @@ class UserSeeder extends Seeder
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
             'company_id' => Company::factory(),
-            'role_id' => User::ADMIN
+            'role_id' => User::ADMIN,
+            'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME
         ]);
         UserDetails::create([
             'user_id' => $user->id,
@@ -44,7 +45,8 @@ class UserSeeder extends Seeder
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
             'company_id' => 1,
-            'role_id' => User::DEPARTMENT_MANAGER
+            'role_id' => User::DEPARTMENT_MANAGER,
+            'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME
         ]);
         UserDetails::create([
             'user_id' => $user->id,
@@ -64,7 +66,8 @@ class UserSeeder extends Seeder
             'status' => User::USER_ACTIVE,
             'password' => 'password', // password
             'company_id' => 1,
-            'role_id' => User::EMPLOYEE
+            'role_id' => User::EMPLOYEE,
+            'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME
         ]);
         UserDetails::create([
             'user_id' => $user->id,
