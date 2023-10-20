@@ -174,7 +174,13 @@ class PayslipController extends Controller
     function preview_payslip(Payslip $payslip) {
         return apiResponse(
             data: [
-                'user_info' => $payslip?->employee,
+                'user_info' => array_merge(
+                    $payslip?->employee->toArray(),
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name
+                    ]
+                ),
                 'company_info' => $payslip?->employee?->company,
                 'payslip_info' => new ViewPayslipResource($payslip)
             ]
@@ -184,7 +190,13 @@ class PayslipController extends Controller
     function preview_french_payslip(Payslip $payslip) {
         return apiResponse(
             data: [
-                'user_info' => $payslip?->employee,
+                'user_info' => array_merge(
+                    $payslip?->employee->toArray(),
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name
+                    ]
+                ),
                 'company_info' => $payslip?->employee?->company,
                 'payslip_info' => new ViewFrenchPayslipResource($payslip)
             ]
