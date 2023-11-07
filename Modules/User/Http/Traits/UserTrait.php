@@ -40,4 +40,22 @@ trait UserTrait
             message: 'User Successfully Updated'
         );
     }
+
+    function user_information() {
+        if(auth()->user()->company->associated_package->package->id == '1' || auth()->user()->company->associated_package->package->id == '2' || auth()->user()->company->associated_package->package->id == '3' || auth()->user()->company->associated_package->package->id == '15' || auth()->user()->company->associated_package->package->id == '16' || auth()->user()->company->associated_package->package->id == '17' || auth()->user()->company->associated_package->package->id == '18' || auth()->user()->company->associated_package->package->id == '19' || auth()->user()->company->associated_package->package->id == '20' || auth()->user()->company->associated_package->package->id == '21' || auth()->user()->company->associated_package->package->id == '22'){
+            $company_image = env('APP_URL') . '/storage/uploads/company/logo/logo-payroll.png'; 
+        } elseif(auth()->user()->company->associated_package->package->id == '14'){
+            $company_image = env('APP_URL') . '/storage/uploads/company/logo/SOFTDRIVE-EASYBOOKS.png'; 
+        } elseif(auth()->user()->company->associated_package->package->id == "23" || auth()->user()->company->associated_package->package->id == "24" || auth()->user()->company->associated_package->package->id == "25" || auth()->user()->company->associated_package->package->id == "26" || auth()->user()->company->associated_package->package->id == "27"){
+            $company_image = env('APP_URL') . '/storage/uploads/company/logo/Project-Manager.jpg'; 
+        } else{
+            $company_image = env('APP_URL') . '/storage/uploads/company/logo/HR-Payroll.jpg'; 
+        }
+        return apiResponse(
+            data: [
+                'company_image' => auth()->user()->company->company_logo ? env('APP_URL') . '/' . 'storage/'.auth()->user()->company->company_logo : $company_image,
+                'user_image' => auth()->user()->user_image ? env('APP_URL') . '/' . 'storage/'.auth()->user()->user_image : $company_image
+            ]
+        );
+    }
 }
