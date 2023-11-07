@@ -36,6 +36,8 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password,
+                'role_id' => User::ADMIN,
+                'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME
             ]);
             $company = Company::create([
                 'company_name' => $request->company_name,
@@ -56,7 +58,7 @@ class RegisteredUserController extends Controller
                 'user_phone' => $request->user_phone,
                 // 'user_image' => $request->user_address ?? null,
             ]);
-            $user->assignRole('super-admin');
+            // $user->assignRole('super-admin');
 
             // seeding the database
             $this->userServices->salary_items_name_seeder($company->id);
