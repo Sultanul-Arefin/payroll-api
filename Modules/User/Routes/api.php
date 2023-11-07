@@ -28,6 +28,11 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::get('attach/delete/{id}',[UserController::class, 'deleteDocument']);
 
         /**
+         * User's Common Info
+         */
+        Route::get('user-information', [UserController::class, 'user_information']);
+
+        /**
          * Staff Interaction Panel
          */
         Route::post('activate-user', [UserController::class, 'activate_user']);
