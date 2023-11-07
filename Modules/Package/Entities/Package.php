@@ -12,6 +12,10 @@ class Package extends Model
 
     protected $fillable = [];
 
+    public const PRICE_CHARGED_1 = "Monthly";
+    public const PRICE_CHARGED_2 = "Quarterly";
+    public const PRICE_CHARGED_3 = "Annually";
+
     protected static function newFactory()
     {
         return PackageFactory::new();
