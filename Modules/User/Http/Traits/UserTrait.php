@@ -54,7 +54,9 @@ trait UserTrait
         return apiResponse(
             data: [
                 'company_image' => auth()->user()->company->company_logo ? env('APP_URL') . '/' . 'storage/'.auth()->user()->company->company_logo : $company_image,
-                'user_image' => auth()->user()->user_image ? env('APP_URL') . '/' . 'storage/'.auth()->user()->user_image : $company_image
+                'user_image' => auth()->user()->user_image ? env('APP_URL') . '/' . 'storage/'.auth()->user()->user_image : $company_image,
+                'packageId' => auth()->user()->company->associated_package->package_id,
+                'role' => auth()->user()->role_id
             ]
         );
     }
