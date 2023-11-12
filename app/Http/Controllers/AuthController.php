@@ -98,7 +98,9 @@ class AuthController extends Controller
                 'package_info' => [
                     'package_id' => $package_info->package_id,
                     'package_name' => $package_info->package_name
-                ]
+                ],
+                'packageId' => auth()->user()->company->associated_package->package_id,
+                'role' => auth()->user()->role_id
             ],
             message: 'User logged in successful'
         );
