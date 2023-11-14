@@ -15,5 +15,6 @@
     "Designation": true,
     "LeaveManagement": true,
     "Dashboard": true,
-    "Notification": true
+    "Notification": true,
+    "Agenda": true
 }

@@ -1,0 +1,11 @@
+{
+    "name": "Agenda",
+    "alias": "agenda",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Agenda\\Providers\\AgendaServiceProvider"
+    ],
+    "files": []
+}
