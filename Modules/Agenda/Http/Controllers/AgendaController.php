@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Agenda\Entities\Agenda;
 use Modules\Agenda\Http\Resources\AgendaResource;
+use Modules\Agenda\Http\Resources\CalendarAgendaResource;
 
 class AgendaController extends Controller
 {
@@ -17,6 +18,15 @@ class AgendaController extends Controller
             ->latest()
             ->get();
         return AgendaResource::collection($agendas);
+    }
+
+    function calendar_agenda() {
+        $agendas = Agenda::query()
+            ->where('user_id', auth()->user()->id)
+            ->with([])
+            ->latest()
+            ->get();
+        return CalendarAgendaResource::collection($agendas);
     }
 
     function store(Request $request) {
