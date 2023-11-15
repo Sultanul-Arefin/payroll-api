@@ -2,6 +2,7 @@
 
 namespace Modules\Agenda\Http\Resources;
 
+use DateTime;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -28,6 +29,17 @@ class AgendaResource extends JsonResource
                     'end_date'
                 ])
             ),
+            'start_date_formatted' => $this->convert_date($this->start_date),
+            'end_date_formatted' => $this->convert_date($this->end_date)
         ];
+    }
+
+    function convert_date($given_date) {
+        // Create a DateTime object from the original date string
+        $originalDateTime = new DateTime($given_date);
+
+        // Format the DateTime object to the desired format
+        $newDateString = $originalDateTime->format('Y-m-d\TH:i:s');
+        return $newDateString;
     }
 }
