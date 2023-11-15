@@ -2,6 +2,7 @@
 
 namespace Modules\Agenda\Http\Controllers;
 
+use DateTime;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -49,5 +50,50 @@ class AgendaController extends Controller
             data: $agenda,
             message: 'Agenda Created Successfully'
         );
+    }
+
+    function show(Agenda $agenda) {
+        $agenda->start_date = $this->convert_date($agenda->start_date);
+        $agenda->end_date = $this->convert_date($agenda->end_date);
+        return apiResponse(
+            data: $agenda->only(['title', 'description', 'start_date', 'end_date'])
+        );
+    }
+
+    function update(Agenda $agenda, Request $request) {
+        $request->validate([
+            'title' => 'required|min:2|max:250',
+            'description' => 'required',
+            'start_date' => 'required|date_format:Y-m-d H:i:s',
+            'end_date' => 'required|date_format:Y-m-d H:i:s',
+        ]);
+        $agenda->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
+
+        return apiResponse(
+            data: $agenda,
+            message: 'Agenda Updated Successfully'
+        );
+    }
+
+    function destroy(Agenda $agenda) {
+        $agenda->delete();
+        return apiResponse(
+            data: null,
+            message: 'Agenda Deleted Successfully'
+        );
+    }
+
+    private function convert_date($given_date) {
+        // Create a DateTime object from the original date string
+        $originalDateTime = new DateTime($given_date);
+
+        // Format the DateTime object to the desired format
+        $newDateString = $originalDateTime->format('Y-m-d\TH:i:s');
+        return $newDateString;
     }
 }
