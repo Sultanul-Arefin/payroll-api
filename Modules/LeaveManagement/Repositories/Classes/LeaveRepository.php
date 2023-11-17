@@ -31,7 +31,10 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
      */
     public function leave_types():?Collection
     {
-       return SalaryItemsName::where('company_id', auth()->user()->company_id)->get();
+       return SalaryItemsName::query()
+                ->whereHas('leave_salary_items')
+                ->where('company_id', auth()->user()->company_id)
+                ->get();
     }
 
     /**
