@@ -198,7 +198,7 @@ class PayslipService
                 ->get()->sum('amount');
         } elseif($category_id == 8){
             return [
-                'company_governemnt_contribution' => 0.00,
+                'company_government_contribution' => 0.00,
                 'company_other_complimentary_contribution' => 0.00,
                 'company_contribution' => 0.00
             ];
@@ -209,6 +209,21 @@ class PayslipService
                             'salaryItemsCategory', function(Builder $builder)use($category_id){
                                 $builder->where('id', $category_id);
                             }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('employee_id', request('employee_id'))
+                ->get()->sum('amount');
+        } elseif($category_id == 1){
+            return EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function(Builder $builder)use($category_id){
+                        $builder->where('name', 'Wages')
+                            ->whereHas(
+                                'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                    $builder->where('id', 1);
+                                }
                         );
                     }
                 )
