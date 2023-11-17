@@ -30,7 +30,7 @@ class LeaveManagementController extends Controller
 
         $leaveTypes = $this->leaveRepository->leave_types();
         $sortData = LeaveResource::collection($leaveTypes);
-        return apiResponse($sortData, 'data successfully fetched', 'success', '200');
+        return apiResponse($sortData, 'Data successfully fetched', 'success', '200');
     }
     public function leave_store(LeaveStoreRequest $request){
 
