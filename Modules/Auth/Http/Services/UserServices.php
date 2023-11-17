@@ -91,7 +91,7 @@ class UserServices
     public function department_seeder($company_id)
     {
         Department::create([
-            'department_name' => 'SD Department',
+            'department_name' => 'Software Department',
             'company_id' => $company_id
         ]);
         Department::create([
