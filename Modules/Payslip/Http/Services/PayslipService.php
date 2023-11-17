@@ -59,7 +59,9 @@ class PayslipService
                                     ->where('employee_id', $employee_id)
                                     ->whereHas(
                                         'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 1);
+                                            $builder
+                                                ->where('name', 'Wages')
+                                                ->where('salary_items_category_id', 1);
                                         }
                                     )
                                     ->sum('amount');
