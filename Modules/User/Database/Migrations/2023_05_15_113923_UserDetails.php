@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('user_area');
             $table->string('user_city');
             $table->string('zip_code');
-            $table->integer('country_id')->nullable();
+            $table->foreignId('country_id')
+                ->constrained('countries', 'id')
+                ->cascadeOnDelete();
             $table->string('user_phone');
             $table->tinyInteger('gender');
             $table->string('nid');
