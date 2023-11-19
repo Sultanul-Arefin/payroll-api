@@ -30,7 +30,10 @@ class RegisterRequest extends FormRequest
             'company_name' => ['required'],
             'company_email' => ['required'],
             'company_phone' => ['required'],
-            'user_phone' => ['required']
+            'user_phone' => ['required'],
+            'user_area' => ['required'],
+            'user_city' => ['required'],
+            'country_id' => ['required']
         ];
     }
 }

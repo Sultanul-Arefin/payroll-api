@@ -31,6 +31,7 @@ class UserSeeder extends Seeder
             'user_id' => $user->id,
             'user_city' => 'Dhaka, Bangladesh',
             'user_phone' => '1234567890',
+            'country_id' => 1
             // 'user_image' => $request->user_address ?? null,
         ]);
         CompanyAssociatedWithPackage::create([
@@ -52,6 +53,7 @@ class UserSeeder extends Seeder
             'user_id' => $user->id,
             'user_city' => 'Dhaka, Bangladesh',
             'user_phone' => '1234567890',
+            'country_id' => 2
             // 'user_image' => $request->user_address ?? null,
         ]);
         CompanyAssociatedWithPackage::create([
@@ -73,6 +75,7 @@ class UserSeeder extends Seeder
             'user_id' => $user->id,
             'user_city' => 'Dhaka, Bangladesh',
             'user_phone' => '1234567890',
+            'country_id' => 3
             // 'user_image' => $request->user_address ?? null,
         ]);
         CompanyAssociatedWithPackage::create([

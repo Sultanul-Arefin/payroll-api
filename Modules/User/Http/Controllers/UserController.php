@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Http\Resources\UserBasicSalaryResource;
+use Modules\User\Http\Traits\CountryTrait;
 use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Notifications\UserCreatedNotificationToAdmin;
 use Modules\User\Notifications\UserCreatedNotificationToUser;
@@ -36,7 +37,8 @@ class UserController extends Controller
 {
     use ImageUploads,
         Attachment,
-        UserTrait;
+        UserTrait,
+        CountryTrait;
     /**
      * Display a listing of the resource.
      * @return Renderable

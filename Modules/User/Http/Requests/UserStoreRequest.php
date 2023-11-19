@@ -18,6 +18,7 @@ class UserStoreRequest extends FormRequest
             'email' => 'required|unique:users',
             'user_city' => 'required',
             'user_phone' => 'required',
+            'country_id' => 'required|exists:countries,id',
             'employee_type' => 'required|integer|in:1,2,3,4',
             'designation_id' => 'required|integer|exists:designations,id',
             'department_id' => 'required|integer|exists:departments,id',
