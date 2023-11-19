@@ -41,4 +41,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function(){
         Route::get('user-info-for-payslip', [UserController::class, 'user_info_for_payslip'])->name('user-info-for-payslip');
 
     });
+    Route::get('country-list', [UserController::class, 'country_list'])
+            ->name('user_list_without_guard');
 });
