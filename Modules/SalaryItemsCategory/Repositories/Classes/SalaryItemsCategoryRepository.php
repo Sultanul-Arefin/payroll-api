@@ -1,6 +1,7 @@
 <?php
 
 namespace Modules\SalaryItemsCategory\Repositories\Classes;
+
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,8 +12,6 @@ class SalaryItemsCategoryRepository extends BaseRepository implements SalaryItem
 {
     /**
      * SalaryItemsCategory Repository constructor.
-     *
-     * @param SalaryItemsCategory $model
      */
     public function __construct(SalaryItemsCategory $model)
     {
@@ -20,32 +19,27 @@ class SalaryItemsCategoryRepository extends BaseRepository implements SalaryItem
     }
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchQuery($relations)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($relations)
     {
-        return $this->model
-            ::query()
-            ->when(
-                !is_null(request('add_new_salary_item')) || !is_null(request('add_new_payslip_item')),
-                fn(Builder $builder) => $builder->whereNotIn(
-                    'id',
-                    [1,2]
+        return $this->model::query()
+                ->when(
+                    ! is_null(request('add_new_salary_item')) || ! is_null(request('add_new_payslip_item')),
+                    fn (Builder $builder) => $builder->whereNotIn(
+                        'id',
+                        [1, 2]
+                    )
                 )
-            )
-            ->with($relations)
-            ->latest();
+                ->with($relations)
+                ->latest();
     }
 }

@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'name' => 'Agenda'
+    'name' => 'Agenda',
 ];

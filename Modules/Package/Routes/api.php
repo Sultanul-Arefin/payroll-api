@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\Package\Http\Controllers\PackageController;
 
 /*
@@ -19,5 +18,5 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('package_list');
     });
     Route::get('package-list', [PackageController::class, 'package_list'])
-            ->name('package_list_without_guard');
+        ->name('package_list_without_guard');
 });

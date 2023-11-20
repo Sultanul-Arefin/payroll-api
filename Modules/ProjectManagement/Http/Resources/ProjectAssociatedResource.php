@@ -5,7 +5,6 @@ namespace Modules\ProjectManagement\Http\Resources;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Arr;
 use JsonSerializable;
 use Modules\ProjectManagement\Http\Controllers\TaskController;
 
@@ -14,7 +13,7 @@ class ProjectAssociatedResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -23,23 +22,27 @@ class ProjectAssociatedResource extends JsonResource
             'id' => $this->id,
             'column' => $this->project_column_name,
             'column_position' => $this->column_position,
-            'tasks' => app(TaskController::class)->getTaskDetails($this->tasks)
+            'tasks' => app(TaskController::class)->getTaskDetails($this->tasks),
         ];
     }
 
-    function getTasks($tasks) {
-        
-        $tasks->each(function($item){
+    public function getTasks($tasks)
+    {
+
+        $tasks->each(function ($item) {
             // return $item->associated_users;
-            $item->associated_users->map(function($name){
+            $item->associated_users->map(function ($name) {
                 return $name->user_info->only('id', 'name');
             });
         });
+
         return $tasks;
         $tasks->put('a', 'b');
+
         return $tasks;
+
         return [
-            'tasks' => $tasks
+            'tasks' => $tasks,
         ];
     }
 

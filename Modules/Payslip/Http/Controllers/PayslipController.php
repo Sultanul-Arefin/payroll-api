@@ -5,16 +5,12 @@ namespace Modules\Payslip\Http\Controllers;
 use App\Models\User;
 use DateTime;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 use Modules\Payslip\Entities\Payslip;
-use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
-use Modules\Payslip\Http\Resources\SalaryItemsCategoryResource;
 use Modules\Payslip\Http\Resources\ViewFrenchPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
@@ -24,17 +20,19 @@ use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
 class PayslipController extends Controller
 {
-    function __construct(
+    public function __construct(
         public PayslipService $payslipService,
         public PayslipRepositoryInterface $payslipRepositoryInterface
-    ) {}
+    ) {
+    }
 
-    function request_for_payslip(Request $request) {
+    public function request_for_payslip(Request $request)
+    {
         $request->validate([
             'employee_id' => 'required',
             'from_date' => 'required|date|date_format:Y-m-d',
             'to_date' => 'required|date|date_format:Y-m-d',
-            'payment_date' =>  'required|date|date_format:Y-m-d'
+            'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
 
         return apiResponse(
@@ -44,17 +42,18 @@ class PayslipController extends Controller
         );
     }
 
-    function employee_salary_items(Request $request) {
+    public function employee_salary_items(Request $request)
+    {
         $request->validate([
-            'employee_id' => 'required'
+            'employee_id' => 'required',
         ]);
         $user = User::where('id', request('employee_id'))->first();
 
         return apiResponse(
-            data: $user->salary_items?->map(function($s_items){
+            data: $user->salary_items?->map(function ($s_items) {
                 return [
                     'name' => $s_items->salaryItemsName?->name,
-                    'value' => $s_items->amount
+                    'value' => $s_items->amount,
                 ];
             }),
             message: 'success',
@@ -62,9 +61,10 @@ class PayslipController extends Controller
         );
     }
 
-    function employee_salary_items_calculation(Request $request) {
+    public function employee_salary_items_calculation(Request $request)
+    {
         $request->validate([
-            'employee_id' => 'required'
+            'employee_id' => 'required',
         ]);
         $user = User::where('id', request('employee_id'))->first();
         $salary_category = SalaryItemsCategory::query()
@@ -76,7 +76,8 @@ class PayslipController extends Controller
                             //                 ->where('employee_id', $user->id)
                             //         )
                             // )
-                            ->get();
+            ->get();
+
         return CategoryResource::collection(
             $salary_category
         )->additional([
@@ -85,17 +86,18 @@ class PayslipController extends Controller
                 'gross_pay_before_tax' => ($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id),
                 'gross_pay_after_tax' => (($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id)),
                 'pay_due_before_deduction' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
-                'net_pay' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id)
-            ]
+                'net_pay' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
+            ],
         ]);
     }
 
-    function run_payslip(Request $request) {
+    public function run_payslip(Request $request)
+    {
         $request->validate([
-            'employee_id'   => 'required',
-            'from_date'     => 'required|date_format:Y-m-d',
-            'to_date'       => 'required|date_format:Y-m-d',
-            'payment_date'  => 'required|date_format:Y-m-d'
+            'employee_id' => 'required',
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+            'payment_date' => 'required|date_format:Y-m-d',
         ]);
 
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
@@ -128,11 +130,10 @@ class PayslipController extends Controller
         // ];
 
         // $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
-        /** 
+        /**
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-
-        $calculation = DB::transaction(function() use($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount){
+        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount) {
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
@@ -152,7 +153,7 @@ class PayslipController extends Controller
                 'post_tax_value' => $get_additional_taxes_tax_top_up,
                 'non_taxable_allowance' => $get_non_taxable_allowance,
                 'pay_deduction' => $pay_due_before_deductions,
-                'net_pay' => $total_amount
+                'net_pay' => $total_amount,
             ]);
 
             /** add the payslip details */
@@ -160,6 +161,7 @@ class PayslipController extends Controller
 
             /** notification to user */
             $payslip->employee->notify(new PayslipCreatedNotificationToUser(auth()->user(), $payslip));
+
             return $payslip;
         });
 
@@ -171,42 +173,45 @@ class PayslipController extends Controller
         );
     }
 
-    function preview_payslip(Payslip $payslip) {
+    public function preview_payslip(Payslip $payslip)
+    {
         return apiResponse(
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee->toArray(),
                     [
                         'department' => $payslip?->employee?->department?->department_name,
-                        'designation' => $payslip?->employee?->designation?->name
+                        'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
                 'company_info' => $payslip?->employee?->company,
-                'payslip_info' => new ViewPayslipResource($payslip)
+                'payslip_info' => new ViewPayslipResource($payslip),
             ]
         );
     }
 
-    function preview_french_payslip(Payslip $payslip) {
+    public function preview_french_payslip(Payslip $payslip)
+    {
         return apiResponse(
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee->toArray(),
                     [
                         'department' => $payslip?->employee?->department?->department_name,
-                        'designation' => $payslip?->employee?->designation?->name
+                        'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
                 'company_info' => $payslip?->employee?->company,
-                'payslip_info' => new ViewFrenchPayslipResource($payslip)
+                'payslip_info' => new ViewFrenchPayslipResource($payslip),
             ]
         );
     }
 
-    function payslips() {
+    public function payslips()
+    {
 
         $rows = 15;
-        if(request()?->has('rows')){
+        if (request()?->has('rows')) {
             $rows = (int) request('rows');
         }
 
@@ -214,7 +219,7 @@ class PayslipController extends Controller
             $this->payslipRepositoryInterface->allWithSearch(
                 ['*'],
                 [
-                    'employee'
+                    'employee',
                 ],
                 $rows
             )

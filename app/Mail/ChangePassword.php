@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -40,7 +39,7 @@ class ChangePassword extends Mailable
             view: 'emails.users.change_password',
             with: [
                 'password' => $this->password,
-                'username' => $this->name
+                'username' => $this->name,
             ],
         );
     }

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\Payslip\Http\Controllers\PayslipController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {

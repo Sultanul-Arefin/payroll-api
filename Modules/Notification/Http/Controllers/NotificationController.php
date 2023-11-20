@@ -3,30 +3,26 @@
 namespace Modules\Notification\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
-use Modules\Notification\Entities\Notification;
 use Modules\Notification\Http\Resources\NotificationResource;
 
 class NotificationController extends Controller
 {
-    /**
-     * @return AnonymousResourceCollection
-     */
-    function all_notifications(): AnonymousResourceCollection {
+    public function all_notifications(): AnonymousResourceCollection
+    {
         $rows = request()?->has('rows') ? request('rows') : 15;
+
         return NotificationResource::collection(
             auth()
                 ->user()
                 ?->notifications()
-                ->when(!is_null(request('search')), function ($query) {
+                ->when(! is_null(request('search')), function ($query) {
                     $query->where(
                         'data',
                         'LIKE',
-                        '%' . request('search') . '%'
+                        '%'.request('search').'%'
                     );
                 })
                 ->latest('created_at')
@@ -36,30 +32,26 @@ class NotificationController extends Controller
                 'total' => auth()
                     ->user()
                     ?->notifications()
-                    ->when(!is_null(request('search')), function ($query) {
+                    ->when(! is_null(request('search')), function ($query) {
                         $query->where(
                             'data',
                             'LIKE',
-                            '%' . request('search') . '%'
+                            '%'.request('search').'%'
                         );
                     })
                     ->count(),
-                'range' => $this->calculateRangeForsCursor($rows)
-            ]
+                'range' => $this->calculateRangeForsCursor($rows),
+            ],
         ]);
     }
 
-    /**
-     * @param $rows
-     * @return array
-     */
     public function calculateRangeForsCursor($rows): array
     {
         $totalRecordsCount = auth()
             ->user()
             ?->notifications()
-            ->when(!is_null(request('search')), function ($query) {
-                $query->where('data', 'LIKE', '%' . request('search') . '%');
+            ->when(! is_null(request('search')), function ($query) {
+                $query->where('data', 'LIKE', '%'.request('search').'%');
             })
             ->count();
         if (request()?->has('cursor')) {
@@ -71,82 +63,84 @@ class NotificationController extends Controller
                 $totalBeforeCursor = auth()
                     ->user()
                     ?->notifications()
-                    ->when(!is_null(request('search')), function ($query) {
+                    ->when(! is_null(request('search')), function ($query) {
                         $query->where(
                             'data',
                             'LIKE',
-                            '%' . request('search') . '%'
+                            '%'.request('search').'%'
                         );
                     })
                     ->where('created_at', '>=', $cursor->created_at)
                     ->count();
+
                 return [
                     'from' => $totalBeforeCursor + 1,
                     'to' => min($totalRecordsCount, $rows + $totalBeforeCursor),
-                    'total' => $totalRecordsCount
+                    'total' => $totalRecordsCount,
                 ];
             }
 
             $totalAfterCursor = auth()
                 ->user()
                 ?->notifications()
-                ->when(!is_null(request('search')), function ($query) {
+                ->when(! is_null(request('search')), function ($query) {
                     $query->where(
                         'data',
                         'LIKE',
-                        '%' . request('search') . '%'
+                        '%'.request('search').'%'
                     );
                 })
                 ->where('created_at', '<=', $cursor->created_at)
                 ->count();
+
             return [
                 'from' => $totalRecordsCount - ($rows + $totalAfterCursor - 1),
                 'to' => $totalRecordsCount - $totalAfterCursor,
-                'total' => $totalRecordsCount
+                'total' => $totalRecordsCount,
             ];
         }
+
         return [
             'from' => 1,
             'to' => min($totalRecordsCount, $rows),
-            'total' => $totalRecordsCount
+            'total' => $totalRecordsCount,
         ];
     }
 
-    /**
-     * @param
-     * @return JsonResponse
-     */
-    function un_read_notifications(): JsonResponse {
+    public function un_read_notifications(): JsonResponse
+    {
         $notifications = auth()
             ->user()
             ?->unreadNotifications();
+
         return apiResponse([
             'notifications' => $notifications
                 ->limit(5)
                 ->get(['id', 'type', 'data', 'read_at', 'created_at']),
-            'notifications_count' => $notifications->count()
+            'notifications_count' => $notifications->count(),
         ]);
     }
 
     /**
-     * @param
      * @return JsonResponse
      */
-    function mark_all_as_read() {
+    public function mark_all_as_read()
+    {
         auth()
             ->user()
             ?->unreadNotifications->markAsRead();
+
         return apiResponse(
-            data: [], 
+            data: [],
             message: 'Notifications marked as read'
         );
     }
 
     /**
-     * @param $id
      * @return JsonResponse
      */
-    function mark_single_as_read($id) {
+    public function mark_single_as_read($id)
+    {
         $notifications = auth()
             ->user()
             ?->unreadNotifications()
@@ -155,8 +149,10 @@ class NotificationController extends Controller
             ->get();
         if ($notifications->count() > 0) {
             $notifications->markAsRead();
+
             return apiResponse([], 'Notification marked as read');
         }
+
         return apiResponse([], 'No Notification exists');
     }
 }

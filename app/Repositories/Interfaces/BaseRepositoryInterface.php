@@ -9,10 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 interface BaseRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return LengthAwarePaginator
+     * @param  array|string[]  $columns
      */
     public function all(
         array $columns = ['*'],
@@ -21,9 +18,7 @@ interface BaseRepositoryInterface
     ): LengthAwarePaginator;
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @return Collection
+     * @param  array|string[]  $columns
      */
     public function allWithOutPagination(
         array $columns = ['*'],
@@ -31,11 +26,7 @@ interface BaseRepositoryInterface
     ): Collection;
 
     /**
-     * @param $columnName
-     * @param $value
-     * @param array $relations
-     * @param array|string[] $columns
-     * @return Model|null
+     * @param  array|string[]  $columns
      */
     public function find(
         $columnName,
@@ -44,46 +35,22 @@ interface BaseRepositoryInterface
         array $columns = ['*']
     ): ?Model;
 
-    /**
-     * @param int $id
-     * @param array $relations
-     * @param array $columns
-     * @return Model|null
-     */
     public function findById(
         int $id,
         array $relations = [],
         array $columns = ['*']
     ): ?Model;
 
-    /**
-     * @param array $attributes
-     * @return Model
-     */
     public function create(array $attributes): Model;
 
     /**
-     * @param int $id
-     * @param array $attributes
      * @return mixed
      */
     public function update(int $id, array $attributes);
 
-    /**
-     * @param int $id
-     * @return int
-     */
     public function delete(int $id): int;
 
-    /**
-     * @param array $columns
-     * @return Model|null
-     */
     public function last(array $columns = ['*']): ?Model;
 
-    /**
-     * @param array $ids
-     * @return int
-     */
     public function deleteMultiple(array $ids): int;
 }

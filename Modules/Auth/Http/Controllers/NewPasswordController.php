@@ -18,7 +18,6 @@ class NewPasswordController extends Controller
     /**
      * Handle an incoming new password request.
      *
-     * @param Request $request
      * @return JsonResponse
      *
      * @throws ValidationException
@@ -28,7 +27,7 @@ class NewPasswordController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', Rules\Password::defaults()]
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
         // if ($password != $new_confirm_password) {
@@ -59,11 +58,11 @@ class NewPasswordController extends Controller
                 'email'
             ),
             // static function ($user) use ($request, $password) {
-                static function ($user) use ($request) {
+            static function ($user) use ($request) {
                 $user
                     ->forceFill([
                         'password' => Hash::make($request->password),
-                        'remember_token' => Str::random(60)
+                        'remember_token' => Str::random(60),
                     ])
                     ->save();
 
@@ -74,15 +73,14 @@ class NewPasswordController extends Controller
         return $status == Password::PASSWORD_RESET
             ? $this->apiResponse([], 'Your password has been reset!')
             : throw ValidationException::withMessages([
-                'email' => [__($status)]
+                'email' => [__($status)],
             ]);
     }
 
     /**
      * Handle an incoming registration request.
      *
-     * @param Request $request
-     *
+     * @param  Request  $request
      * @return JsonResponse
      */
     // public function update_password(Request $request): JsonResponse

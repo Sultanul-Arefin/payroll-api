@@ -14,7 +14,7 @@ class UserResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -24,7 +24,7 @@ class UserResource extends JsonResource
                 Arr::only(parent::toArray($request), [
                     'id',
                     'name',
-                    'email'
+                    'email',
                 ])
             ),
             'status' => $this->status,
@@ -32,12 +32,13 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'user_details' => $this->user_details,
             'user_image' => $this->user_details?->changed_user_image,
-            'attachments' => new UserAttachmentResource($this->whenLoaded('user_attachment'))
+            'attachments' => new UserAttachmentResource($this->whenLoaded('user_attachment')),
         ];
     }
 
-    function getRole($role_id) {
-        return match($role_id){
+    public function getRole($role_id)
+    {
+        return match ($role_id) {
             User::ADMIN => 'ADMIN',
             User::DEPARTMENT_MANAGER => 'DEPARTMENT_MANAGER',
             User::EMPLOYEE => 'EMPLOYEE',

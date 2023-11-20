@@ -30,19 +30,19 @@ class UserServices
                 'Annual Leave',
                 'Sick Leave',
                 'Absent',
-                'Unpaid Sick Leave'
+                'Unpaid Sick Leave',
             ],
             [
                 'Taxable Allowance 1',
-                'Taxable Allowance 2'
+                'Taxable Allowance 2',
             ],
             [
                 'Non Taxable Allowance 1',
-                'Non Taxable Allowance 2'
+                'Non Taxable Allowance 2',
             ],
             [
                 'Income Taxes 1',
-                'Income Taxes 2'
+                'Income Taxes 2',
             ],
             [
                 'Additional Taxes(Tax TopUp) 1',
@@ -50,25 +50,25 @@ class UserServices
             ],
             [
                 'Government Deductions 1',
-                'Government Deductions 2'
+                'Government Deductions 2',
             ],
             [
                 'Other Complimentary Deductions 1',
-                'Other Complimentary Deductions 2'
+                'Other Complimentary Deductions 2',
             ],
             'Non-Taxable Allowances',
             'Income Taxes',
             'Additional Taxes(Tax TopUp)',
             'Government Deductions',
-            'Other Complimentary Deductions'
+            'Other Complimentary Deductions',
         ];
-        foreach($categories as $key => $value){
-            if(is_array($value)){
-                foreach($value as $item){
+        foreach ($categories as $key => $value) {
+            if (is_array($value)) {
+                foreach ($value as $item) {
                     SalaryItemsName::create([
                         'salary_items_category_id' => $key + 1,
                         'name' => $item,
-                        'company_id' => $company_id
+                        'company_id' => $company_id,
                     ]);
                 }
             }
@@ -79,7 +79,7 @@ class UserServices
     public function leave_salary_items($company_id)
     {
         $salary_items_names = SalaryItemsName::where('company_id', $company_id)->where('salary_items_category_id', 2)->get();
-        foreach($salary_items_names as $value){
+        foreach ($salary_items_names as $value) {
             LeaveSalaryItems::create([
                 'salary_items_id' => $value->id,
                 'no_of_days' => 0,
@@ -92,11 +92,11 @@ class UserServices
     {
         Department::create([
             'department_name' => 'Software Department',
-            'company_id' => $company_id
+            'company_id' => $company_id,
         ]);
         Department::create([
             'department_name' => 'IT Department',
-            'company_id' => $company_id
+            'company_id' => $company_id,
         ]);
     }
 
@@ -105,11 +105,11 @@ class UserServices
     {
         Designation::create([
             'company_id' => $company_id,
-            'name' => 'Jr Developer'
+            'name' => 'Jr Developer',
         ]);
         Designation::create([
             'company_id' => $company_id,
-            'name' => 'Sr Developer'
+            'name' => 'Sr Developer',
         ]);
     }
 }

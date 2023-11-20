@@ -4,15 +4,15 @@ namespace App\Exceptions;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Throwable;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -40,9 +40,9 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param Request $request
-     * @param Throwable $exception
+     * @param  Request  $request
      * @return JsonResponse|\Illuminate\Http\Response|Response
+     *
      * @throws Throwable
      */
     public function render($request, Throwable $exception)
@@ -51,16 +51,18 @@ class Handler extends ExceptionHandler
             $response = [
                 'status' => 'error',
                 'message' => 'Url Not Found!',
-                'data' => []
+                'data' => [],
             ];
+
             return response()->json($response, 404);
         }
         if ($exception instanceof HttpException) {
             $response = [
                 'status' => 'error',
                 'message' => $exception->getMessage(),
-                'data' => []
+                'data' => [],
             ];
+
             return response()->json($response, $exception->getStatusCode());
         }
         if ($exception instanceof ValidationException) {
@@ -73,8 +75,8 @@ class Handler extends ExceptionHandler
                         ->toArray()
                 ),
                 'data' => [
-                    'errors' => $exception->errors()
-                ]
+                    'errors' => $exception->errors(),
+                ],
             ];
 
             return response()->json($response, 422);
@@ -83,7 +85,7 @@ class Handler extends ExceptionHandler
             $response = [
                 'status' => 'error',
                 'message' => 'Resource Not Found',
-                'data' => []
+                'data' => [],
             ];
 
             return response()->json($response, 404);
@@ -92,26 +94,30 @@ class Handler extends ExceptionHandler
             $response = [
                 'status' => 'error',
                 'message' => 'Unauthenticated Request!',
-                'data' => []
+                'data' => [],
             ];
+
             return response()->json($response, 401);
         }
         if ($exception instanceof MethodNotAllowedHttpException) {
             $response = [
                 'status' => 'error',
                 'message' => 'Method Not Allowed!',
-                'data' => []
+                'data' => [],
             ];
+
             return response()->json($response, 404);
         }
         if ($exception instanceof CustomException) {//custom exception handle if need anywhere
             $response = [
                 'status' => 'error',
                 'message' => $exception->getMessage(),
-                'data' => []
+                'data' => [],
             ];
+
             return response()->json($response, $exception->getCode());
         }
+
         return parent::render($request, $exception);
     }
 }

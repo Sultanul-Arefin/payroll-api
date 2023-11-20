@@ -1,6 +1,7 @@
 <?php
 
 namespace Modules\SalaryItemsName\Repositories\Classes;
+
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -11,8 +12,6 @@ class SalaryItemsNameRepository extends BaseRepository implements SalaryItemsNam
 {
     /**
      * SalaryItemsName Repository constructor.
-     *
-     * @param SalaryItemsName $model
      */
     public function __construct(SalaryItemsName $model)
     {
@@ -20,29 +19,23 @@ class SalaryItemsNameRepository extends BaseRepository implements SalaryItemsNam
     }
 
     /**
-     * @param Model $id
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         Model $id,
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchQuery($relations, $id)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($relations, $resource)
     {
-        return $this->model
-            ::query()
-            ->where('salary_items_category_id', $resource->id)
-            ->where('company_id', auth()->user()->company_id)
-            ->with($relations)
-            ->latest();
+        return $this->model::query()
+                ->where('salary_items_category_id', $resource->id)
+                ->where('company_id', auth()->user()->company_id)
+                ->with($relations)
+                ->latest();
     }
 }

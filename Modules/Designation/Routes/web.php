@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('designation')->group(function() {
+Route::prefix('designation')->group(function () {
     Route::get('/', 'DesignationController@index');
 });

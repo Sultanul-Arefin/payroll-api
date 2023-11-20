@@ -2,11 +2,9 @@
 
 namespace Modules\Payslip\Repositories\Classes;
 
-use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\CursorPaginator;
-use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
@@ -15,8 +13,6 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
 {
     /**
      * Payslip Repository constructor.
-     *
-     * @param Payslip $model
      */
     public function __construct(Payslip $model)
     {
@@ -24,74 +20,67 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
     }
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchQuery($relations)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($relations)
     {
-        return $this->model
-            ::query()
-            ->where('company_id', auth()->user()->company_id)
-            ->when(
-                !is_null(request('employee_id')),
-                fn(Builder $builder) => $builder->where(function($query){
-                    $query
-                        ->where('employee_id', request('employee_id'));
-                })
-            )
-            ->when(
-                !is_null(request('search')),
-                fn(Builder $builder) => $builder->where(function($query){
-                    $query
-                        ->whereRelation(
-                            'employee', 
-                            'name',
-                            'LIKE',
-                             '%' . request('search') . '%'
-                        )
-                        ->orWhereRelation(
-                            'employee',
-                            'email', 
-                            'LIKE',
-                             '%' . request('search') . '%'
-                        );
-                })
-            )
-            ->with($relations)
-            ->latest();
+        return $this->model::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->when(
+                    ! is_null(request('employee_id')),
+                    fn (Builder $builder) => $builder->where(function ($query) {
+                        $query
+                            ->where('employee_id', request('employee_id'));
+                    })
+                )
+                ->when(
+                    ! is_null(request('search')),
+                    fn (Builder $builder) => $builder->where(function ($query) {
+                        $query
+                            ->whereRelation(
+                                'employee',
+                                'name',
+                                'LIKE',
+                                '%'.request('search').'%'
+                            )
+                            ->orWhereRelation(
+                                'employee',
+                                'email',
+                                'LIKE',
+                                '%'.request('search').'%'
+                            );
+                    })
+                )
+                ->with($relations)
+                ->latest();
     }
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
-    function getSalaryItemsCategory(
+    public function getSalaryItemsCategory(
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
+        int $count = 15
     ): CursorPaginator {
         return $this->getSalaryItemsCategoryData($relations)->cursorPaginate($count, $columns);
     }
 
-    function getSalaryItemsCategoryData($relations) {
+    public function getSalaryItemsCategoryData($relations)
+    {
         return SalaryItemsCategory::query()
             ->whereHas(
-                'salaryItemsName', function(Builder $builder){
+                'salaryItemsName', function (Builder $builder) {
                     $builder->whereHas(
-                        'employeeSalaryItem', function(Builder $builder){
+                        'employeeSalaryItem', function (Builder $builder) {
                             $builder
                                 ->where('company_id', auth()->user()->company_id)
                                 ->where('employee_id', request('employee_id'));

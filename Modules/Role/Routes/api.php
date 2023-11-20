@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\Role\Http\Controllers\RoleController;
 
 /*
@@ -14,8 +13,8 @@ use Modules\Role\Http\Controllers\RoleController;
 |
 */
 
-Route::middleware(['json.response'])->prefix('v1')->group(function(){
-    Route::middleware(['auth:sanctum'])->group(function(){
-        Route::get('roles',[RoleController::class, 'index'])->name('role_list');
+Route::middleware(['json.response'])->prefix('v1')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('roles', [RoleController::class, 'index'])->name('role_list');
     });
 });

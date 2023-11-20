@@ -2,20 +2,18 @@
 
 namespace Modules\Payslip\Http\Resources;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
-use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 
 class EmployeeSalaryItemsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -26,10 +24,10 @@ class EmployeeSalaryItemsResource extends JsonResource
                     'id',
                     'is_general',
                     'is_percentage',
-                    'amount'
+                    'amount',
                 ])
             ),
-            'item_name' => $this->salaryItemsName?->only(['name'])
+            'item_name' => $this->salaryItemsName?->only(['name']),
         ];
     }
 }

@@ -3,20 +3,22 @@
 namespace Modules\Payslip\Entities;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Payslip extends Model
 {
     use HasFactory, HasUuids;
 
     public const EMAIL_SENT = 1;
+
     public const EMAIL_NOT_SENT = 0;
 
     public const NOTIFICATION_SENT = 1;
+
     public const NOTIFICATION_NOT_SENT = 0;
 
     protected $fillable = [
@@ -39,9 +41,9 @@ class Payslip extends Model
         'post_tax_value',
         'non_taxable_allowance',
         'pay_deduction',
-        'net_pay'
+        'net_pay',
     ];
-    
+
     /**
      * changes while using uuid
      */
@@ -60,18 +62,13 @@ class Payslip extends Model
     /**
      * other methods
      */
-    
-    /**
-     * @return belongsTo
-     */
-    function employee(): BelongsTo {
+    public function employee(): BelongsTo
+    {
         return $this->belongsTo(User::class, 'employee_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
-    function payslip_details(): HasMany {
+    public function payslip_details(): HasMany
+    {
         return $this->hasMany(PayslipDetail::class, 'payslip_id', 'id');
     }
 }

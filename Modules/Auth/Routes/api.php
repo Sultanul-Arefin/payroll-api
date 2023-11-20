@@ -1,13 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\NewPasswordController;
 use Modules\Auth\Http\Controllers\PasswordResetLinkController;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +21,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['guest'])->group(function () {
         Route::post('/register', [RegisteredUserController::class, 'store'])
             ->middleware('guest');
-        
+
         Route::post('/login', [AuthController::class, 'store'])
             ->middleware('guest');
         Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
@@ -34,9 +31,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->middleware('guest')
             ->name('password.update');
 
-
     });
-    Route::middleware(['auth:sanctum'])->group(function(){
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/change-password', [AuthController::class, 'change_password'])
             ->name('password.change');
         Route::post('/logout', [AuthController::class, 'logout'])

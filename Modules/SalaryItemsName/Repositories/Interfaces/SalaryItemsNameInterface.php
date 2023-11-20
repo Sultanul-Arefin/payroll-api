@@ -7,11 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 interface SalaryItemsNameInterface
 {
     /**
-     * @param Model $id
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return mixed
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         Model $id,

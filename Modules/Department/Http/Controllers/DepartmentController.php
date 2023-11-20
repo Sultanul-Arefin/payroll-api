@@ -19,7 +19,7 @@ class DepartmentController extends Controller
 {
     public function __construct(
         private DepartmentRepositoryInterface $departmentRepo
-    ){
+    ) {
     }
 
     public function index()
@@ -33,7 +33,7 @@ class DepartmentController extends Controller
             $this->departmentRepo->allWithSearch(
                 ['*'],
                 [
-                    'departments'
+                    'departments',
                 ],
                 $rows
             )
@@ -69,7 +69,7 @@ class DepartmentController extends Controller
 
         return $this->apiResponse(
             [
-                'department' => DepartmentResource::make($department->fresh())
+                'department' => DepartmentResource::make($department->fresh()),
             ],
             'Department created successfully',
             statusCode: 201
@@ -79,8 +79,7 @@ class DepartmentController extends Controller
     public function update(
         UpdateDepartment $request,
         Department $department
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $this->departmentRepo->update(
             $department->id,
             $request->only('department_name', 'parent_id')
@@ -88,31 +87,31 @@ class DepartmentController extends Controller
 
         return $this->apiResponse(
             [
-                'department' => DepartmentResource::make($department->fresh())
+                'department' => DepartmentResource::make($department->fresh()),
             ],
             'Department updated successfully'
         );
     }
 
-    public function destroy(Department $department){
+    public function destroy(Department $department)
+    {
 
-      $users= User::where('department_id', $department->id)->get();
+        $users = User::where('department_id', $department->id)->get();
 
-      
-       if(count($users) > 0)
-       {
+        if (count($users) > 0) {
             return apiResponse(
                 data: null,
-                message:  "Department id already exist",
+                message: 'Department id already exist',
                 status: 'Error!'
             );
-       }
-            $department=Department::where('id', $department->id)->delete();
-            return apiResponse(
-                data: null,
-                message:  "Department delete successfully",
-                status: 'success!'
-            );
+        }
+        $department = Department::where('id', $department->id)->delete();
+
+        return apiResponse(
+            data: null,
+            message: 'Department delete successfully',
+            status: 'success!'
+        );
 
     }
 }

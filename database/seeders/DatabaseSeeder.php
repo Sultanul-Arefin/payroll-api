@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             EmployeeSalaryItemsSeeder::class,
             LeaveSalaryItemsSeeder::class,
             DepartmentSeeder::class,
-            DesignationSeeder::class
+            DesignationSeeder::class,
         ]);
     }
 }

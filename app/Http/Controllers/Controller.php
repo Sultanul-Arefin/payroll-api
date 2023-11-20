@@ -11,13 +11,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    /**
-     * @param $data
-     * @param string $message
-     * @param string $status
-     * @param int $statusCode
-     * @return JsonResponse
-     */
     public function apiResponse(
         $data,
         string $message = 'Success',
@@ -27,8 +20,9 @@ class Controller extends BaseController
         $response = [
             'data' => $data,
             'message' => $message,
-            'status' => $status
+            'status' => $status,
         ];
+
         return response()->json($response, $statusCode);
     }
 }

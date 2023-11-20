@@ -5,7 +5,6 @@ namespace Modules\Payslip\Http\Resources;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Arr;
 use JsonSerializable;
 
 class ViewPayslipResource extends JsonResource
@@ -13,7 +12,7 @@ class ViewPayslipResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -33,11 +32,12 @@ class ViewPayslipResource extends JsonResource
             'pay_due_before_deduction' => $this->pay_deduction,
             'staff_social_charges' => 0.00,
             'total_net_pay' => $this->net_pay,
-            'overall_calculation' => $this->overall_calculation()
+            'overall_calculation' => $this->overall_calculation(),
         ];
     }
 
-    function overall_calculation() {
+    public function overall_calculation()
+    {
         return [
             'monthly' => [
                 [
@@ -52,8 +52,8 @@ class ViewPayslipResource extends JsonResource
                     'total_staff_contribution' => 0,
                     'total_company_contribution' => 0,
                     'total_staff_cost' => 30000,
-                    'total_net_pay' => 30000
-                ]
+                    'total_net_pay' => 30000,
+                ],
             ],
             'yearly' => [
                 [
@@ -68,10 +68,10 @@ class ViewPayslipResource extends JsonResource
                     'total_staff_contribution' => 0,
                     'total_company_contribution' => 0,
                     'total_staff_cost' => 30000,
-                    'total_net_pay' => 30000
-                ]
+                    'total_net_pay' => 30000,
+                ],
             ],
-            'total_net_pay' => $this->net_pay
+            'total_net_pay' => $this->net_pay,
         ];
     }
 }

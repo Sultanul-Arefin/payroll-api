@@ -7,10 +7,7 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 interface PackageRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],

@@ -6,7 +6,6 @@ use DateTime;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Arr;
 use JsonSerializable;
 
 class CalendarAgendaResource extends JsonResource
@@ -14,7 +13,7 @@ class CalendarAgendaResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,16 +21,18 @@ class CalendarAgendaResource extends JsonResource
         return [
             'title' => $this->title,
             'start' => $this->convert_date($this->start_date),
-            'end' => $this->convert_date($this->end_date)
+            'end' => $this->convert_date($this->end_date),
         ];
     }
 
-    function convert_date($given_date) {
+    public function convert_date($given_date)
+    {
         // Create a DateTime object from the original date string
         $originalDateTime = new DateTime($given_date);
 
         // Format the DateTime object to the desired format
         $newDateString = $originalDateTime->format('Y-m-d\TH:i:s');
+
         return $newDateString;
     }
 }

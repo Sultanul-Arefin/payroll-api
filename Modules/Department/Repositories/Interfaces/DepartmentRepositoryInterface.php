@@ -2,14 +2,10 @@
 
 namespace Modules\Department\Repositories\Interfaces;
 
-
 interface DepartmentRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return mixed
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
@@ -18,10 +14,7 @@ interface DepartmentRepositoryInterface
     ): mixed;
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return mixed
+     * @param  array|string[]  $columns
      */
     public function allDataWithSearch(
         array $columns = ['*'],

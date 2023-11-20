@@ -17,7 +17,7 @@ class StoreEmployeeSalaryItems extends FormRequest
             'salary_item_id' => 'required|exists:salary_items_names,id',
             'is_percentage' => 'required|integer|in:1,0',
             'is_general' => 'required|integer|in:1,0',
-            'employee_id' => 'nullable|required_if:is_general,0'
+            'employee_id' => 'nullable|required_if:is_general,0',
         ];
     }
 

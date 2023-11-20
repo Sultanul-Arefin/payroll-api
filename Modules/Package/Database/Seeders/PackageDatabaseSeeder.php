@@ -2,8 +2,8 @@
 
 namespace Modules\Package\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Seeder;
 use Modules\Package\Entities\Package;
 
 class PackageDatabaseSeeder extends Seeder
@@ -26,7 +26,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 5,
-            'no_of_payslips' => 260
+            'no_of_payslips' => 260,
         ]);
         Package::create([
             'id' => 2,
@@ -36,7 +36,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 10,
-            'no_of_payslips' => 520
+            'no_of_payslips' => 520,
         ]);
         Package::create([
             'id' => 3,
@@ -46,7 +46,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 25,
-            'no_of_payslips' => 1300
+            'no_of_payslips' => 1300,
         ]);
         Package::create([
             'id' => 4,
@@ -56,7 +56,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 50,
-            'no_of_payslips' => 2600
+            'no_of_payslips' => 2600,
         ]);
         Package::create([
             'id' => 5,
@@ -66,7 +66,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 75,
-            'no_of_payslips' => 3900
+            'no_of_payslips' => 3900,
         ]);
         Package::create([
             'id' => 6,
@@ -76,7 +76,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 150,
-            'no_of_payslips' => 7800
+            'no_of_payslips' => 7800,
         ]);
         Package::create([
             'id' => 7,
@@ -86,7 +86,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 300,
-            'no_of_payslips' => 15600
+            'no_of_payslips' => 15600,
         ]);
         Package::create([
             'id' => 8,
@@ -96,7 +96,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 500,
-            'no_of_payslips' => 26000
+            'no_of_payslips' => 26000,
         ]);
         Package::create([
             'id' => 9,
@@ -106,7 +106,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 10,
-            'no_of_payslips' => 60
+            'no_of_payslips' => 60,
         ]);
         Package::create([
             'id' => 10,
@@ -116,7 +116,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 12,
-            'no_of_payslips' => 48
+            'no_of_payslips' => 48,
         ]);
         Package::create([
             'id' => 11,
@@ -126,7 +126,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 14,
-            'no_of_payslips' => 74
+            'no_of_payslips' => 74,
         ]);
         Package::create([
             'id' => 14,
@@ -136,7 +136,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 2,
-            'no_of_payslips' => 24
+            'no_of_payslips' => 24,
         ]);
         Package::create([
             'id' => 15,
@@ -146,7 +146,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 50,
-            'no_of_payslips' => 2600
+            'no_of_payslips' => 2600,
         ]);
         Package::create([
             'id' => 16,
@@ -156,7 +156,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 100,
-            'no_of_payslips' => 5200
+            'no_of_payslips' => 5200,
         ]);
         Package::create([
             'id' => 17,
@@ -166,7 +166,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 150,
-            'no_of_payslips' => 7800
+            'no_of_payslips' => 7800,
         ]);
         Package::create([
             'id' => 18,
@@ -176,7 +176,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 200,
-            'no_of_payslips' => 10400
+            'no_of_payslips' => 10400,
         ]);
         Package::create([
             'id' => 19,
@@ -186,7 +186,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 300,
-            'no_of_payslips' => 15600
+            'no_of_payslips' => 15600,
         ]);
         Package::create([
             'id' => 20,
@@ -196,7 +196,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 500,
-            'no_of_payslips' => 26000
+            'no_of_payslips' => 26000,
         ]);
         Package::create([
             'id' => 21,
@@ -206,7 +206,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 8,
-            'no_of_payslips' => 48
+            'no_of_payslips' => 48,
         ]);
         Package::create([
             'id' => 22,
@@ -216,7 +216,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 9,
-            'no_of_payslips' => 54
+            'no_of_payslips' => 54,
         ]);
         Package::create([
             'id' => 23,
@@ -226,7 +226,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 50,
-            'no_of_payslips' => 0
+            'no_of_payslips' => 0,
         ]);
         Package::create([
             'id' => 24,
@@ -236,7 +236,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 75,
-            'no_of_payslips' => 0
+            'no_of_payslips' => 0,
         ]);
         Package::create([
             'id' => 25,
@@ -246,7 +246,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 150,
-            'no_of_payslips' => 0
+            'no_of_payslips' => 0,
         ]);
         Package::create([
             'id' => 26,
@@ -256,7 +256,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 300,
-            'no_of_payslips' => 0
+            'no_of_payslips' => 0,
         ]);
         Package::create([
             'id' => 27,
@@ -266,7 +266,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 500,
-            'no_of_payslips' => 0
+            'no_of_payslips' => 0,
         ]);
         Package::create([
             'id' => 29,
@@ -276,7 +276,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 50,
-            'no_of_payslips' => 2600
+            'no_of_payslips' => 2600,
         ]);
         Package::create([
             'id' => 30,
@@ -286,7 +286,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 75,
-            'no_of_payslips' => 3900
+            'no_of_payslips' => 3900,
         ]);
         Package::create([
             'id' => 31,
@@ -296,7 +296,7 @@ class PackageDatabaseSeeder extends Seeder
             'currency' => 'EUR',
             'price_charged' => Package::PRICE_CHARGED_1,
             'no_of_employees' => 150,
-            'no_of_payslips' => 7800
+            'no_of_payslips' => 7800,
         ]);
     }
 }

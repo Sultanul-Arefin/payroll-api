@@ -17,7 +17,8 @@ use Modules\User\Entities\UserDetails;
 
 class AttendanceController extends Controller
 {
-    public function __construct(private AttendanceRepositoryInterface $attendanceRepo, private AttendanceService $attendanceService){
+    public function __construct(private AttendanceRepositoryInterface $attendanceRepo, private AttendanceService $attendanceService)
+    {
     }
 
     public function index()
@@ -37,18 +38,18 @@ class AttendanceController extends Controller
             'meta' => [
                 'attendance_type_key' => auth()->user()->user_details?->attendance_type,
                 'attendance_type_value' => auth()->user()->user_details?->attendance_type == UserDetails::WEB_ATTENDANCE ? 'web' : 'machine',
-            ]
+            ],
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
+     *
      * @return Renderable
      */
     public function store(Request $request)
     {
-        if(auth()->user()->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE){
+        if (auth()->user()->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE) {
             return apiResponse(
                 data: [
                     'message' => 'You\'re not allowed to give web attendance! Please Contact with HR or Admin for changing your attendance to web!',
@@ -67,27 +68,28 @@ class AttendanceController extends Controller
         $request->validate([
             'dates' => 'required',
             'in_time' => 'required',
-            'out_time' => 'required'
+            'out_time' => 'required',
         ]);
 
         // CHECK IF ATTENDANCE EXIST FOR THAT DAY
         $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
 
-        if($attendance){
+        if ($attendance) {
             $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->attendanceIsPossible($attendance, $request->in_time, $request->out_time);
-            if($checkIfSameTimeRangeAttendanceExist){
+            if ($checkIfSameTimeRangeAttendanceExist) {
                 $attendance_details = AttendanceDetail::create([
                     'attendance_id' => $attendance->id,
                     'in_time' => $request->in_time,
-                    'out_time' => $request->out_time
+                    'out_time' => $request->out_time,
                 ]);
+
                 return apiResponse(
                     data: [],
                     message: 'This Slot Successfully Added',
                     status: 'success'
                 );
 
-            }else{
+            } else {
                 return apiResponse(
                     data: [],
                     message: 'This Time Slot Is Already Booked!',
@@ -99,17 +101,18 @@ class AttendanceController extends Controller
         }
 
         // CREATE A NEW ATTENDANCE
-        $attendances = DB::transaction(function() use($request){
+        $attendances = DB::transaction(function () use ($request) {
             $attendance = Attendance::create([
                 'dates' => $request->dates,
                 'user_id' => auth()->user()->id,
-                'status' => Attendance::PENDING
+                'status' => Attendance::PENDING,
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
                 'in_time' => $request->in_time,
-                'out_time' => $request->out_time
+                'out_time' => $request->out_time,
             ]);
+
             return $attendance;
         });
 
@@ -119,28 +122,32 @@ class AttendanceController extends Controller
             status: 'success'
         );
     }
-    
-    function requested_attendance() {
+
+    public function requested_attendance()
+    {
         $current_date = Carbon::now();
         $current_month = $current_date->month;
         $current_year = $current_date->year;
         $requested_attendance = Attendance::query()
                         // ->whereYear('dates', $current_year)
                         // ->whereMonth('dates', $current_month)
-                        ->where('status', Attendance::PENDING)
-                        ->groupBy('dates')
-                        ->orderBy('dates')
-                        ->get();
+            ->where('status', Attendance::PENDING)
+            ->groupBy('dates')
+            ->orderBy('dates')
+            ->get();
+
         return AttendanceResourceForAdmin::collection($requested_attendance);
     }
 
-    function approve_all_attendance_by_date(Request $request) {
+    public function approve_all_attendance_by_date(Request $request)
+    {
         $request->validate([
-            'date' => 'required'
+            'date' => 'required',
         ]);
         Attendance::where('dates', $request->date)->update([
-            'status' => Attendance::PRESENT
+            'status' => Attendance::PRESENT,
         ]);
+
         return apiResponse(
             data: null,
             message: 'Attendance Successfully Approved',

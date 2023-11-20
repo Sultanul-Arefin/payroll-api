@@ -15,7 +15,7 @@ class SalaryItemsCategoryResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -23,21 +23,22 @@ class SalaryItemsCategoryResource extends JsonResource
         return [
             $this->merge(
                 Arr::only(parent::toArray($request), [
-                    'id'
+                    'id',
                 ])
             ),
             "category_$this->id" => EmployeeSalaryItemsResource::collection(
                 $this->getCategoryItems($this->id)
-            )
+            ),
         ];
     }
 
-    function getCategoryItems($category_id) {
+    public function getCategoryItems($category_id)
+    {
         return EmployeeSalaryItem::query()
             ->whereHas(
-                'salaryItemsName', function(Builder $builder)use($category_id){
+                'salaryItemsName', function (Builder $builder) use ($category_id) {
                     $builder->whereHas(
-                        'salaryItemsCategory', function(Builder $builder)use($category_id){
+                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
                             $builder->where('id', $category_id);
                         }
                     );

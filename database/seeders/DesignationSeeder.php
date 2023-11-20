@@ -2,13 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
-use Modules\Company\Entities\Company;
 use Modules\Designation\Entities\Designation;
-use Modules\User\Entities\UserDetails;
 
 class DesignationSeeder extends Seeder
 {
@@ -19,11 +14,11 @@ class DesignationSeeder extends Seeder
     {
         Designation::create([
             'company_id' => 1,
-            'name' => 'Jr Developer'
+            'name' => 'Jr Developer',
         ]);
         Designation::create([
             'company_id' => 1,
-            'name' => 'Sr Developer'
+            'name' => 'Sr Developer',
         ]);
     }
 }

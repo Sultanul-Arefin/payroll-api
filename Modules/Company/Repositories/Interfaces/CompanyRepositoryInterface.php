@@ -2,14 +2,10 @@
 
 namespace Modules\Company\Repositories\Interfaces;
 
-
 interface CompanyRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return mixed
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],

@@ -2,42 +2,35 @@
 
 namespace Modules\Auth\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Modules\Auth\Http\Services\UserServices;
 use Modules\Company\Entities\Company;
 use Modules\User\Entities\UserDetails;
 
 class RegisteredUserController extends Controller
 {
-
     public function __construct(
         private UserServices $userServices
-    )
-    {
+    ) {
     }
+
     /**
      * Handle an incoming registration request.
-     *
-     * @param RegisterRequest $request
-     *
-     * @return JsonResponse
      */
     public function store(RegisterRequest $request): JsonResponse
     {
-        $user = DB::transaction(function() use($request){
+        $user = DB::transaction(function () use ($request) {
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password,
                 'role_id' => User::ADMIN,
-                'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME
+                'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME,
             ]);
             $company = Company::create([
                 'company_name' => $request->company_name,
@@ -45,18 +38,18 @@ class RegisteredUserController extends Controller
                 'company_phone' => $request->company_phone,
             ]);
             $user->update([
-                'company_id' => $company->id
+                'company_id' => $company->id,
             ]);
             DB::table('company_associated_with_package')->insert([
                 'company_id' => $company->id,
-                'package_id' => $request->package_id
+                'package_id' => $request->package_id,
             ]);
             UserDetails::create([
                 'user_id' => $user->id,
                 'user_area' => $request->user_area,
                 'user_city' => $request->user_city,
                 'user_phone' => $request->user_phone,
-                'country_id' => $request->country_id
+                'country_id' => $request->country_id,
                 // 'user_image' => $request->user_address ?? null,
             ]);
             // $user->assignRole('super-admin');
@@ -66,6 +59,7 @@ class RegisteredUserController extends Controller
             $this->userServices->leave_salary_items($company->id);
             $this->userServices->department_seeder($company->id);
             $this->userServices->designation_seeder($company->id);
+
             return $user;
         });
 
@@ -75,7 +69,7 @@ class RegisteredUserController extends Controller
             data: [
                 'email' => $user->email,
                 'name' => $user->name,
-                'token' => $user->createToken($user->name)->plainTextToken
+                'token' => $user->createToken($user->name)->plainTextToken,
             ],
             message: 'User registered successfully'
         );

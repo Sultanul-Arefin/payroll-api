@@ -7,10 +7,7 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 interface UserRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
@@ -18,13 +15,10 @@ interface UserRepositoryInterface
         int $count = 15
     ): CursorPaginator;
 
-    public function userDetailsUpdate($user_id,$attributes);
+    public function userDetailsUpdate($user_id, $attributes);
 
     /**
      * user status active or inactive
-     * @param object $user
-     * @param int $statusTypes
-     * @return bool
      */
     public function userStatus(object $user, int $statusTypes): bool;
 

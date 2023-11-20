@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('employeesalaryitems')->group(function() {
+Route::prefix('employeesalaryitems')->group(function () {
     Route::get('/', 'EmployeeSalaryItemsController@index');
 });

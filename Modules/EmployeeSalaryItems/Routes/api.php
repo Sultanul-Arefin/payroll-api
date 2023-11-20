@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\EmployeeSalaryItems\Http\Controllers\EmployeeSalaryItemsController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\Permission\Entities\Permission;
 use Modules\Role\Entities\Role;
@@ -17,17 +16,17 @@ class RoleAndPermissionSeeder extends Seeder
         $role = Role::query()->create([
             'status' => 1,
             'name' => 'ADMIN',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ]);
         $role = Role::query()->create([
             'status' => 1,
             'name' => 'DEPARTMENT_MANAGER',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ]);
         $role = Role::query()->create([
             'status' => 1,
             'name' => 'EMPLOYEE',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ]);
 
         // create permissions
