@@ -32,5 +32,18 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // ADD OR UPDATE ANNUAL HOLIDAYS
         Route::post('add-annual-holidays', [CompanyController::class, 'add_annual_holidays'])
             ->name('add-annual-holidays');
+
+        
+        /**
+         * Quick Payslip Settings
+         */
+        Route::get('view-payslip-settings', [CompanyController::class, 'view_payslip_settings'])
+            ->name('view-payslip-settings');
+        Route::post('add-payslip-settings', [CompanyController::class, 'add_payslip_settings'])
+            ->name('add-payslip-settings');
+        Route::get('view-leave-days', [CompanyController::class, 'view_leave_days'])
+            ->name('view-leave-days');
+        Route::post('add-leave-days', [CompanyController::class, 'add_leave_days'])
+            ->name('add-leave-days');
     });
 });
