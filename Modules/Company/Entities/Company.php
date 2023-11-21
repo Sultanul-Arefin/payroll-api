@@ -40,6 +40,10 @@ class Company extends Model
         'contact_person_email',
         'contact_person_phone',
         'status',
+        'no_of_working_days_per_week',
+        'working_hours_per_day',
+        'lunch_and_others_per_day',
+        'working_hours_per_week'
     ];
 
     public function getChangedCompanyLogoAttribute()
