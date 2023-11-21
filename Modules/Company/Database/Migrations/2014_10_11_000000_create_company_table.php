@@ -33,6 +33,10 @@ return new class extends Migration
             $table->string('contact_person_name')->nullable();
             $table->string('contact_person_email')->nullable();
             $table->string('contact_person_phone')->nullable();
+            $table->decimal('no_of_working_days_per_week', 4, 2)->nullable();
+            $table->decimal('working_hours_per_day', 4, 2)->nullable();
+            $table->decimal('lunch_and_others_per_day', 4, 2)->nullable();
+            $table->decimal('working_hours_per_week', 4, 2)->nullable();
             $table->timestamps();
         });
     }
