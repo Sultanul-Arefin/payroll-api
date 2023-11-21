@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
@@ -24,9 +25,9 @@ class SalaryItemsName extends Model
         return \Modules\SalaryItemsName\Database\factories\SalaryItemsNameFactory::new();
     }
 
-    public function leave_salary_items(): HasMany
+    public function leave_salary_items(): HasOne
     {
-        return $this->hasMany(LeaveSalaryItems::class, 'salary_items_id', 'id');
+        return $this->hasOne(LeaveSalaryItems::class, 'salary_items_id', 'id');
     }
 
     public function salaryItemsCategory(): BelongsTo

@@ -14,11 +14,14 @@ use Modules\Company\Http\Requests\CompanyStoreRequest;
 use Modules\Company\Http\Requests\CompanyUpdateRequest;
 use Modules\Company\Http\Services\CompanyService;
 use Modules\Company\Http\Traits\CompanyTrait;
+use Modules\Company\Http\Traits\QuickPayslipSettingsTrait;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {
-    use CompanyTrait, ImageUploads;
+    use CompanyTrait,
+        ImageUploads,
+        QuickPayslipSettingsTrait;
 
     public function __construct(
         private CompanyRepositoryInterface $companyRepo,
