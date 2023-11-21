@@ -13,7 +13,7 @@ class PackageResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,13 +22,13 @@ class PackageResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'package_name'
+                    'package_name',
                 ])
             ),
             'max_department_count' => $this->no_of_departments,
             'max_employee_count' => $this->no_of_employees,
             'max_payslip_count' => $this->no_of_payslips,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s')
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

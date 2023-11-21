@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('salaryitemscategory')->group(function() {
+Route::prefix('salaryitemscategory')->group(function () {
     Route::get('/', 'SalaryItemsCategoryController@index');
 });

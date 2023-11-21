@@ -4,16 +4,14 @@ namespace Modules\Company\Http\Controllers;
 
 use App\Http\Traits\ImageUploads;
 use Carbon\Carbon;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Company\Entities\AnnualHoliday;
 use Modules\Company\Entities\Company;
+use Modules\Company\Entities\WeeklyHoliday;
 use Modules\Company\Http\Requests\CompanyStoreRequest;
 use Modules\Company\Http\Requests\CompanyUpdateRequest;
-use Illuminate\Support\Facades\Storage;
-use Modules\Company\Entities\AnnualHoliday;
-use Modules\Company\Entities\WeeklyHoliday;
 use Modules\Company\Http\Services\CompanyService;
 use Modules\Company\Http\Traits\CompanyTrait;
 use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
@@ -21,10 +19,11 @@ use Modules\Company\Repositories\Interfaces\CompanyRepositoryInterface;
 class CompanyController extends Controller
 {
     use CompanyTrait, ImageUploads;
+
     public function __construct(
         private CompanyRepositoryInterface $companyRepo,
         public CompanyService $companyService
-    ){
+    ) {
     }
 
     public function index()
@@ -34,6 +33,7 @@ class CompanyController extends Controller
             [],
         );
         $company->company_logo = $company->changed_company_logo;
+
         return apiResponse(
             data: $company,
             message: 'Success',
@@ -44,7 +44,7 @@ class CompanyController extends Controller
     public function store(CompanyStoreRequest $request)
     {
         // check if already company associated
-        if(auth()->user()->company_id != null){
+        if (auth()->user()->company_id != null) {
             return apiResponse(
                 data: null,
                 message: 'Already Associated With a Company',
@@ -53,9 +53,9 @@ class CompanyController extends Controller
             );
         }
 
-        $store_company = DB::transaction(function() use(
+        $store_company = DB::transaction(function () use (
             $request
-        ){
+        ) {
             $company = $this->companyRepo->create([
                 'company_name' => $request->company_name,
                 'company_address' => $request->company_address,
@@ -76,8 +76,9 @@ class CompanyController extends Controller
             ]);
 
             auth()->user()->update([
-                'company_id' => $company->id
+                'company_id' => $company->id,
             ]);
+
             return $company;
         });
 
@@ -91,20 +92,20 @@ class CompanyController extends Controller
 
     public function update(CompanyUpdateRequest $request, Company $company)
     {
-        $company_update = DB::transaction(function() use(
-            $request,$company
-        ){
+        $company_update = DB::transaction(function () use (
+            $request, $company
+        ) {
             $updated_logo = $company->company_logo;
-            if($request->has('company_logo')){
+            if ($request->has('company_logo')) {
                 // unlink goes here
-                if($company->company_logo && $this->isImageExist($company->company_logo)){
+                if ($company->company_logo && $this->isImageExist($company->company_logo)) {
                     $this->deleteImage($company->company_logo);
                 }
-                $updated_logo = $this->imageUploadCompany($request,Company::COMPANY_IMAGE_PATH);
+                $updated_logo = $this->imageUploadCompany($request, Company::COMPANY_IMAGE_PATH);
 
             }
 
-            $company = $this->companyRepo->update($company->id,[
+            $company = $this->companyRepo->update($company->id, [
                 'company_name' => $request->company_name,
                 'company_address' => $request->company_address,
                 'company_email' => $request->company_email,
@@ -127,10 +128,9 @@ class CompanyController extends Controller
             return $company;
         });
 
-
         return apiResponse(
             data: $company_update,
-            message: $company_update ? 'Company Updated Successfully':'Company Updated Failed',
+            message: $company_update ? 'Company Updated Successfully' : 'Company Updated Failed',
             status: 'success',
             statusCode: 201
         );
@@ -139,21 +139,21 @@ class CompanyController extends Controller
     public function add_weekly_holidays(Request $request)
     {
         $request->validate([
-            'weekDays' => 'required|array'
+            'weekDays' => 'required|array',
         ]);
         $weekendDates = $this->companyService->yearlyWeekendDays($request->weekDays);
-        $existWeeklyHolidays =  WeeklyHoliday::where('company_id', auth()->user()->company_id)
-           ->whereYear('dates', Carbon::now()->year)
+        $existWeeklyHolidays = WeeklyHoliday::where('company_id', auth()->user()->company_id)
+            ->whereYear('dates', Carbon::now()->year)
             ->pluck('dates')
             ->toArray();
         $uniqueDates = array_diff($weekendDates, $existWeeklyHolidays);
         $dates = collect($uniqueDates);
 
-        $dates->each(function($item, $key){
+        $dates->each(function ($item, $key) {
             WeeklyHoliday::create([
                 'dates' => $item,
                 'company_id' => auth()->user()->id,
-                'added_by' => auth()->user()->id
+                'added_by' => auth()->user()->id,
             ]);
         });
 
@@ -168,15 +168,15 @@ class CompanyController extends Controller
     {
         $request->validate([
             'dates' => 'required|array',
-            'holiday_type' => 'required'
+            'holiday_type' => 'required',
         ]);
         $dates = collect($request->dates);
-        $dates->each(function($item, $key) use($request){
+        $dates->each(function ($item, $key) use ($request) {
             AnnualHoliday::create([
                 'dates' => $item,
                 'holiday_type' => $request->holiday_type,
                 'company_id' => auth()->user()->id,
-                'added_by' => auth()->user()->id
+                'added_by' => auth()->user()->id,
             ]);
         });
 

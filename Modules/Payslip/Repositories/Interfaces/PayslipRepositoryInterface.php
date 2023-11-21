@@ -7,10 +7,7 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 interface PayslipRepositoryInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
@@ -19,12 +16,9 @@ interface PayslipRepositoryInterface
     ): CursorPaginator;
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
-    function getSalaryItemsCategory(
+    public function getSalaryItemsCategory(
         array $columns = ['*'],
         array $relations = [],
         int $count = 15

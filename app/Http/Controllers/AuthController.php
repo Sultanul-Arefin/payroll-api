@@ -13,19 +13,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
-use Modules\Company\Entities\Company;
-use Modules\User\Entities\UserDetails;
 use Spatie\Activitylog\Contracts\Activity;
 
 class AuthController extends Controller
 {
-    /**
-     * @param LoginRequest $request
-     * @return JsonResponse
-     */
     public function store(LoginRequest $request): JsonResponse
     {
-        if(!Auth::attempt($request->only(['email', 'password']))){
+        if (! Auth::attempt($request->only(['email', 'password']))) {
             return $this->apiResponse(
                 data: [],
                 message: 'Email & Password does not match with our record.',
@@ -35,30 +29,30 @@ class AuthController extends Controller
         }
         $user = User::where('email', $request->email)->first();
         $user_details = DB::table('companies')
-                            ->join('users','users.company_id','companies.id')
-                            ->join('user_details','users.id','user_details.user_id')
-                            ->join('roles','roles.id','users.role_id')
-                            ->select('user_details.user_image','companies.company_name','companies.company_logo','roles.name as role_name')
-                            ->where('users.id',$user->id)
-                            ->first();
+            ->join('users', 'users.company_id', 'companies.id')
+            ->join('user_details', 'users.id', 'user_details.user_id')
+            ->join('roles', 'roles.id', 'users.role_id')
+            ->select('user_details.user_image', 'companies.company_name', 'companies.company_logo', 'roles.name as role_name')
+            ->where('users.id', $user->id)
+            ->first();
 
         $package_info = DB::table('companies')
-                            ->join('company_associated_with_package','company_associated_with_package.company_id','companies.id')
-                            ->join('packages','packages.id','company_associated_with_package.package_id')
-                            ->select('packages.id as package_id','packages.package_name')
-                            ->where('companies.id',$user->company_id)
-                            ->first();
+            ->join('company_associated_with_package', 'company_associated_with_package.company_id', 'companies.id')
+            ->join('packages', 'packages.id', 'company_associated_with_package.package_id')
+            ->select('packages.id as package_id', 'packages.package_name')
+            ->where('companies.id', $user->company_id)
+            ->first();
         // check if the user is deactivated
         if ($user->status == User::USER_DISABLE) {
             throw ValidationException::withMessages([
-                'email' => ['Your account is suspended from the system']
+                'email' => ['Your account is suspended from the system'],
             ]);
         }
 
         // check if the user is deactivated
         if ($user->status == User::USER_PENDING) {
             throw ValidationException::withMessages([
-                'email' => ['Your account is not active.']
+                'email' => ['Your account is not active.'],
             ]);
         }
 
@@ -97,10 +91,10 @@ class AuthController extends Controller
                 ],
                 'package_info' => [
                     'package_id' => $package_info->package_id,
-                    'package_name' => $package_info->package_name
+                    'package_name' => $package_info->package_name,
                 ],
                 'packageId' => auth()->user()->company->associated_package->package_id,
-                'role' => auth()->user()->role_id
+                'role' => auth()->user()->role_id,
             ],
             message: 'User logged in successful'
         );
@@ -126,24 +120,21 @@ class AuthController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function change_password(Request $request): JsonResponse
     {
         $request->validate([
             'current_password' => ['required', 'string', 'max:255'],
-            'new_password' => ['required']
+            'new_password' => ['required'],
         ]);
-        if(\Hash::check($request->current_password, auth()->user()->password)){
-            if (!\Hash::check($request->new_password, auth()->user()->password)) {
+        if (\Hash::check($request->current_password, auth()->user()->password)) {
+            if (! \Hash::check($request->new_password, auth()->user()->password)) {
                 $user = User::where('id', auth()->user()->id)->update([
-                    'password' => Hash::make($request->new_password)
+                    'password' => Hash::make($request->new_password),
                 ]);
                 $message = 'Password Updated successfully';
                 Mail::to(auth()->user()->email)->queue(new ChangePassword($request->new_password, auth()->user()->name));
+
                 return apiResponse(
                     data: [
                         'message' => $message,
@@ -154,6 +145,7 @@ class AuthController extends Controller
                 );
             } else {
                 $message = 'Password Same as Before';
+
                 return apiResponse(
                     data: [
                         'message' => $message,
@@ -163,8 +155,9 @@ class AuthController extends Controller
                     statusCode: 422
                 );
             }
-        } else{
+        } else {
             $message = 'Current Password Doesn\'t match';
+
             return apiResponse(
                 data: [
                     'message' => $message,
@@ -174,14 +167,15 @@ class AuthController extends Controller
                 statusCode: 422
             );
         }
-    //     if (Mail::failures()) {
-    //         return response()->Fail('Sorry! Please try again latter');
-    //    }else{
-    //         return response()->success('Great! Successfully send in your mail');
-    //       }
+        //     if (Mail::failures()) {
+        //         return response()->Fail('Sorry! Please try again latter');
+        //    }else{
+        //         return response()->success('Great! Successfully send in your mail');
+        //       }
     }
-    
-    public function logout(Request $request){
+
+    public function logout(Request $request)
+    {
         Auth::user()->tokens()->delete();
 
         return apiResponse(null,

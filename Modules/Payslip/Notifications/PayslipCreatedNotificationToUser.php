@@ -3,9 +3,8 @@
 namespace Modules\Payslip\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class PayslipCreatedNotificationToUser extends Notification
 {
@@ -24,7 +23,7 @@ class PayslipCreatedNotificationToUser extends Notification
     /**
      * Get the notification's delivery channels.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array
      */
     public function via($notifiable)
@@ -35,7 +34,7 @@ class PayslipCreatedNotificationToUser extends Notification
     /**
      * Get the mail representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     // public function toMail($notifiable)
@@ -49,22 +48,22 @@ class PayslipCreatedNotificationToUser extends Notification
     /**
      * Get the array representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array
      */
     public function toArray($notifiable)
     {
         return [
-            'title'         => 'Payslip Created',
-            'description'   => 'Payslip for month ' . $this->payslip->month . ' is created',
-            'action_by'     => [
-                'name'  => $this->created_by->name,
+            'title' => 'Payslip Created',
+            'description' => 'Payslip for month '.$this->payslip->month.' is created',
+            'action_by' => [
+                'name' => $this->created_by->name,
                 'email' => $this->created_by->email,
-                'phone' => $this->created_by->phone
+                'phone' => $this->created_by->phone,
             ],
-            'action_at'     => date('Y-m-d H:i:s'),
-            'type'          => 'Payslip',
-            'color'         => ''
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Payslip',
+            'color' => '',
         ];
     }
 }

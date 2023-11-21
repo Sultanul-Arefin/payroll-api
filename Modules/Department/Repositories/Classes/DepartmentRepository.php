@@ -1,6 +1,7 @@
 <?php
 
 namespace Modules\Department\Repositories\Classes;
+
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Modules\Department\Entities\Department;
@@ -10,8 +11,6 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
 {
     /**
      * Department Repository constructor.
-     *
-     * @param Department $model
      */
     public function __construct(Department $model)
     {
@@ -19,51 +18,41 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
     }
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchQuery($relations)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($relations)
     {
-        return $this->model
-            ::query()
-            ->where('company_id', auth()->user()->company_id)
-            ->where('parent_id', null)
-            ->with($relations)
-            ->latest('id');
+        return $this->model::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->where('parent_id', null)
+                ->with($relations)
+                ->latest('id');
     }
 
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allDataWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchAllQuery($relations)->cursorPaginate($count, $columns);
     }
 
     private function searchAllQuery($relations)
     {
-        return $this->model
-            ::query()
-            ->where('company_id', auth()->user()->company_id)
-            ->with($relations)
-            ->latest('id');
+        return $this->model::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->with($relations)
+                ->latest('id');
     }
 }

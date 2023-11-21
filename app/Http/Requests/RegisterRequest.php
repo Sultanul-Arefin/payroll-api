@@ -33,7 +33,7 @@ class RegisterRequest extends FormRequest
             'user_phone' => ['required'],
             'user_area' => ['required'],
             'user_city' => ['required'],
-            'country_id' => ['required']
+            'country_id' => ['required'],
         ];
     }
 }

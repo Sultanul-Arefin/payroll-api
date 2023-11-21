@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 
@@ -21,9 +20,9 @@ class SalaryItemsCategorySeeder extends Seeder
             'Income Taxes',
             'Additional Taxes(Tax TopUp)',
             'Government Deductions',
-            'Other Complimentary Deductions'
+            'Other Complimentary Deductions',
         ];
-        foreach($categories as $value){
+        foreach ($categories as $value) {
             SalaryItemsCategory::create([
                 'name' => $value,
             ]);

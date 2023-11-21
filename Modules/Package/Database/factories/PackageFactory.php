@@ -23,10 +23,9 @@ class PackageFactory extends Factory
     {
         return [
             'package_name' => fake()->name(),
-            'no_of_departments' => fake()->randomElement([2,4,6,8,10,12]),
+            'no_of_departments' => fake()->randomElement([2, 4, 6, 8, 10, 12]),
             'no_of_employees' => fake()->randomElement([100, 500, 1000]),
-            'no_of_payslips' => fake()->randomElement([500, 2500, 5000])
+            'no_of_payslips' => fake()->randomElement([500, 2500, 5000]),
         ];
     }
 }
-

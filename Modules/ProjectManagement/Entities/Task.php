@@ -2,8 +2,8 @@
 
 namespace Modules\ProjectManagement\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -19,24 +19,20 @@ class Task extends Model
         'estimation_hour',
         'start_date_time',
         'end_date_time',
-        'created_by'
+        'created_by',
     ];
 
     public const COMPLETED = 1;
+
     public const NOT_COMPLETED = 0;
 
-    /**
-     * @return belongsTo
-     */
     public function project_associated_column(): BelongsTo
     {
         return $this->belongsTo(ProjectAssociatedColumn::class, 'project_associated_column_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
-    function associated_users(): HasMany {
+    public function associated_users(): HasMany
+    {
         return $this->hasMany(TaskAssociatedEmployee::class, 'task_id', 'id');
     }
 }

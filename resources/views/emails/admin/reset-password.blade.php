@@ -217,7 +217,7 @@
                                                                             href="#">
                                                                             <img
                                                                                 alt="logo"
-                                                                                src="https://assignment-portal.s3.ap-south-1.amazonaws.com/logo/logo-dark.svg"
+                                                                                src="https://tellpe.com/storage/uploads/company/logo/omada-logo.jpeg"
                                                                                 width="180"
                                                                                 height="60"
                                                                                 style="max-width:180px;">
@@ -359,7 +359,7 @@
                                                             is required.
 
                                                             Regards,
-                                                            Assignment Portal Team
+                                                            BFIN IT Pvt. Ltd. Team
 
                                                         </td>
                                                     </tr>
@@ -443,15 +443,15 @@
                                                             <br>
                                                             <a target="_blank"
                                                                style="text-decoration:none;color:#EC1C24;"
-                                                               href="https://lawsikho.com/">lawsikho.com</a>
+                                                               href="">bfin.technology</a>
                                                             |
                                                             <a target="_blank"
                                                                style="text-decoration:none;color:#EC1C24;"
-                                                               href="mailto:support@lawsikho.in
-    ">support@lawsikho.in
+                                                               href="mailto:support@bfin.technology
+    ">support@bfin.technology
                                                             </a> | <a target="_blank"
                                                                       style="text-decoration:none;color:#EC1C24;"
-                                                                      href="tel:+91 98186 78383">+91 98186 78383
+                                                                      href="tel:+88888888888">+88888888888
                                                             </a>
 
 
@@ -505,7 +505,7 @@
                                                         <td class="em_grey_txt"
                                                             style="font-family:'Open Sans', Avenir, Arial, sans-serif;font-size:14px;text-align:center;color:#ffffff;line-height:24px;">
 
-                                                            © 2022 Addictive Learning Technologies Private Limited.
+                                                            © <?php echo date('Y'); ?> BFIN IT Pvt. Ltd.
                                                             All rights reserved.
 
                                                         </td>

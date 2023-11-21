@@ -13,7 +13,7 @@ class PayslipResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,12 +22,12 @@ class PayslipResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'month'
+                    'month',
                 ])
             ),
             'employee' => $this->employee?->only('name', 'email'),
             'employee_payslip_type' => $this->employee?->user_details?->payslip_type,
-            'payment_date' => date('Y-m-d H:i:s')
+            'payment_date' => date('Y-m-d H:i:s'),
         ];
     }
 }

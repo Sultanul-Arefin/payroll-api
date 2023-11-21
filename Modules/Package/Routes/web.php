@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('package')->group(function() {
+Route::prefix('package')->group(function () {
     Route::get('/', 'PackageController@index');
 });

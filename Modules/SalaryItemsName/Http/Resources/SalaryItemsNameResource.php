@@ -13,7 +13,7 @@ class SalaryItemsNameResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,7 +22,7 @@ class SalaryItemsNameResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'name'
+                    'name',
                 ])
             ),
         ];

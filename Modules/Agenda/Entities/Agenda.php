@@ -2,8 +2,8 @@
 
 namespace Modules\Agenda\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Agenda extends Model
 {
@@ -15,6 +15,6 @@ class Agenda extends Model
         'start_date',
         'end_date',
         'user_id',
-        'created_by'
+        'created_by',
     ];
 }

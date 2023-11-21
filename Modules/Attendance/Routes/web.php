@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('attendance')->group(function() {
+Route::prefix('attendance')->group(function () {
     Route::get('/', 'AttendanceController@index');
 });

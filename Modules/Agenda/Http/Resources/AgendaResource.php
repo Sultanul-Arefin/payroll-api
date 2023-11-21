@@ -14,7 +14,7 @@ class AgendaResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -26,20 +26,22 @@ class AgendaResource extends JsonResource
                     'title',
                     'description',
                     'start_date',
-                    'end_date'
+                    'end_date',
                 ])
             ),
             'start_date_formatted' => $this->convert_date($this->start_date),
-            'end_date_formatted' => $this->convert_date($this->end_date)
+            'end_date_formatted' => $this->convert_date($this->end_date),
         ];
     }
 
-    function convert_date($given_date) {
+    public function convert_date($given_date)
+    {
         // Create a DateTime object from the original date string
         $originalDateTime = new DateTime($given_date);
 
         // Format the DateTime object to the desired format
         $newDateString = $originalDateTime->format('Y-m-d\TH:i:s');
+
         return $newDateString;
     }
 }

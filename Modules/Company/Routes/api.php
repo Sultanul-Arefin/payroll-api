@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Company\Http\Controllers\CompanyController;
 
@@ -18,8 +17,8 @@ use Modules\Company\Http\Controllers\CompanyController;
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // Route::middleware('checkIfCompanyCreated')->group(function(){
-            Route::get('company', [CompanyController::class, 'index'])
-                ->name('details_company');
+        Route::get('company', [CompanyController::class, 'index'])
+            ->name('details_company');
         // });
         // Route::post('company', [CompanyController::class, 'store'])
         //     ->name('add_company');
@@ -29,9 +28,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // ADD OR UPDATE WEEKLY HOLIDAYS
         Route::post('add-weekly-holidays', [CompanyController::class, 'add_weekly_holidays'])
             ->name('add-weekly-holidays');
-        
+
         // ADD OR UPDATE ANNUAL HOLIDAYS
         Route::post('add-annual-holidays', [CompanyController::class, 'add_annual_holidays'])
-            ->name('add-annual-holidays');  
+            ->name('add-annual-holidays');
     });
 });

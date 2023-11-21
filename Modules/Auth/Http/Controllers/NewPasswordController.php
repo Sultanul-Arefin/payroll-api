@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -18,7 +19,6 @@ class NewPasswordController extends Controller
     /**
      * Handle an incoming new password request.
      *
-     * @param Request $request
      * @return JsonResponse
      *
      * @throws ValidationException
@@ -28,61 +28,87 @@ class NewPasswordController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', Rules\Password::defaults()]
+            'password' => ['required', Rules\Password::defaults()],
         ]);
 
-        // if ($password != $new_confirm_password) {
-        //     return response()->json(
-        //         [
-        //             'status' => 'error',
-        //             'message' => 'Form Validation failed',
-        //             'data' => [
-        //                 'errors' => [
-        //                     'password' => [
-        //                         "The password confirmation doesn't match"
-        //                     ]
-        //                 ]
-        //             ]
-        //         ],
-        //         422
-        //     );
-        // }
+        if ($request->password != $request->password_confirmation) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Form Validation failed',
+                    'data' => [
+                        'errors' => [
+                            'password' => [
+                                "The password confirmation doesn't match"
+                            ]
+                        ]
+                    ]
+                ],
+                422
+            );
+        }
+
+        $updatePassword = DB::table('password_reset_tokens')
+            ->where([
+                'email' => $request->email,
+                'token' => $request->token
+            ])
+            ->first();
+
+        if (!$updatePassword) {
+            return apiResponse(
+                data: null,
+                message: 'Invalid Token',
+                status: 'error',
+                statusCode: 422
+            );
+        }
+
+        $user = User::where('email', $request->email)
+            ->update(['password' => Hash::make($request->password)]);
+
+        DB::table('password_reset_tokens')->where(['email' => $request->email])->delete();
+
+        return apiResponse(
+            data: null,
+            message: 'Password Successfully Updated, Please Login To Continue',
+            statusCode: 200
+        );
 
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
         // database. Otherwise, we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only(
-                'password',
-                'password_confirmation',
-                'token',
-                'email'
-            ),
-            // static function ($user) use ($request, $password) {
-                static function ($user) use ($request) {
-                $user
-                    ->forceFill([
-                        'password' => Hash::make($request->password),
-                        'remember_token' => Str::random(60)
-                    ])
-                    ->save();
+        // $status = Password::reset(
+        //     $request->only(
+        //         'password',
+        //         'password_confirmation',
+        //         'token',
+        //         'email'
+        //     ),
+        //     // static function ($user) use ($request, $password) {
+        //     static function ($user) use ($request) {
+        //         $user
+        //             ->forceFill([
+        //                 'password' => Hash::make($request->password),
+        //                 'remember_token' => Str::random(60),
+        //             ])
+        //             ->save();
 
-                event(new PasswordReset($user));
-            }
-        );
+        //         event(new PasswordReset($user));
+        //     }
+        // );
 
-        return $status == Password::PASSWORD_RESET
-            ? $this->apiResponse([], 'Your password has been reset!')
-            : throw ValidationException::withMessages([
-                'email' => [__($status)]
-            ]);
+        // return $status == Password::PASSWORD_RESET
+        //     ? $this->apiResponse([], 'Your password has been reset!')
+        //     : throw ValidationException::withMessages([
+        //         'email' => [__($status)],
+        //     ]);
     }
 
     /**
      * Handle an incoming registration request.
      *
-     * @param Request $request
-     *
+     * @param  Request  $request
      * @return JsonResponse
      */
     // public function update_password(Request $request): JsonResponse

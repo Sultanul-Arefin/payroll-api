@@ -15,7 +15,9 @@ class UserCreateMailJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $username;
+
     public $password;
+
     public $email;
 
     /**
@@ -34,6 +36,6 @@ class UserCreateMailJob implements ShouldQueue
     public function handle(): void
     {
         Mail::to($this->email)
-            ->send(new SendPassword($this->username,$this->password));
+            ->send(new SendPassword($this->username, $this->password));
     }
 }

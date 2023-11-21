@@ -1,4 +1,5 @@
 <?php
+
 namespace Modules\LeaveManagement\Repositories\Classes;
 
 use App\Repositories\RepositoryClasses\BaseRepository;
@@ -11,14 +12,10 @@ use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
-
-
-class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface {
-
+class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
+{
     /**
      * LeaveSalaryItems Repository constructor.
-     *
-     * @param LeaveSalaryItems $model
      */
     public function __construct(LeaveSalaryItems $model)
     {
@@ -27,57 +24,57 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
 
     /**
      * all salary item list show under a company id
-     * @return Collection|null
      */
-    public function leave_types():?Collection
+    public function leave_types(): ?Collection
     {
-       return SalaryItemsName::query()
-                ->whereHas('leave_salary_items')
-                ->where('company_id', auth()->user()->company_id)
-                ->get();
+        return SalaryItemsName::query()
+            ->whereHas('leave_salary_items')
+            ->where('company_id', auth()->user()->company_id)
+            ->get();
     }
 
     /**
-     * @param $request
-     * @param $existDates
      * @return mixed
      */
     public function leave_store($request, $existDates)
     {
         $mergeDates = array_merge($request->dates, $existDates); //user request dates and exist dates are merged
         $valueCounts = array_count_values($mergeDates); //each date count
-        $sortDates = array_keys(array_filter($valueCounts, function ($count){
-           return $count === 1;
+        $sortDates = array_keys(array_filter($valueCounts, function ($count) {
+            return $count === 1;
         }));
-        $userLeave = DB::transaction(function () use($request, $sortDates){
+        $userLeave = DB::transaction(function () use ($request, $sortDates) {
 
-           $userLeave = UserLeave::create([
+            $userLeave = UserLeave::create([
                 'leave_type' => $request->leave_type,
                 'user_id' => auth()->user()->id,
                 'leave_message' => $request->leave_message,
                 'action_by' => 1,
             ]);
 
-            foreach($sortDates as $date){
+            foreach ($sortDates as $date) {
                 UserLeaveDetail::create([
                     'user_leaves_id' => $userLeave->id,
-                    'dates' => $date
+                    'dates' => $date,
                 ]);
             }
+
             return $userLeave;
         });
+
         return $userLeave;
 
     }
-    public function leave_list(){
-       return UserLeave::query()
+
+    public function leave_list()
+    {
+        return UserLeave::query()
             ->when(
-                !is_null(request('employee_id')),
-                fn(Builder $builder) => $builder->where(function($query){
+                ! is_null(request('employee_id')),
+                fn (Builder $builder) => $builder->where(function ($query) {
                     $query->where('user_id', request('employee_id'));
                 })
             )
             ->with('user', 'salary_item', 'leave_details')->get();
     }
-
 }

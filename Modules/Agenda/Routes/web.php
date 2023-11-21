@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('agenda')->group(function() {
+Route::prefix('agenda')->group(function () {
     Route::get('/', 'AgendaController@index');
 });

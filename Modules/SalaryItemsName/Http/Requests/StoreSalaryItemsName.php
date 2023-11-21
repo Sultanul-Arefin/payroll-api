@@ -15,7 +15,7 @@ class StoreSalaryItemsName extends FormRequest
     {
         return [
             'salary_items_category_id' => 'required',
-            'name' => 'required'
+            'name' => 'required',
         ];
     }
 

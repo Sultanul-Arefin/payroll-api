@@ -3,17 +3,14 @@
 namespace Modules\ProjectManagement\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
-use Modules\ProjectManagement\Http\Resources\TaskResource;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
 use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 
@@ -23,7 +20,7 @@ class TaskController extends Controller
 
     public function __construct(
         private TaskInterface $taskRepo
-    ){
+    ) {
     }
 
     public function index($id)
@@ -42,10 +39,10 @@ class TaskController extends Controller
             )
         );
     }
-    
+
     public function store(StoreTaskRequest $request)
     {
-        $task = DB::transaction(function() use($request){
+        $task = DB::transaction(function () use ($request) {
             $task = Task::create([
                 'project_id' => $request->project_id,
                 'project_associated_column_id' => $request->project_associated_column_id,
@@ -53,16 +50,18 @@ class TaskController extends Controller
                 'created_by' => auth()->user()->id,
             ]);
         });
+
         return apiResponse(
             data: $task,
-            message: "Task Created Successfully",
+            message: 'Task Created Successfully',
             status: 'success'
         );
     }
 
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function show($id)
@@ -72,7 +71,7 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        $task_update = DB::transaction(function() use($request, $task){
+        $task_update = DB::transaction(function () use ($request, $task) {
             $task->update([
                 'task_title' => $request->task_title,
                 'task_description' => $request->task_description,
@@ -82,14 +81,16 @@ class TaskController extends Controller
             ]);
             // delete associate employees
             TaskAssociatedEmployee::where('task_id', $task->id)->delete();
-            foreach($request->assigned_employees as $employee_value){
+            foreach ($request->assigned_employees as $employee_value) {
                 TaskAssociatedEmployee::create([
                     'task_id' => $task->id,
-                    'user_id' => $employee_value
+                    'user_id' => $employee_value,
                 ]);
             }
+
             return $task;
         });
+
         return apiResponse(
             data: $task,
             message: 'Task Updated Successfully',
@@ -99,7 +100,8 @@ class TaskController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Renderable
      */
     public function destroy($id)
@@ -107,8 +109,10 @@ class TaskController extends Controller
         //
     }
 
-    function change_task_column(ChangeTaskColumnRequest $request) {
-        $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id'=>$request->updated_column_id]);
+    public function change_task_column(ChangeTaskColumnRequest $request)
+    {
+        $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id' => $request->updated_column_id]);
+
         return apiResponse(
             data: $update,
             message: 'Column Successfully Updated',

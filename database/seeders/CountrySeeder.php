@@ -3,13 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Country;
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
-use Modules\Company\Entities\Company;
-use Modules\Department\Entities\Department;
-use Modules\User\Entities\UserDetails;
 
 class CountrySeeder extends Seeder
 {
@@ -18,7 +12,7 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-        $countries = array(
+        $countries = [
             'AF' => 'Afghanistan',
             'AL' => 'Albania',
             'DZ' => 'Algeria',
@@ -264,11 +258,11 @@ class CountrySeeder extends Seeder
             'EH' => 'Western Sahara',
             'YE' => 'Yemen',
             'ZM' => 'Zambia',
-            'ZW' => 'Zimbabwe'
-        );
-        foreach($countries as $value){
+            'ZW' => 'Zimbabwe',
+        ];
+        foreach ($countries as $value) {
             Country::create([
-                'name' => $value
+                'name' => $value,
             ]);
         }
     }

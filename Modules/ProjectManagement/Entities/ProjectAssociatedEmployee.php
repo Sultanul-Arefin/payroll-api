@@ -2,10 +2,8 @@
 
 namespace Modules\ProjectManagement\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 
 class ProjectAssociatedEmployee extends Model
 {
@@ -13,6 +11,6 @@ class ProjectAssociatedEmployee extends Model
 
     protected $fillable = [
         'project_id',
-        'assigned_employees'
+        'assigned_employees',
     ];
 }

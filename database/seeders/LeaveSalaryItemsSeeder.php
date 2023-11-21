@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
@@ -16,7 +14,7 @@ class LeaveSalaryItemsSeeder extends Seeder
     public function run(): void
     {
         $salary_items_names = SalaryItemsName::where('company_id', 1)->where('salary_items_category_id', 2)->get();
-        foreach($salary_items_names as $value){
+        foreach ($salary_items_names as $value) {
             LeaveSalaryItems::create([
                 'salary_items_id' => $value->id,
                 'no_of_days' => 0,

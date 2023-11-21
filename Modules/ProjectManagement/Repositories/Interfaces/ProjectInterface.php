@@ -2,14 +2,10 @@
 
 namespace Modules\ProjectManagement\Repositories\Interfaces;
 
-
 interface ProjectInterface
 {
     /**
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return mixed
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         array $columns = ['*'],

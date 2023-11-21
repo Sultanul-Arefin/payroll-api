@@ -1,6 +1,7 @@
 <?php
 
 namespace Modules\ProjectManagement\Repositories\Classes;
+
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
@@ -11,8 +12,6 @@ class TaskRepository extends BaseRepository implements TaskInterface
 {
     /**
      * Task Repository constructor.
-     *
-     * @param Task $model
      */
     public function __construct(Task $model)
     {
@@ -21,28 +20,23 @@ class TaskRepository extends BaseRepository implements TaskInterface
 
     /**
      * @param project_id
-     * @param array|string[] $columns
-     * @param array $relations
-     * @param int $count
-     * @return CursorPaginator
+     * @param  array|string[]  $columns
      */
     public function allWithSearch(
         int $project_id,
         array $columns = ['*'],
         array $relations = [],
-        int   $count = 15
-    ): CursorPaginator
-    {
+        int $count = 15
+    ): CursorPaginator {
         return $this->searchQuery($project_id, $relations)->cursorPaginate($count, $columns);
     }
 
     private function searchQuery($project_id, $relations)
     {
-        return ProjectAssociatedColumn
-            ::query()
-            ->where('project_id', $project_id)
-            ->orderBy('column_position', 'ASC')
-            ->with($relations)
-            ->latest('id');
+        return ProjectAssociatedColumn::query()
+                ->where('project_id', $project_id)
+                ->orderBy('column_position', 'ASC')
+                ->with($relations)
+                ->latest('id');
     }
 }

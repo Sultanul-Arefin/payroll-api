@@ -3,8 +3,8 @@
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -25,9 +25,9 @@ return new class extends Migration
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
             $table->foreignId('department_id')
-                    ->nullable()
-                    ->constrained('departments', 'id')
-                    ->cascadeOnDelete();
+                ->nullable()
+                ->constrained('departments', 'id')
+                ->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
             $table->integer('status')->default(User::USER_PENDING);

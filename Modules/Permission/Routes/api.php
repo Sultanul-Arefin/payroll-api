@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\Permission\Http\Controllers\PermissionController;
 
 /*
@@ -16,6 +15,6 @@ use Modules\Permission\Http\Controllers\PermissionController;
 Route::middleware(['auth:sanctum', 'json.response'])
     ->prefix('v1')
     ->group(function () {
-        Route::get('/permissions/users/{user?}', [PermissionController::class,'userPermissions'])
+        Route::get('/permissions/users/{user?}', [PermissionController::class, 'userPermissions'])
             ->name('permissions.user.index');
     });

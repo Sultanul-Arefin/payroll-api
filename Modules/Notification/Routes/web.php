@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('notification')->group(function() {
+Route::prefix('notification')->group(function () {
     Route::get('/', 'NotificationController@index');
 });

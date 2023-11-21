@@ -2,8 +2,8 @@
 
 namespace Modules\Company\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class AnnualHoliday extends Model
 {
@@ -13,9 +13,9 @@ class AnnualHoliday extends Model
         'dates',
         'holiday_type',
         'company_id',
-        'added_by'
+        'added_by',
     ];
-    
+
     protected static function newFactory()
     {
         return \Modules\Company\Database\factories\AnnualHolidayFactory::new();

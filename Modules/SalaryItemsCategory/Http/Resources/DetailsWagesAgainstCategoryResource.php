@@ -13,7 +13,7 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -28,7 +28,7 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             'category' => $this->salaryItemsName?->salaryItemsCategory?->name,
             'salary_amount' => $this->amount,
             'issue_to' => $this->employee?->name,
-            'is_general' => 0
+            'is_general' => 0,
         ];
     }
 }

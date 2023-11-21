@@ -3,7 +3,6 @@
 namespace Modules\Agenda\Http\Controllers;
 
 use DateTime;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Agenda\Entities\Agenda;
@@ -12,25 +11,30 @@ use Modules\Agenda\Http\Resources\CalendarAgendaResource;
 
 class AgendaController extends Controller
 {
-    function index() {
+    public function index()
+    {
         $agendas = Agenda::query()
             ->where('user_id', auth()->user()->id)
             ->with([])
             ->latest()
             ->get();
+
         return AgendaResource::collection($agendas);
     }
 
-    function calendar_agenda() {
+    public function calendar_agenda()
+    {
         $agendas = Agenda::query()
             ->where('user_id', auth()->user()->id)
             ->with([])
             ->latest()
             ->get();
+
         return CalendarAgendaResource::collection($agendas);
     }
 
-    function store(Request $request) {
+    public function store(Request $request)
+    {
         $request->validate([
             'title' => 'required|min:2|max:250',
             'description' => 'required',
@@ -43,7 +47,7 @@ class AgendaController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'user_id' => $request->user_id ?? auth()->user()->id,
-            'created_by' => auth()->user()->id
+            'created_by' => auth()->user()->id,
         ]);
 
         return apiResponse(
@@ -52,15 +56,18 @@ class AgendaController extends Controller
         );
     }
 
-    function show(Agenda $agenda) {
+    public function show(Agenda $agenda)
+    {
         $agenda->start_date = $this->convert_date($agenda->start_date);
         $agenda->end_date = $this->convert_date($agenda->end_date);
+
         return apiResponse(
             data: $agenda->only(['title', 'description', 'start_date', 'end_date'])
         );
     }
 
-    function update(Agenda $agenda, Request $request) {
+    public function update(Agenda $agenda, Request $request)
+    {
         $request->validate([
             'title' => 'required|min:2|max:250',
             'description' => 'required',
@@ -80,20 +87,24 @@ class AgendaController extends Controller
         );
     }
 
-    function destroy(Agenda $agenda) {
+    public function destroy(Agenda $agenda)
+    {
         $agenda->delete();
+
         return apiResponse(
             data: null,
             message: 'Agenda Deleted Successfully'
         );
     }
 
-    private function convert_date($given_date) {
+    private function convert_date($given_date)
+    {
         // Create a DateTime object from the original date string
         $originalDateTime = new DateTime($given_date);
 
         // Format the DateTime object to the desired format
         $newDateString = $originalDateTime->format('Y-m-d\TH:i:s');
+
         return $newDateString;
     }
 }

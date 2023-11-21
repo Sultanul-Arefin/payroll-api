@@ -1,18 +1,9 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Modules\Company\Entities\Company;
-use Modules\ProjectManagement\Entities\ProjectColumn;
 
-if (!function_exists('apiResponse')) {
-    /**
-     * @param $data
-     * @param string $message
-     * @param string $status
-     * @param int $statusCode
-     * @return JsonResponse
-     */
+if (! function_exists('apiResponse')) {
+
     function apiResponse(
         $data,
         string $message = 'Success',
@@ -22,18 +13,19 @@ if (!function_exists('apiResponse')) {
         $response = [
             'data' => $data,
             'message' => $message,
-            'status' => $status
+            'status' => $status,
         ];
 
         return response()->json($response, $statusCode);
     }
 }
 
-if(!function_exists('default_project_columns')){
-    function default_project_columns(){
+if (! function_exists('default_project_columns')) {
+    function default_project_columns()
+    {
         return [
             'Backlog',
-            'In Progress'
+            'In Progress',
         ];
     }
 }

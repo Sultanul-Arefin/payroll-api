@@ -21,7 +21,7 @@ class UserBasicSalaryResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -30,11 +30,11 @@ class UserBasicSalaryResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'name'
+                    'name',
                 ])
             ),
             // 'user_id' => $this->user_id,
-            'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount
+            'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount,
         ];
     }
 }

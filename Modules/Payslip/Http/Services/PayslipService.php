@@ -2,23 +2,24 @@
 
 namespace Modules\Payslip\Http\Services;
 
-use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\PayslipDetail;
 
 class PayslipService
 {
-    function getCategoryOneData($employee_id) {
+    public function getCategoryOneData($employee_id)
+    {
         $data = EmployeeSalaryItem::query()
             ->where('company_id', auth()->user()->company_id)
             ->where('employee_id', $employee_id)
             ->whereHas(
-                'salaryItemsName', function(Builder $query){
+                'salaryItemsName', function (Builder $query) {
                     $query->where('salary_items_category_id', 1);
                 }
             )
             ->get();
+
         return $data;
     }
 
@@ -34,21 +35,22 @@ class PayslipService
     //     return $employee_associated_amount;
     // }
 
-    function add_payslip_details($payslip_id, $employee_id) {
+    public function add_payslip_details($payslip_id, $employee_id)
+    {
         $employee_associated_amount = EmployeeSalaryItem::query()
                                     // ->whereHas(
                                     //     'salaryItemsName', function(Builder $builder){
                                     //         $builder->whereNotIn('salary_items_category_id', [1,2]);
                                     //     }
                                     // )
-                                    ->where('employee_id', $employee_id)
-                                    ->whereNotNull('amount')
-                                    ->get();
-        foreach($employee_associated_amount as $value){
+            ->where('employee_id', $employee_id)
+            ->whereNotNull('amount')
+            ->get();
+        foreach ($employee_associated_amount as $value) {
             PayslipDetail::create([
                 'payslip_id' => $payslip_id,
                 'salary_item_id' => $value->salary_item_id,
-                'amount' => $value->amount
+                'amount' => $value->amount,
             ]);
         }
     }
@@ -56,140 +58,151 @@ class PayslipService
     public function get_basic_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder
-                                                ->where('name', 'Wages')
-                                                ->where('salary_items_category_id', 1);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder
+                        ->where('name', 'Wages')
+                        ->where('salary_items_category_id', 1);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function get_staff_deduction_sick_absent_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 2);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 2);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function get_taxable_allowance_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 3);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 3);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function get_non_taxable_allowance_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 4);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 4);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function get_income_taxes_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 5);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 5);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function get_additional_taxes_tax_top_up_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 6);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 6);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function government_deduction_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 7);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 7);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     public function other_complimentary_deduction_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
-                                    ->where('employee_id', $employee_id)
-                                    ->whereHas(
-                                        'salaryItemsName', function(Builder $builder){
-                                            $builder->where('salary_items_category_id', 8);
-                                        }
-                                    )
-                                    ->sum('amount');
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('salary_items_category_id', 8);
+                }
+            )
+            ->sum('amount');
+
         return $employee_associated_amount;
     }
 
     // employee-salary-items-calculation
-    function getAmountForEmployee($category_id, $employee_id) {
-        if($category_id == 7){
+    public function getAmountForEmployee($category_id, $employee_id)
+    {
+        if ($category_id == 7) {
             return [
                 'employee_government_deduction' => 0.00,
                 'other_complimentary_deduction' => 0.00,
-                'employee_deduction' => 0.00
+                'employee_deduction' => 0.00,
             ];
+
             return DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function(Builder $builder)use($category_id){
+                    'employee_salary_item', function (Builder $builder) use ($category_id) {
                         $builder
-                        ->where('company_id', auth()->user()->company_id)
-                        ->where('employee_id', request('employee_id'))
-                        ->whereHas(
-                            'salaryItemsName', function(Builder $builder)use($category_id){
-                                $builder->whereHas(
-                                    'salaryItemsCategory', function(Builder $builder)use($category_id){
-                                        $builder->where('id', $category_id);
-                                    }
-                                );
-                            }
-                        );
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('employee_id', request('employee_id'))
+                            ->whereHas(
+                                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                                    $builder->whereHas(
+                                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                            $builder->where('id', $category_id);
+                                        }
+                                    );
+                                }
+                            );
                     }
                 )
                 ->get()->sum('employee_amount as emp_amount');
+
             return EmployeeSalaryItem::query()
                 ->whereHas(
-                    'salaryItemsName', function(Builder $builder)use($category_id){
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->whereHas(
-                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
                                 $builder->where('id', $category_id);
                             }
                         );
@@ -198,17 +211,18 @@ class PayslipService
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
-        } elseif($category_id == 8){
+        } elseif ($category_id == 8) {
             return [
                 'company_government_contribution' => 0.00,
                 'company_other_complimentary_contribution' => 0.00,
-                'company_contribution' => 0.00
+                'company_contribution' => 0.00,
             ];
+
             return EmployeeSalaryItem::query()
                 ->whereHas(
-                    'salaryItemsName', function(Builder $builder)use($category_id){
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->whereHas(
-                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
                                 $builder->where('id', $category_id);
                             }
                         );
@@ -217,27 +231,27 @@ class PayslipService
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
-        } elseif($category_id == 1){
+        } elseif ($category_id == 1) {
             return EmployeeSalaryItem::query()
                 ->whereHas(
-                    'salaryItemsName', function(Builder $builder)use($category_id){
+                    'salaryItemsName', function (Builder $builder) {
                         $builder->where('name', 'Wages')
                             ->whereHas(
-                                'salaryItemsCategory', function(Builder $builder)use($category_id){
+                                'salaryItemsCategory', function (Builder $builder) {
                                     $builder->where('id', 1);
                                 }
-                        );
+                            );
                     }
                 )
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
-        } else{
+        } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
-                    'salaryItemsName', function(Builder $builder)use($category_id){
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->whereHas(
-                            'salaryItemsCategory', function(Builder $builder)use($category_id){
+                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
                                 $builder->where('id', $category_id);
                             }
                         );

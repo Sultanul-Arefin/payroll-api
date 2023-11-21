@@ -15,8 +15,6 @@ use Modules\Designation\Repositories\Classes\DesignationRepository;
 use Modules\Designation\Repositories\Interfaces\DesignationInterface;
 use Modules\LeaveManagement\Repositories\Classes\LeaveRepository;
 use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
-use Modules\User\Repositories\Classes\UserRepository;
-use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 use Modules\Package\Repositories\Classes\PackageRepository;
 use Modules\Package\Repositories\Interfaces\PackageRepositoryInterface;
 use Modules\Payslip\Repositories\Classes\PayslipRepository;
@@ -31,6 +29,8 @@ use Modules\SalaryItemsCategory\Repositories\Classes\SalaryItemsCategoryReposito
 use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInterface;
 use Modules\SalaryItemsName\Repositories\Classes\SalaryItemsNameRepository;
 use Modules\SalaryItemsName\Repositories\Interfaces\SalaryItemsNameInterface;
+use Modules\User\Repositories\Classes\UserRepository;
+use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

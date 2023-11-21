@@ -21,7 +21,7 @@ class NotificationResource extends JsonResource
                     'created_at',
                     'updated_at',
                     'notifiable_type',
-                    'type'
+                    'type',
                 ])
             ),
         ];

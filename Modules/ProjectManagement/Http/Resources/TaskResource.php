@@ -13,7 +13,7 @@ class TaskResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,7 +22,7 @@ class TaskResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'task_title'
+                    'task_title',
                 ])
             ),
             // 'columns' => $this->project_associated_column

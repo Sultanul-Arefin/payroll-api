@@ -6,17 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceDetail;
 
-class AttendanceService{
-    function checkIfAttendanceExist($date) : ?Model {
+class AttendanceService
+{
+    public function checkIfAttendanceExist($date): ?Model
+    {
         $attendance = Attendance::where('dates', $date)->first();
-        if($attendance){
+        if ($attendance) {
             return $attendance;
-        } else{
+        } else {
             return null;
         }
     }
 
-    function attendanceIsPossible($attendance, $in_time, $out_time)
+    public function attendanceIsPossible($attendance, $in_time, $out_time)
     {
 
         $attendances = AttendanceDetail::query();
@@ -41,36 +43,35 @@ class AttendanceService{
             })
             ->exists();
 
-        if($attendance){
+        if ($attendance) {
             return false;
-        } else{
+        } else {
             return true;
         }
 
         //raw codding
 
-//        $attendance = AttendanceDetail::where('attendance_id', $attendance->id)->orderBy('in_time','ASC')->get();
-//
-//        if (($in_time >= $attendance[count($attendance) - 1]->out_time) || ($out_time <= $attendance[0]->in_time)) {
-//            return true;
-//        }
-//        $is_status = false;
-//        foreach ($attendance as $current_value) {
-//            if (
-//                ($in_time < $current_value->in_time && $out_time < $current_value->out_time)
-//                || ($in_time > $current_value->in_time && $out_time > $current_value->out_time)
-//                || ($in_time >= $current_value->in_time && $out_time <= $current_value->out_time)
-//                || ($in_time < $current_value->in_time && $out_time > $current_value->out_time)
-//            ) {
-//                return false;
-//            } else {
-//                $is_status = true;
-//            }
-//        }
-//        if ($is_status == true) {
-//            return true;
-//        }
-
+        //        $attendance = AttendanceDetail::where('attendance_id', $attendance->id)->orderBy('in_time','ASC')->get();
+        //
+        //        if (($in_time >= $attendance[count($attendance) - 1]->out_time) || ($out_time <= $attendance[0]->in_time)) {
+        //            return true;
+        //        }
+        //        $is_status = false;
+        //        foreach ($attendance as $current_value) {
+        //            if (
+        //                ($in_time < $current_value->in_time && $out_time < $current_value->out_time)
+        //                || ($in_time > $current_value->in_time && $out_time > $current_value->out_time)
+        //                || ($in_time >= $current_value->in_time && $out_time <= $current_value->out_time)
+        //                || ($in_time < $current_value->in_time && $out_time > $current_value->out_time)
+        //            ) {
+        //                return false;
+        //            } else {
+        //                $is_status = true;
+        //            }
+        //        }
+        //        if ($is_status == true) {
+        //            return true;
+        //        }
 
     }
 }

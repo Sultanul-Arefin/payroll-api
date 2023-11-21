@@ -15,7 +15,7 @@ class LeaveStoreRequest extends FormRequest
     {
         return [
             'leave_type' => 'required',
-            'dates.*' => 'required|unique:user_leave_details,dates'
+            'dates.*' => 'required|unique:user_leave_details,dates',
         ];
     }
 

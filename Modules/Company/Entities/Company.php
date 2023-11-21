@@ -2,8 +2,8 @@
 
 namespace Modules\Company\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Company\Database\factories\CompanyFactory;
 
@@ -17,6 +17,7 @@ class Company extends Model
     }
 
     public const ACTIVE = 1;
+
     public const PENDING = 0;
 
     public const COMPANY_IMAGE_PATH = 'uploads/company/photo/';
@@ -38,19 +39,16 @@ class Company extends Model
         'contact_person_name',
         'contact_person_email',
         'contact_person_phone',
-        'status'
+        'status',
     ];
 
     public function getChangedCompanyLogoAttribute()
     {
-        return $this->company_logo ? env('APP_URL') . '/' . 'storage/'.$this->company_logo : null;
+        return $this->company_logo ? env('APP_URL').'/'.'storage/'.$this->company_logo : null;
     }
 
-    /**
-     * @return HasOne
-     */
-    function associated_package(): HasOne {
+    public function associated_package(): HasOne
+    {
         return $this->hasOne(CompanyAssociatedWithPackage::class, 'company_id', 'id');
     }
-
 }

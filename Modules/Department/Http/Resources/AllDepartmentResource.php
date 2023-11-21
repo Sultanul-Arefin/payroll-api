@@ -13,7 +13,7 @@ class AllDepartmentResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array|Arrayable|JsonSerializable
      */
     public function toArray($request)
@@ -22,9 +22,9 @@ class AllDepartmentResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
-                    'department_name'
+                    'department_name',
                 ])
-            )
+            ),
         ];
     }
 }

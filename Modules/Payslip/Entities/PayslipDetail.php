@@ -2,8 +2,8 @@
 
 namespace Modules\Payslip\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class PayslipDetail extends Model
 {
@@ -12,6 +12,6 @@ class PayslipDetail extends Model
     protected $fillable = [
         'payslip_id',
         'salary_item_id',
-        'amount'
+        'amount',
     ];
 }

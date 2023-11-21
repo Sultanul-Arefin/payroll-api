@@ -2,8 +2,8 @@
 
 namespace Modules\Company\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class WeeklyHoliday extends Model
 {
@@ -12,9 +12,9 @@ class WeeklyHoliday extends Model
     protected $fillable = [
         'dates',
         'company_id',
-        'added_by'
+        'added_by',
     ];
-    
+
     protected static function newFactory()
     {
         return \Modules\Company\Database\factories\WeeklyHolidayFactory::new();

@@ -2,8 +2,8 @@
 
 namespace Modules\Payslip\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Seeder;
 
 class PayslipDatabaseSeeder extends Seeder
 {

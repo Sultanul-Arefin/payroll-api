@@ -11,6 +11,7 @@ class ProjectAssociatedColumnController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
      * @return Renderable
      */
     public function index()
@@ -20,6 +21,7 @@ class ProjectAssociatedColumnController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Renderable
      */
     public function create()
@@ -29,7 +31,7 @@ class ProjectAssociatedColumnController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
+     *
      * @return Renderable
      */
     public function store(Request $request)
@@ -41,20 +43,21 @@ class ProjectAssociatedColumnController extends Controller
             'project_id' => $request->project_id,
             'project_column_name' => $request->project_column_name,
             'created_by' => auth()->user()->id,
-            'column_position' => ++$max_column_value
+            'column_position' => ++$max_column_value,
         ]);
 
         return apiResponse(
             data: $column,
-            message: "Project Column Created Successfully",
+            message: 'Project Column Created Successfully',
             status: 'success'
         );
     }
 
-    function change_column_index(Request $request) {
+    public function change_column_index(Request $request)
+    {
         $request->validate([
             'current_column_id' => 'required|integer',
-            'target_column_id' => 'required|integer'
+            'target_column_id' => 'required|integer',
         ]);
         $current_column = ProjectAssociatedColumn::where('id', $request->current_column_id)->first();
         $target_column = ProjectAssociatedColumn::where('id', $request->target_column_id)->first();
@@ -63,16 +66,16 @@ class ProjectAssociatedColumnController extends Controller
 
         // update
         $current_column->update([
-            'column_position' => $target_column->column_position
+            'column_position' => $target_column->column_position,
         ]);
         $target_column->update([
-            'column_position' => $current_column_value
+            'column_position' => $current_column_value,
         ]);
 
         return apiResponse(
             data: null,
-            message: "Column Position Updated Successfully",
-            status: "success"
+            message: 'Column Position Updated Successfully',
+            status: 'success'
         );
     }
 }
