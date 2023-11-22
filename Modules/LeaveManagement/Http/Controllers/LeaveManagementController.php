@@ -3,10 +3,12 @@
 namespace Modules\LeaveManagement\Http\Controllers;
 
 use App\Exceptions\CustomException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Company\Http\Traits\LeaveTrait;
 use Modules\LeaveManagement\Entities\UserLeave;
+use Modules\LeaveManagement\Entities\UserLeaveDetail;
 use Modules\LeaveManagement\Http\Requests\LeaveStoreRequest;
 use Modules\LeaveManagement\Http\Resources\LeaveListResource;
 use Modules\LeaveManagement\Http\Resources\LeaveResource;
@@ -33,7 +35,24 @@ class LeaveManagementController extends Controller
 
     public function leave_store(LeaveStoreRequest $request)
     {
-
+        $request['user_id'] = $request->user_id ?? auth()->user()->id;
+        $taken_leave = UserLeaveDetail::query()
+                    ->whereHas(
+                        'user_leave', function(Builder $builder) use($request){
+                            $builder->where('user_id', $request->user_id);
+                        }
+                    )
+                    ->whereIn('dates', $request->dates)
+                    ->count();
+        if($taken_leave > 0)
+        {
+            return apiResponse(
+                data: null,
+                message: 'Date Already Taken',
+                status: 'error',
+                statusCode: 422
+            );
+        }
         $existDates = $this->isHolidayExist($request->dates); //params pass to date for checking holiday exist or not
         $leaveStore = $this->leaveRepository->leave_store($request, $existDates);
 

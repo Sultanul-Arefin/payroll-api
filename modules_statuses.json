@@ -16,5 +16,6 @@
     "LeaveManagement": true,
     "Dashboard": true,
     "Notification": true,
-    "Agenda": true
+    "Agenda": true,
+    "TimeManagement": true
 }
