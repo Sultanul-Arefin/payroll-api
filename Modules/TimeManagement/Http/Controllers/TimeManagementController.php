@@ -2,78 +2,62 @@
 
 namespace Modules\TimeManagement\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Attendance\Entities\Attendance;
+use Modules\TimeManagement\Http\Resources\AttendanceReportResource;
+use Modules\TimeManagement\Http\Resources\CalendarOverviewResource;
+use Modules\TimeManagement\Http\Resources\TimeManagementResource;
 
 class TimeManagementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
+    function time_management_report() 
     {
-        return view('timemanagement::index');
+        $users = User::where('company_id', auth()->user()->id)->get();
+        $response = TimeManagementResource::collection(
+            $users
+        );
+        return apiResponse(
+            data: $response
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    function attendance_report() 
     {
-        return view('timemanagement::create');
+        $users = User::where('company_id', auth()->user()->id)->get();
+        $response = AttendanceReportResource::collection(
+            $users
+        );
+        return apiResponse(
+            data: $response
+        );
     }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
+    
+    function attendance_calendar_overview_per_person(Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('timemanagement::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('timemanagement::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
+        $request->validate([
+            'department_id' => 'required',
+            'user_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d'
+        ]);
+        $attendance = Attendance::query()
+                    ->where('user_id', $request->user_id)
+                    ->whereBetween(
+                        'dates',
+                        [
+                            $request->from_date,
+                            $request->to_date
+                        ]
+                    )
+                    ->get();
+        $response = CalendarOverviewResource::collection(
+            $attendance
+        );
+        return apiResponse(
+            data: $response
+        );
     }
 }
