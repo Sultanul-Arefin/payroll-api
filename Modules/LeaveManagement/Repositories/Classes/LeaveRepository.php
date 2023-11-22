@@ -47,7 +47,7 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
 
             $userLeave = UserLeave::create([
                 'leave_type' => $request->leave_type,
-                'user_id' => auth()->user()->id,
+                'user_id' => $request->user_id,
                 'leave_message' => $request->leave_message,
                 'action_by' => 1,
             ]);
