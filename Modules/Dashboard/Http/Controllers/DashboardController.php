@@ -79,6 +79,7 @@ class DashboardController extends Controller
     {
         $last12MonthsData = DB::table('payslips')
             ->select(
+                'month as month_name',
                 DB::raw('SUM(total_pay_value) as total_gross_pay'),
                 DB::raw('SUM(gross_pay_before_tax) as total_staff_cost')
             )
