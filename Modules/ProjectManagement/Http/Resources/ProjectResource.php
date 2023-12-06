@@ -30,6 +30,8 @@ class ProjectResource extends JsonResource
                 ])
             ),
             'assigned_employees' => $this->getAssignedEmployees($this->id),
+            'last_update' => $this->getLastUpdate($this->id),
+            'status' => $this->getStatus($this->status)
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -38,6 +40,14 @@ class ProjectResource extends JsonResource
             //     });
             // })
         ];
+    }
+
+    function getStatus($status) {
+        return $status;
+    }
+
+    function getLastUpdate($project_id) {
+        return date('Y-m-d H:i:s');
     }
 
     public function getAssignedEmployees($project_id)
