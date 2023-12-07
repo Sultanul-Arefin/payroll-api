@@ -64,6 +64,20 @@ class ProjectController extends Controller
         );
     }
 
+    function update_status(Project $project, Request $request) {
+        $request->validate([
+            'status' => 'required|integer|in:0,1,2'
+        ]);
+        $project->update([
+            'is_completed' => $request->status
+        ]);
+        return apiResponse(
+            data: $project,
+            message: 'Project Status Updated Successfully',
+            status: 'success'
+        );
+    }
+
     /**
      * Show the specified resource.
      *
