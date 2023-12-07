@@ -26,6 +26,7 @@ if (! function_exists('default_project_columns')) {
         return [
             'Backlog',
             'In Progress',
+            'Completed'
         ];
     }
 }
