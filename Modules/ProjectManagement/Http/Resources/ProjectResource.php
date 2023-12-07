@@ -9,6 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 use Modules\ProjectManagement\Entities\Project;
+use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 
@@ -32,7 +33,8 @@ class ProjectResource extends JsonResource
             ),
             'assigned_employees' => $this->getAssignedEmployees($this->id),
             'last_update' => $this->getLastUpdate($this->id),
-            'status' => $this->getStatus($this->is_completed)
+            'status' => $this->getStatus($this->is_completed),
+            'project_data' => $this->getProjectData($this->id)
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -41,6 +43,24 @@ class ProjectResource extends JsonResource
             //     });
             // })
         ];
+    }
+
+    function getProjectData($project_id) {
+        $tasks = ProjectAssociatedColumn::query()
+            ->where('project_id', $project_id)
+            ->orderBy('column_position', 'ASC')
+            ->with([])
+            ->latest('id')
+            ->get();
+        $final_data = [];
+        foreach($tasks as $task){
+            $count_task = Task::where('project_id', $project_id)->count();
+            array_push($final_data, [
+                'column' => $task->project_column_name,
+                'total_task' => $count_task
+            ]);
+        }
+        return $final_data;
     }
 
     function getStatus($status) {
