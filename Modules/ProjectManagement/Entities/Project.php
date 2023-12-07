@@ -16,6 +16,7 @@ class Project extends Model
         'created_by',
         'company_id',
         'depatment_id',
+        'status'
     ];
 
     protected static function newFactory()
