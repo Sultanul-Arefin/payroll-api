@@ -8,6 +8,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('projects', ProjectController::class);
 
+        Route::post('update-status/{project}', [ProjectController::class, 'update_status']);
+
         Route::post('project-column', [ProjectAssociatedColumnController::class, 'store']);
         Route::post('change-column-index', [ProjectAssociatedColumnController::class, 'change_column_index']);
 
