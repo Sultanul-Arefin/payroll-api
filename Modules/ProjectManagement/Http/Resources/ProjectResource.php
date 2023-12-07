@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 
@@ -31,7 +32,7 @@ class ProjectResource extends JsonResource
             ),
             'assigned_employees' => $this->getAssignedEmployees($this->id),
             'last_update' => $this->getLastUpdate($this->id),
-            'status' => $this->getStatus($this->status)
+            'status' => $this->getStatus($this->is_completed)
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -43,7 +44,12 @@ class ProjectResource extends JsonResource
     }
 
     function getStatus($status) {
-        return $status;
+        if($status == Project::COMPLETED){
+            return 'completed';
+        } elseif($status == Project::PROCESSING){
+            return 'processing';
+        }
+        return 'cancelled';
     }
 
     function getLastUpdate($project_id) {

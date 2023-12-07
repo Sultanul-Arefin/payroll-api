@@ -31,6 +31,12 @@ class ProjectRepository extends BaseRepository implements ProjectInterface
     private function searchQuery($relations)
     {
         return $this->model::query()
+                ->when(!is_null(request('status')), function ($query) {
+                    $query->where(
+                        'is_completed',
+                        request('status')
+                    );
+                })
                 ->where('company_id', auth()->user()->company_id)
                 ->with($relations)
                 ->latest('id');
