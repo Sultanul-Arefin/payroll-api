@@ -34,7 +34,8 @@ class ProjectResource extends JsonResource
             'assigned_employees' => $this->getAssignedEmployees($this->id),
             'last_update' => $this->getLastUpdate($this->id),
             'status' => $this->getStatus($this->is_completed),
-            'project_data' => $this->getProjectData($this->id)
+            'project_data' => $this->getProjectData($this->id),
+            'total_task' => $this->getTotalTask($this->id)
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -43,6 +44,11 @@ class ProjectResource extends JsonResource
             //     });
             // })
         ];
+    }
+
+    function getTotalTask($project_id) {
+        $count_task = Task::where('project_id', $project_id)->count();
+        return $count_task;
     }
 
     function getProjectData($project_id) {
@@ -54,7 +60,7 @@ class ProjectResource extends JsonResource
             ->get();
         $final_data = [];
         foreach($tasks as $task){
-            $count_task = Task::where('project_id', $project_id)->count();
+            $count_task = Task::where('project_associated_column_id', $task->id)->count();
             array_push($final_data, [
                 'column' => $task->project_column_name,
                 'total_task' => $count_task
