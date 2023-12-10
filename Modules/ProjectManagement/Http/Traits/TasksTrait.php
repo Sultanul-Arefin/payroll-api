@@ -35,6 +35,9 @@ trait TasksTrait
             }
             $task[$key]['task_comment'] = $asso_comments;
             unset($task[$key]['comments']);
+            
+            $task[$key]['total_comments'] = $value->comments->count();
+            unset($task[$key]['comments']);
         }
 
         return $task;
