@@ -11,12 +11,13 @@ use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
+use Modules\ProjectManagement\Http\Traits\CommentTrait;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
 use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 
 class TaskController extends Controller
 {
-    use TasksTrait;
+    use TasksTrait, CommentTrait;
 
     public function __construct(
         private TaskInterface $taskRepo
