@@ -5,6 +5,7 @@ namespace Modules\ProjectManagement\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
@@ -13,6 +14,7 @@ use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
 use Modules\ProjectManagement\Http\Traits\CommentTrait;
 use Modules\ProjectManagement\Http\Traits\TasksTrait;
+use Modules\ProjectManagement\Notifications\ProjectManagementNotification;
 use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 
 class TaskController extends Controller
@@ -50,6 +52,23 @@ class TaskController extends Controller
                 'task_title' => $request->task_title,
                 'created_by' => auth()->user()->id,
             ]);
+
+            // TASK CREATION NOTIFICATION
+            $project = Project::where('id', $request->project_id)->first();
+
+            $data = [
+                'title' => 'Task Created',
+                'description' => 'A New Task Named ' . $request->task_title . ' Has Been Created',
+                'action' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'phone' => auth()->user()->phone,
+                ],
+                'action_at' => date('Y-m-d H:i:s'),
+                'type' => 'Project Management',
+                'color' => '',
+            ];
+            $project->notify(new ProjectManagementNotification($data));
         });
 
         return apiResponse(
@@ -89,6 +108,23 @@ class TaskController extends Controller
                 ]);
             }
 
+            // TASK UPDATE NOTIFICATION
+            $project = Project::where('id', $task->project_id)->first();
+
+            $data = [
+                'title' => 'Task Updated',
+                'description' => 'Task Named ' . $task->task_title . ' Has Been Updated',
+                'action' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'phone' => auth()->user()->phone,
+                ],
+                'action_at' => date('Y-m-d H:i:s'),
+                'type' => 'Project Management',
+                'color' => '',
+            ];
+            $project->notify(new ProjectManagementNotification($data));
+
             return $task;
         });
 
@@ -113,6 +149,23 @@ class TaskController extends Controller
     public function change_task_column(ChangeTaskColumnRequest $request)
     {
         $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id' => $request->updated_column_id]);
+
+        // TASK COLUMN UPDATE NOTIFICATION
+        // $project = $task->project_associated_column->project;
+
+        // $data = [
+        //     'title' => 'Task Column Updated',
+        //     'description' => 'Task Column Position Has Been Created',
+        //     'action' => [
+        //         'name' => auth()->user()->name,
+        //         'email' => auth()->user()->email,
+        //         'phone' => auth()->user()->phone,
+        //     ],
+        //     'action_at' => date('Y-m-d H:i:s'),
+        //     'type' => 'Project Management',
+        //     'color' => '',
+        // ];
+        // $project->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $update,

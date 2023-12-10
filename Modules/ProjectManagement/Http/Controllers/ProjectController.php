@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Http\Requests\StoreProjectRequest;
+use Modules\ProjectManagement\Http\Resources\ProjectOverviewResource;
 use Modules\ProjectManagement\Http\Resources\ProjectResource;
+use Modules\ProjectManagement\Notifications\ProjectManagementNotification;
 use Modules\ProjectManagement\Repositories\Interfaces\ProjectInterface;
 
 class ProjectController extends Controller
@@ -17,6 +19,21 @@ class ProjectController extends Controller
     public function __construct(
         private ProjectInterface $projectRepo
     ) {
+    }
+
+    function project_overview(Project $project) {
+        $data = Project::query()
+                ->when(!is_null(request('status')), function ($query) {
+                    $query->where(
+                        'is_completed',
+                        request('status')
+                    );
+                })
+                ->where('company_id', auth()->user()->company_id)
+                ->with([])
+                ->where('id', $project->id)
+                ->first();
+        return new ProjectOverviewResource($data);
     }
 
     public function index()
@@ -45,6 +62,21 @@ class ProjectController extends Controller
                 'company_id' => auth()->user()->company_id,
                 'department_id' => 1,
             ]);
+            // PROJECT CREATION NOTIFICATION
+            $data = [
+                'title' => 'Project Created',
+                'description' => 'A New Project Has Been Created',
+                'action' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'phone' => auth()->user()->phone,
+                ],
+                'action_at' => date('Y-m-d H:i:s'),
+                'type' => 'Project Management',
+                'color' => '',
+            ];
+            $project->notify(new ProjectManagementNotification($data));
+
             $index = 0;
             foreach(default_project_columns() as $key => $value){
                 ProjectAssociatedColumn::create([
@@ -53,6 +85,20 @@ class ProjectController extends Controller
                     'created_by' => auth()->user()->id,
                     'column_position' => ++$index
                 ]);
+                // COLUMN CREATION NOTIFICATION
+                $data = [
+                    'title' => 'Column Created',
+                    'description' => 'Column ' . $value . ' Has Been Created',
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Project Management',
+                    'color' => ''
+                ];
+                $project->notify(new ProjectManagementNotification($data));
             }
             return $project;
         });
@@ -71,6 +117,20 @@ class ProjectController extends Controller
         $project->update([
             'is_completed' => $request->status
         ]);
+        // UPDATE PROJECT STATUS NOTIFICATION
+        $data = [
+            'title' => 'Project Status Updated',
+            'description' => 'Project Status Updated to ' . $request->status,
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => ''
+        ];
+        $project->notify(new ProjectManagementNotification($data));
         return apiResponse(
             data: $project,
             message: 'Project Status Updated Successfully',

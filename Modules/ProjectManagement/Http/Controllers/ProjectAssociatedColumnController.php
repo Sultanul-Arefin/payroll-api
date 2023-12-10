@@ -5,7 +5,9 @@ namespace Modules\ProjectManagement\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
+use Modules\ProjectManagement\Notifications\ProjectManagementNotification;
 
 class ProjectAssociatedColumnController extends Controller
 {
@@ -45,6 +47,22 @@ class ProjectAssociatedColumnController extends Controller
             'created_by' => auth()->user()->id,
             'column_position' => ++$max_column_value,
         ]);
+        
+        $project = Project::where('id', $request->project_id)->first();
+        // CREATE NEW PROJECT COLUMN NOTIFICATION
+        $data = [
+            'title' => 'Project Column Created',
+            'description' => 'Project Column ' . $request->project_column_name . ' created',
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => ''
+        ];
+        $project->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $column,
@@ -73,6 +91,22 @@ class ProjectAssociatedColumnController extends Controller
             'column_position' => $current_column_value,
         ]);
 
+        // PROJECT COLUMN INDEX UPDATED NOTIFICATION
+        $project = Project::where('id', $current_column->project_id)->first();;
+        $data = [
+            'title' => 'Project Column Position Updated',
+            'description' => 'Project Column Updated to ' . $request->target_column_id . ' from ' . $request->current_column_id,
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => ''
+        ];
+        $project->notify(new ProjectManagementNotification($data));
+
         return apiResponse(
             data: null,
             message: 'Column Position Updated Successfully',
@@ -84,9 +118,26 @@ class ProjectAssociatedColumnController extends Controller
         $request->validate([
             'project_column_name' => 'required'
         ]);
+        $old_name = $project_associated_column->project_column_name;
         $project_associated_column->update([
             'project_column_name' => $request->project_column_name
         ]);
+
+        // UPDATE PROJECT COLUMN NAME NOTIFICATION
+        $project = Project::where('id', $project_associated_column->project_id)->first();
+        $data = [
+            'title' => 'Project Column Updated',
+            'description' => 'Project Name Updated to ' . $request->project_column_name . 'from ' . $old_name,
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => ''
+        ];
+        $project->notify(new ProjectManagementNotification($data));
         return apiResponse(
             data: $project_associated_column,
             message: 'Column Name Updated Successfully'
