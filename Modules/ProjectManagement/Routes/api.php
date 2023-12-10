@@ -11,11 +11,13 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('update-status/{project}', [ProjectController::class, 'update_status']);
 
         Route::post('project-column', [ProjectAssociatedColumnController::class, 'store']);
+        Route::post('update-project-column/{project_associated_column}', [ProjectAssociatedColumnController::class, 'update_project_associated_column']);
         Route::post('change-column-index', [ProjectAssociatedColumnController::class, 'change_column_index']);
 
         Route::get('task/{project}', [TaskController::class, 'index']);
         Route::post('task', [TaskController::class, 'store']);
         Route::post('update-task/{task}', [TaskController::class, 'update']);
+        Route::post('add-comment/{task}', [TaskController::class, 'add_comment']);
         Route::post('change-task-column', [TaskController::class, 'change_task_column']);
     });
 });
