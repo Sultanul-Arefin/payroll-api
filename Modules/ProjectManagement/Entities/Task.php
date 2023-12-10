@@ -35,4 +35,11 @@ class Task extends Model
     {
         return $this->hasMany(TaskAssociatedEmployee::class, 'task_id', 'id');
     }
+
+    /**
+     * @return HasMany
+     */
+    function comments(): HasMany {
+        return $this->hasMany(TaskComment::class, 'task_id', 'id');
+    }
 }
