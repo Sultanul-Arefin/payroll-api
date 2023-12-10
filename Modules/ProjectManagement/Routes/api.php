@@ -19,5 +19,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('update-task/{task}', [TaskController::class, 'update']);
         Route::post('add-comment/{task}', [TaskController::class, 'add_comment']);
         Route::post('change-task-column', [TaskController::class, 'change_task_column']);
+
+        Route::get('project-overview/{project}', [ProjectController::class, 'project_overview']);
     });
 });
