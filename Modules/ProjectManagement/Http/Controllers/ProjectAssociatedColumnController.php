@@ -62,6 +62,7 @@ class ProjectAssociatedColumnController extends Controller
         $current_column = ProjectAssociatedColumn::where('id', $request->current_column_id)->first();
         $target_column = ProjectAssociatedColumn::where('id', $request->target_column_id)->first();
 
+        // storing the current column value to update target column
         $current_column_value = $current_column->column_position;
 
         // update
@@ -76,6 +77,19 @@ class ProjectAssociatedColumnController extends Controller
             data: null,
             message: 'Column Position Updated Successfully',
             status: 'success'
+        );
+    }
+
+    function update_project_associated_column(ProjectAssociatedColumn $project_associated_column, Request $request) {
+        $request->validate([
+            'project_column_name' => 'required'
+        ]);
+        $project_associated_column->update([
+            'project_column_name' => $request->project_column_name
+        ]);
+        return apiResponse(
+            data: $project_associated_column,
+            message: 'Column Name Updated Successfully'
         );
     }
 }
