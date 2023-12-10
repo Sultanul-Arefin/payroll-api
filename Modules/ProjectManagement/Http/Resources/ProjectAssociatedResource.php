@@ -23,7 +23,12 @@ class ProjectAssociatedResource extends JsonResource
             'column' => $this->project_column_name,
             'column_position' => $this->column_position,
             'tasks' => app(TaskController::class)->getTaskDetails($this->tasks),
+            'task_count' => $this->getTaskCount($this->tasks)
         ];
+    }
+
+    function getTaskCount($tasks) {
+        return $tasks->count();
     }
 
     public function getTasks($tasks)
