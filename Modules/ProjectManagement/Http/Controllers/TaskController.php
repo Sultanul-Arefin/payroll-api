@@ -151,21 +151,21 @@ class TaskController extends Controller
         $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id' => $request->updated_column_id]);
 
         // TASK COLUMN UPDATE NOTIFICATION
-        // $project = $task->project_associated_column->project;
+        $project = Task::where('id', $request->task_id)->first()->project_associated_column->project;
 
-        // $data = [
-        //     'title' => 'Task Column Updated',
-        //     'description' => 'Task Column Position Has Been Created',
-        //     'action' => [
-        //         'name' => auth()->user()->name,
-        //         'email' => auth()->user()->email,
-        //         'phone' => auth()->user()->phone,
-        //     ],
-        //     'action_at' => date('Y-m-d H:i:s'),
-        //     'type' => 'Project Management',
-        //     'color' => '',
-        // ];
-        // $project->notify(new ProjectManagementNotification($data));
+        $data = [
+            'title' => 'Task Column Position Updated',
+            'description' => 'Task Column Position Has Been Updated',
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => '',
+        ];
+        $project->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $update,

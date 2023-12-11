@@ -19,12 +19,14 @@ class Task extends Model
         'estimation_hour',
         'start_date_time',
         'end_date_time',
+        'status',
         'created_by',
     ];
 
+    public const BACKLOG = 0;
     public const COMPLETED = 1;
-
-    public const NOT_COMPLETED = 0;
+    public const IN_PROGRESS = 2;
+    public const CANCELLED = 3;
 
     public function project_associated_column(): BelongsTo
     {

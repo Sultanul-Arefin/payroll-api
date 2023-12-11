@@ -2,6 +2,9 @@
 
 namespace Modules\ProjectManagement\Http\Traits;
 
+use Illuminate\Http\Request;
+use Modules\ProjectManagement\Entities\Task;
+
 trait TasksTrait
 {
     public function getTaskDetails($task)
@@ -41,5 +44,18 @@ trait TasksTrait
         }
 
         return $task;
+    }
+
+    function update_task_status(Task $task, Request $request) {
+        $request->validate([
+            'status' => 'required|integer|in:0,1,2,3'
+        ]);
+        $task->update([
+            'status' => $request->status
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'Task Status Updated Successfully'
+        );
     }
 }
