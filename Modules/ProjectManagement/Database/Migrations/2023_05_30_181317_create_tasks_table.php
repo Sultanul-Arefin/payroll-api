@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\ProjectManagement\Entities\Task;
 
 return new class extends Migration
 {
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('estimation_hour')->nullable();
             $table->date('start_date_time')->nullable();
             $table->date('end_date_time')->nullable();
+            $table->integer('status')->default(Task::BACKLOG);
             $table
                 ->foreignId('created_by')
                 ->constrained('users', 'id')
