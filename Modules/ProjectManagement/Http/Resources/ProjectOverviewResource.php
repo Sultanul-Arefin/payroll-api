@@ -83,25 +83,25 @@ class ProjectOverviewResource extends JsonResource
         array_push($final_data, [
             'column' => 'Completed',
             'percentage' => $count_individual_task ? round(($completed_task/$count_individual_task) * 100) : 0,
-            'total_task' => $count_individual_task,
+            'task_count' => $completed_task,
             'color' => 'green'
         ]);
         array_push($final_data, [
             'column' => 'Backlog',
             'percentage' => $count_individual_task ? round(($backlog_task/$count_individual_task) * 100) : 0,
-            'total_task' => $count_individual_task,
+            'task_count' => $backlog_task,
             'color' => 'navy'
         ]);
         array_push($final_data, [
             'column' => 'In Progress',
             'percentage' => $count_individual_task ? round(($in_progress_task/$count_individual_task) * 100) : 0,
-            'total_task' => $count_individual_task,
+            'task_count' => $in_progress_task,
             'color' => 'orange'
         ]);
         array_push($final_data, [
             'column' => 'Cancelled',
             'percentage' => $count_individual_task ? round(($cancelled_task/$count_individual_task) * 100) : 0,
-            'total_task' => $count_individual_task,
+            'task_count' => $cancelled_task,
             'color' => 'red'
         ]);
         return $final_data;
