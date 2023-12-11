@@ -90,7 +90,7 @@ class ProjectOverviewResource extends JsonResource
             'column' => 'Backlog',
             'percentage' => $count_individual_task ? round(($backlog_task/$count_individual_task) * 100) : 0,
             'total_task' => $count_individual_task,
-            'color' => 'violet'
+            'color' => 'navy'
         ]);
         array_push($final_data, [
             'column' => 'In Progress',
