@@ -28,8 +28,14 @@ class ProjectOverviewResource extends JsonResource
         return [
             'project_data' => $this->getProjectData($this->id),
             'total_task' => $this->getTotalTask($this->id),
-            'activity' => $this->getActivity($this->id)
+            // 'activity' => $this->getActivity($this->id)
+            'task_overview' => $this->getTaskOverview($this->id)
         ];
+    }
+
+    function getTaskOverview($project_id) {
+        $tasks = Task::where('project_id', $project_id)->get();
+        return TaskOverviewResource::collection($tasks);
     }
 
     function getActivity($project_id) {
