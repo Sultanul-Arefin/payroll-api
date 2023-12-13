@@ -31,12 +31,12 @@ class TaskOverviewResource extends JsonResource
             'end_date' => $this->end_date_time,
             'status' => $this->status,
             'color' => $this->getColor($this->status),
-            'percentage' => $this->getPercentage()
+            'percentage' => $this->getPercentage($this->id)
         ];
     }
 
-    function getPercentage() {
-        return 0;
+    function getPercentage($task_id) {
+        return $task_id;
     }
 
     function getColor($status) {
