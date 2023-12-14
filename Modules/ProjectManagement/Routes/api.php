@@ -20,6 +20,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('add-comment/{task}', [TaskController::class, 'add_comment']);
         Route::post('change-task-column', [TaskController::class, 'change_task_column']);
         Route::post('update-task-status/{task}', [TaskController::class, 'update_task_status']);
+        Route::post('update-task-percentage/{task}', [TaskController::class, 'update_task_percentage']);
 
         Route::get('project-overview/{project}', [ProjectController::class, 'project_overview']);
     });
