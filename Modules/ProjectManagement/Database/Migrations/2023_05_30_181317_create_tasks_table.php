@@ -30,6 +30,7 @@ return new class extends Migration
             $table->date('start_date_time')->nullable();
             $table->date('end_date_time')->nullable();
             $table->integer('status')->default(Task::BACKLOG);
+            $table->integer('percentage')->default(0);
             $table
                 ->foreignId('created_by')
                 ->constrained('users', 'id')

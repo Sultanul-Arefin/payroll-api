@@ -58,4 +58,17 @@ trait TasksTrait
             message: 'Task Status Updated Successfully'
         );
     }
+
+    function update_task_percentage(Task $task, Request $request) {
+        $request->validate([
+            'percentage' => 'required|integer|min:1|max:100'
+        ]);
+        $task->update([
+            'percentage' => $request->percentage
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'Task Percentage Updated Successfully'
+        );
+    }
 }

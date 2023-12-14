@@ -20,6 +20,7 @@ class Task extends Model
         'start_date_time',
         'end_date_time',
         'status',
+        'percentage',
         'created_by',
     ];
 
