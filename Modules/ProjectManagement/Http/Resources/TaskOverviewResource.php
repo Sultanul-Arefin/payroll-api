@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Resources;
 
+use DateTime;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -31,12 +32,19 @@ class TaskOverviewResource extends JsonResource
             'end_date' => $this->end_date_time,
             'status' => $this->status,
             'color' => $this->getColor($this->status),
-            'percentage' => $this->getPercentage($this->id)
+            'percentage' => $this->percentage
+            // 'percentage' => $this->getPercentage($this->end_date_time, date('Y-m-d', strtotime($this->created_at)))
         ];
     }
 
-    function getPercentage($task_id) {
-        return $task_id;
+    function getPercentage($end_date, $created_date) {
+        if(!isset($end_date)){
+            return 0;
+        }
+        $end_date = new DateTime($end_date);
+        $created_date = new DateTime($created_date);
+        $interval = $end_date->diff($created_date);
+        return $interval->format('%R%a');
     }
 
     function getColor($status) {
