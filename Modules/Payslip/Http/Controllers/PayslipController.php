@@ -173,6 +173,19 @@ class PayslipController extends Controller
         );
     }
 
+    function run_department_wise_payslip(Request $request) {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+            'payment_date' => 'required|date_format:Y-m-d',
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
+        );
+    }
+
     public function preview_payslip(Payslip $payslip)
     {
         return apiResponse(
