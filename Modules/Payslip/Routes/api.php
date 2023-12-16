@@ -9,6 +9,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('employee-salary-items-calculation', [PayslipController::class, 'employee_salary_items_calculation']);
         Route::post('run-payslip', [PayslipController::class, 'run_payslip'])
             ->name('run-payslip');
+        Route::post('run-department-wise-payslip', [PayslipController::class, 'run_department_wise_payslip'])
+            ->name('run-department-wise-payslip');
         Route::get('preview-payslip/{payslip}', [PayslipController::class, 'preview_payslip'])
             ->name('preview-payslip');
         Route::get('preview-french-payslip/{payslip}', [PayslipController::class, 'preview_french_payslip'])
