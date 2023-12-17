@@ -34,8 +34,9 @@ class ProjectResource extends JsonResource
             'assigned_employees' => $this->getAssignedEmployees($this->id),
             'last_update' => $this->getLastUpdate($this->id),
             'status' => $this->getStatus($this->is_completed),
-            'project_data' => $this->getProjectData($this->id),
-            'total_task' => $this->getTotalTask($this->id)
+            // 'project_data' => $this->getProjectData($this->id),
+            'total_task' => $this->getTotalTask($this->id),
+            'project_data' => $this->getProjectData($this->id)
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -46,28 +47,68 @@ class ProjectResource extends JsonResource
         ];
     }
 
-    function getTotalTask($project_id) {
-        $count_task = Task::where('project_id', $project_id)->count();
-        return $count_task;
-    }
-
     function getProjectData($project_id) {
-        $tasks = ProjectAssociatedColumn::query()
+        $project_columns = ProjectAssociatedColumn::query()
             ->where('project_id', $project_id)
             ->orderBy('column_position', 'ASC')
             ->with([])
             ->latest('id')
             ->get();
         $final_data = [];
-        foreach($tasks as $task){
-            $count_task = Task::where('project_associated_column_id', $task->id)->count();
-            array_push($final_data, [
-                'column' => $task->project_column_name,
-                'total_task' => $count_task
-            ]);
-        }
+        $count_individual_task = Task::where('project_id', $project_id)->count();
+        $completed_task = Task::where('project_id', $project_id)->where('status', Task::COMPLETED)->count();
+        $backlog_task = Task::where('project_id', $project_id)->where('status', Task::BACKLOG)->count();
+        $in_progress_task = Task::where('project_id', $project_id)->where('status', Task::IN_PROGRESS)->count();
+        $cancelled_task = Task::where('project_id', $project_id)->where('status', Task::CANCELLED)->count();
+        array_push($final_data, [
+            'column' => 'Completed',
+            'percentage' => $count_individual_task ? round(($completed_task/$count_individual_task) * 100) : 0,
+            'task_count' => $completed_task,
+            'color' => 'green'
+        ]);
+        array_push($final_data, [
+            'column' => 'Backlog',
+            'percentage' => $count_individual_task ? round(($backlog_task/$count_individual_task) * 100) : 0,
+            'task_count' => $backlog_task,
+            'color' => 'navy'
+        ]);
+        array_push($final_data, [
+            'column' => 'In Progress',
+            'percentage' => $count_individual_task ? round(($in_progress_task/$count_individual_task) * 100) : 0,
+            'task_count' => $in_progress_task,
+            'color' => 'orange'
+        ]);
+        array_push($final_data, [
+            'column' => 'Cancelled',
+            'percentage' => $count_individual_task ? round(($cancelled_task/$count_individual_task) * 100) : 0,
+            'task_count' => $cancelled_task,
+            'color' => 'red'
+        ]);
         return $final_data;
     }
+
+    function getTotalTask($project_id) {
+        $count_task = Task::where('project_id', $project_id)->count();
+        return $count_task;
+    }
+
+    // function getProjectData($project_id) {
+    //     $tasks = ProjectAssociatedColumn::query()
+    //         ->where('project_id', $project_id)
+    //         ->orderBy('column_position', 'ASC')
+    //         ->with([])
+    //         ->latest('id')
+    //         ->get();
+    //     $final_data = [];
+    //     foreach($tasks as $task){
+    //         $count_task = Task::where('project_associated_column_id', $task->id)->count();
+    //         array_push($final_data, [
+    //             'column' => $task->project_column_name,
+    //             'total_task' => $count_task
+    //         ]);
+    //     }
+    //     return $final_data;
+    // }
 
     function getStatus($status) {
         if($status == Project::COMPLETED){
