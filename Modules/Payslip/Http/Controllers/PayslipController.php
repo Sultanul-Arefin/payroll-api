@@ -42,6 +42,9 @@ class PayslipController extends Controller
         );
     }
 
+    /**
+     * Get All Salary Items to an Employee Starts
+     */
     public function employee_salary_items(Request $request)
     {
         $request->validate([
@@ -53,7 +56,9 @@ class PayslipController extends Controller
             data: $user->salary_items?->map(function ($s_items) {
                 return [
                     'name' => $s_items->salaryItemsName?->name,
-                    'value' => $s_items->amount,
+                    'hours_days' => $this->getHoursDaysCalculation($s_items),
+                    'rate' => $this->getRateCalculation($s_items),
+                    'amount' => $this->getAmountCalculation($s_items)
                 ];
             }),
             message: 'success',
@@ -61,6 +66,37 @@ class PayslipController extends Controller
         );
     }
 
+    function getHoursDaysCalculation($salary_item) {
+        if($salary_item->salaryItemsName->name == "Wages"){
+            return "1 month";
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1 || $salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+            return 0; // this will come from no. of leave days
+        }
+        return "1 month";
+    }
+
+    function getRateCalculation($salary_item) {
+        return $salary_item->amount;
+    }
+
+    function getAmountCalculation($salary_item) {
+        if($salary_item->salaryItemsName->name == "Wages"){
+            return $salary_item->amount;
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1 || $salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+            return $salary_item->amount * 0; // * no of leave days/hours
+        }
+        return $salary_item->amount;
+    }
+    /**
+     * Get All Salary Items to an Employee Ends
+     */
+
+
+    /**
+     * Get Salary Items Category Calculation to an Employee Starts
+     */
     public function employee_salary_items_calculation(Request $request)
     {
         $request->validate([
@@ -145,7 +181,7 @@ class PayslipController extends Controller
                 'payment_date' => $request->payment_date,
                 'hours_worked' => 148,
                 'wages' => $get_basic,
-                'leave_decution' => $get_staff_deduction_sick_absent,
+                'leave_deduction' => $get_staff_deduction_sick_absent,
                 'total_pay_value' => $total_pay,
                 'taxable_allowance' => $get_taxable_allowance,
                 'gross_pay_before_tax' => $gross_pay_before_tax,

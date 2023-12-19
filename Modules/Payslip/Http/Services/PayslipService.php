@@ -73,6 +73,7 @@ class PayslipService
 
     public function get_staff_deduction_sick_absent_amount($employee_id)
     {
+        return 0;
         $employee_associated_amount = EmployeeSalaryItem::query()
             ->where('employee_id', $employee_id)
             ->whereHas(
@@ -246,6 +247,8 @@ class PayslipService
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
+        } elseif($category_id == 2){
+            return 0;  
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
