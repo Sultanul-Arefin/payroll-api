@@ -246,6 +246,8 @@ class PayslipService
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
+        } elseif($category_id == 2){
+            return 0;  
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
