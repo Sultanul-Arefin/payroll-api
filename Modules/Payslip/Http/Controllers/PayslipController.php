@@ -181,7 +181,7 @@ class PayslipController extends Controller
                 'payment_date' => $request->payment_date,
                 'hours_worked' => 148,
                 'wages' => $get_basic,
-                'leave_decution' => $get_staff_deduction_sick_absent,
+                'leave_deduction' => $get_staff_deduction_sick_absent,
                 'total_pay_value' => $total_pay,
                 'taxable_allowance' => $get_taxable_allowance,
                 'gross_pay_before_tax' => $gross_pay_before_tax,
