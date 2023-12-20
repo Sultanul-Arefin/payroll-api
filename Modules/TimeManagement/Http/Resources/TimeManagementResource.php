@@ -20,10 +20,11 @@ class TimeManagementResource extends JsonResource
             'annual_leave_quota' => $this->getAnnualLeaveQuota($this->company),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->id),
             'remaining_annual_leave' => $this->getAnnualLeaveQuota($this->company) - $this->getAnnualLeaveTaken($this->id),
-            'sick_leave_quota' => '',
-            'sick_leave_taken' => '',
-            'unpaid_sick_leave(absent)' => '',
-            'maternity_leave' => ''
+            'sick_leave_quota' => $this->getSickLeaveQuota($this->company),
+            'sick_leave_taken' => $this->getSickLeaveTaken($this->id),
+            'remaining_sick_leave' => $this->getSickLeaveQuota($this->company) - $this->getSickLeaveTaken($this->id),
+            'unpaid_sick_leave(absent)' => 0,
+            'maternity_leave' => 0
         ];
     }
 
@@ -63,6 +64,54 @@ class TimeManagementResource extends JsonResource
         $data = UserLeave::query()
                 ->where('user_id', $user_id)
                 ->where('leave_type', $annual_leave_data->salary_items_id)
+                ->where('status', UserLeave::APPROVED)
+                ->get();
+        $count = 0;
+        foreach($data as $value){
+            $details = UserLeaveDetail::query()
+                ->where('user_leaves_id', $value->id)
+                ->count();
+            $count += $details;
+        }
+        return $count;
+    }
+
+    function getSickLeaveQuota($company): int {
+        $data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Sick Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        return $data->no_of_days;
+    }
+
+    function getSickLeaveTaken($user_id): int {
+        $sick_leave_data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Sick Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        $data = UserLeave::query()
+                ->where('user_id', $user_id)
+                ->where('leave_type', $sick_leave_data->salary_items_id)
                 ->where('status', UserLeave::APPROVED)
                 ->get();
         $count = 0;
