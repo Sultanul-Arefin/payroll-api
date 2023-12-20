@@ -23,7 +23,8 @@ class TimeManagementResource extends JsonResource
             'sick_leave_quota' => $this->getSickLeaveQuota($this->company),
             'sick_leave_taken' => $this->getSickLeaveTaken($this->id),
             'remaining_sick_leave' => $this->getSickLeaveQuota($this->company) - $this->getSickLeaveTaken($this->id),
-            'unpaid_sick_leave(absent)' => 0,
+            // 'unpaid_sick_leave(absent)' => 0,
+            'unpaid_sick_leave_absent' => 0,
             'maternity_leave' => 0
         ];
     }
