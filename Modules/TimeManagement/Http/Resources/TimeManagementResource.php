@@ -2,7 +2,11 @@
 
 namespace Modules\TimeManagement\Http\Resources;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\LeaveManagement\Entities\UserLeave;
+use Modules\LeaveManagement\Entities\UserLeaveDetail;
+use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
 class TimeManagementResource extends JsonResource
 {
@@ -11,15 +15,63 @@ class TimeManagementResource extends JsonResource
         return [
             'year' => date('Y'),
             'name' => $this->name,
-            'employee_id' => '',
-            'department' => '',
-            'annual_leave_quota' => '',
-            'annual_leave_taken' => '',
-            'remaining_annual_leave' => '',
+            'employee_id' => 'EMP-ID',
+            'department' => $this?->department?->department_name,
+            'annual_leave_quota' => $this->getAnnualLeaveQuota($this->company),
+            'annual_leave_taken' => $this->getAnnualLeaveTaken($this->id),
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota($this->company) - $this->getAnnualLeaveTaken($this->id),
             'sick_leave_quota' => '',
             'sick_leave_taken' => '',
             'unpaid_sick_leave(absent)' => '',
             'maternity_leave' => ''
         ];
+    }
+
+    function getAnnualLeaveQuota($company): int {
+        $data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Annual Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        return $data->no_of_days;
+    }
+
+    function getAnnualLeaveTaken($user_id): int {
+        $annual_leave_data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Annual Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        $data = UserLeave::query()
+                ->where('user_id', $user_id)
+                ->where('leave_type', $annual_leave_data->salary_items_id)
+                ->where('status', UserLeave::APPROVED)
+                ->get();
+        $count = 0;
+        foreach($data as $value){
+            $details = UserLeaveDetail::query()
+                ->where('user_leaves_id', $value->id)
+                ->count();
+            $count += $details;
+        }
+        return $count;
     }
 }
