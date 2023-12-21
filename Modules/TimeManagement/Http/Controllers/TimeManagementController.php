@@ -13,8 +13,12 @@ use Modules\TimeManagement\Http\Resources\TimeManagementResource;
 
 class TimeManagementController extends Controller
 {
-    function time_management_report() 
+    function time_management_report(Request $request) 
     {
+        $request->validate([
+            'department_id' => 'required|integer',
+            'year' => 'required'
+        ]);
         $users = User::where('company_id', auth()->user()->id)->where('status', User::USER_ACTIVE)->get();
         $response = TimeManagementResource::collection(
             $users
@@ -24,9 +28,13 @@ class TimeManagementController extends Controller
         );
     }
 
-    function attendance_report() 
+    function attendance_report(Request $request) 
     {
-        $users = User::where('company_id', auth()->user()->id)->get();
+        $request->validate([
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d'
+        ]);
+        $users = User::where('company_id', auth()->user()->id)->where('status', User::USER_ACTIVE)->get();
         $response = AttendanceReportResource::collection(
             $users
         );
@@ -45,6 +53,7 @@ class TimeManagementController extends Controller
         ]);
         $attendance = Attendance::query()
                     ->where('user_id', $request->user_id)
+                    ->where('status', Attendance::PRESENT)
                     ->whereBetween(
                         'dates',
                         [
