@@ -26,7 +26,7 @@ class TimeManagementController extends Controller
 
     function attendance_report() 
     {
-        $users = User::where('company_id', auth()->user()->id)->get();
+        $users = User::where('company_id', auth()->user()->id)->where('status', User::USER_ACTIVE)->get();
         $response = AttendanceReportResource::collection(
             $users
         );
