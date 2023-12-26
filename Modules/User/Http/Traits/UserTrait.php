@@ -64,4 +64,75 @@ trait UserTrait
             ]
         );
     }
+
+    function terminate_employee(Request $request) {
+        $request->validate([
+            'employee_id' => 'required|integer|exists:users,id'
+        ]);
+        $user = User::where('id', $request->employee_id)->first();
+        $payslip_report = [
+            [
+                'payment_date' => date('d-m-Y'),
+                'month' => date('M'),
+                'gross_pay' => 400000,
+                'fixed_pay' => 300000
+            ],
+            [
+                'payment_date' => date('d-m-Y'),
+                'month' => date('M'),
+                'gross_pay' => 400000,
+                'fixed_pay' => 300000
+            ]
+        ];
+        $other_report = [
+            [
+                'month' => date('M'),
+                'gross_pay' => 400000,
+                'fixed_pay' => 300000,
+                'allowance' => 200000,
+                'ordinary_time' => 148,
+                'recuperated_hour' => 0,
+                'maternity_leave' => 0,
+                'holiday' => 0,
+                'sick_leave' => 0,
+                'overtime' => 0,
+                'bonus' => 0,
+                'double_overtime' => 0
+            ],
+            [
+                'month' => date('M'),
+                'gross_pay' => 400000,
+                'fixed_pay' => 300000,
+                'allowance' => 200000,
+                'ordinary_time' => 148,
+                'recuperated_hour' => 0,
+                'maternity_leave' => 0,
+                'holiday' => 0,
+                'sick_leave' => 0,
+                'overtime' => 0,
+                'bonus' => 0,
+                'double_overtime' => 0
+            ]
+        ];
+        return apiResponse(
+            data: [
+                'attestation_letter' => [
+                    'date' => date('d-m-Y'),
+                    'employee_name' => $user->name,
+                    'company_name' => $user->company->company_name,
+                    'joining_date' => date('d-m-Y'),
+                    'termination_date' => date('d-m-Y'),
+                    'designation' => $user->designation?->name,
+                    'payslip_report' => $payslip_report,
+                    'other_report' => $other_report
+                ],
+                'termination_letter' => [
+                    'date' => date('d-m-Y'),
+                    'employee_name' => $user->name,
+                    'contacted_email' => auth()->user()->email,
+                    'contacted_name' => auth()->user()->name
+                ]
+            ]
+        );
+    }
 }
