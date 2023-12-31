@@ -23,6 +23,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             Route::get('total-paid-salary', [DashboardController::class, 'total_paid_salary']);
             Route::get('total-staff-cost', [DashboardController::class, 'total_staff_cost']);
             Route::get('last-12-months-data', [DashboardController::class, 'last_12_months_data']);
+            Route::get('recent-leaves', [DashboardController::class, 'get_recent_leaves']);
         });
 
     });
