@@ -94,4 +94,8 @@ class DashboardController extends Controller
             'data' => $last12MonthsData,
         ]);
     }
+
+    function get_recent_leaves() {
+        return 'get recent leaves';
+    }
 }
