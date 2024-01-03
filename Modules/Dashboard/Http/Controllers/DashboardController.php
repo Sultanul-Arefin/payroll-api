@@ -96,6 +96,14 @@ class DashboardController extends Controller
     }
 
     function get_recent_leaves() {
-        return 'get recent leaves';
+        return apiResponse(
+            data: null
+        );
+    }
+
+    function get_others() {
+        return apiResponse(
+            data: null
+        );
     }
 }

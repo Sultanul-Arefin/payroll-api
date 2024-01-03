@@ -24,6 +24,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             Route::get('total-staff-cost', [DashboardController::class, 'total_staff_cost']);
             Route::get('last-12-months-data', [DashboardController::class, 'last_12_months_data']);
             Route::get('recent-leaves', [DashboardController::class, 'get_recent_leaves']);
+            Route::get('others', [DashboardController::class, 'get_others']);
         });
 
     });
