@@ -100,4 +100,10 @@ class DashboardController extends Controller
             data: null
         );
     }
+
+    function get_others() {
+        return apiResponse(
+            data: null
+        );
+    }
 }
