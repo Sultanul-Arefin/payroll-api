@@ -104,7 +104,8 @@ class DashboardController extends Controller
 
     function get_others() {
         return apiResponse(
-            data: null
+            data: null,
+            message: 'Success'
         );
     }
 }
