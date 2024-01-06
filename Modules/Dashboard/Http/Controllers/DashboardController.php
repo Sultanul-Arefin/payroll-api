@@ -97,7 +97,8 @@ class DashboardController extends Controller
 
     function get_recent_leaves() {
         return apiResponse(
-            data: null
+            data: null,
+            message: 'Success'
         );
     }
 
