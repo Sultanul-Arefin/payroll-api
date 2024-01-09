@@ -108,6 +108,7 @@ class DashboardController extends Controller
         return apiResponse(
             data: null,
             message: 'Success'
+            statusCode: 200
         );
     }
 }
