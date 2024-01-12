@@ -99,14 +99,20 @@ class DashboardController extends Controller
         return apiResponse(
             data: null,
             message: 'Success',
-            status: 'success'
+            status: 'success',
+            statusCode: 200
         );
     }
 
     function get_others() {
         return apiResponse(
             data: null,
-            message: 'Success'
+            message: 'Success',
+            statusCode: 200
         );
+    }
+
+    private function calculation(){
+        return 1;
     }
 }
