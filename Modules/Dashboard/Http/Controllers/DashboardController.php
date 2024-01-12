@@ -113,6 +113,6 @@ class DashboardController extends Controller
     }
 
     private function calculation(){
-        
+        return 1;
     }
 }
