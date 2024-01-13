@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Company\Entities\AnnualHoliday;
 use Modules\Dashboard\Http\Resources\HolidayResource;
 use Modules\Department\Entities\Department;
+use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\Payslip\Entities\Payslip;
 
 class DashboardController extends Controller
@@ -96,8 +97,10 @@ class DashboardController extends Controller
     }
 
     function get_recent_leaves() {
+        $leaves = UserLeave::query()
+                ->get();
         return apiResponse(
-            data: null,
+            data: $leaves,
             message: 'Success',
             status: 'success',
             statusCode: 200
