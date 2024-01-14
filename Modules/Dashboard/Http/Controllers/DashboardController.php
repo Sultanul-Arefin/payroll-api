@@ -98,7 +98,7 @@ class DashboardController extends Controller
 
     function get_recent_leaves() {
         $leaves = UserLeave::query()
-                ->get();
+                ->get(); // Need to get the most recent leaves from today [ have to update the query here ]
         return apiResponse(
             data: $leaves,
             message: 'Success',
