@@ -31,6 +31,10 @@ class ProjectAssociatedResource extends JsonResource
         return $tasks->count();
     }
 
+    function test_data() {
+        return 'dummy data';
+    }
+
     public function getTasks($tasks)
     {
 
