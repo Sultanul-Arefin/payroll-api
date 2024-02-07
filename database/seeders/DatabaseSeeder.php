@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             PackageDatabaseSeeder::class,
             UserSeeder::class,
+            AdminUserSeeder::class,
             SalaryItemsCategorySeeder::class,
             SalaryItemsNamesSeeder::class,
             EmployeeSalaryItemsSeeder::class,
