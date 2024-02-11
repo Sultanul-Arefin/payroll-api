@@ -32,7 +32,7 @@ class AuthController extends Controller
             ->join('users', 'users.company_id', 'companies.id')
             ->join('user_details', 'users.id', 'user_details.user_id')
             ->join('roles', 'roles.id', 'users.role_id')
-            ->select('user_details.user_image', 'companies.company_name', 'companies.company_logo', 'roles.name as role_name')
+            ->select('user_details.user_image', 'companies.company_name', 'companies.company_logo', 'companies.no_of_working_days_per_week', 'companies.working_hours_per_day', 'roles.name as role_name')
             ->where('users.id', $user->id)
             ->first();
 
@@ -88,6 +88,8 @@ class AuthController extends Controller
                     'company_id' => $user->company_id,
                     'company_name' => $user_details->company_name,
                     'company_logo' => $user_details->company_logo,
+                    'no_of_working_days_per_week' => $user_details->no_of_working_days_per_week,
+                    'working_hours_per_day' => $user_details->working_hours_per_day,
                 ],
                 'package_info' => [
                     'package_id' => $package_info->package_id,
