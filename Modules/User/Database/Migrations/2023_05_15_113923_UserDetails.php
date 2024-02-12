@@ -19,15 +19,16 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
-            $table->string('user_area');
-            $table->string('user_city');
-            $table->string('zip_code');
+            $table->string('user_area')->nullable();
+            $table->string('user_city')->nullable();
+            $table->string('zip_code')->nullable();
             $table->foreignId('country_id')
                 ->constrained('countries', 'id')
                 ->cascadeOnDelete();
             $table->string('user_phone');
-            $table->tinyInteger('gender');
-            $table->string('nid');
+            $table->tinyInteger('gender')->nullable();
+            $table->string('nid')->nullable();
+            $table->string('fax')->nullable();
             $table->string('passport')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->date('joining_date')->nullable();
