@@ -37,6 +37,7 @@ return new class extends Migration
             $table->decimal('working_hours_per_day', 4, 2)->nullable();
             $table->decimal('lunch_and_others_per_day', 4, 2)->nullable();
             $table->decimal('working_hours_per_week', 4, 2)->nullable();
+            $table->integer('subscription_duration')->nullable();
             $table->timestamps();
         });
     }
