@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('support_messages', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('support_id')
+                ->constrained('supports', 'id')
+                ->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users', 'id')
+                ->nullOnDelete();
+            $table->string('messages');
             $table->timestamps();
         });
     }
