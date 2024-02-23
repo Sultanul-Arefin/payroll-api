@@ -18,7 +18,7 @@ class ViewPayslipResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'items_details' => $this->payslip_details,
+            'items_details' => $this->get_payslip_details($this->payslip_details),
             'payment_date' => date('Y-m-d H:i:s'),
             'fixed_pay_details' => $this->wages,
             'additional_pay' => 0,
@@ -34,6 +34,13 @@ class ViewPayslipResource extends JsonResource
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
         ];
+    }
+
+    public function get_payslip_details($details){
+        foreach($details as $detail){
+            $detail->salary_item_name = "Item Name";
+        }
+        return $details;
     }
 
     public function overall_calculation()
