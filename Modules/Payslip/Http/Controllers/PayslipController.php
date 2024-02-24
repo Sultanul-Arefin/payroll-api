@@ -234,7 +234,7 @@ class PayslipController extends Controller
                     ]
                 ),
                 'company_info' => $payslip?->employee?->company,
-                'payslip_info' => new ViewPayslipResource($payslip),
+                'payslip_info' => new ViewPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );
     }
