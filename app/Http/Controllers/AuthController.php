@@ -56,6 +56,13 @@ class AuthController extends Controller
             ]);
         }
 
+        // check if the staff panel access has given
+        if ($user->staff_interaction_panel_status == User::STAFF_INTERACTION_PANEL_NOT_GIVEN) {
+            throw ValidationException::withMessages([
+                'email' => ['You Don\'t Have Staff Interaction Panel Access! Please contact with your company.'],
+            ]);
+        }
+
         // activity log
         $std = new User();
         $activity = activity()
