@@ -30,24 +30,20 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, Notifiable;
 
     public const USER_ACTIVE = 1;
-
     public const USER_DISABLE = 0;
-
     public const USER_PENDING = 2;
 
     public const ADMIN = 1;
-
     public const DEPARTMENT_MANAGER = 2;
-
     public const EMPLOYEE = 3;
 
     public const EMPLOYEE_TYPE_FULL_TIME = 1;
-
     public const EMPLOYEE_TYPE_PART_TIME = 2;
-
     public const EMPLOYEE_TYPE_FLEXI_TIME = 3;
-
     public const EMPLOYEE_TYPE_CONTRACTUAL = 4;
+
+    public const STAFF_INTERACTION_PANEL_GIVEN = 1;
+    public const STAFF_INTERACTION_PANEL_NOT_GIVEN = 0;
 
     protected string $guard_name = 'sanctum';
 
@@ -64,6 +60,7 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
+        'staff_interaction_panel_status',
         'last_login',
         'company_id',
         'role_id',
