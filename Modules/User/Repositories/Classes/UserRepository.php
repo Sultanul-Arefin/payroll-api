@@ -80,6 +80,16 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                     })
                 )
                 ->when(
+                    ! is_null(request('is_staff_panel_given')),
+                    fn (Builder $builder) => $builder->where(function ($query) {
+                        $query
+                            ->where(
+                                'staff_interaction_panel_status',
+                                request('is_staff_panel_given')
+                            );
+                    })
+                )
+                ->when(
                     is_null(request('is_activated')),
                     fn (Builder $builder) => $builder->where(function ($query) {
                         $query

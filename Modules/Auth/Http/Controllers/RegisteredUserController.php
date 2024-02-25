@@ -29,6 +29,8 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password,
+                'status' => User::USER_ACTIVE,
+                'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN,
                 'role_id' => User::ADMIN,
                 'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME,
             ]);

@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
+            'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN,
             'password' => 'password', // password
             'company_id' => Company::factory(),
             'role_id' => User::ADMIN,
@@ -42,6 +43,7 @@ class UserSeeder extends Seeder
             'name' => 'FahimSultan',
             'email_verified_at' => now(),
             'status' => User::USER_ACTIVE,
+            'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN,
             'password' => 'password', // password
             'company_id' => 1,
             'role_id' => User::DEPARTMENT_MANAGER,
@@ -53,10 +55,6 @@ class UserSeeder extends Seeder
             'user_phone' => '1234567890',
             'country_id' => 2,
             // 'user_image' => $request->user_address ?? null,
-        ]);
-        CompanyAssociatedWithPackage::create([
-            'company_id' => 1,
-            'package_id' => 1,
         ]);
         /** User 2 */
         $user = User::factory()->create([
@@ -75,10 +73,6 @@ class UserSeeder extends Seeder
             'user_phone' => '1234567890',
             'country_id' => 3,
             // 'user_image' => $request->user_address ?? null,
-        ]);
-        CompanyAssociatedWithPackage::create([
-            'company_id' => 1,
-            'package_id' => 1,
         ]);
         // User::factory()->count(10)->create();
     }

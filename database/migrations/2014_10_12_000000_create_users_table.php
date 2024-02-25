@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->integer('status')->default(User::USER_PENDING);
+            $table->integer('staff_interaction_panel_status')->default(User::STAFF_INTERACTION_PANEL_NOT_GIVEN);
             $table->integer('role_id')->nullable();
             $table->integer('employee_type');
             $table->integer('company_id');
