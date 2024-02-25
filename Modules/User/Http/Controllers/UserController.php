@@ -124,7 +124,7 @@ class UserController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'company_id' => auth()->user()->company_id,
-                    'status' => User::USER_PENDING,
+                    'status' => User::USER_ACTIVE,
                     'employee_type' => $request->employee_type,
                 ]);
 
