@@ -35,6 +35,7 @@ trait UserTrait
             'role_id' => $request->role_id,
             'status' => User::USER_ACTIVE,
             'password' => Hash::make($request->password),
+            'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN
         ]);
 
         return apiResponse(
