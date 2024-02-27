@@ -8,6 +8,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
@@ -49,6 +50,9 @@ class PayslipController extends Controller
     {
         $request->validate([
             'employee_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d',
+            'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
         $user = User::where('id', request('employee_id'))->first();
 
@@ -70,10 +74,31 @@ class PayslipController extends Controller
         if($salary_item->salaryItemsName->name == "Wages"){
             return "1 month";
         }
-        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1 || $salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1)
+        {
             return 0; // this will come from no. of leave days
         }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 2)
+        {
+            $leave = $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id);
+            return $leave;
+        }
         return "1 month";
+    }
+
+    public function get_leave_details($employee_id, $item_id)
+    {
+        $leave = UserLeave::query()
+            ->where('user_id', $employee_id)
+            ->where('status', UserLeave::APPROVED)
+            ->where('leave_type', $item_id)
+            ->get();
+        $count = 0;
+        foreach($leave as $value)
+        {
+            $count = $value?->leave_details?->count();
+        }
+        return $count;
     }
 
     function getRateCalculation($salary_item) {
@@ -101,6 +126,9 @@ class PayslipController extends Controller
     {
         $request->validate([
             'employee_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d',
+            'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
         $user = User::where('id', request('employee_id'))->first();
         $salary_category = SalaryItemsCategory::query()
