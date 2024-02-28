@@ -149,8 +149,6 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
-            return $count * $absent_unpaid_value[0]->amount ?? 0;
-            return $unpaid_absent_count;
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
