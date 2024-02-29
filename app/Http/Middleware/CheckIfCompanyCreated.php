@@ -25,15 +25,15 @@ class CheckIfCompanyCreated
                     data: [],
                     message: 'Please, Config The Working Days, Hours, & Holidays!',
                     status: 'error',
-                    statusCode: 200
-                );    
+                    statusCode: 409
+                );
             }
         } else {
             return apiResponse(
                 data: [],
                 message: 'Please, Create Company First!',
                 status: 'error',
-                statusCode: 200
+                statusCode: 403
             );
         }
     }
