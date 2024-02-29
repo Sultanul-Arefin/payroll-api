@@ -25,7 +25,7 @@ class CheckIfCompanyCreated
                     data: [],
                     message: 'Please, Config The Working Days, Hours, & Holidays!',
                     status: 'error',
-                    statusCode: 401
+                    statusCode: 200
                 );    
             }
         } else {
@@ -33,7 +33,7 @@ class CheckIfCompanyCreated
                 data: [],
                 message: 'Please, Create Company First!',
                 status: 'error',
-                statusCode: 401
+                statusCode: 200
             );
         }
     }
