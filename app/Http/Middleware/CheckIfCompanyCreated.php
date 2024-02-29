@@ -17,13 +17,23 @@ class CheckIfCompanyCreated
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check() && ! is_null(Auth::user()->company_id) && Auth::user()->active_company) {
-            return $next($request);
+            if(Auth::user()->company->no_of_working_days_per_week){
+                return $next($request);
+            }
+            else{
+                return apiResponse(
+                    data: [],
+                    message: 'Please, Config The Working Days, Hours, & Holidays!',
+                    status: 'error',
+                    statusCode: 403
+                );    
+            }
         } else {
             return apiResponse(
                 data: [],
                 message: 'Please, Create Company First!',
                 status: 'error',
-                statusCode: 401
+                statusCode: 403
             );
         }
     }
