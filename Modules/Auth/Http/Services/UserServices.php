@@ -20,7 +20,7 @@ class UserServices
                 'Paid Sick Leave Rate',
                 'Unpaid Sick Leave Rate',
                 'Holiday Rate',
-                'Absent',
+                'Absent Rate',
                 'Bonus',
                 'Overtime Rate',
                 'Double Overtime Rate',
