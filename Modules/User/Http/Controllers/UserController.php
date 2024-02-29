@@ -258,16 +258,32 @@ class UserController extends Controller
         if ($salary_items['paid_sick_leave_rate']) {
             $item_id = $this->check_salary_items('Paid Sick Leave Rate');
             $this->add_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items('Sick Leave');
+            $this->add_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
         }
         if ($salary_items['unpaid_sick_leave_rate']) {
             $item_id = $this->check_salary_items('Unpaid Sick Leave Rate');
+            $this->add_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items('Unpaid Sick Leave');
             $this->add_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
         }
         if ($salary_items['holiday_rate']) {
             $item_id = $this->check_salary_items('Holiday Rate');
             $this->add_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items('Annual Leave');
+            $this->add_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
         }
         if ($salary_items['absent']) {
+            $item_id = $this->check_salary_items('Absent Rate');
+            $this->add_items_with_employee($item_id, $salary_items['absent'], $employee_id);
+
+            // for category id 2
             $item_id = $this->check_salary_items('Absent');
             $this->add_items_with_employee($item_id, $salary_items['absent'], $employee_id);
         }
@@ -331,16 +347,32 @@ class UserController extends Controller
         if ($salary_items['paid_sick_leave_rate']) {
             $item_id = $this->check_salary_items_for_update('Paid Sick Leave Rate');
             $this->update_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items_for_update('Sick Leave');
+            $this->update_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
         }
         if ($salary_items['unpaid_sick_leave_rate']) {
             $item_id = $this->check_salary_items_for_update('Unpaid Sick Leave Rate');
+            $this->update_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items_for_update('Unpaid Sick Leave');
             $this->update_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
         }
         if ($salary_items['holiday_rate']) {
             $item_id = $this->check_salary_items_for_update('Holiday Rate');
             $this->update_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
+
+            // for category id 2
+            $item_id = $this->check_salary_items_for_update('Annual Leave');
+            $this->update_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
         }
         if ($salary_items['absent']) {
+            $item_id = $this->check_salary_items_for_update('Absent Rate');
+            $this->update_items_with_employee($item_id, $salary_items['absent'], $employee_id);
+
+            // for category id 2
             $item_id = $this->check_salary_items_for_update('Absent');
             $this->update_items_with_employee($item_id, $salary_items['absent'], $employee_id);
         }
