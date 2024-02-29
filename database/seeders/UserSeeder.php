@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         ]);
         CompanyAssociatedWithPackage::create([
             'company_id' => 1,
-            'package_id' => 1,
+            'package_id' => 4,
         ]);
         /** User 1 */
         $user = User::factory()->create([
