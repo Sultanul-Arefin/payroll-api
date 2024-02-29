@@ -86,7 +86,7 @@ class PayslipController extends Controller
         return "1 month";
     }
 
-    public function get_leave_details($employee_id, $item_id): int
+    public function get_leave_details($employee_id, $item_id)
     {
         $leave = UserLeave::query()
             ->where('user_id', $employee_id)
@@ -101,21 +101,16 @@ class PayslipController extends Controller
         return $count;
     }
 
-    function getRateCalculation($salary_item)
-    {
+    function getRateCalculation($salary_item) {
         return $salary_item->amount;
     }
 
-    function getAmountCalculation($salary_item)
-    {
+    function getAmountCalculation($salary_item) {
         if($salary_item->salaryItemsName->name == "Wages"){
             return $salary_item->amount;
         }
-        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
-            return 0;
-        }
-        if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
-            return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1 || $salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+            return $salary_item->amount * 0; // * no of leave days/hours
         }
         return $salary_item->amount;
     }

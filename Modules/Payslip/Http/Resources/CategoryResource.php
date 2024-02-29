@@ -10,7 +10,6 @@ use Illuminate\Support\Arr;
 use JsonSerializable;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
-use Modules\LeaveManagement\Entities\UserLeave;
 
 class CategoryResource extends JsonResource
 {
@@ -111,46 +110,7 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif($category_id == 2){
-            // return 0;
-            $unpaid_absent_count = UserLeave::query()
-                                    ->whereHas(
-                                        'salary_item', function(Builder $builder){
-                                            $builder->where('company_id', auth()->user()->company_id)
-                                                    ->where(function($query){
-                                                        $query->where('name', 'Absent')
-                                                            ->orWhere('name', 'Unpaid Sick Leave');
-                                                    });
-                                        }
-                                    )
-                                    ->where('user_id', request('employee_id'))
-                                    ->get();
-            $count = 0;
-            foreach($unpaid_absent_count as $value)
-            {
-                $count = $value?->leave_details?->count();
-            }
-
-            // get absent, unpaid leave value
-            $absent_unpaid_value = EmployeeSalaryItem::query()
-                ->whereHas(
-                    'salaryItemsName', function (Builder $builder) use ($category_id) {
-                        $builder->where(function($query){
-                                $query->where('name', 'Absent')
-                                    ->orWhere('name', 'Unpaid Sick Leave');
-                            })
-                        ->whereHas(
-                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                $builder->where('id', 2);
-                            }
-                        );
-                    }
-                )
-                ->where('company_id', auth()->user()->company_id)
-                ->where('employee_id', request('employee_id'))
-                ->get();
-            return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
-            return $count * $absent_unpaid_value[0]->amount ?? 0;
-            return $unpaid_absent_count;
+            return 0;
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
