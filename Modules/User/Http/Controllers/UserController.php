@@ -400,7 +400,6 @@ class UserController extends Controller
             ->where('company_id', auth()->user()->company_id)
             ->where('name', 'like', '%'.$item_name.'%')
             ->first();
-
         return $name->id;
     }
 
