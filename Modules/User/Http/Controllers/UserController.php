@@ -309,7 +309,7 @@ class UserController extends Controller
     {
         $name = SalaryItemsName::query()
             ->where('company_id', auth()->user()->company_id)
-            ->where('name', 'like', '%'.$item_name.'%')
+            ->where('name', 'like', $item_name)
             ->first();
 
         return $name->id;
@@ -398,7 +398,7 @@ class UserController extends Controller
     {
         $name = SalaryItemsName::query()
             ->where('company_id', auth()->user()->company_id)
-            ->where('name', 'like', '%'.$item_name.'%')
+            ->where('name', 'like', $item_name)
             ->first();
         return $name->id;
     }
