@@ -111,7 +111,6 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif($category_id == 2){
-            // return 0;
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
                                         'salary_item', function(Builder $builder){
