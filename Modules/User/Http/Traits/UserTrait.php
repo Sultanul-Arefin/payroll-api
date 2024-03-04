@@ -55,27 +55,21 @@ trait UserTrait
 
         return apiResponse(
             data: null,
-            message: 'Password Successfully Updated'
+            message: 'User Password Successfully Updated'
         );
     }
 
     public function update_role(User $user, Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'role_id' => 'required|integer|in:1,2,3',
-            'password' => 'required|string|max:30',
+            'role_id' => 'required|integer|in:1,2,3'
         ]);
-        $update_user = User::where('id', $request->user_id)->update([
-            'role_id' => $request->role_id,
-            'status' => User::USER_ACTIVE,
-            'password' => Hash::make($request->password),
-            'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN
+        $updated_user = $user->update([
+            'role_id' => $request->role_id
         ]);
-
         return apiResponse(
             data: null,
-            message: 'User Successfully Updated'
+            message: 'User Role Successfully Updated'
         );
     }
 
