@@ -36,6 +36,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
          * Staff Interaction Panel
          */
         Route::post('activate-user', [UserController::class, 'activate_user']);
+        Route::patch('update-password/{user}', [UserController::class, 'update_password']);
+        Route::patch('update-role/{user}', [UserController::class, 'update_role']);
 
         // Route for payslip
         Route::get('user-info-for-payslip', [UserController::class, 'user_info_for_payslip'])->name('user-info-for-payslip');
