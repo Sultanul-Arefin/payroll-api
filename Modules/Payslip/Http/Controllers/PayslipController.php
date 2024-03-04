@@ -311,4 +311,14 @@ class PayslipController extends Controller
             )
         );
     }
+
+    public function delete_payslip(Payslip $payslip, Request $request)
+    {
+        $payslip->delete();
+
+        return apiResponse(
+            data: null,
+            message: 'Payslip Deleted Successfully'
+        );
+    }
 }
