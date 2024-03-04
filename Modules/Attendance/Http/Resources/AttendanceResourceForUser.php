@@ -28,6 +28,7 @@ class AttendanceResourceForUser extends JsonResource
                     'out_time' => $attendance->out_time,
                 ];
             }),
+            'created_at' => $this->created_at
         ];
     }
 
