@@ -44,6 +44,35 @@ trait UserTrait
         );
     }
 
+    public function update_password(User $user, Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string|max:30',
+        ]);
+        $updated_user = $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'User Password Successfully Updated'
+        );
+    }
+
+    public function update_role(User $user, Request $request)
+    {
+        $request->validate([
+            'role_id' => 'required|integer|in:1,2,3'
+        ]);
+        $updated_user = $user->update([
+            'role_id' => $request->role_id
+        ]);
+        return apiResponse(
+            data: null,
+            message: 'User Role Successfully Updated'
+        );
+    }
+
     public function user_information()
     {
         if (auth()->user()->company->associated_package->package->id == '1' || auth()->user()->company->associated_package->package->id == '2' || auth()->user()->company->associated_package->package->id == '3' || auth()->user()->company->associated_package->package->id == '15' || auth()->user()->company->associated_package->package->id == '16' || auth()->user()->company->associated_package->package->id == '17' || auth()->user()->company->associated_package->package->id == '18' || auth()->user()->company->associated_package->package->id == '19' || auth()->user()->company->associated_package->package->id == '20' || auth()->user()->company->associated_package->package->id == '21' || auth()->user()->company->associated_package->package->id == '22') {
