@@ -101,6 +101,16 @@ class UserController extends Controller
         return view('employee::create');
     }
 
+    public function get_customer_id(): JsonResponse
+    {
+        $count = User::where('company_id', auth()->user()->company_id)->count();
+        return apiResponse(
+            data: [
+                'customer_id' => 'EMP-' . $count + 1
+            ]
+        );
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -125,6 +135,7 @@ class UserController extends Controller
                     'email' => $request->email,
                     'company_id' => auth()->user()->company_id,
                     'status' => User::USER_ACTIVE,
+                    'customer_id' => $request->customer_id,
                     'employee_type' => $request->employee_type,
                 ]);
 

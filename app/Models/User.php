@@ -64,6 +64,7 @@ class User extends Authenticatable
         'last_login',
         'company_id',
         'role_id',
+        'customer_id',
         'employee_type',
     ];
 
