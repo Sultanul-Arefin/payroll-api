@@ -22,6 +22,7 @@ class AttendanceDetailsResourceForAdmin extends JsonResource
             'user_email' => $this->user->email,
             'date' => $this->dates,
             'attendance_details' => $this->attendance_details,
+            'created_at' => $this->created_at
         ];
     }
 }
