@@ -17,5 +17,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('preview-french-payslip');
         Route::get('payslips', [PayslipController::class, 'payslips'])
             ->name('payslips');
+        Route::delete('delete-payslip/{payslip}', [PayslipController::class, 'delete_payslip'])
+            ->name('payslip.delete');
     });
 });
