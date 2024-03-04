@@ -2,7 +2,9 @@
 
 namespace Modules\Payslip\Http\Services;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Modules\Attendance\Entities\Attendance;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\Payslip\Entities\PayslipDetail;
@@ -74,17 +76,43 @@ class PayslipService
 
     public function get_staff_deduction_sick_absent_amount($employee_id)
     {
-        return 0;
-        $employee_associated_amount = EmployeeSalaryItem::query()
-            ->where('employee_id', $employee_id)
-            ->whereHas(
-                'salaryItemsName', function (Builder $builder) {
-                    $builder->where('salary_items_category_id', 2);
-                }
-            )
-            ->sum('amount');
+        $unpaid_absent_count = UserLeave::query()
+                                    ->whereHas(
+                                        'salary_item', function(Builder $builder){
+                                            $builder->where('company_id', auth()->user()->company_id)
+                                                    ->where(function($query){
+                                                        $query->where('name', 'Absent')
+                                                            ->orWhere('name', 'Unpaid Sick Leave');
+                                                    });
+                                        }
+                                    )
+                                    ->where('user_id', $employee_id)
+                                    ->get();
+            $count = 0;
+            foreach($unpaid_absent_count as $value)
+            {
+                $count = $value?->leave_details?->count();
+            }
 
-        return $employee_associated_amount;
+            // get absent, unpaid leave value
+            $absent_unpaid_value = EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder->where(function($query){
+                                $query->where('name', 'Absent')
+                                    ->orWhere('name', 'Unpaid Sick Leave');
+                            })
+                        ->whereHas(
+                            'salaryItemsCategory', function (Builder $builder) {
+                                $builder->where('id', 2);
+                            }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('employee_id', $employee_id)
+                ->get();
+            return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
     }
 
     public function get_taxable_allowance_amount($employee_id)
@@ -169,6 +197,38 @@ class PayslipService
             ->sum('amount');
 
         return $employee_associated_amount;
+    }
+
+    // hours worked for employee
+    public function get_hours_worked($employee_id, $from_date, $to_date)
+    {
+        $attendances = Attendance::query()
+                        ->where('user_id', $employee_id)
+                        ->where('status', Attendance::PRESENT)
+                        ->whereBetween(
+                            'dates',
+                            [
+                                $from_date,
+                                $to_date
+                            ]
+                        )
+                        ->get();
+        $total_minutes = 0;
+        foreach($attendances as $value)
+        {
+            $details = $value->attendance_details;
+
+            foreach($details as $detail)
+            {
+                $inTime = Carbon::parse($detail->in_time);
+                $outTime = Carbon::parse($detail->out_time);
+
+                // Calculate the time difference in minutes and add it to the total
+                $timeDifferenceMinutes = $outTime->diffInHours($inTime);
+                $total_minutes += $timeDifferenceMinutes;
+            }
+        }
+        return $total_minutes;
     }
 
     // employee-salary-items-calculation
