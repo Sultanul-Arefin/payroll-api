@@ -19,6 +19,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('user', [UserController::class, 'index'])->name('user_list');
         Route::post('status/updateStatus/{user}', [UserController::class, 'user_status_update'])->name('status_update_user');
 
+        Route::get('get-customer-id', [UserController::class, 'get_customer_id']);
         Route::get('user/{user}', [UserController::class, 'findById'])->name('get_user');
         Route::post('user', [UserController::class, 'store'])->name('add_user');
         Route::post('user/update/{user}', [UserController::class, 'update'])->name('update_user');
