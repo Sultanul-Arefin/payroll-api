@@ -216,7 +216,7 @@ class PayslipController extends Controller
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
                 'payment_date' => $request->payment_date,
-                'hours_worked' => 148,
+                'hours_worked' => $hours_worked,
                 'wages' => $get_basic,
                 'leave_deduction' => $get_staff_deduction_sick_absent,
                 'total_pay_value' => $total_pay,
