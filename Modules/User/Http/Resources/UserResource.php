@@ -29,6 +29,7 @@ class UserResource extends JsonResource
             ),
             'status' => $this->status,
             'role' => $this->getRole($this->role_id),
+            'role_id' => $this->role_id,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'user_details' => $this->user_details,
             'user_image' => $this->user_details?->changed_user_image,
