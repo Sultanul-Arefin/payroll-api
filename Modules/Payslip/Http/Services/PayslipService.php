@@ -50,12 +50,44 @@ class PayslipService
             ->whereNotNull('amount')
             ->get();
         foreach ($employee_associated_amount as $value) {
-            PayslipDetail::create([
-                'payslip_id' => $payslip_id,
-                'salary_item_id' => $value->salary_item_id,
-                'amount' => $value->amount,
-            ]);
+            if($this->getAmountCalculation($value) != 0){
+                PayslipDetail::create([
+                    'payslip_id' => $payslip_id,
+                    'salary_item_id' => $value->salary_item_id,
+                    'amount' => $this->getAmountCalculation($value),
+                    // 'amount' => $value->amount,
+                ]);
+            }
         }
+    }
+
+    function getAmountCalculation($salary_item)
+    {
+        if($salary_item->salaryItemsName->name == "Wages"){
+            return $salary_item->amount;
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
+            return 0;
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+            return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
+        }
+        return $salary_item->amount;
+    }
+
+    public function get_leave_details($employee_id, $item_id): int
+    {
+        $leave = UserLeave::query()
+            ->where('user_id', $employee_id)
+            ->where('status', UserLeave::APPROVED)
+            ->where('leave_type', $item_id)
+            ->get();
+        $count = 0;
+        foreach($leave as $value)
+        {
+            $count = $value?->leave_details?->count();
+        }
+        return $count;
     }
 
     public function get_basic_amount($employee_id)

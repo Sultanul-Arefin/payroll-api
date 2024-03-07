@@ -58,12 +58,14 @@ class PayslipController extends Controller
 
         return apiResponse(
             data: $user->salary_items?->map(function ($s_items) {
-                return [
-                    'name' => $s_items->salaryItemsName?->name,
-                    'hours_days' => $this->getHoursDaysCalculation($s_items),
-                    'rate' => $this->getRateCalculation($s_items),
-                    'amount' => $this->getAmountCalculation($s_items)
-                ];
+                if($this->getAmountCalculation($s_items) != 0){
+                    return [
+                        'name' => $s_items->salaryItemsName?->name,
+                        'hours_days' => $this->getHoursDaysCalculation($s_items),
+                        'rate' => $this->getRateCalculation($s_items),
+                        'amount' => $this->getAmountCalculation($s_items)
+                    ];
+                }
             }),
             message: 'success',
             statusCode: 200
