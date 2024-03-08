@@ -36,11 +36,11 @@ class ViewPayslipResource extends JsonResource
         ];
     }
 
-    public function get_payslip_details($details){
-        foreach($details as $detail){
-            $detail->salary_item_name = "Item Name";
+    public function get_payslip_details($payslip_details){
+        foreach($payslip_details as $payslip_detail){
+            $payslip_detail->salary_item_name = $payslip_detail->salary_item->name;
         }
-        return $details;
+        return $payslip_details;
     }
 
     public function overall_calculation()
