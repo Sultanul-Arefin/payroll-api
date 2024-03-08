@@ -4,6 +4,8 @@ namespace Modules\Payslip\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class PayslipDetail extends Model
 {
@@ -14,4 +16,12 @@ class PayslipDetail extends Model
         'salary_item_id',
         'amount',
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function salary_item(): BelongsTo
+    {
+        return $this->belongsTo(SalaryItemsName::class, 'salary_item_id', 'id');
+    }
 }
