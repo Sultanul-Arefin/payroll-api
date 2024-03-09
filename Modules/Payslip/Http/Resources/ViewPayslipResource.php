@@ -19,7 +19,7 @@ class ViewPayslipResource extends JsonResource
     {
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
-            'payment_date' => date('Y-m-d H:i:s'),
+            'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
             'additional_pay' => 0,
             'wage_deduction' => $this->leave_deduction,
