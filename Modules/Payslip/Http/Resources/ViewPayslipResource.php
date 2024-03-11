@@ -21,7 +21,7 @@ class ViewPayslipResource extends JsonResource
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => 0,
+            'additional_pay' => 0, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
@@ -30,7 +30,7 @@ class ViewPayslipResource extends JsonResource
             'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'pay_due_before_deduction' => $this->pay_deduction,
-            'staff_social_charges' => 0.00,
+            'staff_social_charges' => 0.00, // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
         ];
