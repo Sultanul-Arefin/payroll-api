@@ -30,7 +30,7 @@ class ViewPayslipResource extends JsonResource
             'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'pay_due_before_deduction' => $this->pay_deduction,
-            'staff_social_charges' => 0.00,
+            'staff_social_charges' => 0.00, // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
         ];
