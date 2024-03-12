@@ -49,7 +49,7 @@ class ViewPayslipResource extends JsonResource
             'monthly' => [
                 [
                     'hours' => $this->hours_worked,
-                    'overtime_hours' => 0,
+                    'overtime_hours' => 0, // calculate full working hours & get overtime
                     'total_fixed_pay' => $this->wages - $this->leave_deduction,
                     'taxable_allowances' => $this->taxable_allowance,
                     'non_taxable_allowances' => $this->non_taxable_allowance,
