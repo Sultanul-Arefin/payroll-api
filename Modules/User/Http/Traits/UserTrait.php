@@ -149,7 +149,7 @@ trait UserTrait
                     'date' => date('d-m-Y'),
                     'employee_name' => $user->name,
                     'company_name' => $user->company->company_name,
-                    'joining_date' => date('m-d-Y', strtotime($user->user_details->joining_date)),
+                    'joining_date' => date('m-d-Y', strtotime($user->user_details?->joining_date)),
                     'termination_date' => date('d-m-Y'),
                     'designation' => $user->designation?->name,
                     'payslip_report' => $payslip_report,
