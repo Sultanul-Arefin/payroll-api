@@ -129,7 +129,7 @@ class User extends Authenticatable
         return $this->hasMany(EmployeeSalaryItem::class, 'employee_id', 'id');
     }
 
-    public function paslips(): HasMany
+    public function payslips(): HasMany
     {
         return $this->hasMany(Payslip::class, 'employee_id', 'id');
     }
