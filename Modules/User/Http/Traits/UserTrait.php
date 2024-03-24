@@ -100,27 +100,40 @@ trait UserTrait
             'employee_id' => 'required|integer|exists:users,id'
         ]);
         $user = User::where('id', $request->employee_id)->first();
-        $payslip_report = [
-            [
-                'payment_date' => date('d-m-Y'),
-                'month' => date('M'),
-                'gross_pay' => 400000,
-                'fixed_pay' => 300000
-            ],
-            [
-                'payment_date' => date('d-m-Y'),
-                'month' => date('M'),
-                'gross_pay' => 400000,
-                'fixed_pay' => 300000
-            ]
-        ];
-        $other_report = [
-            [
-                'month' => date('M'),
-                'gross_pay' => 400000,
-                'fixed_pay' => 300000,
-                'allowance' => 200000,
-                'ordinary_time' => 148,
+        if($user->payslips->count() == 0)
+        {
+            return apiResponse(
+                data: [],
+                message: 'No Payslips Found! Please Create Payslip First',
+                status: 'error',
+                statusCode: 404
+            );
+        }
+
+        $payslips = $user->payslips; // GET THE PAYSLIPS ASSOCIATED WITH THIS USER
+
+        // PAYSLIP REPORT
+        $payslip_report = array();
+        foreach($payslips as $payslip)
+        {
+            array_push($payslip_report, [
+                'payment_date' => $payslip->payment_date,
+                'month' => $payslip->month,
+                'gross_pay' => $payslip->wages,
+                'fixed_pay' => $payslip->net_pay
+            ]);
+        }
+
+        // OTHERS REPORT
+        $other_report = array();
+        foreach($payslips as $payslip)
+        {
+            array_push($other_report, [
+                'month' => $payslip->payment_date,
+                'gross_pay' => $payslip->wages,
+                'fixed_pay' => $payslip->net_pay,
+                'allowance' => $payslip->non_taxable_allowance,
+                'ordinary_time' => $payslip->hours_worked,
                 'recuperated_hour' => 0,
                 'maternity_leave' => 0,
                 'holiday' => 0,
@@ -128,22 +141,8 @@ trait UserTrait
                 'overtime' => 0,
                 'bonus' => 0,
                 'double_overtime' => 0
-            ],
-            [
-                'month' => date('M'),
-                'gross_pay' => 400000,
-                'fixed_pay' => 300000,
-                'allowance' => 200000,
-                'ordinary_time' => 148,
-                'recuperated_hour' => 0,
-                'maternity_leave' => 0,
-                'holiday' => 0,
-                'sick_leave' => 0,
-                'overtime' => 0,
-                'bonus' => 0,
-                'double_overtime' => 0
-            ]
-        ];
+            ]);
+        }
         return apiResponse(
             data: [
                 'attestation_letter' => [
