@@ -88,15 +88,15 @@ class AuthController extends Controller
                 'user_info' => [
                     'user_name' => $user->name,
                     'user_email' => $user->email,
-                    'user_image' => $user_details->user_image,
-                    'user_role' => $user_details->role_name,
+                    'user_image' => $user->company?->user_image,
+                    'user_role' => $user->company?->role_name,
                 ],
                 'company_info' => [
                     'company_id' => $user->company_id,
-                    'company_name' => $user_details->company_name,
-                    'company_logo' => $user_details->company_logo,
-                    'no_of_working_days_per_week' => $user_details->no_of_working_days_per_week,
-                    'working_hours_per_day' => $user_details->working_hours_per_day,
+                    'company_name' => $user->company?->company_name,
+                    'company_logo' => $user->company?->company_logo,
+                    'no_of_working_days_per_week' => $user->company?->no_of_working_days_per_week,
+                    'working_hours_per_day' => $user->company?->working_hours_per_day,
                 ],
                 'package_info' => [
                     'package_id' => $package_info->package_id,
