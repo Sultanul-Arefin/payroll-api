@@ -71,4 +71,31 @@ class EmployeeSalaryItemsController extends Controller
             )
         );
     }
+
+    public function update_salary_item(EmployeeSalaryItem $employee_salary_item, Request $request)
+    {
+        $request->validate([
+            'amount' => 'required',
+            '_method' => 'required'
+        ]);
+        $employee_salary_item->update([
+            'amount' => $request->amount
+        ]);
+        return apiResponse(
+            data: $employee_salary_item,
+            message: 'Salary Amount Updated Successfully'
+        );
+    }
+
+    public function delete_salary_item(EmployeeSalaryItem $employee_salary_item, Request $request)
+    {
+        $request->validate([
+            '_method' => 'required'
+        ]);
+        $employee_salary_item->delete();
+        return apiResponse(
+            data: [],
+            message: 'Salary Amount Deleted Successfully'
+        );
+    }
 }
