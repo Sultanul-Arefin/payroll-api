@@ -39,10 +39,8 @@ class EmployeeSalaryItemsController extends Controller
                     'government_or_company_amount' => $request->company_deduction,
                 ]);
             }
-
             return $employee_salary;
         });
-
         return apiResponse(
             data: null,
             message: 'Salary Items Associate Successfully',
