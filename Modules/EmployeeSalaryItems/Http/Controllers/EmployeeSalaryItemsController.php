@@ -2,15 +2,22 @@
 
 namespace Modules\EmployeeSalaryItems\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\EmployeeSalaryItems\Http\Requests\StoreEmployeeSalaryItems;
+use Modules\EmployeeSalaryItems\Http\Resources\DetailsWagesAgainstCategoryResource;
+use Modules\EmployeeSalaryItems\Http\Services\SalaryItemsCategoryService;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class EmployeeSalaryItemsController extends Controller
 {
+    public function __construct(
+        private SalaryItemsCategoryService $salaryItemsCategoryService
+    ) {
+    }
     public function store(StoreEmployeeSalaryItems $request)
     {
         // validation for category_id 7 & 8
@@ -45,6 +52,23 @@ class EmployeeSalaryItemsController extends Controller
             data: null,
             message: 'Salary Items Associate Successfully',
             status: 'success'
+        );
+    }
+
+    public function getSalaryItemsValue(Request $request)
+    {
+        $request->validate([
+            'salary_items_category_id' => 'required|exists:salary_items_categories,id',
+        ]);
+        $rows = 15;
+        if (request()?->has('rows')) {
+            $rows = (int) request('rows');
+        }
+
+        return DetailsWagesAgainstCategoryResource::collection(
+            $this->salaryItemsCategoryService->get_salary_items_name_with_employee(
+                $request->salary_items_category_id, $rows
+            )
         );
     }
 }
