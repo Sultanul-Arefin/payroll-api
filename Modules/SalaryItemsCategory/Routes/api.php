@@ -17,7 +17,5 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('salary-items-categories', [SalaryItemsCategoryController::class, 'index'])
             ->name('salary-items-category');
-        Route::get('salary-items-value-against-category', [SalaryItemsCategoryController::class, 'getSalaryItemsValue'])
-            ->name('salary-items-value-against-category');
     });
 });

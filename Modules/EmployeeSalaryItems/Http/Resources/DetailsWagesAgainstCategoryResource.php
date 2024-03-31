@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\SalaryItemsCategory\Http\Resources;
+namespace Modules\EmployeeSalaryItems\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;

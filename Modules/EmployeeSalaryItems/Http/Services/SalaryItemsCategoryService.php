@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\SalaryItemsCategory\Http\Services;
+namespace Modules\EmployeeSalaryItems\Http\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
