@@ -206,7 +206,7 @@ class PayslipController extends Controller
         /**
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked) {
+        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked) {
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
@@ -221,11 +221,12 @@ class PayslipController extends Controller
                 'leave_deduction' => $get_staff_deduction_sick_absent,
                 'total_pay_value' => $total_pay,
                 'taxable_allowance' => $get_taxable_allowance,
+                'gross_pay_after_tax' => $gross_pay_after_tax,
                 'gross_pay_before_tax' => $gross_pay_before_tax,
                 'tax_value' => $get_income_taxes,
                 'post_tax_value' => $get_additional_taxes_tax_top_up,
                 'non_taxable_allowance' => $get_non_taxable_allowance,
-                'pay_deduction' => $pay_due_before_deductions,
+                'pay_due_before_deduction' => $pay_due_before_deductions,
                 'net_pay' => $total_amount,
             ]);
 
