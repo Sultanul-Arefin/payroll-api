@@ -29,7 +29,7 @@ class ViewFrenchPayslipResource extends JsonResource
             'total_gross_pay' => $this->gross_pay_before_tax,
             'taxable_gross_pay' => $this->gross_pay_before_tax,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
-            'pay_due_before_deduction' => $this->pay_deduction,
+            'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => 0.00,
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),

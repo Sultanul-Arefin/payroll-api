@@ -39,8 +39,9 @@ class Payslip extends Model
         'gross_pay_before_tax',
         'tax_value',
         'post_tax_value',
+        'gross_pay_after_tax',
         'non_taxable_allowance',
-        'pay_deduction',
+        'pay_due_before_deduction',
         'net_pay',
     ];
 
