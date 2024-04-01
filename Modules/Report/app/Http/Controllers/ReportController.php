@@ -6,62 +6,73 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Payslip\Entities\Payslip;
+use Modules\Payslip\Http\Resources\PayslipResource;
 
 class ReportController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function department_wise_report(Request $request)
     {
-        return view('report::index');
+        $request->validate([
+            'department_id' => 'required',
+            'month' => 'required'
+        ]);
+
+        $payslips = Payslip::get();
+
+        return PayslipResource::collection(
+            $payslips
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function get_internal_report(Request $request)
     {
-        return view('report::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('report::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('report::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
+        $response = [
+            [
+                'employee' => 'Anindha',
+                'hours_worked' => 173.00,
+                'wages' => 10000.00,
+                'taxable_allowances' => 3000.00,
+                'non_taxable_allowance' => 7000.00,
+                'total_gross_pay' => 20000.00,
+                'taxable_gross_pay' => 13000.00,
+                'y_t_d_tax_paid' => 0.00,
+                'total_staff_contribution' => 0.00,
+                'total_company_contribution' => 0.00,
+                'total_staff_cost' => 20000.00,
+                'total_net_pay' => 20000.00
+            ],
+            [
+                'employee' => 'Nashed',
+                'hours_worked' => 143.00,
+                'wages' => 10000.00,
+                'taxable_allowances' => 3000.00,
+                'non_taxable_allowance' => 7000.00,
+                'total_gross_pay' => 20000.00,
+                'taxable_gross_pay' => 13000.00,
+                'y_t_d_tax_paid' => 0.00,
+                'total_staff_contribution' => 0.00,
+                'total_company_contribution' => 0.00,
+                'total_staff_cost' => 20000.00,
+                'total_net_pay' => 20000.00
+            ],
+            [
+                'employee' => 'Shoriful',
+                'hours_worked' => 103.00,
+                'wages' => 10000.00,
+                'taxable_allowances' => 3000.00,
+                'non_taxable_allowance' => 7000.00,
+                'total_gross_pay' => 20000.00,
+                'taxable_gross_pay' => 13000.00,
+                'y_t_d_tax_paid' => 0.00,
+                'total_staff_contribution' => 0.00,
+                'total_company_contribution' => 0.00,
+                'total_staff_cost' => 20000.00,
+                'total_net_pay' => 20000.00
+            ],
+        ];
+        return apiResponse(
+            data: $response
+        );
     }
 }
