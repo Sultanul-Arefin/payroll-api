@@ -29,7 +29,8 @@ class ViewPayslipResource extends JsonResource
             'total_gross_pay' => $this->gross_pay_before_tax,
             'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
-            'pay_due_before_deduction' => $this->pay_deduction,
+            'gross_pay_after_tax' => $this->gross_pay_after_tax,
+            'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => 0.00, // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
@@ -39,6 +40,8 @@ class ViewPayslipResource extends JsonResource
     public function get_payslip_details($payslip_details){
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->salary_item_name = $payslip_detail->salary_item->name;
+            // unset these keys from the response
+            unset($payslip_detail->salary_item, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return $payslip_details;
     }
