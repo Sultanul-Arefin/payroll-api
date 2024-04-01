@@ -10,8 +10,7 @@ use Modules\SalaryItemsCategory\Repositories\Interfaces\SalaryItemsCategoryInter
 class SalaryItemsCategoryController extends Controller
 {
     public function __construct(
-        private SalaryItemsCategoryInterface $salaryItemsCategoryRepo,
-        private SalaryItemsCategoryService $salaryItemsCategoryService
+        private SalaryItemsCategoryInterface $salaryItemsCategoryRepo
     ) {
     }
 
