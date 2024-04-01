@@ -17,5 +17,6 @@
     "Dashboard": true,
     "Notification": true,
     "Agenda": true,
-    "TimeManagement": true
+    "TimeManagement": true,
+    "Report": true
 }
