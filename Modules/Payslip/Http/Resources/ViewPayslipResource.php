@@ -39,9 +39,13 @@ class ViewPayslipResource extends JsonResource
 
     public function get_payslip_details($payslip_details){
         foreach($payslip_details as $payslip_detail){
-            $payslip_detail->salary_item_name = $payslip_detail->salary_item->name;
+            $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+            $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+            $payslip_detail->rate = $payslip_detail->amount;
+            $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+
             // unset these keys from the response
-            unset($payslip_detail->salary_item, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->amount, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return $payslip_details;
     }
