@@ -36,7 +36,8 @@ class ProjectResource extends JsonResource
             'status' => $this->getStatus($this->is_completed),
             // 'project_data' => $this->getProjectData($this->id),
             'total_task' => $this->getTotalTask($this->id),
-            'project_data' => $this->getProjectData($this->id)
+            'project_data' => $this->getProjectData($this->id),
+            'is_editable' => $this->getIfEditable()
             // 'assigned_employees' => $this->project_associated_colums->each(function($item){
             //     return $item->tasks->each(function($emp_item){
             //         return $emp_item->associated_users->each(function($item){
@@ -45,6 +46,18 @@ class ProjectResource extends JsonResource
             //     });
             // })
         ];
+    }
+
+    private function getIfEditable(): bool
+    {
+        if(
+            auth()->user()->role_id == User::ADMIN ||
+            auth()->user()->id == $this->project_manager ||
+            auth()->user()->id == $this->created_by
+        ){
+            return true;
+        }
+        return false;
     }
 
     function getProjectData($project_id) {
