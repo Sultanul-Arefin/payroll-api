@@ -40,6 +40,14 @@ class Task extends Model
     }
 
     /**
+     * @return BelongsTo
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+
+    /**
      * @return HasMany
      */
     function comments(): HasMany {
