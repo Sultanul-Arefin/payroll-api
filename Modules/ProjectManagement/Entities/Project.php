@@ -2,8 +2,10 @@
 
 namespace Modules\ProjectManagement\Entities;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
@@ -16,8 +18,9 @@ class Project extends Model
         'project_description',
         'created_by',
         'company_id',
-        'depatment_id',
-        'is_completed'
+        'department_id',
+        'is_completed',
+        'project_manager'
     ];
 
     protected static function newFactory()
@@ -31,8 +34,13 @@ class Project extends Model
 
     public const PROCESSING = 2;
 
-    public function project_associated_colums(): HasMany
+    public function project_associated_columns(): HasMany
     {
         return $this->hasMany(ProjectAssociatedColumn::class, 'project_id', 'id');
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'project_manager', 'id');
     }
 }

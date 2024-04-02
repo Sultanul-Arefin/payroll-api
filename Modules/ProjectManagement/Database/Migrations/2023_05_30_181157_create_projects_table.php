@@ -37,6 +37,11 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('departments', 'id')
                 ->cascadeOnDelete();
+            $table
+                ->foreignId('project_manager')
+                ->nullable()
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

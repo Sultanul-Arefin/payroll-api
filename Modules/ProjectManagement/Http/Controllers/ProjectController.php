@@ -149,15 +149,22 @@ class ProjectController extends Controller
         return view('projectmanagement::show');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function update(Project $project, Request $request)
     {
-        //
+        $request->validate([
+            '_method' => 'required',
+            'project_title' => 'required',
+            'project_description' => 'required',
+            'project_manager' => 'required|exists:users,id'
+        ]);
+        $project->update([
+            'project_title' => $request->project_title,
+            'project_description' => $request->project_description,
+            'project_manager' => $request->project_manager
+        ]);
+        return apiResponse(
+            data: $project
+        );
     }
 
     /**
