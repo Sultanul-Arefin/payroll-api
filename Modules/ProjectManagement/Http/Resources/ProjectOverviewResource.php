@@ -29,8 +29,8 @@ class ProjectOverviewResource extends JsonResource
             'project' => [
                 'project_title' => $this->project_title,
                 'project_description' => $this->project_description,
+                'project_manager' => $this->manager?->only(['id', 'name']),
             ],
-            'project_manager' => $this->manager?->only(['id', 'name']),
             'project_data' => $this->getProjectData($this->id),
             'total_task' => $this->getTotalTask($this->id),
             // 'activity' => $this->getActivity($this->id)
