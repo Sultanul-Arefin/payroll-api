@@ -22,7 +22,7 @@ class ViewPayslipResource extends JsonResource
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
             'additional_pay' => 0, // additional pay goes here
-            'wage_deduction' => $this->wages - $this->leave_deduction,
+            'wages_deduction' => $this->wages - $this->leave_deduction,
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
