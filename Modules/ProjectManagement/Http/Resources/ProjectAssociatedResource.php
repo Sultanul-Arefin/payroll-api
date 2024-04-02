@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,8 +24,21 @@ class ProjectAssociatedResource extends JsonResource
             'column' => $this->project_column_name,
             'column_position' => $this->column_position,
             'tasks' => app(TaskController::class)->getTaskDetails($this->tasks),
-            'task_count' => $this->getTaskCount($this->tasks)
+            'task_count' => $this->getTaskCount($this->tasks),
+            'is_editable' => $this->getIfEditable($this->project_id)
         ];
+    }
+
+    private function getIfEditable(): bool
+    {
+        if(
+            auth()->user()->role_id == User::ADMIN ||
+            auth()->user()->id == $this->project_manager ||
+            auth()->user()->id == $this->created_by
+        ){
+            return true;
+        }
+        return false;
     }
 
     function getTaskCount($tasks) {
