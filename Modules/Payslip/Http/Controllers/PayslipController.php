@@ -265,13 +265,13 @@ class PayslipController extends Controller
         return apiResponse(
             data: [
                 'user_info' => array_merge(
-                    $payslip?->employee->toArray(),
+                    $payslip?->employee?->only(['name', 'email', 'customer_id', 'user_phone', 'user_city', 'employee_type', 'joining_date', ]),
                     [
                         'department' => $payslip?->employee?->department?->department_name,
                         'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
-                'company_info' => $payslip?->employee?->company,
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
                 'payslip_info' => new ViewPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );
