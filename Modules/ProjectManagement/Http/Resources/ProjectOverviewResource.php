@@ -31,11 +31,24 @@ class ProjectOverviewResource extends JsonResource
                 'project_description' => $this->project_description,
                 'project_manager' => $this->manager?->only(['id', 'name']),
             ],
+            'if_editable' => $this->getIfEditable(),
             'project_data' => $this->getProjectData($this->id),
             'total_task' => $this->getTotalTask($this->id),
             // 'activity' => $this->getActivity($this->id)
             'task_overview' => $this->getTaskOverview($this->id)
         ];
+    }
+
+    private function getIfEditable(): bool
+    {
+        if(
+            auth()->user()->role_id == User::ADMIN ||
+            auth()->user()->id == $this->project_manager ||
+            auth()->user()->id == $this->created_by
+        ){
+            return true;
+        }
+        return false;
     }
 
     function getTaskOverview($project_id) {
