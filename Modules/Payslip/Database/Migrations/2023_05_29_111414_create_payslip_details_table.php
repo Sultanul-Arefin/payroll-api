@@ -25,6 +25,7 @@ return new class extends Migration
                 ->foreignId('salary_item_id')
                 ->constrained('salary_items_names', 'id')
                 ->cascadeOnDelete();
+            $table->string('base_amount_or_hours')->default('1 month');
             $table->double('amount', 8, 2); // can store total 8 digits, 6 before decimal point & 2 after decimal point
             $table->timestamps();
         });
