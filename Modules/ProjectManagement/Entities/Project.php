@@ -39,7 +39,7 @@ class Project extends Model
         return $this->hasMany(ProjectAssociatedColumn::class, 'project_id', 'id');
     }
 
-    public function project_manager(): BelongsTo
+    public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'project_manager', 'id');
     }
