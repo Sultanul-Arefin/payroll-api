@@ -26,6 +26,7 @@ class ProjectOverviewResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'project_manager' => $this->manager?->only(['id', 'name']),
             'project_data' => $this->getProjectData($this->id),
             'total_task' => $this->getTotalTask($this->id),
             // 'activity' => $this->getActivity($this->id)

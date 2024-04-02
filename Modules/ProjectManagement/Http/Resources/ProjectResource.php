@@ -31,7 +31,6 @@ class ProjectResource extends JsonResource
                     'project_description',
                 ])
             ),
-            'project_manager' => $this->manager?->only(['id', 'name']),
             'assigned_employees' => $this->getAssignedEmployees($this->id),
             'last_update' => $this->getLastUpdate($this->id),
             'status' => $this->getStatus($this->is_completed),
