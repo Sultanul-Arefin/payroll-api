@@ -34,13 +34,27 @@ class Project extends Model
 
     public const PROCESSING = 2;
 
+    /**
+     * @return HasMany
+     */
     public function project_associated_columns(): HasMany
     {
         return $this->hasMany(ProjectAssociatedColumn::class, 'project_id', 'id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'project_manager', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'project_id', 'id');
     }
 }
