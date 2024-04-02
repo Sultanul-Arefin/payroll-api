@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Repositories\Classes;
 
+use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +32,18 @@ class ProjectRepository extends BaseRepository implements ProjectInterface
 
     private function searchQuery($relations)
     {
+        if(auth()->user()->role_id == User::ADMIN)
+        {
+            return $this->model::query()
+                ->when(!is_null(request('status')), function ($query) {
+                    $query->where(
+                        'is_completed',
+                        request('status')
+                    );
+                })
+                ->with($relations)
+                ->latest('id');
+        }
         return $this->model::query()
                 ->when(!is_null(request('status')), function ($query) {
                     $query->where(
