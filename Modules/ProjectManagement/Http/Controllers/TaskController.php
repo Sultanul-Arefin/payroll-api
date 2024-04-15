@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +59,7 @@ class TaskController extends Controller
 
             $data = [
                 'title' => 'Task Created',
-                'description' => 'A New Task Named ' . $request->task_title . ' Has Been Created',
+                'description' => "A New Task Named " . $request->task_title . " Has Been Created in Project: <b>{$project->project_title}</b>",
                 'action' => [
                     'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
@@ -68,7 +69,9 @@ class TaskController extends Controller
                 'type' => 'Project Management',
                 'color' => '',
             ];
-            $project->notify(new ProjectManagementNotification($data));
+            $user = app(ProjectController::class)->getAdminUser();
+            $user->notify(new ProjectManagementNotification($data));
+            // $project->notify(new ProjectManagementNotification($data));
         });
 
         return apiResponse(
@@ -101,11 +104,28 @@ class TaskController extends Controller
             ]);
             // delete associate employees
             TaskAssociatedEmployee::where('task_id', $task->id)->delete();
-            foreach ($request->assigned_employees as $employee_value) {
+            foreach ($request->assigned_employees as $employee_id) {
                 TaskAssociatedEmployee::create([
                     'task_id' => $task->id,
-                    'user_id' => $employee_value,
+                    'user_id' => $employee_id,
                 ]);
+
+                // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
+
+                $data = [
+                    'title' => 'Task Assigned!',
+                    'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Project Management',
+                    'color' => '',
+                ];
+                $user_whom_should_be_notified = User::where('id', $employee_id)->first();
+                $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
             }
 
             // TASK UPDATE NOTIFICATION
@@ -123,7 +143,9 @@ class TaskController extends Controller
                 'type' => 'Project Management',
                 'color' => '',
             ];
-            $project->notify(new ProjectManagementNotification($data));
+            $user = app(ProjectController::class)->getAdminUser();
+            $user->notify(new ProjectManagementNotification($data));
+            // $project->notify(new ProjectManagementNotification($data));
 
             return $task;
         });
@@ -151,11 +173,12 @@ class TaskController extends Controller
         $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id' => $request->updated_column_id]);
 
         // TASK COLUMN UPDATE NOTIFICATION
-        $project = Task::where('id', $request->task_id)->first()->project_associated_column->project;
+        $task = Task::where('id', $request->task_id)->first();
+        // $project = Task::where('id', $request->task_id)->first()->project_associated_column->project;
 
         $data = [
             'title' => 'Task Column Position Updated',
-            'description' => 'Task Column Position Has Been Updated',
+            'description' => "Task Named <b>{$task->task_title}</b>'s Column Position Has Been Updated",
             'action' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
@@ -165,7 +188,8 @@ class TaskController extends Controller
             'type' => 'Project Management',
             'color' => '',
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = app(ProjectController::class)->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $update,

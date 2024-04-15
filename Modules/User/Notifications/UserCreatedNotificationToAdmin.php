@@ -62,7 +62,6 @@ class UserCreatedNotificationToAdmin extends Notification
                 'phone' => $this->created_by->phone,
             ],
             'action_at' => date('Y-m-d H:i:s'),
-            // 'fileLink'      => $this->fileLink,
             'type' => 'User',
             'color' => '',
         ];

@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -75,7 +76,9 @@ class ProjectController extends Controller
                 'type' => 'Project Management',
                 'color' => '',
             ];
-            $project->notify(new ProjectManagementNotification($data));
+            $user = $this->getAdminUser();
+            $user->notify(new ProjectManagementNotification($data));
+            // $project->notify(new ProjectManagementNotification($data));
 
             $index = 0;
             foreach(default_project_columns() as $key => $value){
@@ -87,8 +90,8 @@ class ProjectController extends Controller
                 ]);
                 // COLUMN CREATION NOTIFICATION
                 $data = [
-                    'title' => 'Column Created',
-                    'description' => 'Column ' . $value . ' Has Been Created',
+                    'title' => 'Project Column Created',
+                    'description' => 'Project Column ' . $value . ' Has Been Created',
                     'action' => [
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
@@ -98,7 +101,7 @@ class ProjectController extends Controller
                     'type' => 'Project Management',
                     'color' => ''
                 ];
-                $project->notify(new ProjectManagementNotification($data));
+                $user->notify(new ProjectManagementNotification($data));
             }
             return $project;
         });
@@ -130,7 +133,9 @@ class ProjectController extends Controller
             'type' => 'Project Management',
             'color' => ''
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = $this->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
+        // $project->notify(new ProjectManagementNotification($data));
         return apiResponse(
             data: $project,
             message: 'Project Status Updated Successfully',
@@ -162,6 +167,21 @@ class ProjectController extends Controller
             'project_description' => $request->project_description,
             'project_manager' => $request->project_manager
         ]);
+        // UPDATE PROJECT NOTIFICATION
+        $data = [
+            'title' => 'Project Updated',
+            'description' => 'Project Updated',
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Project Management',
+            'color' => ''
+        ];
+        $user = $this->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
         return apiResponse(
             data: $project
         );
@@ -176,5 +196,10 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getAdminUser(): User
+    {
+        return User::where('company_id', auth()->user()->company_id)->where('role_id', User::ADMIN)->first();
     }
 }
