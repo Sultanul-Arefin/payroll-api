@@ -155,11 +155,12 @@ class TaskController extends Controller
         $update = $this->taskRepo->update($request->task_id, ['project_associated_column_id' => $request->updated_column_id]);
 
         // TASK COLUMN UPDATE NOTIFICATION
-        $project = Task::where('id', $request->task_id)->first()->project_associated_column->project;
+        $task = Task::where('id', $request->task_id)->first();
+        // $project = Task::where('id', $request->task_id)->first()->project_associated_column->project;
 
         $data = [
             'title' => 'Task Column Position Updated',
-            'description' => 'Task Column Position Has Been Updated',
+            'description' => "Task Named <b>{$task->task_title}</b>'s Column Position Has Been Updated",
             'action' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
@@ -169,7 +170,8 @@ class TaskController extends Controller
             'type' => 'Project Management',
             'color' => '',
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = app(ProjectController::class)->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $update,
