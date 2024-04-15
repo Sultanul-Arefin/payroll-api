@@ -14,6 +14,7 @@ use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
 use Modules\Attendance\Http\Services\AttendanceService;
 use Modules\Attendance\Notifications\AttendanceNotification;
 use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
+use Modules\ProjectManagement\Http\Controllers\ProjectController;
 use Modules\User\Entities\UserDetails;
 
 class AttendanceController extends Controller
