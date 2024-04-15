@@ -12,6 +12,7 @@ use Modules\Attendance\Entities\AttendanceDetail;
 use Modules\Attendance\Http\Resources\AttendanceResourceForAdmin;
 use Modules\Attendance\Http\Resources\AttendanceResourceForUser;
 use Modules\Attendance\Http\Services\AttendanceService;
+use Modules\Attendance\Notifications\AttendanceNotification;
 use Modules\Attendance\Repositories\Interfaces\AttendanceRepositoryInterface;
 use Modules\User\Entities\UserDetails;
 
@@ -83,6 +84,22 @@ class AttendanceController extends Controller
                     'out_time' => $request->out_time,
                 ]);
 
+                // ATTENDANCE UPDATE NOTIFICATION
+                $data = [
+                    'title' => 'Existing Attendance Update',
+                    'description' => "Attendance Given",
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Attendance Management',
+                    'color' => '',
+                ];
+                $user = $this->getAdminUser();
+                $user->notify(new AttendanceNotification($data));
+
                 return apiResponse(
                     data: [],
                     message: 'This Slot Successfully Added',
@@ -112,6 +129,22 @@ class AttendanceController extends Controller
                 'in_time' => $request->in_time,
                 'out_time' => $request->out_time,
             ]);
+
+            // ATTENDANCE CREATION NOTIFICATION
+            $data = [
+                'title' => 'New Attendance Given',
+                'description' => "Attendance Given",
+                'action' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'phone' => auth()->user()->phone,
+                ],
+                'action_at' => date('Y-m-d H:i:s'),
+                'type' => 'Attendance Management',
+                'color' => '',
+            ];
+            $user = $this->getAdminUser();
+            $user->notify(new AttendanceNotification($data));
 
             return $attendance;
         });
