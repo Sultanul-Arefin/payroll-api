@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -103,11 +104,28 @@ class TaskController extends Controller
             ]);
             // delete associate employees
             TaskAssociatedEmployee::where('task_id', $task->id)->delete();
-            foreach ($request->assigned_employees as $employee_value) {
+            foreach ($request->assigned_employees as $employee_id) {
                 TaskAssociatedEmployee::create([
                     'task_id' => $task->id,
-                    'user_id' => $employee_value,
+                    'user_id' => $employee_id,
                 ]);
+
+                // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
+
+                $data = [
+                    'title' => 'Task Assigned!',
+                    'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Project Management',
+                    'color' => '',
+                ];
+                $user_whom_should_be_notified = User::where('id', $employee_id)->first();
+                $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
             }
 
             // TASK UPDATE NOTIFICATION
