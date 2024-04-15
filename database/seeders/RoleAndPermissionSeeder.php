@@ -14,17 +14,14 @@ class RoleAndPermissionSeeder extends Seeder
     public function run(): void
     {
         $role = Role::query()->create([
-            'status' => 1,
             'name' => 'ADMIN',
             'guard_name' => 'sanctum',
         ]);
         $role = Role::query()->create([
-            'status' => 1,
             'name' => 'DEPARTMENT_MANAGER',
             'guard_name' => 'sanctum',
         ]);
         $role = Role::query()->create([
-            'status' => 1,
             'name' => 'EMPLOYEE',
             'guard_name' => 'sanctum',
         ]);
