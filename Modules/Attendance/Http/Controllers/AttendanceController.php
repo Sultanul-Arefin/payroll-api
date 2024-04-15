@@ -97,7 +97,7 @@ class AttendanceController extends Controller
                     'type' => 'Attendance Management',
                     'color' => '',
                 ];
-                $user = $this->getAdminUser();
+                $user = app(ProjectController::class)->getAdminUser();
                 $user->notify(new AttendanceNotification($data));
 
                 return apiResponse(
@@ -143,7 +143,7 @@ class AttendanceController extends Controller
                 'type' => 'Attendance Management',
                 'color' => '',
             ];
-            $user = $this->getAdminUser();
+            $user = app(ProjectController::class)->getAdminUser();
             $user->notify(new AttendanceNotification($data));
 
             return $attendance;
