@@ -47,12 +47,12 @@ class ProjectAssociatedColumnController extends Controller
             'created_by' => auth()->user()->id,
             'column_position' => ++$max_column_value,
         ]);
-        
+
         $project = Project::where('id', $request->project_id)->first();
         // CREATE NEW PROJECT COLUMN NOTIFICATION
         $data = [
             'title' => 'Project Column Created',
-            'description' => 'Project Column ' . $request->project_column_name . ' created',
+            'description' => "Project Column Named " . $request->project_column_name . " Has Created in Project: <b>{$project->project_title}</b>",
             'action' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
@@ -62,7 +62,9 @@ class ProjectAssociatedColumnController extends Controller
             'type' => 'Project Management',
             'color' => ''
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = app(ProjectController::class)->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
+        // $project->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: $column,
