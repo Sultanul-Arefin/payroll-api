@@ -107,7 +107,8 @@ class ProjectAssociatedColumnController extends Controller
             'type' => 'Project Management',
             'color' => ''
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = app(ProjectController::class)->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
 
         return apiResponse(
             data: null,
@@ -129,7 +130,7 @@ class ProjectAssociatedColumnController extends Controller
         $project = Project::where('id', $project_associated_column->project_id)->first();
         $data = [
             'title' => 'Project Column Updated',
-            'description' => 'Project Name Updated to ' . $request->project_column_name . 'from ' . $old_name,
+            'description' => 'Project Column Name Updated to ' . $request->project_column_name . 'from ' . $old_name,
             'action' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
@@ -139,7 +140,8 @@ class ProjectAssociatedColumnController extends Controller
             'type' => 'Project Management',
             'color' => ''
         ];
-        $project->notify(new ProjectManagementNotification($data));
+        $user = app(ProjectController::class)->getAdminUser();
+        $user->notify(new ProjectManagementNotification($data));
         return apiResponse(
             data: $project_associated_column,
             message: 'Column Name Updated Successfully'
