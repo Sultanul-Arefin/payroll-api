@@ -58,7 +58,7 @@ class TaskController extends Controller
 
             $data = [
                 'title' => 'Task Created',
-                'description' => 'A New Task Named ' . $request->task_title . ' Has Been Created',
+                'description' => "A New Task Named " . $request->task_title . " Has Been Created in Project: <b>{$project->project_title}</b>",
                 'action' => [
                     'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
@@ -68,7 +68,9 @@ class TaskController extends Controller
                 'type' => 'Project Management',
                 'color' => '',
             ];
-            $project->notify(new ProjectManagementNotification($data));
+            $user = app(ProjectController::class)->getAdminUser();
+            $user->notify(new ProjectManagementNotification($data));
+            // $project->notify(new ProjectManagementNotification($data));
         });
 
         return apiResponse(
