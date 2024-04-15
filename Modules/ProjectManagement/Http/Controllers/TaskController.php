@@ -125,7 +125,9 @@ class TaskController extends Controller
                 'type' => 'Project Management',
                 'color' => '',
             ];
-            $project->notify(new ProjectManagementNotification($data));
+            $user = app(ProjectController::class)->getAdminUser();
+            $user->notify(new ProjectManagementNotification($data));
+            // $project->notify(new ProjectManagementNotification($data));
 
             return $task;
         });
