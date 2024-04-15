@@ -178,7 +178,7 @@ class TaskController extends Controller
 
         $data = [
             'title' => 'Task Column Position Updated',
-            'description' => "Task Named <span class='font-bold'>{$task->task_title}</span>'s Column Position Has Been Updated",
+            'description' => "Task Named <b>{$task->task_title}</b>'s Column Position Has Been Updated",
             'action' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
