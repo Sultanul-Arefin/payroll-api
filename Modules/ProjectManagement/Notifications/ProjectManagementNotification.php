@@ -62,7 +62,6 @@ class ProjectManagementNotification extends Notification
                 'phone' => $this->data['action']['phone'],
             ],
             'action_at' => $this->data['action_at'],
-            // 'fileLink'      => $this->fileLink,
             'type' => $this->data['type'],
             'color' => $this->data['color'],
         ];
