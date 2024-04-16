@@ -32,9 +32,27 @@ class TaskOverviewResource extends JsonResource
             'end_date' => $this->end_date_time,
             'status' => $this->status,
             'color' => $this->getColor($this->status),
-            'percentage' => $this->percentage
+            'percentage' => $this->percentage,
+            'employees' => $this->get_employees($this->associated_users),
             // 'percentage' => $this->getPercentage($this->end_date_time, date('Y-m-d', strtotime($this->created_at)))
         ];
+    }
+
+    private function get_employees($associated_users)
+    {
+        $users = $associated_users->each(function($user){
+            return $user->user_info;
+        });
+        foreach($users as $user){
+            $user->name = $user->user_info['name'];
+            unset($user->id);
+            unset($user->task_id);
+            unset($user->user_id);
+            unset($user->created_at);
+            unset($user->updated_at);
+            unset($user->user_info);
+        }
+        return $users;
     }
 
     function getPercentage($end_date, $created_date) {
