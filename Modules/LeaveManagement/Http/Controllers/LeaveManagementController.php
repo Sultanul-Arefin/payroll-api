@@ -3,6 +3,7 @@
 namespace Modules\LeaveManagement\Http\Controllers;
 
 use App\Exceptions\CustomException;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -12,7 +13,9 @@ use Modules\LeaveManagement\Entities\UserLeaveDetail;
 use Modules\LeaveManagement\Http\Requests\LeaveStoreRequest;
 use Modules\LeaveManagement\Http\Resources\LeaveListResource;
 use Modules\LeaveManagement\Http\Resources\LeaveResource;
+use Modules\LeaveManagement\Notifications\LeaveManagementNotification;
 use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
+use Modules\ProjectManagement\Http\Controllers\ProjectController;
 
 class LeaveManagementController extends Controller
 {
@@ -56,7 +59,29 @@ class LeaveManagementController extends Controller
         $existDates = $this->isHolidayExist($request->dates); //params pass to date for checking holiday exist or not
         $leaveStore = $this->leaveRepository->leave_store($request, $existDates);
 
+        // STORE LEAVE NOTIFICATION
+        $requested_leave_user = $this->getRequestedUser($request->user_id);
+        $admin_user = app(ProjectController::class)->getAdminUser();
+        $data = [
+            'title' => 'Leave Request Created',
+            'description' => "A New Leave Request Has Been Created For <b>{$requested_leave_user->name}</b>",
+            'action' => [
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+            ],
+            'action_at' => date('Y-m-d H:i:s'),
+            'type' => 'Leave Management',
+            'color' => '',
+        ];
+        $admin_user->notify(new LeaveManagementNotification($data));
+
         return apiResponse(null, 'Successfully Leave Stored', 'success', '201');
+    }
+
+    public function getRequestedUser($user_id): User
+    {
+        return User::where('id', $user_id)->first();
     }
 
     public function leave_list()
@@ -82,6 +107,28 @@ class LeaveManagementController extends Controller
                 'action_by' => auth()->user()->id,
             ]);
             if ($update) {
+                // STORE LEAVE NOTIFICATION
+                $get_user_id = UserLeave::query()
+                            ->where('id', $request->user_leave_id)
+                            ->first();
+                $requested_leave_user = $this->getRequestedUser($get_user_id->user_id);
+
+                $status = $this->getLeaveStatus($request->status);
+
+                $data = [
+                    'title' => 'Leave Request Approved',
+                    'description' => "Leave Request Has Been {$status} By <b>{auth()->user()->name}</b>",
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Leave Management',
+                    'color' => '',
+                ];
+                $requested_leave_user->notify(new LeaveManagementNotification($data));
+
                 return apiResponse(null, 'Successfully Leave Updated', 'success', '200');
             } else {
                 throw new \Exception('');
@@ -89,6 +136,19 @@ class LeaveManagementController extends Controller
 
         } catch (\Exception $ex) {
             throw new CustomException('oops! something wrong, please try again', 404);
+        }
+    }
+
+    public function getLeaveStatus($status)
+    {
+        switch ($status) {
+            case UserLeave::APPROVED : return "Approved";
+                break;
+            case UserLeave::DENIED : return "Denied";
+                break;
+            case UserLeave::PENDING : return "Pending";
+                break;
+            default: return false;
         }
     }
 }
