@@ -2,9 +2,11 @@
 
 namespace Modules\User\Http\Traits;
 
+use App\Mail\ChangePassword;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 trait UserTrait
 {
@@ -56,6 +58,10 @@ trait UserTrait
         User::where('id', $user->id)->update([
             'password' => bcrypt($request->password)
         ]);
+
+        // SEND EMAIL
+        $user = User::where('id', $user->id)->first();
+        Mail::to($user->email)->queue(new ChangePassword($request->password, $user->name));
 
         return apiResponse(
             data: null,
