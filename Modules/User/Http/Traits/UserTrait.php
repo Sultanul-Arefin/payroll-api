@@ -48,8 +48,9 @@ trait UserTrait
     {
         $request->validate([
             'password' => 'required|string|max:30',
+            '_method' => 'required'
         ]);
-        $updated_user = $user->update([
+        $user->update([
             'password' => Hash::make($request->password)
         ]);
 
