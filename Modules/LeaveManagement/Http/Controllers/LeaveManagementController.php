@@ -114,10 +114,11 @@ class LeaveManagementController extends Controller
                 $requested_leave_user = $this->getRequestedUser($get_user_id->user_id);
 
                 $status = $this->getLeaveStatus($request->status);
+                $logged_in_user_name = auth()->user()->name;
 
                 $data = [
                     'title' => 'Leave Request Approved',
-                    'description' => "Leave Request Has Been {$status} By <b>{auth()->user()->name}</b>",
+                    'description' => "Leave Request Has Been <b>{$status}</b> By <b>{$logged_in_user_name}</b>", // DATA DIDN'T SAVE AS EXPECTED. HAVE TO WORK
                     'action' => [
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
