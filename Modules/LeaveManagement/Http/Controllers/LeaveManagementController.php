@@ -112,9 +112,12 @@ class LeaveManagementController extends Controller
                             ->where('id', $request->user_leave_id)
                             ->first();
                 $requested_leave_user = $this->getRequestedUser($get_user_id->user_id);
+
+                $status = $this->getLeaveStatus($request->status);
+
                 $data = [
                     'title' => 'Leave Request Approved',
-                    'description' => "Leave Request Has Been Approved By <b>{auth()->user()->name}</b>",
+                    'description' => "Leave Request Has Been {$status} By <b>{auth()->user()->name}</b>",
                     'action' => [
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
@@ -133,6 +136,19 @@ class LeaveManagementController extends Controller
 
         } catch (\Exception $ex) {
             throw new CustomException('oops! something wrong, please try again', 404);
+        }
+    }
+
+    public function getLeaveStatus($status)
+    {
+        switch ($status) {
+            case UserLeave::APPROVED : return "Approved";
+                break;
+            case UserLeave::DENIED : return "Denied";
+                break;
+            case UserLeave::PENDING : return "Pending";
+                break;
+            default: return false;
         }
     }
 }
