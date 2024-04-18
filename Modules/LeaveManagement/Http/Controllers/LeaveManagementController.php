@@ -107,6 +107,25 @@ class LeaveManagementController extends Controller
                 'action_by' => auth()->user()->id,
             ]);
             if ($update) {
+                // STORE LEAVE NOTIFICATION
+                $get_user_id = UserLeave::query()
+                            ->where('id', $request->user_leave_id)
+                            ->first();
+                $requested_leave_user = $this->getRequestedUser($get_user_id->user_id);
+                $data = [
+                    'title' => 'Leave Request Approved',
+                    'description' => "Leave Request Has Been Approved By <b>{auth()->user()->name}</b>",
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Leave Management',
+                    'color' => '',
+                ];
+                $requested_leave_user->notify(new LeaveManagementNotification($data));
+
                 return apiResponse(null, 'Successfully Leave Updated', 'success', '200');
             } else {
                 throw new \Exception('');
