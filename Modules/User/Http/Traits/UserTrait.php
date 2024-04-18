@@ -55,7 +55,7 @@ trait UserTrait
         ]);
 
         return apiResponse(
-            data: $user,
+            data: $request->all(),
             message: 'User Password Successfully Updated'
         );
     }
