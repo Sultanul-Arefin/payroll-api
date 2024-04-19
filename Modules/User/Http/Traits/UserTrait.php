@@ -52,9 +52,6 @@ trait UserTrait
             'password' => 'required|string|max:30',
             '_method' => 'required'
         ]);
-        // $user->update([
-        //     'password' => Hash::make($request->password)
-        // ]);
         User::where('id', $user->id)->update([
             'password' => bcrypt($request->password)
         ]);
