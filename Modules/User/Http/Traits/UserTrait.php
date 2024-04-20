@@ -49,7 +49,7 @@ trait UserTrait
     public function update_password(User $user, Request $request)
     {
         $request->validate([
-            'password' => 'required|string|max:30',
+            'password' => 'required|string|min:4|max:30',
             '_method' => 'required'
         ]);
         User::where('id', $user->id)->update([
