@@ -41,6 +41,7 @@ class ProjectRepository extends BaseRepository implements ProjectInterface
                         request('status')
                     );
                 })
+                ->where('company_id', auth()->user()->id)
                 ->with($relations)
                 ->latest('id');
         }
@@ -69,6 +70,7 @@ class ProjectRepository extends BaseRepository implements ProjectInterface
                                 );
                             });
                 })
+                ->where('company_id', auth()->user()->id)
                 ->with($relations)
                 ->latest('id');
     }
