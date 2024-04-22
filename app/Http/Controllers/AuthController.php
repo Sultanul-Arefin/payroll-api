@@ -28,13 +28,6 @@ class AuthController extends Controller
             );
         }
         $user = User::where('email', $request->email)->first();
-        $user_details = DB::table('companies')
-            ->join('users', 'users.company_id', 'companies.id')
-            ->join('user_details', 'users.id', 'user_details.user_id')
-            ->join('roles', 'roles.id', 'users.role_id')
-            ->select('user_details.user_image', 'companies.company_name', 'companies.company_logo', 'companies.no_of_working_days_per_week', 'companies.working_hours_per_day', 'roles.name as role_name')
-            ->where('users.id', $user->id)
-            ->first();
 
         $package_info = DB::table('companies')
             ->join('company_associated_with_package', 'company_associated_with_package.company_id', 'companies.id')
@@ -80,9 +73,6 @@ class AuthController extends Controller
             data: [
                 'id' => $user->id,
                 'email' => $user->email,
-                // 'title' => $user->title,
-                // 'first_name' => $user->first_name,
-                // 'last_name' => $user->last_name,
                 'name' => $user->name,
                 'token' => $user->createToken($user->name)->plainTextToken,
                 'user_info' => [
@@ -99,8 +89,8 @@ class AuthController extends Controller
                     'working_hours_per_day' => $user->company?->working_hours_per_day,
                 ],
                 'package_info' => [
-                    'package_id' => $package_info->package_id,
-                    'package_name' => $package_info->package_name,
+                    'package_id' => auth()->user()->company->associated_package->package_id,
+                    'package_name' => auth()->user()->company->associated_package->package_name,
                 ],
                 'packageId' => auth()->user()->company->associated_package->package_id,
                 'role' => auth()->user()->role_id,
@@ -185,7 +175,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::user()->tokens()->delete();
+        // Auth::user()->tokens()->delete();
+        auth()->user()->tokens()->delete();
 
         return apiResponse(null,
             message: 'Successfully logged out',
