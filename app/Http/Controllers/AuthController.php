@@ -76,10 +76,10 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'token' => $user->createToken($user->name)->plainTextToken,
                 'user_info' => [
-                    'user_name' => $user->name,
-                    'user_email' => $user->email,
-                    'user_image' => $user->company?->user_image,
-                    'user_role' => $user->company?->role_name,
+                    'user_name' => $user?->name,
+                    'user_email' => $user?->email,
+                    'user_image' => $user?->user_details?->user_image,
+                    'user_role' => $user?->get_user_role?->name,
                 ],
                 'company_info' => [
                     'company_id' => $user->company_id,
@@ -89,10 +89,10 @@ class AuthController extends Controller
                     'working_hours_per_day' => $user->company?->working_hours_per_day,
                 ],
                 'package_info' => [
-                    'package_id' => auth()->user()->company->associated_package->package_id,
-                    'package_name' => auth()->user()->company->associated_package->package_name,
+                    'package_id' => auth()->user()->company?->associated_package?->package_id,
+                    'package_name' => auth()->user()->company?->associated_package?->package?->package_name,
                 ],
-                'packageId' => auth()->user()->company->associated_package->package_id,
+                'packageId' => auth()->user()->company?->associated_package?->package_id,
                 'role' => auth()->user()->role_id,
             ],
             message: 'User logged in successful'
