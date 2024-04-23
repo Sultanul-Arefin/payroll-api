@@ -21,6 +21,7 @@ use Modules\Designation\Entities\Designation;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\Payslip\Entities\Payslip;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
+use Modules\Role\Entities\Role;
 use Modules\User\Entities\UserAttachment;
 use Modules\User\Entities\UserDetails;
 use Spatie\Permission\Traits\HasRoles;
@@ -157,6 +158,11 @@ class User extends Authenticatable
     public function userAttachment(): HasMany
     {
         return $this->hasMany(UserAttachment::class, 'user_id', 'id');
+    }
+
+    public function get_user_role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
     public function userRole(): Attribute
