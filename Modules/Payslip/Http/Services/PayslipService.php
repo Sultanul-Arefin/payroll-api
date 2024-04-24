@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Services;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Modules\Attendance\Entities\Attendance;
+use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\Payslip\Entities\PayslipDetail;
@@ -267,18 +268,12 @@ class PayslipService
     public function getAmountForEmployee($category_id, $employee_id)
     {
         if ($category_id == 7) {
-            return [
-                'employee_government_deduction' => 0.00,
-                'other_complimentary_deduction' => 0.00,
-                'employee_deduction' => 0.00,
-            ];
-
-            return DeductionDetails::query()
+            $employee_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', request('employee_id'))
+                            ->where('employee_id', $employee_id)
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
@@ -290,21 +285,30 @@ class PayslipService
                             );
                     }
                 )
-                ->get()->sum('employee_amount as emp_amount');
+                ->get()
+                ->sum('employee_amount');
 
-            return EmployeeSalaryItem::query()
+            // GET CATEGORY ID 8 DEDUCTION VALUE
+            $other_complimentary_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'salaryItemsName', function (Builder $builder) use ($category_id) {
-                        $builder->whereHas(
-                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                $builder->where('id', $category_id);
-                            }
-                        );
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('employee_id', $employee_id)
+                            ->whereHas(
+                                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                                    $builder->whereHas(
+                                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                            $builder->where('id', 8);
+                                        }
+                                    );
+                                }
+                            );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
-                ->where('employee_id', request('employee_id'))
-                ->get()->sum('amount');
+                ->get()
+                ->sum('employee_amount');
+            return $employee_deduction + $other_complimentary_deduction;
         } elseif ($category_id == 8) {
             return [
                 'company_government_contribution' => 0.00,
@@ -377,7 +381,7 @@ class PayslipService
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get();
-            return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0); 
+            return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
