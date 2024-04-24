@@ -117,6 +117,9 @@ class PayslipController extends Controller
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
         }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 7 || $salary_item->salaryItemsName->salaryItemsCategory->id == 8){
+            return 'Emp: ' . $salary_item->deduction_details?->employee_amount . ', Cmp: ' . $salary_item->deduction_details?->government_or_company_amount;
+        }
         return $salary_item->amount;
     }
     /**

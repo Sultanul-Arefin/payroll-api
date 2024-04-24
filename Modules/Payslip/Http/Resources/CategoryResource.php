@@ -37,13 +37,13 @@ class CategoryResource extends JsonResource
     public function getAmount($category_id)
     {
         if ($category_id == 7) {
-            return [
-                'employee_government_deduction' => 0.00,
-                'other_complimentary_deduction' => 0.00,
-                'employee_deduction' => 0.00,
-            ];
+            // return [
+            //     'employee_government_deduction' => 0.00,
+            //     'other_complimentary_deduction' => 0.00,
+            //     'employee_deduction' => 0.00,
+            // ];
 
-            return DeductionDetails::query()
+            $employee_deduction = DeductionDetails::query()
                 ->whereHas(
                     'employee_salary_item', function (Builder $builder) use ($category_id) {
                         $builder
@@ -60,7 +60,35 @@ class CategoryResource extends JsonResource
                             );
                     }
                 )
-                ->get()->sum('employee_amount as emp_amount');
+                ->get()
+                ->sum('employee_amount');
+
+            // GET CATEGORY ID 8 DEDUCTION VALUE
+            $other_complimentary_deduction = DeductionDetails::query()
+                ->whereHas(
+                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('employee_id', request('employee_id'))
+                            ->whereHas(
+                                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                                    $builder->whereHas(
+                                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                            $builder->where('id', 8);
+                                        }
+                                    );
+                                }
+                            );
+                    }
+                )
+                ->get()
+                ->sum('employee_amount');
+
+            return [
+                'employee_government_deduction' => $employee_deduction,
+                'other_complimentary_deduction' => $other_complimentary_deduction,
+                'employee_deduction' => $employee_deduction + $other_complimentary_deduction,
+            ];
 
             return EmployeeSalaryItem::query()
                 ->whereHas(
