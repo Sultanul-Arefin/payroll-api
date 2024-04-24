@@ -41,7 +41,13 @@ return new class extends Migration
             $table->double('gross_pay_after_tax', 8, 2); // gross_pay_after_tax
             $table->double('non_taxable_allowance', 8, 2)->default(0.00); // non_tax_val -> non taxable allowance
             $table->double('pay_due_before_deduction', 8, 2)->default(0.00); // pay_due_before_deduction -> pay due before deduction
+            $table->double('company_contribution_value', 8, 2)->default(0.00); // category => 7, for company
+            $table->double('employee_contribution_value', 8, 2)->default(0.00); // category => 7, for employee
+            $table->double('other_company_deduction', 8, 2)->default(0.00); // category => 8, for employee
+            $table->double('other_company_contribution', 8, 2)->default(0.00); // category => 8, for company
             $table->double('net_pay', 8, 2)->default(0.00); // net_pay -> net pay before company & government contribution -> main salary
+            $table->double('total_employee_deduction', 8, 2)->default(0.00); // employee_contribution_value + other_company_deduction
+            $table->double('company_contribution', 8, 2)->default(0.00); // company_contribution_value + other_company_contribution
             $table->timestamps();
         });
     }
