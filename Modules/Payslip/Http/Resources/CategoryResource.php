@@ -37,11 +37,6 @@ class CategoryResource extends JsonResource
     public function getAmount($category_id)
     {
         if ($category_id == 7) {
-            // return [
-            //     'employee_government_deduction' => 0.00,
-            //     'other_complimentary_deduction' => 0.00,
-            //     'employee_deduction' => 0.00,
-            // ];
 
             $employee_deduction = DeductionDetails::query()
                 ->whereHas(
@@ -89,25 +84,51 @@ class CategoryResource extends JsonResource
                 'other_complimentary_deduction' => $other_complimentary_deduction,
                 'employee_deduction' => $employee_deduction + $other_complimentary_deduction,
             ];
-
-            return EmployeeSalaryItem::query()
+        } elseif ($category_id == 8) {
+            $company_government_contribution = DeductionDetails::query()
                 ->whereHas(
-                    'salaryItemsName', function (Builder $builder) use ($category_id) {
-                        $builder->whereHas(
-                            'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                $builder->where('id', $category_id);
-                            }
-                        );
+                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('employee_id', request('employee_id'))
+                            ->whereHas(
+                                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                                    $builder->whereHas(
+                                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                            $builder->where('id', $category_id);
+                                        }
+                                    );
+                                }
+                            );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
-                ->where('employee_id', request('employee_id'))
-                ->get()->sum('amount');
-        } elseif ($category_id == 8) {
+                ->get()
+                ->sum('government_or_company_amount');
+
+            // GET CATEGORY ID 7 DEDUCTION VALUE
+            $company_other_complimentary_contribution = DeductionDetails::query()
+                ->whereHas(
+                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('employee_id', request('employee_id'))
+                            ->whereHas(
+                                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                                    $builder->whereHas(
+                                        'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                            $builder->where('id', 7);
+                                        }
+                                    );
+                                }
+                            );
+                    }
+                )
+                ->get()
+                ->sum('government_or_company_amount');
             return [
-                'company_government_contribution' => 0.00,
-                'company_other_complimentary_contribution' => 0.00,
-                'company_contribution' => 0.00,
+                'company_government_contribution' => $company_government_contribution,
+                'company_other_complimentary_contribution' => $company_other_complimentary_contribution,
+                'company_contribution' => $company_government_contribution + $company_other_complimentary_contribution,
             ];
 
             return EmployeeSalaryItem::query()
