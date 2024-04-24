@@ -189,7 +189,8 @@ class PayslipController extends Controller
         $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
         $gross_pay_after_tax = $gross_pay_before_tax - ($get_income_taxes + $get_additional_taxes_tax_top_up); // have to deduct (income tax & additional taxes tax top up) from previous value
         $pay_due_before_deductions = $gross_pay_after_tax + $get_non_taxable_allowance; // have to add previous value with non taxable allowance
-        $total_employee_contribution_for_deduction = $get_government_deduction + $get_other_complimentary_deduction; // employee contribution
+        // $total_employee_contribution_for_deduction = $get_government_deduction + $get_other_complimentary_deduction; // employee contribution
+        $total_employee_contribution_for_deduction = $get_government_deduction; // employee contribution
         $total_company_contribution_for_deduction = $get_government_deduction + $get_other_complimentary_deduction; // company contribution
 
         $total_amount = $pay_due_before_deductions - $total_employee_contribution_for_deduction;
@@ -197,17 +198,18 @@ class PayslipController extends Controller
         // GET HOURS WORKED
         $hours_worked = $this->payslipService->get_hours_worked($request->employee_id, $request->from_date, $request->to_date);
 
-        // return [
-        //     'basic' => $get_basic,
-        //     'sick_absent' => $get_staff_deduction_sick_absent,
-        //     'taxable_allowance' => $get_taxable_allowance,
-        //     'non_taxable_allowance' => $get_non_taxable_allowance,
-        //     'income_tax' => $get_income_taxes,
-        //     'additional_tax' => $get_additional_taxes_tax_top_up,
-        //     'government_deduction' => $get_government_deduction,
-        //     'complimentary_deduction' => $get_other_complimentary_deduction,
-        //     'hours_worked' => $hours_worked
-        // ];
+        return [
+            'basic' => $get_basic,
+            'sick_absent' => $get_staff_deduction_sick_absent,
+            'taxable_allowance' => $get_taxable_allowance,
+            'non_taxable_allowance' => $get_non_taxable_allowance,
+            'income_tax' => $get_income_taxes,
+            'additional_tax' => $get_additional_taxes_tax_top_up,
+            'government_deduction' => $get_government_deduction,
+            'complimentary_deduction' => $get_other_complimentary_deduction,
+            'total' => $total_amount,
+            'hours_worked' => $hours_worked
+        ];
 
         // $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
         /**
