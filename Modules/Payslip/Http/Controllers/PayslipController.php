@@ -198,18 +198,18 @@ class PayslipController extends Controller
         // GET HOURS WORKED
         $hours_worked = $this->payslipService->get_hours_worked($request->employee_id, $request->from_date, $request->to_date);
 
-        return [
-            'basic' => $get_basic,
-            'sick_absent' => $get_staff_deduction_sick_absent,
-            'taxable_allowance' => $get_taxable_allowance,
-            'non_taxable_allowance' => $get_non_taxable_allowance,
-            'income_tax' => $get_income_taxes,
-            'additional_tax' => $get_additional_taxes_tax_top_up,
-            'government_deduction' => $get_government_deduction,
-            'complimentary_deduction' => $get_other_complimentary_deduction,
-            'total' => $total_amount,
-            'hours_worked' => $hours_worked
-        ];
+        // return [
+        //     'basic' => $get_basic,
+        //     'sick_absent' => $get_staff_deduction_sick_absent,
+        //     'taxable_allowance' => $get_taxable_allowance,
+        //     'non_taxable_allowance' => $get_non_taxable_allowance,
+        //     'income_tax' => $get_income_taxes,
+        //     'additional_tax' => $get_additional_taxes_tax_top_up,
+        //     'government_deduction' => $get_government_deduction,
+        //     'complimentary_deduction' => $get_other_complimentary_deduction,
+        //     'total' => $total_amount,
+        //     'hours_worked' => $hours_worked
+        // ];
 
         // $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
         /**

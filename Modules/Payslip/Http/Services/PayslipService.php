@@ -9,6 +9,7 @@ use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\Payslip\Entities\PayslipDetail;
+use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 
 class PayslipService
 {
@@ -58,6 +59,75 @@ class PayslipService
                     'amount' => $this->getAmountCalculation($value),
                     // 'amount' => $value->amount,
                 ]);
+            }
+        }
+
+        // FOR DEDUCTION
+        $salary_deduction_values = EmployeeSalaryItem::query()
+                            ->whereHas(
+                                'salaryItemsName', function(Builder $builder){
+                                    $builder->whereIn('salary_items_category_id', [7,8]);
+                                }
+                            )
+                            ->where('employee_id', $employee_id)
+                            ->whereNull('amount')
+                            ->get();
+        foreach($salary_deduction_values as $value){
+            if($value->salaryItemsName->salaryItemsCategory->id == 7){
+                $deduction_value = DeductionDetails::query()
+                    ->whereHas(
+                        'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                            $builder
+                                ->where('company_id', auth()->user()->company_id)
+                                ->where('employee_id', $employee_id)
+                                ->whereHas(
+                                    'salaryItemsName', function (Builder $builder){
+                                        $builder->whereHas(
+                                            'salaryItemsCategory', function (Builder $builder){
+                                                $builder->where('id', 7);
+                                            }
+                                        );
+                                    }
+                                );
+                        }
+                    )
+                    ->get();
+                    // ->sum('government_or_company_amount');
+                foreach($deduction_value as $dv){
+                    PayslipDetailsForDeduction::create([
+                        'payslip_id' => $payslip_id,
+                        'employee_amount' => $dv->employee_amount,
+                        'government_or_company_amount' => $dv->government_or_company_amount
+                    ]);
+                }
+            }
+            if($value->salaryItemsName->salaryItemsCategory->id == 8){
+                $deduction_value = DeductionDetails::query()
+                    ->whereHas(
+                        'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                            $builder
+                                ->where('company_id', auth()->user()->company_id)
+                                ->where('employee_id', $employee_id)
+                                ->whereHas(
+                                    'salaryItemsName', function (Builder $builder){
+                                        $builder->whereHas(
+                                            'salaryItemsCategory', function (Builder $builder){
+                                                $builder->where('id', 8);
+                                            }
+                                        );
+                                    }
+                                );
+                        }
+                    )
+                    ->get();
+                    // ->sum('government_or_company_amount');
+                foreach($deduction_value as $dv){
+                    PayslipDetailsForDeduction::create([
+                        'payslip_id' => $payslip_id,
+                        'employee_amount' => $dv->employee_amount,
+                        'government_or_company_amount' => $dv->government_or_company_amount
+                    ]);
+                }
             }
         }
     }
