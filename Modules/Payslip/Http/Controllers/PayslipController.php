@@ -178,8 +178,12 @@ class PayslipController extends Controller
         $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id);
         $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id);
         $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id);
-        $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id);
-        $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id);
+        $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id); // employee deduction total
+        $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id); // company contribution total
+        $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id);
+        $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id);
+        $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id);
+        $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id);
 
         $total_pay = $get_basic - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic
         $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
@@ -209,7 +213,7 @@ class PayslipController extends Controller
         /**
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked) {
+        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked, $get_government_deduction, $get_other_complimentary_deduction, $get_company_contribution_value, $get_employee_contribution_value, $get_other_company_deduction, $get_other_company_contribution) {
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
@@ -230,7 +234,13 @@ class PayslipController extends Controller
                 'post_tax_value' => $get_additional_taxes_tax_top_up,
                 'non_taxable_allowance' => $get_non_taxable_allowance,
                 'pay_due_before_deduction' => $pay_due_before_deductions,
+                'company_contribution_value' => $get_company_contribution_value,
+                'employee_contribution_value' => $get_employee_contribution_value,
+                'other_company_deduction' => $get_other_company_deduction,
+                'other_company_contribution' => $get_other_company_contribution,
                 'net_pay' => $total_amount,
+                'total_employee_deduction' => $get_government_deduction,
+                'company_contribution' => $get_other_complimentary_deduction
             ]);
 
             /** add the payslip details */
