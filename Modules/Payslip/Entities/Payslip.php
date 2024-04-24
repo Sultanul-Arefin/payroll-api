@@ -42,7 +42,13 @@ class Payslip extends Model
         'gross_pay_after_tax',
         'non_taxable_allowance',
         'pay_due_before_deduction',
+        'company_contribution_value',
+        'employee_contribution_value',
+        'other_company_deduction',
+        'other_company_contribution',
         'net_pay',
+        'total_employee_deduction',
+        'company_contribution'
     ];
 
     /**
