@@ -206,30 +206,188 @@ class PayslipService
 
     public function government_deduction_amount($employee_id)
     {
-        $employee_associated_amount = EmployeeSalaryItem::query()
-            ->where('employee_id', $employee_id)
+        // GET VALUE FROM CATEGORY 7
+        $employee_contribution_value = DeductionDetails::query()
             ->whereHas(
-                'salaryItemsName', function (Builder $builder) {
-                    $builder->where('salary_items_category_id', 7);
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 7);
+                                    }
+                                );
+                            }
+                        );
                 }
             )
-            ->sum('amount');
+            ->get()
+            ->sum('employee_amount');
 
-        return $employee_associated_amount;
+        // GET VALUE FROM CATEGORY 8
+        $other_company_deduction = DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 8);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('employee_amount');
+
+        return $employee_contribution_value + $other_company_deduction;
     }
 
     public function other_complimentary_deduction_amount($employee_id)
     {
-        $employee_associated_amount = EmployeeSalaryItem::query()
-            ->where('employee_id', $employee_id)
+        // GET VALUE FROM CATEGORY 7
+        $company_contribution_value = DeductionDetails::query()
             ->whereHas(
-                'salaryItemsName', function (Builder $builder) {
-                    $builder->where('salary_items_category_id', 8);
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 7);
+                                    }
+                                );
+                            }
+                        );
                 }
             )
-            ->sum('amount');
+            ->get()
+            ->sum('government_or_company_amount');
 
-        return $employee_associated_amount;
+        // GET VALUE FROM CATEGORY 8
+        $other_company_contribution = DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 8);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('government_or_company_amount');
+
+        return $company_contribution_value + $other_company_contribution;
+    }
+
+    public function company_contribution_value($employee_id)
+    {
+        return DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 7);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('government_or_company_amount');
+    }
+
+    public function employee_contribution_value($employee_id)
+    {
+        return DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 7);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('employee_amount');
+    }
+
+    public function other_company_deduction($employee_id)
+    {
+        return DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 8);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('employee_amount');
+    }
+
+    public function other_company_contribution($employee_id)
+    {
+        return DeductionDetails::query()
+            ->whereHas(
+                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                    $builder
+                        ->where('company_id', auth()->user()->company_id)
+                        ->where('employee_id', $employee_id)
+                        ->whereHas(
+                            'salaryItemsName', function (Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder){
+                                        $builder->where('id', 8);
+                                    }
+                                );
+                            }
+                        );
+                }
+            )
+            ->get()
+            ->sum('government_or_company_amount');
     }
 
     // hours worked for employee
