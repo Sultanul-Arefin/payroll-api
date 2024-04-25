@@ -96,6 +96,7 @@ class PayslipService
                 foreach($deduction_value as $dv){
                     PayslipDetailsForDeduction::create([
                         'payslip_id' => $payslip_id,
+                        'salary_item_id' => $dv->employee_salary_item?->salary_item_id,
                         'employee_amount' => $dv->employee_amount,
                         'government_or_company_amount' => $dv->government_or_company_amount
                     ]);
@@ -124,6 +125,7 @@ class PayslipService
                 foreach($deduction_value as $dv){
                     PayslipDetailsForDeduction::create([
                         'payslip_id' => $payslip_id,
+                        'salary_item_id' => $dv->employee_salary_item?->salary_item_id,
                         'employee_amount' => $dv->employee_amount,
                         'government_or_company_amount' => $dv->government_or_company_amount
                     ]);
