@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
+use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 
 class ViewPayslipResource extends JsonResource
 {
@@ -31,10 +32,17 @@ class ViewPayslipResource extends JsonResource
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
-            'staff_social_charges' => 0.00, // staff social charge goes here
+            'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
         ];
+    }
+
+    public function get_staff_social_charges()
+    {
+        return PayslipDetailsForDeduction::query()
+                ->where('payslip_id', $this->id)
+                ->sum('employee_amount');
     }
 
     public function get_payslip_details($payslip_details){
