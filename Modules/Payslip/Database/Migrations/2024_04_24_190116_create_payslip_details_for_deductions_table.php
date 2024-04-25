@@ -19,6 +19,10 @@ return new class extends Migration
                 ->references('id')
                 ->on('payslips')
                 ->cascadeOnDelete();
+            $table
+                ->foreignId('salary_item_id')
+                ->constrained('salary_items_names', 'id')
+                ->cascadeOnDelete();
             $table->double('employee_amount', 8, 2)->default(0.00);
             $table->double('government_or_company_amount', 8, 2)->default(0.00);
             $table->timestamps();
