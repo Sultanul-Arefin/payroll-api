@@ -210,6 +210,7 @@ class PayslipController extends Controller
         //     'total' => $total_amount,
         //     'hours_worked' => $hours_worked
         // ];
+        // deduction value need to be re calculated. That's why committing this
 
         // $get_total_amount_except_basic_attendance = $this->payslipService->get_total_amount_except_basic_attendance($request->employee_id);
         /**
