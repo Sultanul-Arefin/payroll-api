@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class SupportMessage extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'support_id',
+        'user_id',
+        'message'
+    ];
 }

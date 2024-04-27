@@ -12,4 +12,13 @@ class Support extends Model
     public const CLOSED = 0;
     public const ACTIVE = 1;
     public const PENDING = 2;
+
+    protected $fillable = [
+        'created_by',
+        'category_id',
+        'subject',
+        'page_name',
+        'status',
+        'updated_by'
+    ];
 }
