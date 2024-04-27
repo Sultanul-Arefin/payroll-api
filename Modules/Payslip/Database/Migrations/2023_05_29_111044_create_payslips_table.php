@@ -40,6 +40,7 @@ return new class extends Migration
             $table->double('post_tax_value', 8, 2)->default(0.00); // post_tax_val -> other/top-up tax
             $table->double('gross_pay_after_tax', 8, 2); // gross_pay_after_tax
             $table->double('non_taxable_allowance', 8, 2)->default(0.00); // non_tax_val -> non taxable allowance
+            $table->double('pay_deduction', 8, 2)->default(0.00); // pay_deduction -> non pay_deduction allowance
             $table->double('pay_due_before_deduction', 8, 2)->default(0.00); // pay_due_before_deduction -> pay due before deduction
             $table->double('company_contribution_value', 8, 2)->default(0.00); // category => 7, for company
             $table->double('employee_contribution_value', 8, 2)->default(0.00); // category => 7, for employee

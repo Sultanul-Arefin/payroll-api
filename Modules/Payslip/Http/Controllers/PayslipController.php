@@ -118,7 +118,7 @@ class PayslipController extends Controller
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 7 || $salary_item->salaryItemsName->salaryItemsCategory->id == 8){
-            return 'Emp: ' . $salary_item->deduction_details?->employee_amount . ', Cmp: ' . $salary_item->deduction_details?->government_or_company_amount;
+            return 'Emp: ' . $salary_item->deduction_details?->employee_amount . ', Cmp_Or_Othrs: ' . $salary_item->deduction_details?->government_or_company_amount;
         }
         return $salary_item->amount;
     }
@@ -272,7 +272,8 @@ class PayslipController extends Controller
         ]);
         return apiResponse(
             data: null,
-            message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
+            // message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
+            message: 'This Module is Not Lived Yet! You\'ll be notified after completing!'
         );
     }
 
