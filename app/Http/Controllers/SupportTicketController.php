@@ -14,6 +14,24 @@ class SupportTicketController extends Controller
     public function index()
     {
         $support_tickets = Support::where('created_by', auth()->user()->id)->get();
+        $support_tickets->each(function($ticket){
+            // GET HELP ARTICLE CATEGORY
+            $ticket->category_id = $ticket?->help_article_category?->category_name;
+            unset($ticket->help_article_category);
+
+            // GET HELP ARTICLE
+            $ticket->page_name = $ticket?->help_article?->title;
+            unset($ticket->help_article);
+
+            $status = $ticket->status;
+            unset($ticket->status);
+            $ticket->status = match ($status) {
+                Support::CLOSED => 'CLOSED',
+                Support::ACTIVE => 'ACTIVE',
+                Support::PENDING => 'PENDING',
+                default => 'NO STATUS FOUND'
+            };
+        });
         return apiResponse(
             data: $support_tickets,
         );

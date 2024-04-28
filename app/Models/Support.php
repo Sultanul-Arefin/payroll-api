@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Support extends Model
 {
@@ -21,4 +22,20 @@ class Support extends Model
         'status',
         'updated_by'
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function help_article_category(): BelongsTo
+    {
+        return $this->belongsTo(HelpArticleCategory::class, 'category_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function help_article(): BelongsTo
+    {
+        return $this->belongsTo(HelpArticle::class, 'page_name', 'id');
+    }
 }
