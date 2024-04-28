@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\SupportTicketController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
