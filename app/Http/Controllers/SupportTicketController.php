@@ -31,6 +31,8 @@ class SupportTicketController extends Controller
                 Support::PENDING => 'PENDING',
                 default => 'NO STATUS FOUND'
             };
+
+            // CREATED_AT DATE FORMAT NEED TO BE FIXED
         });
         return apiResponse(
             data: $support_tickets,
