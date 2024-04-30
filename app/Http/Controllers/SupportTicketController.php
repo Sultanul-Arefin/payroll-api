@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SupportTicketResource;
 use App\Models\HelpArticle;
 use App\Models\HelpArticleCategory;
 use App\Models\Support;
@@ -14,6 +15,9 @@ class SupportTicketController extends Controller
     public function index()
     {
         $support_tickets = Support::where('created_by', auth()->user()->id)->get();
+        return SupportTicketResource::collection(
+            $support_tickets
+        );
         $support_tickets->each(function($ticket){
             // GET HELP ARTICLE CATEGORY
             $ticket->category_id = $ticket?->help_article_category?->category_name;
@@ -33,6 +37,7 @@ class SupportTicketController extends Controller
             };
 
             // CREATED_AT DATE FORMAT NEED TO BE FIXED
+            $ticket->created_at = $ticket->created_at->format('Y-m-d H:i:s');
         });
         return apiResponse(
             data: $support_tickets,
