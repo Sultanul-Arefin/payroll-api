@@ -18,30 +18,6 @@ class SupportTicketController extends Controller
         return SupportTicketResource::collection(
             $support_tickets
         );
-        $support_tickets->each(function($ticket){
-            // GET HELP ARTICLE CATEGORY
-            $ticket->category_id = $ticket?->help_article_category?->category_name;
-            unset($ticket->help_article_category);
-
-            // GET HELP ARTICLE
-            $ticket->page_name = $ticket?->help_article?->title;
-            unset($ticket->help_article);
-
-            $status = $ticket->status;
-            unset($ticket->status);
-            $ticket->status = match ($status) {
-                Support::CLOSED => 'CLOSED',
-                Support::ACTIVE => 'ACTIVE',
-                Support::PENDING => 'PENDING',
-                default => 'NO STATUS FOUND'
-            };
-
-            // CREATED_AT DATE FORMAT NEED TO BE FIXED
-            $ticket->created_at = $ticket->created_at->format('Y-m-d H:i:s');
-        });
-        return apiResponse(
-            data: $support_tickets,
-        );
     }
 
     public function store(Request $request)
