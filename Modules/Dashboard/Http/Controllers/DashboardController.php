@@ -20,7 +20,6 @@ class DashboardController extends Controller
      */
     public function totalEmployee(): JsonResponse
     {
-
         $data = User::where('company_id', auth()->user()->company_id)
             ->where('status', 1)
             ->selectRaw('COUNT(*) as count')
