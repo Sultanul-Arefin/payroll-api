@@ -3,7 +3,6 @@
 namespace Modules\Dashboard\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
