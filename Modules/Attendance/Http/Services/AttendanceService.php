@@ -10,7 +10,9 @@ class AttendanceService
 {
     public function checkIfAttendanceExist($date): ?Model
     {
-        $attendance = Attendance::where('dates', $date)->first();
+        $attendance = Attendance::query()
+                    ->where('user_id', auth()->user()->id)
+                    ->where('dates', $date)->first();
         if ($attendance) {
             return $attendance;
         } else {
