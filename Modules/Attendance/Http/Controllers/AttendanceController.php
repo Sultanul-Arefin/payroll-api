@@ -72,6 +72,7 @@ class AttendanceController extends Controller
             'dates' => 'required',
             'in_time' => 'required',
             'out_time' => 'required',
+            'office_type' => 'required'
         ]);
 
         // CHECK IF ATTENDANCE EXIST FOR THAT DAY
@@ -82,6 +83,7 @@ class AttendanceController extends Controller
             if ($checkIfSameTimeRangeAttendanceExist) {
                 $attendance_details = AttendanceDetail::create([
                     'attendance_id' => $attendance->id,
+                    'office_type' => $request->office_type,
                     'in_time' => $request->in_time,
                     'out_time' => $request->out_time,
                 ]);
@@ -128,6 +130,7 @@ class AttendanceController extends Controller
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
+                'office_type' => $request->office_type,
                 'in_time' => $request->in_time,
                 'out_time' => $request->out_time,
             ]);
