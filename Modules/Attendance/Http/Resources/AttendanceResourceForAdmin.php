@@ -22,7 +22,7 @@ class AttendanceResourceForAdmin extends JsonResource
             'date' => $this->dates,
             'count' => $this->count_appearances($this->dates),
             'details' => $this->get_info($this->dates),
-            'created_at' => $this->created_at
+            'created_at' => $this->created_at?->format('d-m-Y H:i:s')
         ];
     }
 
