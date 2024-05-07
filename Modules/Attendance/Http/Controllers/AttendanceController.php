@@ -4,6 +4,7 @@ namespace Modules\Attendance\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -165,10 +166,15 @@ class AttendanceController extends Controller
         $requested_attendance = Attendance::query()
                         // ->whereYear('dates', $current_year)
                         // ->whereMonth('dates', $current_month)
-            ->where('status', Attendance::PENDING)
-            ->groupBy('dates')
-            ->orderBy('dates')
-            ->get();
+                        ->whereHas(
+                            'user', function(Builder $builder){
+                                $builder->where('company_id', auth()->user()->company_id);
+                            }
+                        )
+                        ->where('status', Attendance::PENDING)
+                        ->groupBy('dates')
+                        ->orderBy('dates')
+                        ->get();
 
         return AttendanceResourceForAdmin::collection($requested_attendance);
     }
