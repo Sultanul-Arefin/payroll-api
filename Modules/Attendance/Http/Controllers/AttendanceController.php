@@ -91,7 +91,7 @@ class AttendanceController extends Controller
                 // ATTENDANCE UPDATE NOTIFICATION
                 $data = [
                     'title' => 'Existing Attendance Update',
-                    'description' => "Attendance Given",
+                    'description' => "Attendance Given By: <b>" . auth()->user()->name . "</b>",
                     'action' => [
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
@@ -138,7 +138,7 @@ class AttendanceController extends Controller
             // ATTENDANCE CREATION NOTIFICATION
             $data = [
                 'title' => 'New Attendance Given',
-                'description' => "Attendance Given",
+                'description' => "Attendance Given By <b>" . auth()->user()->name . "</b>",
                 'action' => [
                     'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
