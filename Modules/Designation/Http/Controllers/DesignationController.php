@@ -29,7 +29,9 @@ class DesignationController extends Controller
      */
     public function index()
     {
-        $designation = Designation::all();
+        $designation = Designation::query()
+                        ->where('company_id', auth()->user()->company_id)
+                        ->get();
 
         return apiResponse(
             data: $designation,
