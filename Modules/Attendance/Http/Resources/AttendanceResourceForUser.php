@@ -30,7 +30,8 @@ class AttendanceResourceForUser extends JsonResource
                     'office_type' => $attendance->office_type == AttendanceDetail::FROM_OFFICE ? "OFFICE" : "HOME"
                 ];
             }),
-            'created_at' => $this->created_at->format('d-m-Y H:i:s')
+            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
+            'is_deletable' =>
         ];
     }
 
@@ -43,7 +44,6 @@ class AttendanceResourceForUser extends JsonResource
         } elseif ($status == Attendance::RESTRICTED) {
             return 'restricted';
         }
-
         return 'approved';
     }
 }
