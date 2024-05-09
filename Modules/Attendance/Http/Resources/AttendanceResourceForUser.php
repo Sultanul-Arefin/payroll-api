@@ -31,7 +31,7 @@ class AttendanceResourceForUser extends JsonResource
                 ];
             }),
             'created_at' => $this->created_at->format('d-m-Y H:i:s'),
-            'is_deletable' =>
+            'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0
         ];
     }
 
