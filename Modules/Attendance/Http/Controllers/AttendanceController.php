@@ -197,4 +197,30 @@ class AttendanceController extends Controller
             status: 'success'
         );
     }
+
+    public function approve_individual_attendance(Attendance $attendance, Request $request)
+    {
+        $request->validate([
+            '_method' => 'required'
+        ]);
+        $attendance->update([
+            'status' => Attendance::PRESENT
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Attendance Successfully Approved',
+            status: 'success'
+        );
+    }
+
+    public function destroy(Attendance $attendance)
+    {
+        $attendance->delete();
+        return apiResponse(
+            data: null,
+            message: 'Attendance Successfully Deleted',
+            status: 'success'
+        );
+    }
 }
