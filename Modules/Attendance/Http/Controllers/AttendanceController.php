@@ -214,8 +214,11 @@ class AttendanceController extends Controller
         );
     }
 
-    public function destroy(Attendance $attendance)
+    public function destroy(Attendance $attendance, Request $request)
     {
+        $request->validate([
+            '_method' => 'required'
+        ]);
         $attendance->delete();
         return apiResponse(
             data: null,
