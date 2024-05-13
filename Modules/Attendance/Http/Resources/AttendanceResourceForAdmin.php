@@ -46,6 +46,7 @@ class AttendanceResourceForAdmin extends JsonResource
                             $builder->where('company_id', auth()->user()->company_id);
                         }
                     )
+                    ->where('status', Attendance::PENDING)
                     ->where('dates', $date)->get();
 
         return AttendanceDetailsResourceForAdmin::collection($attendances);
