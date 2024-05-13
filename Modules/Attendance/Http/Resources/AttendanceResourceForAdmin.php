@@ -3,6 +3,7 @@
 namespace Modules\Attendance\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
@@ -28,12 +29,24 @@ class AttendanceResourceForAdmin extends JsonResource
 
     public function count_appearances($date)
     {
-        return Attendance::where('dates', $date)->count();
+        return Attendance::query()
+                ->whereHas(
+                    'user', function(Builder $builder){
+                        $builder->where('company_id', auth()->user()->company_id);
+                    }
+                )
+                ->where('dates', $date)->count();
     }
 
     public function get_info($date)
     {
-        $attendances = Attendance::where('dates', $date)->get();
+        $attendances = Attendance::query()
+                    ->whereHas(
+                        'user', function(Builder $builder){
+                            $builder->where('company_id', auth()->user()->company_id);
+                        }
+                    )
+                    ->where('dates', $date)->get();
 
         return AttendanceDetailsResourceForAdmin::collection($attendances);
     }
