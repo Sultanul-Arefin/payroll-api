@@ -20,6 +20,18 @@ class AttendanceService
         }
     }
 
+    public function checkIfAttendanceExistByAdmin($date, $user_id): ?Model
+    {
+        $attendance = Attendance::query()
+                    ->where('user_id', $user_id)
+                    ->where('dates', $date)->first();
+        if ($attendance) {
+            return $attendance;
+        } else {
+            return null;
+        }
+    }
+
     public function attendanceIsPossible($attendance, $in_time, $out_time)
     {
 
