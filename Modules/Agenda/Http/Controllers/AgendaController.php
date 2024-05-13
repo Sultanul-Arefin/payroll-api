@@ -3,6 +3,7 @@
 namespace Modules\Agenda\Http\Controllers;
 
 use DateTime;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Agenda\Entities\Agenda;
@@ -14,7 +15,11 @@ class AgendaController extends Controller
     public function index()
     {
         $agendas = Agenda::query()
-            ->where('user_id', auth()->user()->id)
+            ->whereHas(
+                'user', function(Builder $builder){
+                    $builder->where('company_id', auth()->user()->company_id);
+                }
+            )
             ->with([])
             ->latest()
             ->get();
