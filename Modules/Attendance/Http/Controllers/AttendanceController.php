@@ -201,7 +201,7 @@ class AttendanceController extends Controller
                 // ATTENDANCE UPDATE NOTIFICATION
                 $data = [
                     'title' => 'Existing Attendance Update',
-                    'description' => "Attendance Given By: <b>" . auth()->user()->name . "</b>",
+                    'description' => "Your Attendance of {$request->dates} Updated By <b>" . auth()->user()->name . "</b>",
                     'action' => [
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
@@ -211,8 +211,8 @@ class AttendanceController extends Controller
                     'type' => 'Attendance Management',
                     'color' => '',
                 ];
-                $user = app(ProjectController::class)->getAdminUser();
-                $user->notify(new AttendanceNotification($data));
+                // $user = app(ProjectController::class)->getAdminUser();
+                $target_user->notify(new AttendanceNotification($data));
 
                 return apiResponse(
                     data: [],
