@@ -198,11 +198,8 @@ class AttendanceController extends Controller
         );
     }
 
-    public function approve_individual_attendance(Attendance $attendance, Request $request)
+    public function approve_individual_attendance(Attendance $attendance)
     {
-        $request->validate([
-            '_method' => 'required'
-        ]);
         $attendance->update([
             'status' => Attendance::PRESENT
         ]);
