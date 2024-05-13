@@ -186,7 +186,7 @@ class AttendanceController extends Controller
 
 
         // CHECK IF ATTENDANCE EXIST FOR THAT DAY
-        $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
+        $attendance = $this->attendanceService->checkIfAttendanceExistByAdmin($request->dates, $request->user_id);
 
         if ($attendance) {
             $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->attendanceIsPossible($attendance, $request->in_time, $request->out_time);
@@ -234,7 +234,7 @@ class AttendanceController extends Controller
         $attendances = DB::transaction(function () use ($request, $target_user) {
             $attendance = Attendance::create([
                 'dates' => $request->dates,
-                'user_id' => auth()->user()->id,
+                'user_id' => $target_user->id,
                 'status' => Attendance::PRESENT,
             ]);
             $attendance_details = AttendanceDetail::create([
