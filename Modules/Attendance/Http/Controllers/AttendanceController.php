@@ -235,7 +235,7 @@ class AttendanceController extends Controller
             $attendance = Attendance::create([
                 'dates' => $request->dates,
                 'user_id' => auth()->user()->id,
-                'status' => Attendance::PENDING,
+                'status' => Attendance::PRESENT,
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
