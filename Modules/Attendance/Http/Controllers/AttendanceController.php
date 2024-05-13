@@ -2,9 +2,11 @@
 
 namespace Modules\Attendance\Http\Controllers;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -45,11 +47,6 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return Renderable
-     */
     public function store(Request $request)
     {
         if (auth()->user()->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE) {
@@ -118,7 +115,6 @@ class AttendanceController extends Controller
                     statusCode: 422
                 );
             }
-
         }
 
         // CREATE A NEW ATTENDANCE
@@ -150,6 +146,119 @@ class AttendanceController extends Controller
             ];
             $user = app(ProjectController::class)->getAdminUser();
             $user->notify(new AttendanceNotification($data));
+
+            return $attendance;
+        });
+
+        return apiResponse(
+            data: $attendances,
+            message: 'Attendance Successfully Added',
+            status: 'success'
+        );
+    }
+
+    public function manual_attendance_by_admin(Request $request): JsonResponse
+    {
+        /**
+         * we have to check for the machine, & web attendance
+         * for the machine attendance, in_time & out_time will not come together
+         * we'll check for the web, & machine attendance
+         * we'll insert, & show the value accordingly
+         */
+        $request->validate([
+            'dates' => 'required',
+            'in_time' => 'required',
+            'out_time' => 'required',
+            'office_type' => 'required',
+            'user_id' => 'required|exists:users,id'
+        ]);
+        $target_user = User::where('id', $request->user_id)->first();
+        if ($target_user->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE) {
+            return apiResponse(
+                data: [
+                    'message' => 'This user\'s attendance type is machine. Please update to web attendance to give attendance from here',
+                ],
+                message: 'This user\'s attendance type is machine. Please update to web attendance to give attendance from here',
+                status: 'error',
+                statusCode: 422
+            );
+        }
+
+
+        // CHECK IF ATTENDANCE EXIST FOR THAT DAY
+        $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
+
+        if ($attendance) {
+            $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->attendanceIsPossible($attendance, $request->in_time, $request->out_time);
+            if ($checkIfSameTimeRangeAttendanceExist) {
+                $attendance_details = AttendanceDetail::create([
+                    'attendance_id' => $attendance->id,
+                    'office_type' => $request->office_type,
+                    'in_time' => $request->in_time,
+                    'out_time' => $request->out_time,
+                ]);
+
+                // ATTENDANCE UPDATE NOTIFICATION
+                $data = [
+                    'title' => 'Existing Attendance Update',
+                    'description' => "Attendance Given By: <b>" . auth()->user()->name . "</b>",
+                    'action' => [
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                    ],
+                    'action_at' => date('Y-m-d H:i:s'),
+                    'type' => 'Attendance Management',
+                    'color' => '',
+                ];
+                $user = app(ProjectController::class)->getAdminUser();
+                $user->notify(new AttendanceNotification($data));
+
+                return apiResponse(
+                    data: [],
+                    message: 'This Slot Successfully Added',
+                    status: 'success'
+                );
+
+            } else {
+                return apiResponse(
+                    data: [],
+                    message: 'This Time Slot Is Already Booked!',
+                    status: 'warning',
+                    statusCode: 422
+                );
+            }
+        }
+
+        // CREATE A NEW ATTENDANCE
+        $attendances = DB::transaction(function () use ($request, $target_user) {
+            $attendance = Attendance::create([
+                'dates' => $request->dates,
+                'user_id' => auth()->user()->id,
+                'status' => Attendance::PENDING,
+            ]);
+            $attendance_details = AttendanceDetail::create([
+                'attendance_id' => $attendance->id,
+                'office_type' => $request->office_type,
+                'in_time' => $request->in_time,
+                'out_time' => $request->out_time,
+            ]);
+
+            // ATTENDANCE CREATION NOTIFICATION
+            $data = [
+                'title' => 'New Attendance Given',
+                'description' => "Your Attendance of {$request->dates} Given By <b>" . auth()->user()->name . "</b>",
+                'action' => [
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'phone' => auth()->user()->phone,
+                ],
+                'action_at' => date('Y-m-d H:i:s'),
+                'type' => 'Attendance Management',
+                'color' => '',
+            ];
+            // $user = app(ProjectController::class)->getAdminUser();
+            $target_user->notify(new AttendanceNotification($data));
 
             return $attendance;
         });
