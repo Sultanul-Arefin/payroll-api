@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Agenda\Entities\Agenda;
 use Modules\Company\Entities\Company;
 use Modules\Department\Entities\Department;
 use Modules\Designation\Entities\Designation;
@@ -170,5 +171,13 @@ class User extends Authenticatable
         return Attribute::make(
             get: fn ($value) => ($value.'3')
         );
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function agendas(): HasMany
+    {
+        return $this->hasMany(Agenda::class, 'user_id', 'id');
     }
 }
