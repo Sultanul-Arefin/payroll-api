@@ -8,7 +8,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::apiResource('attendance', AttendanceController::class);
         Route::get('requested-attendance', [AttendanceController::class, 'requested_attendance']);
         Route::post('approve-all-attendance-by-date', [AttendanceController::class, 'approve_all_attendance_by_date']);
-        Route::patch('approve-individual-attendance/{attendance}', [AttendanceController::class, 'approve_individual_attendance']);
+        Route::post('approve-individual-attendance/{attendance}', [AttendanceController::class, 'approve_individual_attendance']);
 
         Route::get('leave-types', [LeaveController::class, 'leave_types']);
     });
