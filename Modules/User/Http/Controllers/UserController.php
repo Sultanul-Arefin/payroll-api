@@ -452,7 +452,6 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        return gettype($request->ordinary_time_rate);
         DB::transaction(function () use ($request, $user) {
 
             $user_details = UserDetails::where('user_id', $user->id)->first();
@@ -544,7 +543,7 @@ class UserController extends Controller
             }
 
             // update salary items
-            if(isset($request->ordinary_time_rate) && !is_null($request->ordinary_time_rate)){
+            if(isset($request->ordinary_time_rate) && $request->ordinary_time_rate != "null"){
                 $this->update_salary_items($request->all(), $user->id);
             }
 
