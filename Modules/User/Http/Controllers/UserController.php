@@ -452,6 +452,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
+        return gettype($request->ordinary_time_rate);
         DB::transaction(function () use ($request, $user) {
 
             $user_details = UserDetails::where('user_id', $user->id)->first();
@@ -551,7 +552,7 @@ class UserController extends Controller
 
         return apiResponse(
             data: null,
-            message: 'Successfully updated',
+            message: 'Employee Profile Successfully Updated',
             status: 'success'
         );
     }
