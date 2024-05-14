@@ -543,7 +543,9 @@ class UserController extends Controller
             }
 
             // update salary items
-            $this->update_salary_items($request->all(), $user->id);
+            if(isset($request->ordinary_time_rate)){
+                $this->update_salary_items($request->all(), $user->id);
+            }
 
         });
 
