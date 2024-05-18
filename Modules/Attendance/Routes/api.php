@@ -6,6 +6,7 @@ use Modules\Attendance\Http\Controllers\LeaveController;
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('attendance', AttendanceController::class);
+        Route::post('update-attendance-details/{attendance_detail}', [AttendanceController::class, 'update_attendance_details']);
         Route::post('manual-attendance-by-admin', [AttendanceController::class, 'manual_attendance_by_admin']);
         Route::get('requested-attendance', [AttendanceController::class, 'requested_attendance']);
         Route::post('approve-all-attendance-by-date', [AttendanceController::class, 'approve_all_attendance_by_date']);
