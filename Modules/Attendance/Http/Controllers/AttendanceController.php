@@ -157,6 +157,21 @@ class AttendanceController extends Controller
         );
     }
 
+    public function update_attendance_details(AttendanceDetail $attendance_detail, Request $request)
+    {
+        $request->validate([
+            'in_time' => 'required',
+            'out_time' => 'required',
+        ]);
+        $attendance_detail->update([
+            'in_time' => $request->in_time,
+            'out_time' => $request->out_time,
+        ]);
+        return apiResponse(
+            data: $attendance_detail,
+        );
+    }
+
     public function manual_attendance_by_admin(Request $request): JsonResponse
     {
         /**
