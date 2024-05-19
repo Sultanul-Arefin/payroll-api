@@ -25,6 +25,7 @@ class AttendanceResourceForUser extends JsonResource
             'status' => $this->getStatus($this->status),
             'details' => $this->attendance_details->map(function ($attendance) {
                 return [
+                    'id' => $attendance->id,
                     'in_time' => $attendance->in_time,
                     'out_time' => $attendance->out_time,
                     'office_type' => $attendance->office_type == AttendanceDetail::FROM_OFFICE ? "OFFICE" : "HOME"
