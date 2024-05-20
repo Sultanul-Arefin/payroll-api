@@ -10,4 +10,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('help-article-category', [SupportTicketController::class, 'help_article_category']);
         Route::get('help-articles', [SupportTicketController::class, 'help_articles']);
     });
+    Route::post('registration-from-bfin-technology', function(){
+        return apiResponse(
+            data: null
+        );
+    });
 });
