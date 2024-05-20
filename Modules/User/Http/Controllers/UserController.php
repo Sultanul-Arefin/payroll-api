@@ -66,7 +66,6 @@ class UserController extends Controller
 
     public function findById(User $user)
     {
-
         $user->user_details = $user->user_details;
         $user->user_details['gender_value'] = $user->user_details?->gender == 0 ? 'Female' : 'Male';
         $user->user_details['user_image'] = $user->user_details?->user_image ? env('APP_URL').'/'.'storage/'.$user->user_details?->user_image : null;
@@ -78,7 +77,7 @@ class UserController extends Controller
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
                 $builder->where('employee_id', $user->id);
             })
-            ->where('salary_items_category_id', 1)
+            // ->where('salary_items_category_id', 1)
             ->get();
         $user->salary_items = $items->map(function ($item) use ($user) {
             return new UserBasicSalaryResource($item, $user->id);
