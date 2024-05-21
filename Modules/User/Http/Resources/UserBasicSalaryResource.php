@@ -4,10 +4,12 @@ namespace Modules\User\Http\Resources;
 
 use App\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 
 class UserBasicSalaryResource extends JsonResource
 {
@@ -42,8 +44,21 @@ class UserBasicSalaryResource extends JsonResource
             'time_per' => null,
             'govt_amount' => 0,
             'employee_amount' => 0,
-            'is_deletable' => $this->is_deletable($this->salaryItemsCategory)
+            'is_deletable' => $this->is_deletable($this->salaryItemsCategory),
+            'employee_salary_item_id' => $this->getEmployeeSalaryItemId()
         ];
+    }
+
+    private function getEmployeeSalaryItemId()
+    {
+        $get_employee_salary_item = EmployeeSalaryItem::query()
+                                ->whereHas('salaryItemsName', function(Builder $builder){
+                                    $builder->where('name', 'like', $this->name)
+                                            ->where('company_id', auth()->user()->company_id);
+                                })
+                                ->where('employee_id', $this->user_id)
+                                ->first();
+        return $get_employee_salary_item->id;
     }
 
     private function is_deletable($category): bool
