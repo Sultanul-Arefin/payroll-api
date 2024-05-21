@@ -42,11 +42,11 @@ class UserBasicSalaryResource extends JsonResource
             'time_per' => null,
             'govt_amount' => 0,
             'employee_amount' => 0,
-            'is_editable' => $this->is_editable($this->salaryItemsCategory)
+            'is_deletable' => $this->is_deletable($this->salaryItemsCategory)
         ];
     }
 
-    private function is_editable($category): bool
+    private function is_deletable($category): bool
     {
         if($category->id == 1 || $category->id == 2)
         {
