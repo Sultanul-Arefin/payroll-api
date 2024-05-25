@@ -70,9 +70,9 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
     {
         return UserLeave::query()
             ->when(
-                ! is_null(request('employee_id')),
+                ! is_null(request('user_id')),
                 fn (Builder $builder) => $builder->where(function ($query) {
-                    $query->where('user_id', request('employee_id'));
+                    $query->where('user_id', request('user_id'));
                 })
             )
             ->with('user', 'salary_item', 'leave_details')->get();
