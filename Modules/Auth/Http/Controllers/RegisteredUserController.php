@@ -121,7 +121,6 @@ class RegisteredUserController extends Controller
                     'user_city' => $request->address,
                     'user_phone' => $request->address,
                     'country_id' => 1,
-                    // 'user_image' => $request->user_address ?? null,
                 ]);
                 // $user->assignRole('super-admin');
 
