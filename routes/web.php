@@ -14,7 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return apiResponse(
+        data: null,
+        message: 'API is Successfully Working',
+        status: 'success',
+        statusCode: 200
+    );
 });
 
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
