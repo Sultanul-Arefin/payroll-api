@@ -122,7 +122,6 @@ class RegisteredUserController extends Controller
                     'user_phone' => $request->address,
                     'country_id' => 1,
                 ]);
-                // $user->assignRole('super-admin');
 
                 // seeding the database
                 $this->userServices->salary_items_name_seeder($company->id);
