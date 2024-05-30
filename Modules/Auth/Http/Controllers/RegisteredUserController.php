@@ -131,9 +131,8 @@ class RegisteredUserController extends Controller
 
                 return $user;
             });
-        } catch(\Exception $e){
-            // Handle the exception, for example:
-            // Log the error, return a response, etc.
+        } catch(\Exception $e){ // Handle the exception
+            // Log the error, return a response
             Log::error('Error occurred while creating user and company: ' . $e->getMessage());
             return response()->json(['error' => 'Something went wrong'], 500);
         }
