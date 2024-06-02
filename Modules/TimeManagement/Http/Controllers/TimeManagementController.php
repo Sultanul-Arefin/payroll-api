@@ -35,7 +35,6 @@ class TimeManagementController extends Controller
             'to_date' => 'required|date|date_format:Y-m-d'
         ]);
         $users = User::where('company_id', auth()->user()->company_id)->where('status', User::USER_ACTIVE)->get();
-        return $users;
         $response = AttendanceReportResource::collection(
             $users
         );
