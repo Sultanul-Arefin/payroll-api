@@ -13,13 +13,13 @@ use Modules\TimeManagement\Http\Resources\TimeManagementResource;
 
 class TimeManagementController extends Controller
 {
-    function time_management_report(Request $request) 
+    function time_management_report(Request $request)
     {
         $request->validate([
             'department_id' => 'required|integer',
             'year' => 'required'
         ]);
-        $users = User::where('company_id', auth()->user()->id)->where('status', User::USER_ACTIVE)->get();
+        $users = User::where('company_id', auth()->user()->company_id)->where('status', User::USER_ACTIVE)->get();
         $response = TimeManagementResource::collection(
             $users
         );
@@ -28,13 +28,14 @@ class TimeManagementController extends Controller
         );
     }
 
-    function attendance_report(Request $request) 
+    function attendance_report(Request $request)
     {
         $request->validate([
             'from_date' => 'required|date|date_format:Y-m-d',
             'to_date' => 'required|date|date_format:Y-m-d'
         ]);
-        $users = User::where('company_id', auth()->user()->id)->where('status', User::USER_ACTIVE)->get();
+        $users = User::where('company_id', auth()->user()->company_id)->where('status', User::USER_ACTIVE)->get();
+        return $users;
         $response = AttendanceReportResource::collection(
             $users
         );
@@ -42,7 +43,7 @@ class TimeManagementController extends Controller
             data: $response
         );
     }
-    
+
     function attendance_calendar_overview_per_person(Request $request)
     {
         $request->validate([
