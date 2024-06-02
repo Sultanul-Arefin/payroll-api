@@ -89,7 +89,10 @@ class LeaveManagementController extends Controller
         $LeaveList = $this->leaveRepository->leave_list();
         $LeavesCollection = LeaveListResource::collection($LeaveList);
 
-        return apiResponse($LeavesCollection, 'Successfully Get Leave List', 'success', '200');
+        return apiResponse(
+            data: $LeavesCollection,
+            message: 'Successfully Get Leave List'
+        );
     }
 
     public function leave_status(Request $request)
