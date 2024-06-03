@@ -43,15 +43,15 @@ class AttendanceReportResource extends JsonResource
     }
 
     function getOvertime() {
-        return 0;
+        return 0; // will work on this
     }
 
     function getDoubleOvertime() {
-        return 0;
+        return 0; // will work on this
     }
 
     function getEarlyDeparture() {
-        return 0;
+        return 0; // will work on this
     }
 
     function getAnnualLeave($user_id) {
