@@ -83,6 +83,11 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
                     }
                 )
             )
+            ->whereHas(
+                'user', function(Builder $builder){
+                    $builder->where('company_id', auth()->user()->company_id);
+                }
+            )
             ->with('user', 'salary_item', 'leave_details')->get();
     }
 }
