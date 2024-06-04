@@ -487,7 +487,9 @@ class PayslipService
                 $outTime = Carbon::parse($detail->out_time);
 
                 // Calculate the time difference in minutes and add it to the total
-                $timeDifferenceMinutes = $outTime->diffInHours($inTime);
+                $timeDifferenceMinutes = $inTime->diffInHours($outTime); // have to check this code twice, there might be an issue in the inTime, outTime alignment
+                // previous alignment
+                // $timeDifferenceMinutes = $outTime->diffInHours($inTime);
                 $total_minutes += $timeDifferenceMinutes;
             }
         }
