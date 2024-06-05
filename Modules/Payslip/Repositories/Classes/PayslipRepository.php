@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Repositories\Classes;
 
+use App\Models\User;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\CursorPaginator;
@@ -34,6 +35,12 @@ class PayslipRepository extends BaseRepository implements PayslipRepositoryInter
     {
         return $this->model::query()
                 ->where('company_id', auth()->user()->company_id)
+                ->when(
+                    auth()->user()->role_id == User::EMPLOYEE || auth()->user()->role_id == User::DEPARTMENT_MANAGER,
+                    fn(Builder $builder) => $builder->where(function($query){
+                        $query->where('employee_id', auth()->user()->id);
+                    })
+                )
                 ->when(
                     ! is_null(request('employee_id')),
                     fn (Builder $builder) => $builder->where(function ($query) {
