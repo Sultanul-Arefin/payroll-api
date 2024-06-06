@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Storage;
 
 trait Attachment
 {
-    public function uploadAttachment($file, string $storagePath = '')
+    public function uploadAttachment($request, $fileName=null, string $storagePath = '')
     {
         $finalFilePath = null;
-        if ($file) {
-            $fileName = rand(0, 999999999).'_'.date('Ymdhis').'_'.rand(100, 999999999).'.'.$file->getClientOriginalExtension();
+        if($request->hasFile($fileName)){
+            $file = $request->file($fileName);
+            $fileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
             $file->storeAs($storagePath, $fileName, 'public');
-            $finalFilePath = "{$storagePath}/{$fileName}";
+            return "{$storagePath}/{$fileName}";
+        }else{
+            return false;
         }
 
         return ['fileName' => $finalFilePath, 'message' => 'somethings..'];

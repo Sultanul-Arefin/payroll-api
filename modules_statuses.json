@@ -18,5 +18,7 @@
     "Notification": true,
     "Agenda": true,
     "TimeManagement": true,
-    "Report": true
+    "Report": true,
+    "S": true,
+    "StaffObjective": true
 }

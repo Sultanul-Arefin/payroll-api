@@ -1,0 +1,11 @@
+{
+    "name": "StaffObjective",
+    "alias": "staffobjective",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\StaffObjective\\Providers\\StaffObjectiveServiceProvider"
+    ],
+    "files": []
+}
