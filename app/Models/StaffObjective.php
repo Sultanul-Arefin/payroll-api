@@ -1,20 +1,15 @@
 <?php
 
-namespace Modules\StaffObjective\Models;
+namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\StaffObjective\Database\factories\StaffObjectiveFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class StaffObjective extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = ['user_id', 'review_by', 'review_date', 'meeting_details', 'review_notes', 'official_review_notes', 'review_document'];
 
     public function ReviewDocument(): Attribute
@@ -32,5 +27,4 @@ class StaffObjective extends Model
     {
         return $this->belongsTo(User::class, 'review_by', 'id');
     }
-
 }
