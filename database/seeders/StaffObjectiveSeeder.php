@@ -1,7 +1,8 @@
 <?php
 
-namespace Modules\StaffObjective\database\seeders;
+namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class StaffObjectiveSeeder extends Seeder
@@ -11,6 +12,6 @@ class StaffObjectiveSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        //
     }
 }

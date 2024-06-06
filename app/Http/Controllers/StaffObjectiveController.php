@@ -1,16 +1,16 @@
 <?php
 
-namespace Modules\StaffObjective\Http\Controllers;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Traits\Attachment;
+use App\Models\StaffObjective;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Modules\StaffObjective\Http\Requests\StaffObjectiveRequest;
-use Modules\StaffObjective\Models\StaffObjective;
-use App\Http\Traits\Attachment;
-use Modules\StaffObjective\Transformers\StaffObjectiveResource;
+use App\Http\Resources\StaffObjectiveResource;
+use App\Http\Requests\StaffObjectiveRequest;
+
+
 
 class StaffObjectiveController extends Controller
 {
@@ -30,11 +30,11 @@ class StaffObjectiveController extends Controller
      */
     public function store(StaffObjectiveRequest $request)
     {
-       // return $request->all();
+         //return $request->all();
         $fileName =  null;
         if($request->hasFile('review_document')){
             //call file upload trait and sent request file and directory path name
-           $fileName = $this->uploadAttachment($request, 'review_document', 'staff_objectives');
+            $fileName = $this->uploadAttachment($request, 'review_document', 'staff_objectives');
         }
         try {
             StaffObjective::create([
@@ -58,8 +58,8 @@ class StaffObjectiveController extends Controller
      */
     public function show(StaffObjective $staffObjective) : JsonResponse
     {
-       $data = new StaffObjectiveResource($staffObjective);
-       return apiResponse($data, 'success', 200);
+        $data = new StaffObjectiveResource($staffObjective);
+        return apiResponse($data, 'success', 200);
     }
 
     /**
