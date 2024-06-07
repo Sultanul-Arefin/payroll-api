@@ -30,7 +30,6 @@ class StaffObjectiveController extends Controller
      */
     public function store(StaffObjectiveRequest $request)
     {
-         //return $request->all();
         $fileName =  null;
         if($request->hasFile('review_document')){
             //call file upload trait and sent request file and directory path name
