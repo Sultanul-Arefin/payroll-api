@@ -10,7 +10,15 @@ class StaffObjective extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'review_by', 'review_date', 'meeting_details', 'review_notes', 'official_review_notes', 'review_document'];
+    protected $fillable = [
+        'user_id',
+        'review_by',
+        'review_date',
+        'meeting_details',
+        'review_notes',
+        'official_review_notes',
+        'review_document'
+    ];
 
     public function ReviewDocument(): Attribute
     {
