@@ -42,11 +42,41 @@ class UserBasicSalaryResource extends JsonResource
             'category' => $this->salaryItemsCategory?->name,
             'time_month_hour' => null,
             'time_per' => null,
-            'govt_amount' => 0,
-            'employee_amount' => 0,
+            'govt_amount' => $this->getGovernmentAmount(),
+            'employee_amount' => $this->getEmployeeAmount(),
             'is_deletable' => $this->is_deletable($this->salaryItemsCategory),
             'employee_salary_item_id' => $this->getEmployeeSalaryItemId()
         ];
+    }
+
+    private function getGovernmentAmount()
+    {
+        if($this->salaryItemsCategory->id == 7 || $this->salaryItemsCategory->id == 8)
+        {
+            $get_employee_salary_item = EmployeeSalaryItem::query()
+                                ->whereHas('salaryItemsName', function(Builder $builder){
+                                    $builder->where('name', 'like', $this->name)
+                                            ->where('company_id', auth()->user()->company_id);
+                                })
+                                ->where('employee_id', $this->user_id)
+                                ->first();
+            return $get_employee_salary_item?->deduction_details?->government_or_company_amount;
+        }
+    }
+
+    private function getEmployeeAmount()
+    {
+        if($this->salaryItemsCategory->id == 7 || $this->salaryItemsCategory->id == 8)
+        {
+            $get_employee_salary_item = EmployeeSalaryItem::query()
+                                ->whereHas('salaryItemsName', function(Builder $builder){
+                                    $builder->where('name', 'like', $this->name)
+                                            ->where('company_id', auth()->user()->company_id);
+                                })
+                                ->where('employee_id', $this->user_id)
+                                ->first();
+            return $get_employee_salary_item?->deduction_details?->employee_amount;
+        }
     }
 
     private function getEmployeeSalaryItemId()
