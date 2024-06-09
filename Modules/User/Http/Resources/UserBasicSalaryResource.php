@@ -38,7 +38,7 @@ class UserBasicSalaryResource extends JsonResource
             ),
             // 'user_id' => $this->user_id,
             'user' => $this->getUserInfo($this->user_id),
-            'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount,
+            'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount ?? 0,
             'category' => $this->salaryItemsCategory?->name,
             'time_month_hour' => null,
             'time_per' => null,
