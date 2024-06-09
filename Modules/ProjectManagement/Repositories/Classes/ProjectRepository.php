@@ -32,7 +32,7 @@ class ProjectRepository extends BaseRepository implements ProjectInterface
 
     private function searchQuery($relations)
     {
-        if(auth()->user()->role_id == User::ADMIN)
+        if(auth()->user()->role_id == User::ADMIN || auth()->user()->role_id == User::MANAGER)
         {
             return $this->model::query()
                 ->when(!is_null(request('status')), function ($query) {
