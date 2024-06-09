@@ -33,6 +33,7 @@ class ProjectAssociatedResource extends JsonResource
     {
         if(
             auth()->user()->role_id == User::ADMIN ||
+            auth()->user()->role_id == User::MANAGER ||
             auth()->user()->id == $this->project_manager ||
             auth()->user()->id == $this->created_by
         ){

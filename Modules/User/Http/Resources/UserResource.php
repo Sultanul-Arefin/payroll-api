@@ -41,6 +41,7 @@ class UserResource extends JsonResource
     {
         return match ($role_id) {
             User::ADMIN => 'ADMIN',
+            User::MANAGER => 'MANAGER',
             User::DEPARTMENT_MANAGER => 'DEPARTMENT_MANAGER',
             User::EMPLOYEE => 'EMPLOYEE',
             default => 'Role Not Found'
