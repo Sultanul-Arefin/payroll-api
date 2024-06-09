@@ -62,6 +62,7 @@ class UserBasicSalaryResource extends JsonResource
                                 ->first();
             return $get_employee_salary_item?->deduction_details?->government_or_company_amount;
         }
+        return 0;
     }
 
     private function getEmployeeAmount()
@@ -77,6 +78,7 @@ class UserBasicSalaryResource extends JsonResource
                                 ->first();
             return $get_employee_salary_item?->deduction_details?->employee_amount;
         }
+        return 0;
     }
 
     private function getEmployeeSalaryItemId()
