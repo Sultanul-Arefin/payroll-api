@@ -38,6 +38,7 @@ class User extends Authenticatable
     public const ADMIN = 1;
     public const DEPARTMENT_MANAGER = 2;
     public const EMPLOYEE = 3;
+    public const MANAGER = 4;
 
     public const EMPLOYEE_TYPE_FULL_TIME = 1;
     public const EMPLOYEE_TYPE_PART_TIME = 2;
