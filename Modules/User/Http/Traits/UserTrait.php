@@ -30,7 +30,7 @@ trait UserTrait
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role_id' => 'required|integer|in:1,2,3',
+            'role_id' => 'required|integer|in:1,2,3,4',
             'password' => 'required|string|min:4|max:30',
         ]);
         $update_user = User::where('id', $request->user_id)->update([
@@ -69,7 +69,7 @@ trait UserTrait
     public function update_role(User $user, Request $request)
     {
         $request->validate([
-            'role_id' => 'required|integer|in:1,2,3'
+            'role_id' => 'required|integer|in:1,2,3,4'
         ]);
         $updated_user = $user->update([
             'role_id' => $request->role_id
