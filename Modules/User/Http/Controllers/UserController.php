@@ -116,12 +116,11 @@ class UserController extends Controller
      * @param  Request  $request
      * @return Renderable
      */
-    public function store(UserStoreRequest $request)
+    public function store(UserStoreRequest $request) : JsonResponse
     {
         if (! $request->has('wages')) {
             $request->merge(['wages' => null]);
         }
-
         try {
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
@@ -236,8 +235,8 @@ class UserController extends Controller
                 }
             });
         } catch (\Exception $ex) {
-            $this->deleteMultipleAttachment($allFile); // if exception throw, it will call and delete recent stored file form storage
-            throw new CustomException('something wrong, please try again');
+            //$this->deleteMultipleAttachment($allFile); // if exception throw, it will call and delete recent stored file form storage
+            throw new CustomException($ex->getMessage(), 200);
         }
 
         return apiResponse(
@@ -451,7 +450,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        DB::transaction(function () use ($request, $user) {
+      //  DB::transaction(function () use ($request, $user) {
 
             $user_details = UserDetails::where('user_id', $user->id)->first();
 
@@ -496,9 +495,10 @@ class UserController extends Controller
             foreach ($request->allFiles() as $key => $file) {
                 $allFileArr[$key] = $file;
             }
+
             //existing files are update
             if ($user->userAttachment) {
-                //  return 'inside attachement' ;
+                //  return 'inside attachment' ;
                 //loop all existing file from userAttachment DB under a user
                 foreach ($user->userAttachment as $value) {
                     foreach ($allFileArr as $key => $file) { //loop all requested files from new associative array
@@ -506,21 +506,21 @@ class UserController extends Controller
                         if ($value->item_type === (isset(UserAttachment::CONTRACT_ITEM_TYPE[$key]) ? UserAttachment::CONTRACT_ITEM_TYPE[$key] : null) && $value->heading_type === 1) {
                             $this->deleteAttachment($value->file_name);
                             $value->update([
-                                'file_name' => $this->updateAttachment($file, ('employees/contract')),
+                                'file_name' => $this->updateAttachment($file,  ("employees/{$user->id}/contract")),
                             ]);
                             unset($allFileArr[$key]); //remove element from new array
                         }
                         if ($value->item_type === (isset(UserAttachment::OFFICIAL_ITEM_TYPE[$key]) ? UserAttachment::OFFICIAL_ITEM_TYPE[$key] : null) && $value->heading_type === 2) {
                             $this->deleteAttachment($value->file_name);
                             $value->update([
-                                'file_name' => $this->updateAttachment($file, ('employees/official')),
+                                'file_name' => $this->updateAttachment($file, ("employees/{$user->id}/official")),
                             ]);
                             unset($allFileArr[$key]); //remove element from new array
                         }
                         if ($value->item_type === (isset(UserAttachment::OTHERS_ITEM_TYPE[$key]) ? UserAttachment::OTHERS_ITEM_TYPE[$key] : null) && $value->heading_type === 3) {
                             $this->deleteAttachment($value->file_name);
                             $value->update([
-                                'file_name' => $this->updateAttachment($file, ('employees/others')),
+                                'file_name' => $this->updateAttachment($file, ("employees/{$user->id}/others")),
                             ]);
                             unset($allFileArr[$key]);
                         }
@@ -546,7 +546,7 @@ class UserController extends Controller
                 $this->update_salary_items($request->all(), $user->id);
             }
 
-        });
+       // });
 
         return apiResponse(
             data: null,

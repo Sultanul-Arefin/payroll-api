@@ -28,7 +28,7 @@ class UserAttachment extends Model
     protected function fileName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value ? env('APP_URL').'/storage/'.$value : null)
+            get: fn ($value) => ($value ? asset('storage').'/'.$value : null)
         );
     }
 }

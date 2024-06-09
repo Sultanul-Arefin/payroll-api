@@ -7,33 +7,31 @@ use Illuminate\Support\Facades\Storage;
 
 trait Attachment
 {
-    public function uploadAttachment($request, $fileName=null, string $storagePath = '')
+    public function uploadAttachment($request, $fileName=null,  $storagePath = '')
     {
-        $finalFilePath = null;
         if($request->hasFile($fileName)){
             $file = $request->file($fileName);
-            $fileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
-            $file->storeAs($storagePath, $fileName, 'public');
-            return "{$storagePath}/{$fileName}";
+            $uniqueFileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs($storagePath, $uniqueFileName, 'public');
+            return "{$storagePath}/{$uniqueFileName}";
         }else{
             return false;
         }
-
-        return ['fileName' => $finalFilePath, 'message' => 'somethings..'];
     }
 
     public function updateAttachment($file, $storagePath = '')
     {
-        $result = $this->uploadAttachment($file, $storagePath);
-
-        return $result['fileName'];
+            $uniqueFileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs($storagePath, $uniqueFileName, 'public');
+            return "{$storagePath}/{$uniqueFileName}";
     }
 
     public function deleteAttachment($fileName)
     {
-        $existFile = Storage::disk('public')->exists($fileName);
+       $takeOnlyImageName = explode('/', $fileName, 5);
+        $existFile = Storage::disk('public')->exists($takeOnlyImageName[4]);
         if ($existFile) {
-            return Storage::disk('public')->delete($fileName);
+            return Storage::disk('public')->delete($takeOnlyImageName[4]);
         }
     }
 
