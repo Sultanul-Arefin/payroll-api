@@ -39,7 +39,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return $this->model::query()
                 ->where('company_id', auth()->user()->company_id)
-                ->where('role_id', '!=', User::ADMIN)
+                // ->where('role_id', '!=', User::ADMIN)
                 ->when(
                     ! is_null(request('department_id')),
                     fn (Builder $builder) => $builder->where(function ($query) {
