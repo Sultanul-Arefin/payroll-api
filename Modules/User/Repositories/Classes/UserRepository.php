@@ -152,27 +152,25 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $user;
     }
 
-    public function userDocument($request_file_name, $heading_type, $item_type, $user_id)
+    public function userDocument($request, $heading_type, $item_type, $user_id)
     {
-        $data = $this->uploadAttachment($request_file_name, ('employees/'.$heading_type));
-        if ($data['fileName']) {
+        $filename = $this->updateAttachment($request, ("employees/{$user_id}/$heading_type"));
+        if ($filename) {
             try {
                 $attach = UserAttachment::create([
                     'user_id' => $user_id,
-                    'file_name' => $data['fileName'],
+                    'file_name' => $filename,
                     'heading_type' => UserAttachment::HEADING_TYPE[$heading_type],
                     'item_type' => $this->itemType($heading_type, $item_type),
                 ]);
             } catch (\Exception $ex) {
-                $this->deleteAttachment($data['fileName']);
+                $this->deleteAttachment($filename);
                 throw new CustomException('Something Wrong, Please try again', 404);
             }
         } else {
             throw new CustomException('Your File Not Accepted', 404);
         }
-
         return $attach;
-
     }
 
     public function multipleStoreAttachment($request, $userId)
