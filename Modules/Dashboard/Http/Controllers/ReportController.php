@@ -3,12 +3,17 @@
 namespace Modules\Dashboard\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
+use Modules\Dashboard\app\Models\DedicatedDigitalTaxReport;
+use Modules\Dashboard\app\Models\DedicatedDigitalSocialReport;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Http\Resources\PayslipResource;
+use App\Http\Traits\Attachment;
 
 class ReportController extends Controller
 {
+    use Attachment;
     public function department_wise_report(Request $request)
     {
         $request->validate([
@@ -79,9 +84,30 @@ class ReportController extends Controller
 
     }
 
-    public function upload_dedicated_digital_tax_report()
+    public function upload_dedicated_digital_tax_report(Request $request)
     {
+        $request->validate([
+            'user_name' => 'required',
+            'country_name' => 'required',
+            'file_name' => 'required|mimes:png,jpeg,jpg,pdf,docx|max:2048',
+        ]);
 
+        try {
+            $fileName = null;
+            if($request->hasfile('file_name')){
+                $authId = auth()->id();
+                $fileName = $this->uploadAttachment($request, 'file_name', "reports/{$authId}/tax_report");
+            }
+            DedicatedDigitalTaxReport::create([
+                'company_id' => auth()->id(),
+                'user_name' => $request->user_name,
+                'country_name' => $request->country_name,
+                'file_name' => $fileName,
+            ]);
+            return apiResponse('', 'success', 200);
+        }catch (\Exception $ex){
+            return apiResponse(null, 'something went wrong', 403);
+        }
     }
 
     public function create_digital_social_report()
@@ -89,8 +115,28 @@ class ReportController extends Controller
 
     }
 
-    public function upload_dedicated_digital_social_report()
+    public function upload_dedicated_digital_social_report(Request $request)
     {
-
+        $request->validate([
+            'user_name' => 'required',
+            'country_name' => 'required',
+            'file_name' => 'required|mimes:png,jpeg,jpg,pdf,docx|max:2048',
+        ]);
+        try {
+            $fileName = null;
+            if($request->hasfile('file_name')){
+                $authId = auth()->id();
+                $fileName = $this->uploadAttachment($request, 'file_name', "reports/{$authId}/social_report");
+            }
+            DedicatedDigitalSocialReport::create([
+                'company_id' => auth()->id(),
+                'user_name' => $request->user_name,
+                'country_name' => $request->country_name,
+                'file_name' => $fileName,
+            ]);
+            return apiResponse('', 'success', 200);
+        }catch (\Exception $ex){
+            return apiResponse(null, 'something went wrong', 403);
+        }
     }
 }
