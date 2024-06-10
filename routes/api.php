@@ -4,6 +4,7 @@ use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StaffObjectiveController;
+use Modules\Dashboard\Http\Controllers\ReportController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -15,8 +16,12 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
         // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON
         // DIGITAL TAX REPORT
+        Route::post('create-digital-tax-report', [ReportController::class, 'create_digital_tax_report']);
+        Route::post('upload-dedicated-digital-tax-report', [ReportController::class, 'upload_dedicated_digital_tax_report']);
 
         // DIGITAL SOCIAL REPORT
+        Route::post('create-digital-social-report', [ReportController::class, 'create_digital_social_report']);
+        Route::post('upload-dedicated-digital-social-report', [ReportController::class, 'upload_dedicated_digital_social_report']);
 
         // REPORT
         Route::get('department-wise-report', [ReportController::class, 'department_wise_report'])
