@@ -79,9 +79,59 @@ class ReportController extends Controller
         );
     }
 
-    public function create_digital_tax_report()
+    public function create_digital_tax_report(Request $request)
     {
+        $request->validate([
+            'month' => 'required',
+            'year' => 'required',
+            'email' => 'required'
+        ]);
+        return apiResponse(
+            data: [
+                [
+                    'employee_name' => 'Test 1',
+                    'tax_no' => 11111,
+                    'month' => 'June',
+                    'year' => 2024,
+                    'gross_pay_before_tax' => 00000,
+                    'income_tax' => 00000,
+                    'other_tax' => 00000,
+                    'total_paid' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'tax_no' => 11111,
+                    'month' => 'June',
+                    'year' => 2024,
+                    'gross_pay_before_tax' => 00000,
+                    'income_tax' => 00000,
+                    'other_tax' => 00000,
+                    'total_paid' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'tax_no' => 11111,
+                    'month' => 'June',
+                    'year' => 2024,
+                    'gross_pay_before_tax' => 00000,
+                    'income_tax' => 00000,
+                    'other_tax' => 00000,
+                    'total_paid' => 00000
+                ],
+            ]
+        );
+    }
 
+    public function send_digital_tax_report(Request $request)
+    {
+        $request->validate([
+            'email' => 'required'
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Email send successfully!'
+        );
     }
 
     public function upload_dedicated_digital_tax_report(Request $request)
@@ -110,9 +160,50 @@ class ReportController extends Controller
         }
     }
 
-    public function create_digital_social_report()
+    public function create_digital_social_report(Request $request)
     {
+        $request->validate([
+            'month' => 'required',
+            'year' => 'required',
+            'email' => 'required'
+        ]);
+        return apiResponse(
+            data: [
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
+            ]
+        );
+    }
 
+    public function send_digital_social_report(Request $request)
+    {
+        $request->validate([
+            'email' => 'required'
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Email send successfully!'
+        );
     }
 
     public function upload_dedicated_digital_social_report(Request $request)

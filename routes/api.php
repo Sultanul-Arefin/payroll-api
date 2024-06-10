@@ -17,10 +17,12 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON
         // DIGITAL TAX REPORT
         Route::post('create-digital-tax-report', [ReportController::class, 'create_digital_tax_report']);
+        Route::post('send-digital-tax-report', [ReportController::class, 'send_digital_tax_report']);
         Route::post('upload-dedicated-digital-tax-report', [ReportController::class, 'upload_dedicated_digital_tax_report']);
 
         // DIGITAL SOCIAL REPORT
         Route::post('create-digital-social-report', [ReportController::class, 'create_digital_social_report']);
+        Route::post('send-digital-social-report', [ReportController::class, 'send_digital_social_report']);
         Route::post('upload-dedicated-digital-social-report', [ReportController::class, 'upload_dedicated_digital_social_report']);
 
         // REPORT
