@@ -90,16 +90,6 @@ class UserController extends Controller
         );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('employee::create');
-    }
-
     public function get_customer_id(): JsonResponse
     {
         $count = User::where('company_id', auth()->user()->company_id)->count();
@@ -420,28 +410,6 @@ class UserController extends Controller
     }
 
     /**
-     * Show the specified resource.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('employee::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('employee::edit');
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  Request  $request
@@ -464,6 +432,7 @@ class UserController extends Controller
             }
             $user_update = $this->user_repo->update($user->id, [
                 'name' => $request->name ?? $user->name,
+                'email' => $request->email ?? $user->email,
                 'designation_id' => $request->designation_id ?? $user->designation_id,
                 'department_id' => $request->department_id ?? $user->department_id,
                 'assign_to' => $request->assign_to ?? $user->assign_to,
@@ -551,6 +520,29 @@ class UserController extends Controller
         return apiResponse(
             data: null,
             message: 'Employee Profile Successfully Updated',
+            status: 'success'
+        );
+    }
+
+    public function validate_employee_email(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+        $check_email = User::query()
+                    ->where('email', $request->email)
+                    ->first();
+        if($check_email)
+        {
+            return apiResponse(
+                data: null,
+                message: 'Email Already Exists',
+                status: 'error'
+            );
+        }
+        return apiResponse(
+            data: null,
+            message: 'Email is ok to update',
             status: 'success'
         );
     }
