@@ -525,9 +525,14 @@ class UserController extends Controller
 
     public function validate_employee_email(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
+        if(is_null($request->email))
+        {
+            return apiResponse(
+                data: null,
+                message: 'Email Can\'t Be Null',
+                status: 'error'
+            );
+        }
         $check_email = User::query()
                     ->where('email', $request->email)
                     ->first();
