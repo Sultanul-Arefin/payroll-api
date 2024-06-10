@@ -12,6 +12,17 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('help-article-category', [SupportTicketController::class, 'help_article_category']);
         Route::get('help-articles', [SupportTicketController::class, 'help_articles']);
         Route::apiResource('staff-objective', StaffObjectiveController::class);
+
+        // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON
+        // DIGITAL TAX REPORT
+
+        // DIGITAL SOCIAL REPORT
+
+        // REPORT
+        Route::get('department-wise-report', [ReportController::class, 'department_wise_report'])
+            ->name('department-wise-report');
+        Route::get('internal-report', [ReportController::class, 'get_internal_report'])
+            ->name('internal-report');
     });
     Route::post('registration-from-bfin-technology', [RegisteredUserController::class, 'registration_from_bfin_technology']);
 });
