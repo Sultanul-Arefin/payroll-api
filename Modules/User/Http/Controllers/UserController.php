@@ -537,7 +537,8 @@ class UserController extends Controller
             return apiResponse(
                 data: null,
                 message: 'Email Already Exists',
-                status: 'error'
+                status: 'error',
+                statusCode: 422
             );
         }
         return apiResponse(
