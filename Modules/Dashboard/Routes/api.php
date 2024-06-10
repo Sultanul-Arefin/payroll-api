@@ -1,7 +1,6 @@
 <?php
 
 use Modules\Dashboard\Http\Controllers\DashboardController;
-use Modules\Dashboard\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,12 +26,5 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             Route::get('recent-leaves', [DashboardController::class, 'get_recent_leaves']);
             Route::get('others', [DashboardController::class, 'get_others']);
         });
-
-        // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON
-        Route::get('department-wise-report', [ReportController::class, 'department_wise_report'])
-            ->name('department-wise-report');
-        Route::get('internal-report', [ReportController::class, 'get_internal_report'])
-            ->name('internal-report');
-
     });
 });

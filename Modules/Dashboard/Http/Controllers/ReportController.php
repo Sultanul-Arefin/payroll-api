@@ -73,4 +73,24 @@ class ReportController extends Controller
             data: $response
         );
     }
+
+    public function create_digital_tax_report()
+    {
+
+    }
+
+    public function upload_dedicated_digital_tax_report()
+    {
+
+    }
+
+    public function create_digital_social_report()
+    {
+
+    }
+
+    public function upload_dedicated_digital_social_report()
+    {
+
+    }
 }
