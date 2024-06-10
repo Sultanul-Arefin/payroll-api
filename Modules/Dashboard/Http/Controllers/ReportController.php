@@ -122,6 +122,18 @@ class ReportController extends Controller
         );
     }
 
+    public function send_digital_tax_report(Request $request)
+    {
+        $request->validate([
+            'email' => 'required'
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Email send successfully!'
+        );
+    }
+
     public function upload_dedicated_digital_tax_report(Request $request)
     {
         $request->validate([
@@ -179,6 +191,18 @@ class ReportController extends Controller
                     'combined_contribution' => 00000
                 ],
             ]
+        );
+    }
+
+    public function send_digital_social_report(Request $request)
+    {
+        $request->validate([
+            'email' => 'required'
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'Email send successfully!'
         );
     }
 
