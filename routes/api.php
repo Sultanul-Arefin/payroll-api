@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\SupportTicketController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StaffObjectiveController;
