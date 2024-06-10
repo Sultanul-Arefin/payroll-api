@@ -530,7 +530,7 @@ class UserController extends Controller
         ]);
         $check_email = User::query()
                     ->where('email', $request->email)
-                    ->where('email', '!=', auth()->user()->email)
+                    ->where('id', '!=', auth()->user()->id)
                     ->first();
         if($check_email)
         {
