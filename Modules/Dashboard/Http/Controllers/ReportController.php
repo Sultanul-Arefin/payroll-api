@@ -92,7 +92,7 @@ class ReportController extends Controller
            ->whereYear('first_date', $request->year)
            ->with('employee', 'employee.user_details')
            ->get();
-       $data = DigitalTaxReportResource::collection($reports);
+       $data = ['result' => DigitalTaxReportResource::collection($reports), 'month' => $request->month, 'year' => $request->year];
         return apiResponse(
             data: $data
         );
