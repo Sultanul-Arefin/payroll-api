@@ -3,6 +3,8 @@
 namespace Modules\Dashboard\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use PDF;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
 use Modules\Dashboard\app\Models\DedicatedDigitalTaxReport;
@@ -101,9 +103,30 @@ class ReportController extends Controller
     public function send_digital_tax_report(Request $request)
     {
         $request->validate([
-            'email' => 'required'
+            'email' => 'required',
+            'month' => 'required',
+            'year' => 'required'
         ]);
+        $reports = Payslip::where('company_id', auth()->user()->company->id)
+            ->where('month', $request->month)
+            ->whereYear('first_date', $request->year)
+            ->with('employee', 'employee.user_details')
+            ->get();
+        $data = [
+            'data' => $reports
+        ];
+        $pdf = PDF::loadView('reports.digital_tax_report', $data);
+        $options = $pdf->getOptions();
+        $options->set('defaultPaperSize', 'A4');
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
 
+       // return $pdf->download('digital_tax_report.pdf');
+        Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
+            $message->to($request->email)
+                ->subject('Digital Tax Report')
+                ->attachData($pdf->output(), "digital_tax_report.pdf");
+        });
         return apiResponse(
             data: null,
             message: 'Email send successfully!'
@@ -143,30 +166,33 @@ class ReportController extends Controller
             'year' => 'required',
             'email' => 'required'
         ]);
+        $result = [
+            [
+                'employee_name' => 'Test 1',
+                'details' => 'test details',
+                'staff_contribution' => 0000,
+                'company_contribution' => 0000,
+                'combined_contribution' => 00000
+            ],
+            [
+                'employee_name' => 'Test 1',
+                'details' => 'test details',
+                'staff_contribution' => 0000,
+                'company_contribution' => 0000,
+                'combined_contribution' => 00000
+            ],
+            [
+                'employee_name' => 'Test 1',
+                'details' => 'test details',
+                'staff_contribution' => 0000,
+                'company_contribution' => 0000,
+                'combined_contribution' => 00000
+            ],
+        ];
+        $data = ['result' => $result, 'month' => $request->month, 'year' => $request->year];
+
         return apiResponse(
-            data: [
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-            ]
+            data: $data
         );
     }
 
