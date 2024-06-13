@@ -14,7 +14,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('help-articles', [SupportTicketController::class, 'help_articles']);
         Route::apiResource('staff-objective', StaffObjectiveController::class);
 
-        // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON
+        // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON. REPORT SECTION WILL REMAIN HERE UNTIL MODULE ISSUE FIXED
         // DIGITAL TAX REPORT
         Route::post('create-digital-tax-report', [ReportController::class, 'create_digital_tax_report']);
         Route::post('send-digital-tax-report', [ReportController::class, 'send_digital_tax_report']);
