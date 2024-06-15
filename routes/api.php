@@ -25,7 +25,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('send-digital-social-report', [ReportController::class, 'send_digital_social_report']);
         Route::post('upload-dedicated-digital-social-report', [ReportController::class, 'upload_dedicated_digital_social_report']);
 
-        // REPORT
+        // REPORT // THIS SECTION WILL BE SHIFT TO THE REPORT SECTION
         Route::get('department-wise-report', [ReportController::class, 'department_wise_report'])
             ->name('department-wise-report');
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
