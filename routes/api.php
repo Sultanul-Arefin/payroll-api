@@ -31,5 +31,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
             ->name('internal-report');
     });
+    
     Route::post('registration-from-bfin-technology', [RegisteredUserController::class, 'registration_from_bfin_technology']);
 });
