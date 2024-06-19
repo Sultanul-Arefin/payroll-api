@@ -15,7 +15,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::apiResource('staff-objective', StaffObjectiveController::class);
 
         // DUE TO SOME ISSUES, REPORT SECTION IS WRITTEN HERE. WILL BE SHIFT SOON. REPORT SECTION WILL REMAIN HERE UNTIL MODULE ISSUE FIXED
-        // DIGITAL TAX REPORT
+        // DIGITAL TAX REPORT // THIS SECTION WILL BE SHIFT TO THE REPORT SECTION
         Route::post('create-digital-tax-report', [ReportController::class, 'create_digital_tax_report']);
         Route::post('send-digital-tax-report', [ReportController::class, 'send_digital_tax_report']);
         Route::post('upload-dedicated-digital-tax-report', [ReportController::class, 'upload_dedicated_digital_tax_report']);
