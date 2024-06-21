@@ -32,6 +32,6 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('internal-report');
     });
 
-    // THIS ROUTE IS FOR
+    // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE
     Route::post('registration-from-bfin-technology', [RegisteredUserController::class, 'registration_from_bfin_technology']);
 });
