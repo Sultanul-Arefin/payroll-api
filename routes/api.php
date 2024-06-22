@@ -31,5 +31,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
             ->name('internal-report');
     });
+
+    // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING
     Route::post('registration-from-bfin-technology', [RegisteredUserController::class, 'registration_from_bfin_technology']);
 });
