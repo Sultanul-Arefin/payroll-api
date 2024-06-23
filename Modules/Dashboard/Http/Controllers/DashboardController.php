@@ -21,7 +21,7 @@ class DashboardController extends Controller
     {
         $data = User::where('company_id', auth()->user()->company_id)
             ->where('status', User::USER_ACTIVE)
-            ->where('status', User::STAFF_INTERACTION_PANEL_GIVEN)
+            ->where('staff_interaction_panel_status', User::STAFF_INTERACTION_PANEL_GIVEN)
             ->selectRaw('COUNT(*) as count')
             ->first();
 
