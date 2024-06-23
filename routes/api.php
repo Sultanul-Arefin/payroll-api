@@ -8,6 +8,7 @@ use Modules\Dashboard\Http\Controllers\ReportController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
+        // SUPPORT TICKET OPTION NEED TO BE SHOWED
         Route::get('support-tickets', [SupportTicketController::class, 'index']);
         Route::post('support-tickets', [SupportTicketController::class, 'store']);
         Route::get('help-article-category', [SupportTicketController::class, 'help_article_category']);
