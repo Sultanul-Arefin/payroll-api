@@ -304,6 +304,7 @@ class PayslipController extends Controller
             'payment_date' => 'required|date_format:Y-m-d',
         ]);
         DepartmentWisePayslipJob::dispatch(auth()->user(), $request->department_id, $request->from_date, $request->to_date, $request->payment_date);
+        // AFTER COMPLETING THE JOB, HAVE TO SEND A NOTIFICATION
         return apiResponse(
             data: null,
             // message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
