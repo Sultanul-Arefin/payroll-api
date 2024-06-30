@@ -307,8 +307,7 @@ class PayslipController extends Controller
         // AFTER COMPLETING THE JOB, HAVE TO SEND A NOTIFICATION
         return apiResponse(
             data: null,
-            // message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
-            message: 'This Module is Not Lived Yet! You\'ll be notified after completing!'
+            message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
         );
     }
 
