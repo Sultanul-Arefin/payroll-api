@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Controllers;
 use App\Models\User;
 use DateTime;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -296,7 +297,8 @@ class PayslipController extends Controller
         );
     }
 
-    function run_department_wise_payslip(Request $request) {
+    function run_department_wise_payslip(Request $request) : JsonResponse
+    {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'from_date' => 'required|date_format:Y-m-d',
