@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Controllers;
 use App\Models\User;
 use DateTime;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\ViewFrenchPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
+use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
@@ -173,17 +175,46 @@ class PayslipController extends Controller
         ]);
 
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
-        $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id);
+        if($request->company_id){
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
+        }
+        $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
         $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id);
         $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id);
         $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id);
         $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id);
-        $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id); // employee deduction total
-        $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id); // company contribution total
-        $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id);
-        $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id);
-        $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id);
-        $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id);
+        if($request->company_id){
+            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, $request->company_id); // employee deduction total
+        } else{
+            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, auth()->user()->company_id); // employee deduction total
+        }
+        if($request->company_id){
+            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, $request->company_id); // company contribution total
+        } else{
+            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, auth()->user()->company_id); // company contribution total
+        }
+        if($request->company_id){
+            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, $request->company_id);
+        } else{
+            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, $request->company_id);
+        } else{
+            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, $request->company_id);
+        } else{
+            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, $request->company_id);
+        } else{
+            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, auth()->user()->company_id);
+        }
 
         $total_pay = $get_basic - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic
         $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
@@ -220,7 +251,7 @@ class PayslipController extends Controller
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
-                'company_id' => auth()->user()->company_id,
+                'company_id' => $request->company_id ?? auth()->user()->company_id,
                 'month' => (new DateTime($request->from_date))->format('F'), // month name
                 'amount' => $total_amount,
                 'first_date' => $request->from_date,
@@ -247,10 +278,13 @@ class PayslipController extends Controller
             ]);
 
             /** add the payslip details */
-            $payslip_details = $this->payslipService->add_payslip_details($payslip->id, $request->employee_id);
-
+            if($request->company_id){
+                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, $request->company_id);
+            } else{
+                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, auth()->user()->company_id);
+            }
             /** notification to user */
-            $payslip->employee->notify(new PayslipCreatedNotificationToUser(auth()->user(), $payslip));
+            // $payslip->employee->notify(new PayslipCreatedNotificationToUser(auth()->user(), $payslip));
 
             return $payslip;
         });
@@ -263,17 +297,19 @@ class PayslipController extends Controller
         );
     }
 
-    function run_department_wise_payslip(Request $request) {
+    function run_department_wise_payslip(Request $request) : JsonResponse
+    {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'from_date' => 'required|date_format:Y-m-d',
             'to_date' => 'required|date_format:Y-m-d',
             'payment_date' => 'required|date_format:Y-m-d',
         ]);
+        DepartmentWisePayslipJob::dispatch(auth()->user(), $request->department_id, $request->from_date, $request->to_date, $request->payment_date);
+        // AFTER COMPLETING THE JOB, HAVE TO SEND A NOTIFICATION
         return apiResponse(
             data: null,
-            // message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
-            message: 'This Module is Not Lived Yet! You\'ll be notified after completing!'
+            message: 'Department payslip running successfully! You\'ll be notified after completing all the payslips!'
         );
     }
 

@@ -40,7 +40,7 @@ class PayslipService
     //     return $employee_associated_amount;
     // }
 
-    public function add_payslip_details($payslip_id, $employee_id)
+    public function add_payslip_details($payslip_id, $employee_id, $company_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
                                     // ->whereHas(
@@ -76,9 +76,9 @@ class PayslipService
             if($value->salaryItemsName->salaryItemsCategory->id == 7){
                 $deduction_value = DeductionDetails::query()
                     ->whereHas(
-                        'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                             $builder
-                                ->where('company_id', auth()->user()->company_id)
+                                ->where('company_id', $company_id)
                                 ->where('employee_id', $employee_id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
@@ -105,9 +105,9 @@ class PayslipService
             if($value->salaryItemsName->salaryItemsCategory->id == 8){
                 $deduction_value = DeductionDetails::query()
                     ->whereHas(
-                        'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                             $builder
-                                ->where('company_id', auth()->user()->company_id)
+                                ->where('company_id', $company_id)
                                 ->where('employee_id', $employee_id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
@@ -179,12 +179,12 @@ class PayslipService
         return $employee_associated_amount;
     }
 
-    public function get_staff_deduction_sick_absent_amount($employee_id)
+    public function get_staff_deduction_sick_absent_amount($employee_id, $company_id)
     {
         $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
-                                        'salary_item', function(Builder $builder){
-                                            $builder->where('company_id', auth()->user()->company_id)
+                                        'salary_item', function(Builder $builder)use($company_id){
+                                            $builder->where('company_id', $company_id)
                                                     ->where(function($query){
                                                         $query->where('name', 'Absent')
                                                             ->orWhere('name', 'Unpaid Sick Leave');
@@ -214,7 +214,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $company_id)
                 ->where('employee_id', $employee_id)
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
@@ -276,14 +276,14 @@ class PayslipService
         return $employee_associated_amount;
     }
 
-    public function government_deduction_amount($employee_id)
+    public function government_deduction_amount($employee_id, $company_id)
     {
         // GET VALUE FROM CATEGORY 7
         $employee_contribution_value = DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -302,9 +302,9 @@ class PayslipService
         // GET VALUE FROM CATEGORY 8
         $other_company_deduction = DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -323,14 +323,14 @@ class PayslipService
         return $employee_contribution_value + $other_company_deduction;
     }
 
-    public function other_complimentary_deduction_amount($employee_id)
+    public function other_complimentary_deduction_amount($employee_id, $company_id)
     {
         // GET VALUE FROM CATEGORY 7
         $company_contribution_value = DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -349,9 +349,9 @@ class PayslipService
         // GET VALUE FROM CATEGORY 8
         $other_company_contribution = DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -370,13 +370,13 @@ class PayslipService
         return $company_contribution_value + $other_company_contribution;
     }
 
-    public function company_contribution_value($employee_id)
+    public function company_contribution_value($employee_id, $company_id)
     {
         return DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -393,13 +393,13 @@ class PayslipService
             ->sum('government_or_company_amount');
     }
 
-    public function employee_contribution_value($employee_id)
+    public function employee_contribution_value($employee_id, $company_id)
     {
         return DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -416,13 +416,13 @@ class PayslipService
             ->sum('employee_amount');
     }
 
-    public function other_company_deduction($employee_id)
+    public function other_company_deduction($employee_id, $company_id)
     {
         return DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
@@ -439,13 +439,13 @@ class PayslipService
             ->sum('employee_amount');
     }
 
-    public function other_company_contribution($employee_id)
+    public function other_company_contribution($employee_id, $company_id)
     {
         return DeductionDetails::query()
             ->whereHas(
-                'employee_salary_item', function (Builder $builder) use ($employee_id) {
+                'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
-                        ->where('company_id', auth()->user()->company_id)
+                        ->where('company_id', $company_id)
                         ->where('employee_id', $employee_id)
                         ->whereHas(
                             'salaryItemsName', function (Builder $builder){
