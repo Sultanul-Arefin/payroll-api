@@ -78,6 +78,7 @@ class DashboardController extends Controller
                 now()->subMonths(11)->startOfMonth(),  // Start of 12 months ago
                 now()->startOfMonth(),  // Start of the current month
             ])
+            ->where('company_id', auth()->user()->company_id)
             ->groupBy('payment_date')
             ->get();
 
