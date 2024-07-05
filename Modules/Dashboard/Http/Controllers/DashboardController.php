@@ -25,7 +25,6 @@ class DashboardController extends Controller
             ->where('role_id', '!=', User::ADMIN)
             ->selectRaw('COUNT(*) as count')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
