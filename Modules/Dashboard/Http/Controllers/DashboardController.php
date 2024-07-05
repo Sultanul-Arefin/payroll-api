@@ -105,8 +105,4 @@ class DashboardController extends Controller
             statusCode: 200
         );
     }
-
-    private function calculation(){
-        return 1;
-    }
 }
