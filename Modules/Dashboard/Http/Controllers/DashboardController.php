@@ -36,7 +36,6 @@ class DashboardController extends Controller
         $data = Department::where('company_id', auth()->user()->company_id)
             ->selectRaw('COUNT(*) as count')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
