@@ -42,7 +42,6 @@ class DashboardController extends Controller
     public function holiday()
     {
         $holidays = AnnualHoliday::where('company_id', auth()->user()->company_id)->get();
-
         return HolidayResource::collection($holidays);
     }
 
