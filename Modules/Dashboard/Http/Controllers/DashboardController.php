@@ -50,7 +50,6 @@ class DashboardController extends Controller
         $data = Payslip::where('company_id', auth()->user()->company_id)
             ->selectRaw('SUM(total_pay_value) as total_paid_salary')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
