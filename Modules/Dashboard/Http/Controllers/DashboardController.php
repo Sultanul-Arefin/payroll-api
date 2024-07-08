@@ -22,9 +22,9 @@ class DashboardController extends Controller
         $data = User::where('company_id', auth()->user()->company_id)
             ->where('status', User::USER_ACTIVE)
             ->where('staff_interaction_panel_status', User::STAFF_INTERACTION_PANEL_GIVEN)
+            ->where('role_id', '!=', User::ADMIN)
             ->selectRaw('COUNT(*) as count')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
@@ -36,14 +36,12 @@ class DashboardController extends Controller
         $data = Department::where('company_id', auth()->user()->company_id)
             ->selectRaw('COUNT(*) as count')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
     public function holiday()
     {
         $holidays = AnnualHoliday::where('company_id', auth()->user()->company_id)->get();
-
         return HolidayResource::collection($holidays);
     }
 
@@ -52,7 +50,6 @@ class DashboardController extends Controller
         $data = Payslip::where('company_id', auth()->user()->company_id)
             ->selectRaw('SUM(total_pay_value) as total_paid_salary')
             ->first();
-
         return response()->json(['data' => $data]);
     }
 
@@ -77,6 +74,7 @@ class DashboardController extends Controller
                 now()->subMonths(11)->startOfMonth(),  // Start of 12 months ago
                 now()->startOfMonth(),  // Start of the current month
             ])
+            ->where('company_id', auth()->user()->company_id)
             ->groupBy('payment_date')
             ->get();
 
@@ -102,9 +100,5 @@ class DashboardController extends Controller
             message: 'Success',
             statusCode: 200
         );
-    }
-
-    private function calculation(){
-        return 1;
     }
 }
