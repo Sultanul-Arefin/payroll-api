@@ -123,7 +123,9 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                 ->when(
                     is_null(request('is_admin')),
                     fn(Builder $builder) => $builder->where(function($query){
-                        $query->where('role_id', '!=', User::ADMIN);
+                        $query
+                            ->where('role_id', '!=', User::ADMIN)
+                            ->orWhere('role_id', null);
                     })
                 )
                 ->when(
