@@ -61,7 +61,7 @@ class ProjectController extends Controller
                 'project_description' => $request->project_description,
                 'created_by' => auth()->user()->id,
                 'company_id' => auth()->user()->company_id,
-                'department_id' => 1,
+                'department_id' => auth()->user()->department_id ? auth()->user()->department_id : null,
             ]);
             // PROJECT CREATION NOTIFICATION
             $data = [
