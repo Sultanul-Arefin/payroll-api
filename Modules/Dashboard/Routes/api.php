@@ -15,7 +15,6 @@ use Modules\Dashboard\Http\Controllers\DashboardController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
-
         Route::prefix('/dashboard')->group(function () {
             Route::get('/total/employee', [DashboardController::class, 'totalEmployee']);
             Route::get('/total/department', [DashboardController::class, 'totalDepartment']);
