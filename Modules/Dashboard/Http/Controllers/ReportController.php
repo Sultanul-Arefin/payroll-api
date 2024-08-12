@@ -31,6 +31,7 @@ class ReportController extends Controller
                             $builder->where('department_id', $request->department_id);
                         }
                     )
+                    ->where('month', 'like', '%' . $request->month . '%')
                     ->get();
 
         return PayslipResource::collection(
