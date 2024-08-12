@@ -13,6 +13,7 @@ use Modules\Dashboard\app\Transformers\DigitalTaxReportResource;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use App\Http\Traits\Attachment;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReportController extends Controller
 {
@@ -24,7 +25,14 @@ class ReportController extends Controller
             'month' => 'required'
         ]);
 
-        $payslips = Payslip::get();
+        $payslips = Payslip::query()
+                    ->whereHas(
+                        'employee', function(Builder $builder) use($request){
+                            $builder->where('department_id', $request->department_id);
+                        }
+                    )
+                    ->where('month', 'like', '%' . $request->month . '%')
+                    ->get();
 
         return PayslipResource::collection(
             $payslips
