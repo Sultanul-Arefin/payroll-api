@@ -49,6 +49,7 @@ class AttendanceController extends Controller
 
     public function store(Request $request)
     {
+        date_default_timezone_set('Asia/Dhaka');
         return apiResponse(
             data: [
                 '1' => date_default_timezone_get(),
