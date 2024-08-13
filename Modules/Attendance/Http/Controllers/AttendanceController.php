@@ -49,6 +49,13 @@ class AttendanceController extends Controller
 
     public function store(Request $request)
     {
+        return apiResponse(
+            data: [
+                '1' => date_default_timezone_get(),
+                '2' => Carbon::now()->timezoneName,
+                '3' => config('app.timezone')
+            ]
+        );
         if (auth()->user()->user_details->attendance_type == UserDetails::MACHINE_ATTENDANCE) {
             return apiResponse(
                 data: [
