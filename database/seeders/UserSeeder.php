@@ -15,6 +15,29 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        Company::create([
+            'company_name' => 'Test',
+            'company_address' => 'Test',
+            'company_email' => 'test@test.com',
+            'company_phone' => 12231,
+            'company_logo' => null,
+            'company_website' => null,
+            'company_registration_no' => null,
+            'government_employee_no' => null,
+            'fiscal_year_from' => null,
+            'fiscal_year_to' => null,
+            'bank_name' => null,
+            'bank_bic_or_swift_code' => null,
+            'bank_iban_or_account_no' => null,
+            'contact_person_name' => null,
+            'contact_person_email' => null,
+            'contact_person_phone' => null,
+            'no_of_working_days_per_week' => null,
+            'working_hours_per_day' => null,
+            'lunch_and_others_per_day' => null,
+            'working_hours_per_week' => null,
+            'white_label_id' => 1
+        ]);
         $user = User::factory()->create([
             'email' => 'admin@bfin.it',
             'name' => 'Admin',
@@ -22,7 +45,8 @@ class UserSeeder extends Seeder
             'status' => User::USER_ACTIVE,
             'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN,
             'password' => 'password', // password
-            'company_id' => Company::factory(),
+            // 'company_id' => Company::factory(),
+            'company_id' => 1,
             'role_id' => User::ADMIN,
             'employee_type' => User::EMPLOYEE_TYPE_FULL_TIME,
         ]);
