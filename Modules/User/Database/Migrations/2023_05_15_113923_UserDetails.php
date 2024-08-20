@@ -27,7 +27,13 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->string('user_phone');
             $table->tinyInteger('gender')->nullable();
-            $table->string('nid')->nullable();
+            $table->string('tax_number')->nullable();
+            $table->string('social_security_number')->nullable();
+            $table->string('pension_number')->nullable();
+            $table->string('visa_number')->nullable();
+            $table->string('work_permit_number')->nullable();
+            $table->string('national_identity_number')->nullable();
+            $table->json('others_number')->nullable();
             $table->string('fax')->nullable();
             $table->string('passport')->nullable();
             $table->date('date_of_birth')->nullable();
@@ -35,7 +41,6 @@ return new class extends Migration
             $table->string('bank_name')->nullable();
             $table->string('bank_bic_or_swift_code')->nullable();
             $table->string('bank_iban_or_account_no')->nullable();
-            $table->string('tin')->nullable();
             $table->string('user_image')->nullable();
             $table->integer('payslip_type')->default(UserDetails::UNIVERSAL_PAYSLIP);
             $table->integer('attendance_type')->default(UserDetails::WEB_ATTENDANCE);
