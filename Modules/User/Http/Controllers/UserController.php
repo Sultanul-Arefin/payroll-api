@@ -68,7 +68,6 @@ class UserController extends Controller
     {
         $user->user_details = $user->user_details;
         $user->user_details['others'] = json_decode($user->user_details['others_number']);
-        return $user;
         $user->user_details['gender_value'] = $user->user_details?->gender == 0 ? 'Female' : 'Male';
         $user->user_details['user_image'] = $user->user_details?->user_image ? env('APP_URL').'/'.'storage/'.$user->user_details?->user_image : null;
         $user->department_name = $user->department?->department_name;
