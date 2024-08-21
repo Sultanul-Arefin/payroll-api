@@ -464,7 +464,7 @@ class UserController extends Controller
                 'visa_number' => $request->visa_number ? $request->visa_number : $user->user_details?->visa_number,
                 'work_permit_number' => $request->work_permit_number ? $request->work_permit_number : $user->user_details?->work_permit_number,
                 'national_identity_number' => $request->national_identity_number ? $request->national_identity_number : $user->user_details?->national_identity_number,
-                'others_number' => $request->others_number ? json_encode($request->others_number) : $user->user_details?->others_number,
+                'others_number' => $request->others_number ? $request->others_number : $user->user_details?->others_number,
                 'user_image' => $user_image,
                 'payslip_type' => $request->payslip_type ?? $user->user_details->payslip_type,
                 'attendance_type' => $request->attendance_type ?? $user->user_details->attendance_type,
