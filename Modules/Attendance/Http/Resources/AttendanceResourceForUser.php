@@ -31,9 +31,14 @@ class AttendanceResourceForUser extends JsonResource
                     'office_type' => $attendance->office_type == AttendanceDetail::FROM_OFFICE ? "OFFICE" : "HOME"
                 ];
             }),
-            'created_at' => $this->created_at->format('d-m-Y H:i:s'),
+            'created_at' => $this->created_at->format('H:i:s'),
             'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_editable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
+            'working_hours_per_day' => $this->user?->company?->working_hours_per_day,
+            'lunch_and_others_per_day' => $this->user?->company?->lunch_and_others_per_day,
+            'total_office_hours' => $this->user?->company?->working_hours_per_day + $this->user?->company?->lunch_and_others_per_day,
+            'in_time' => $this->attendance_details[0]?->in_time,
+            'out_time' => $this->attendance_details[0]?->out_time
         ];
     }
 
