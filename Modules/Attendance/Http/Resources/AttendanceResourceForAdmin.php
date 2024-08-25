@@ -23,7 +23,12 @@ class AttendanceResourceForAdmin extends JsonResource
             'date' => $this->dates,
             'count' => $this->count_appearances($this->dates),
             'details' => $this->get_info($this->dates),
-            'created_at' => $this->created_at?->format('d-m-Y H:i:s')
+            'created_at' => $this->created_at?->format('H:i:s'),
+            'working_hours_per_day' => $this->user?->company?->working_hours_per_day,
+            'lunch_and_others_per_day' => $this->user?->company?->lunch_and_others_per_day,
+            'total_office_hours' => $this->user?->company?->working_hours_per_day + $this->user?->company?->lunch_and_others_per_day,
+            'in_time' => $this->attendance_details[0]?->in_time, // have to recheck this value
+            'out_time' => $this->attendance_details[0]?->out_time // // have to recheck this value
         ];
     }
 
