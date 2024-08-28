@@ -11,6 +11,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // SUPPORT TICKET OPTION NEED TO BE SHOWED
         Route::get('support-tickets', [SupportTicketController::class, 'index']);
         Route::post('support-tickets', [SupportTicketController::class, 'store']);
+        Route::get('support-ticket/{support_ticket}', [SupportTicketController::class, 'show']);
         Route::get('help-article-category', [SupportTicketController::class, 'help_article_category']);
         Route::get('help-articles', [SupportTicketController::class, 'help_articles']);
         Route::apiResource('staff-objective', StaffObjectiveController::class);

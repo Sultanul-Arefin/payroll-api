@@ -7,6 +7,7 @@ use App\Models\HelpArticle;
 use App\Models\HelpArticleCategory;
 use App\Models\Support;
 use App\Models\SupportMessage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +44,13 @@ class SupportTicketController extends Controller
             ]);
             return $support;
         });
+        return apiResponse(
+            data: $support
+        );
+    }
+
+    public function show(Support $support): JsonResponse
+    {
         return apiResponse(
             data: $support
         );
