@@ -104,6 +104,7 @@ class RegisteredUserController extends Controller
                     'company_name' => $request->name,
                     'company_email' => $request->email,
                     'company_phone' => $request->phone,
+                    'white_label_id' => 1
                 ]);
                 $user->update([
                     'company_id' => $company->id,
