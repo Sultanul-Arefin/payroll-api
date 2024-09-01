@@ -86,7 +86,6 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|unique:users',
-            'password' => 'required',
             'phone' => 'required',
             'service_name' => 'required'
         ]);
