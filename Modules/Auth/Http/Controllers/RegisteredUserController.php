@@ -95,7 +95,7 @@ class RegisteredUserController extends Controller
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
-                    // 'password' => $request->password,
+                    'password' => $request->password,
                     'status' => User::USER_ACTIVE,
                     'staff_interaction_panel_status' => User::STAFF_INTERACTION_PANEL_GIVEN,
                     'role_id' => User::ADMIN,
