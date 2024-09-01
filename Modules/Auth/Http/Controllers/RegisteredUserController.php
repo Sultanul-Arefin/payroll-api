@@ -89,6 +89,7 @@ class RegisteredUserController extends Controller
             'phone' => 'required',
             'service_name' => 'required'
         ]);
+        // test
         try{
             $user = DB::transaction(function () use ($request) {
                 $user = User::create([
