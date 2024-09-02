@@ -4,6 +4,7 @@ use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StaffObjectiveController;
+use App\Http\Controllers\SiteSettingsController;
 use Modules\Dashboard\Http\Controllers\ReportController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
@@ -32,6 +33,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('department-wise-report');
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
             ->name('internal-report');
+
+        // SITE SETTINGS
+        Route::get('site-settings', [SiteSettingsController::class, 'index']);
     });
 
     // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING
