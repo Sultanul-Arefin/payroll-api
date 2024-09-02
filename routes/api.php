@@ -33,11 +33,11 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('department-wise-report');
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
             ->name('internal-report');
-
-        // SITE SETTINGS
-        Route::get('site-settings', [SiteSettingsController::class, 'index']);
     });
 
     // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING
     Route::post('registration-from-bfin-technology', [RegisteredUserController::class, 'registration_from_bfin_technology']);
+
+    // SITE SETTINGS
+    Route::get('site-settings', [SiteSettingsController::class, 'index']);
 });
