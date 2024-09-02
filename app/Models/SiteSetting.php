@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SiteSetting extends Model
 {
@@ -16,18 +17,22 @@ class SiteSetting extends Model
         'title'
     ];
 
-    public function getChangedLogoAttribute()
+    public function Logo(): Attribute
     {
-        return $this->logo ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->logo : null;
+        return Attribute::make(
+            get: fn($value) => ($value !=null ? asset('storage').'/'.$value : null )
+        );
     }
-
-    public function getChangedLoaderAttribute()
+    public function Loader(): Attribute
     {
-        return $this->loader ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->loader : null;
+        return Attribute::make(
+            get: fn($value) => ($value !=null ? asset('storage').'/'.$value : null )
+        );
     }
-
-    public function getChangedFaviconAttribute()
+    public function Favicon(): Attribute
     {
-        return $this->favicon ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->favicon : null;
+        return Attribute::make(
+            get: fn($value) => ($value !=null ? asset('storage').'/'.$value : null )
+        );
     }
 }
