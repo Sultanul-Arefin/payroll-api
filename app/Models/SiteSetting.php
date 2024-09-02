@@ -18,16 +18,16 @@ class SiteSetting extends Model
 
     public function getChangedLogoAttribute()
     {
-        return $this->logo ? env('APP_URL').'/'.'storage/'.$this->logo : null;
+        return $this->logo ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->logo : null;
     }
 
     public function getChangedLoaderAttribute()
     {
-        return $this->loader ? env('APP_URL').'/'.'storage/'.$this->loader : null;
+        return $this->loader ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->loader : null;
     }
 
     public function getChangedFaviconAttribute()
     {
-        return $this->favicon ? env('APP_URL').'/'.'storage/'.$this->favicon : null;
+        return $this->favicon ? env('APP_FRONTEND_URL').'/'.'storage/'.$this->favicon : null;
     }
 }
