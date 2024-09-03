@@ -12,7 +12,7 @@ class SiteSettingsController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-          CURLOPT_URL => 'http://admin.payroll.tellpe.com/api/v1/site-settings-data',
+          CURLOPT_URL => env('APP_URL').'//api/v1/site-settings-data',
           CURLOPT_RETURNTRANSFER => true,
           CURLOPT_ENCODING => '',
           CURLOPT_MAXREDIRS => 10,
