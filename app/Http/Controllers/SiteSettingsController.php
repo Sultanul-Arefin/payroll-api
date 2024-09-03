@@ -26,6 +26,7 @@ class SiteSettingsController extends Controller
 
         curl_close($curl);
 
+
         // Check if the response is valid JSON
         if ($response !== false) {
             // Decode the JSON response into a PHP array
