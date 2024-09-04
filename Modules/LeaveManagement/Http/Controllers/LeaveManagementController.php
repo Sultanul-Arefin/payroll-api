@@ -16,6 +16,7 @@ use Modules\LeaveManagement\Http\Resources\LeaveResource;
 use Modules\LeaveManagement\Notifications\LeaveManagementNotification;
 use Modules\LeaveManagement\Repositories\Interfaces\LeaveRepositoryInterface;
 use Modules\ProjectManagement\Http\Controllers\ProjectController;
+use Modules\TimeManagement\Http\Resources\TimeManagementResource;
 
 class LeaveManagementController extends Controller
 {
@@ -154,5 +155,12 @@ class LeaveManagementController extends Controller
                 break;
             default: return false;
         }
+    }
+
+    public function leave_count()
+    {
+        return apiResponse(
+            data: new TimeManagementResource(auth()->user())
+        );
     }
 }
