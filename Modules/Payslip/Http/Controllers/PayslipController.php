@@ -63,7 +63,7 @@ class PayslipController extends Controller
                 return [
                     'name' => $s_items->salaryItemsName?->name,
                     'hours_days' => $this->getHoursDaysCalculation($s_items),
-                    'rate' => $this->getRateCalculation($s_items),
+                    'rate' => $this->getRateCalculation($s_items, $s_items->is_percentage),
                     'amount' => $this->getAmountCalculation($s_items)
                 ];
             }),
@@ -103,8 +103,11 @@ class PayslipController extends Controller
         return $count;
     }
 
-    function getRateCalculation($salary_item)
+    function getRateCalculation($salary_item, $is_percentage)
     {
+        if($is_percentage==1){
+            return $salary_item->amount . " %";
+        }
         return $salary_item->amount;
     }
 

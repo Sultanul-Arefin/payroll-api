@@ -123,7 +123,14 @@ class User extends Authenticatable
 
     public function salary_items(): HasMany
     {
-        return $this->hasMany(EmployeeSalaryItem::class, 'employee_id', 'id');
+        return $this->hasMany(EmployeeSalaryItem::class, 'employee_id', 'id')
+                ->orWhere(function ($query) {
+                    $query->where('employee_id', $this->id) // Get items where employee_id matches user id
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id') // Get items where employee_id is null
+                                    ->where('is_general', 1); // and is_general is 1
+                          });
+                });
     }
 
     public function payslips(): HasMany
