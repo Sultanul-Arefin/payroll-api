@@ -209,7 +209,13 @@ class CategoryResource extends JsonResource
                     }
                 )
                 ->where('company_id', auth()->user()->company_id)
-                ->where('employee_id', request('employee_id'))
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
                 ->get()->sum('amount');
         }
     }
