@@ -230,7 +230,6 @@ class PayslipService
                 }
             )
             ->sum('amount');
-
         return $employee_associated_amount;
     }
 
