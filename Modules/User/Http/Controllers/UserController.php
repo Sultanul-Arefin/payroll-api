@@ -77,7 +77,7 @@ class UserController extends Controller
         $items = SalaryItemsName::query()
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
                 $builder->where(function ($query) use($user){
-                        $query->where('employee_id', $user->id)
+                        $query->where('employee_id', $user['id'])
                             ->orWhere(function ($query) {
                                 $query->whereNull('employee_id')
                                         ->where('is_general', 1);
