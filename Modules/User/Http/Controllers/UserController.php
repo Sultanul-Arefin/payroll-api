@@ -76,13 +76,7 @@ class UserController extends Controller
         $user->user_attachments = $user->user_attachments;
         $items = SalaryItemsName::query()
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
-                $builder->where(function ($query) use($user){
-                        $query->where('employee_id', $user['id'])
-                            ->orWhere(function ($query) {
-                                $query->whereNull('employee_id')
-                                        ->where('is_general', 1);
-                            });
-                    });
+                $builder->where('employee_id', $user->id);
             })
             // ->where('salary_items_category_id', 1)
             ->get();
