@@ -27,7 +27,7 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             'item_name' => $this->salaryItemsName?->name,
             'category' => $this->salaryItemsName?->salaryItemsCategory?->name,
             'salary_amount' => $this->amount,
-            'issue_to' => $this->employee?->name,
+            'issue_to' => $this->is_general == 1 ? "All" : $this->employee?->name,
             'is_general' => 0,
         ];
     }
