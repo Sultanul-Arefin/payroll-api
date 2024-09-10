@@ -183,11 +183,31 @@ class PayslipController extends Controller
         } else{
             $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
         }
-        $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
-        $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id);
-        $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id);
-        $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id);
-        $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id);
+        if($request->company_id){
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, auth()->user()->company_id);
+        }
+        if($request->company_id){
+            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, $request->company_id);
+        } else{
+            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, auth()->user()->company_id);
+        }
         if($request->company_id){
             $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, $request->company_id); // employee deduction total
         } else{
