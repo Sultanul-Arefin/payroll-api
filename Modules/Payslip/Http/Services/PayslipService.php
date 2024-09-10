@@ -49,7 +49,7 @@ class PayslipService
                                     //     }
                                     // )
             ->whereNotNull('amount')
-            ->where('company_id', auth()->user()->company_id)
+            ->where('company_id', $company_id)
             ->where(function ($query) use($employee_id){
                 $query->where('employee_id', $employee_id)
                         ->orWhere(function ($query) {
