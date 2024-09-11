@@ -74,9 +74,9 @@ class CalendarOverviewResource extends JsonResource
             // $minutes += $totalMinutesWorked % 60; // Get the remaining minutes
         }
         if($time>4){
-            return $time - auth()->user()->company?->lunch_and_others_per_day;
+            return $time - auth()->user()->company?->lunch_and_others_per_day . " Hours";
         }
-        return $time;
+        return $time . " Hours";
     }
 
     function getLunchAndOtherHour() {
