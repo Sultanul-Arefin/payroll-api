@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HelpArticleController;
 use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
@@ -33,6 +34,10 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('department-wise-report');
         Route::get('internal-report', [ReportController::class, 'get_internal_report'])
             ->name('internal-report');
+
+        // HELP ARTICLE SECTION
+        Route::get('help-article-category', [HelpArticleController::class, 'help_article_category']);
+        Route::get('help-article/{help_article}', [HelpArticleController::class, 'help_article']);
     });
 
     // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING
