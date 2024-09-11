@@ -21,5 +21,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('payslip.delete');
         Route::get('payslips-history', [PayslipController::class, 'payslips_history'])
             ->name('payslip.history');
+
+        Route::post('upload-own-design-payslip', [PayslipController::class, 'upload_own_design_payslip']);
     });
 });
