@@ -398,4 +398,24 @@ class PayslipController extends Controller
             message: 'Payslip Deleted Successfully'
         );
     }
+
+    public function payslips_history(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:users,id',
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+        ]);
+        $payslips = Payslip::query()
+                    ->where('employee_id', $request->employee_id)
+                    ->whereBetween('payment_date', [
+                        $request->from_date,
+                        $request->to_date
+                    ])
+                    ->get();
+
+        return PayslipResource::collection(
+            $payslips
+        );
+    }
 }
