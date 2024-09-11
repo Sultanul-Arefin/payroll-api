@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Controllers;
 
+use App\Models\DemoPayslip;
 use App\Models\User;
 use DateTime;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -397,5 +398,66 @@ class PayslipController extends Controller
             data: null,
             message: 'Payslip Deleted Successfully'
         );
+    }
+
+    public function payslips_history(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:users,id',
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+        ]);
+        $payslips = Payslip::query()
+                    ->where('employee_id', $request->employee_id)
+                    ->whereBetween('payment_date', [
+                        $request->from_date,
+                        $request->to_date
+                    ])
+                    ->get();
+
+        return PayslipResource::collection(
+            $payslips
+        );
+    }
+
+    public function upload_own_design_payslip(Request $request)
+    {
+        $request->validate([
+            'user_name' => 'required',
+            'country_name' => 'required',
+            'file' => 'required|mimes:png,jpeg,jpg,pdf,docx|max:2048',
+        ]);
+
+        try {
+            $fileName = null;
+            if($request->hasfile('file')){
+                $authId = auth()->id();
+                $fileName = $this->uploadAttachment($request, 'file', "demo_payslips/{$authId}/payslip");
+            }
+            DemoPayslip::create([
+                'company_id' => auth()->id(),
+                'user_name' => $request->user_name,
+                'country_name' => $request->country_name,
+                'file_name' => $fileName,
+            ]);
+            return apiResponse(
+                data: null,
+                message: 'Successfully Uploaded Payslip. Admin Will Get Back to you!'
+            );
+        }catch (\Exception $ex){
+            return apiResponse(null, 'something went wrong', 403);
+        }
+    }
+
+    private function uploadAttachment($request, $fileName=null,  $storagePath = '')
+    {
+        if($request->hasFile($fileName)){
+            $file = $request->file($fileName);
+            $uniqueFileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs($storagePath, $uniqueFileName, 'public');
+            return "{$storagePath}/{$uniqueFileName}";
+        }else{
+            return false;
+        }
     }
 }
