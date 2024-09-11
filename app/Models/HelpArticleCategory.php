@@ -17,4 +17,12 @@ class HelpArticleCategory extends Model
     {
         return $this->hasMany(Support::class, 'category_id', 'id');
     }
+
+    /**
+     * @return HasMany
+     */
+    public function help_articles(): HasMany
+    {
+        return $this->hasMany(HelpArticle::class, 'article_category_id', 'id');
+    }
 }
