@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HelpArticle extends Model
@@ -16,5 +17,13 @@ class HelpArticle extends Model
     public function support_ticket(): HasMany
     {
         return $this->hasMany(Support::class, 'page_name', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function help_article_category(): BelongsTo
+    {
+        return $this->belongsTo(HelpArticle::class, 'article_category_id', 'id');
     }
 }
