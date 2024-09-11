@@ -18,7 +18,7 @@ class CalendarOverviewResource extends JsonResource
             'details' => $this->getDetails($this->id),
             'total_office_hours' => $this->getTotalOfficeHours(),
             'hours_worked' => $this->getHoursWorked($this->id),
-            'lunch_and_other_hour' => $this->getLunchAndOtherHour(),
+            'lunch_and_other_hour' => $this->getLunchAndOtherHour($this->id),
             'description' => $this->getDescription($this->id),
             'overtime' => $this->getOvertime(),
             'double_overtime' => $this->getDoubleOvertime(),
@@ -68,19 +68,19 @@ class CalendarOverviewResource extends JsonResource
 
             $totalMinutesWorked = $inTime->diffInMinutes($outTime);
             $time += $totalMinutesWorked / 60;
-
-            // Convert total minutes to hours and minutes
-            // $hours += intdiv($totalMinutesWorked, 60); // Get the number of hours
-            // $minutes += $totalMinutesWorked % 60; // Get the remaining minutes
         }
         if($time>4){
-            return $time - auth()->user()->company?->lunch_and_others_per_day . " Hours";
+            return $time - auth()->user()->company?->lunch_and_others_per_day;
         }
-        return $time . " Hours";
+        return $time;
     }
 
-    function getLunchAndOtherHour() {
-        return $this->user->company->lunch_and_others_per_day;
+    function getLunchAndOtherHour($attendance_id) {
+        $get_time = $this->getHoursWorked($attendance_id);
+        if($get_time > 4){
+            return $this->user->company->lunch_and_others_per_day;
+        }
+        return 0;
     }
 
     function getDescription($attendance_id) {
