@@ -19,5 +19,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('payslips');
         Route::delete('delete-payslip/{payslip}', [PayslipController::class, 'delete_payslip'])
             ->name('payslip.delete');
+        Route::get('payslips-history', [PayslipController::class, 'payslips_history'])
+            ->name('payslip.history');
     });
 });
