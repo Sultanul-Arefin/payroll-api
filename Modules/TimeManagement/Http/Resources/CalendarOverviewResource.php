@@ -2,6 +2,7 @@
 
 namespace Modules\TimeManagement\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceDetail;
@@ -14,11 +15,11 @@ class CalendarOverviewResource extends JsonResource
             'date' => $this->dates,
             'entry_time' => $this->getEntryTime($this->id),
             'exit_time' => $this->getExitTime($this->id),
-            'details' => $this->getDetails(),
+            'details' => $this->getDetails($this->id),
             'total_office_hours' => $this->getTotalOfficeHours(),
-            'hours_worked' => $this->getHoursWorked(),
+            'hours_worked' => $this->getHoursWorked($this->id),
             'lunch_and_other_hour' => $this->getLunchAndOtherHour(),
-            'description' => $this->getDescription(),
+            'description' => $this->getDescription($this->id),
             'overtime' => $this->getOvertime(),
             'double_overtime' => $this->getDoubleOvertime(),
             'recuperated' => $this->getRecuperated(),
@@ -42,24 +43,47 @@ class CalendarOverviewResource extends JsonResource
         return $details[$count-1]->out_time;
     }
 
-    function getDetails() {
-        return 'Office';
+    function getDetails($attendance_id) {
+        $details = AttendanceDetail::where('attendance_id', $attendance_id)->first();
+        if($details->office_type == AttendanceDetail::FROM_HOME)
+        {
+            return "Home";
+        }
+        return "Office";
     }
 
     function getTotalOfficeHours() {
-        return $this->user->company->working_hours_per_day;
+        return $this->user?->company?->working_hours_per_day;
     }
 
-    function getHoursWorked() {
-        return 0;
+    function getHoursWorked($attendance_id) {
+        $details = AttendanceDetail::where('attendance_id', $attendance_id)->get();
+        $hours = 0;
+        $minutes = 0;
+        $seconds = 0;
+        foreach($details as $detail){
+            $inTime = Carbon::createFromFormat('H:i:s', $detail->in_time);
+            $outTime = Carbon::createFromFormat('H:i:s', $detail->out_time);
+
+            $workedTime = $inTime->diff($outTime);
+            $hours += $workedTime->format("%H");
+            $minutes += $workedTime->format("%I");
+            $seconds += $workedTime->format("%s");
+        }
+        return "{$hours} Hours, {$minutes} Minutes, {$seconds} seconds";
     }
 
     function getLunchAndOtherHour() {
         return $this->user->company->lunch_and_others_per_day;
     }
 
-    function getDescription() {
-        return 'Office';
+    function getDescription($attendance_id) {
+        $details = AttendanceDetail::where('attendance_id', $attendance_id)->first();
+        if($details->office_type == AttendanceDetail::FROM_HOME)
+        {
+            return "Home";
+        }
+        return "Office";
     }
 
     function getOvertime() {
