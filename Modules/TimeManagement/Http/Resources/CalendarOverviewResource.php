@@ -65,15 +65,16 @@ class CalendarOverviewResource extends JsonResource
             $inTime = Carbon::createFromFormat('H:i:s', $detail->in_time);
             $outTime = Carbon::createFromFormat('H:i:s', $detail->out_time);
 
-            $workedTime = $inTime->diff($outTime);
-            $hours += $workedTime->format("%H");
-            $minutes += $workedTime->format("%I");
-            $seconds += $workedTime->format("%s");
+            $totalMinutesWorked = $inTime->diffInMinutes($outTime);
+
+            // Convert total minutes to hours and minutes
+            $hours += intdiv($totalMinutesWorked, 60); // Get the number of hours
+            $minutes += $totalMinutesWorked % 60; // Get the remaining minutes
         }
         if($hours > 4){
             $hours = $hours - auth()->user()->company?->lunch_and_others_per_day;
         }
-        return "{$hours} Hours, {$minutes} Minutes, {$seconds} seconds";
+        return "{$hours} Hours, {$minutes} Minutes";
     }
 
     function getLunchAndOtherHour() {
