@@ -70,6 +70,9 @@ class CalendarOverviewResource extends JsonResource
             $minutes += $workedTime->format("%I");
             $seconds += $workedTime->format("%s");
         }
+        if($hours > 4){
+            $hours = $hours - auth()->user()->company?->lunch_and_others_per_day;
+        }
         return "{$hours} Hours, {$minutes} Minutes, {$seconds} seconds";
     }
 
