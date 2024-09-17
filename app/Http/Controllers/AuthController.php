@@ -80,6 +80,7 @@ class AuthController extends Controller
                     'user_email' => $user?->email,
                     'user_image' => $user?->user_details?->user_image,
                     'user_role' => $user?->get_user_role?->name,
+                    'line_manager' => $user?->assign_to_user?->name
                 ],
                 'company_info' => [
                     'company_id' => $user->company_id,

@@ -69,6 +69,8 @@ class CalendarOverviewResource extends JsonResource
             $totalMinutesWorked = $inTime->diffInMinutes($outTime);
             $time += $totalMinutesWorked / 60;
         }
+        // if total attendance time is greater than 4 hours, then the lunch time will count
+        // A RANDOM LOGIC FROM BRIAN FINN
         if($time>4){
             return $time - auth()->user()->company?->lunch_and_others_per_day;
         }

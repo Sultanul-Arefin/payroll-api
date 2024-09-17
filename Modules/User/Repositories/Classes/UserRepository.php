@@ -134,6 +134,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                         $query->where('department_id', auth()->user()->department_id);
                     })
                 )
+                ->when(
+                    !is_null(request('is_manager')),
+                    fn(Builder $builder) => $builder->where(function($query){
+                        $query->where('role_id', User::ADMIN)
+                            ->orWhere('role_id', User::MANAGER);
+                    })
+                )
                 ->with($relations)
                 ->latest();
     }
