@@ -339,10 +339,25 @@ class PayslipController extends Controller
 
     public function preview_payslip(Payslip $payslip)
     {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' => 'CONTRACTUAL'
+        ];
         return apiResponse(
             data: [
                 'user_info' => array_merge(
-                    $payslip?->employee?->only(['name', 'email', 'customer_id', 'user_phone', 'user_city', 'employee_type', 'joining_date', ]),
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    [
+                        'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
+                    ],
+                    [
+                        'month' => $payslip?->month,
+                        'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
+                    ],
                     [
                         'department' => $payslip?->employee?->department?->department_name,
                         'designation' => $payslip?->employee?->designation?->name,
