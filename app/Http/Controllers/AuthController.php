@@ -112,7 +112,6 @@ class AuthController extends Controller
         $status = Password::sendResetLink(
             $request->only('email')
         );
-
         return $status === Password::RESET_LINK_SENT
                     ? back()->with(['status' => __($status)])
                     : back()->withErrors(['email' => __($status)]);
@@ -167,16 +166,10 @@ class AuthController extends Controller
                 statusCode: 422
             );
         }
-        //     if (Mail::failures()) {
-        //         return response()->Fail('Sorry! Please try again latter');
-        //    }else{
-        //         return response()->success('Great! Successfully send in your mail');
-        //       }
     }
 
     public function logout(Request $request)
     {
-        // Auth::user()->tokens()->delete();
         auth()->user()->tokens()->delete();
 
         return apiResponse(null,
