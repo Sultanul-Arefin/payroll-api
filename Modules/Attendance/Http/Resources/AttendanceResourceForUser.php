@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,11 +36,41 @@ class AttendanceResourceForUser extends JsonResource
             'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_editable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'working_hours_per_day' => $this->user?->company?->working_hours_per_day,
-            'lunch_and_others_per_day' => $this->user?->company?->lunch_and_others_per_day,
+            'lunch_and_others_per_day' => $this->getLunchAndOtherHour($this->id),
             'total_office_hours' => $this->user?->company?->working_hours_per_day + $this->user?->company?->lunch_and_others_per_day,
             'in_time' => $this->attendance_details[0]?->in_time, // have to recheck this value
-            'out_time' => $this->attendance_details[0]?->out_time // have to recheck this value
+            'out_time' => $this->attendance_details[0]?->out_time, // have to recheck this value,
+            'hours_worked' => $this->getHoursWorked($this->id)
         ];
+    }
+
+    function getHoursWorked($attendance_id) {
+        $details = AttendanceDetail::where('attendance_id', $attendance_id)->get();
+        $hours = 0;
+        $minutes = 0;
+        $seconds = 0;
+        $time = 0;
+        foreach($details as $detail){
+            $inTime = Carbon::createFromFormat('H:i:s', $detail->in_time);
+            $outTime = Carbon::createFromFormat('H:i:s', $detail->out_time);
+
+            $totalMinutesWorked = $inTime->diffInMinutes($outTime);
+            $time += $totalMinutesWorked / 60;
+        }
+        // if total attendance time is greater than 4 hours, then the lunch time will count
+        // A RANDOM LOGIC FROM BRIAN FINN
+        if($time>4){
+            return $time - auth()->user()->company?->lunch_and_others_per_day;
+        }
+        return $time;
+    }
+
+    function getLunchAndOtherHour($attendance_id) {
+        $get_time = $this->getHoursWorked($attendance_id);
+        if($get_time > 4){
+            return $this->user->company->lunch_and_others_per_day;
+        }
+        return 0;
     }
 
     public function getStatus($status): ?string
