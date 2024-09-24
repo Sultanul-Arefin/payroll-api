@@ -2,6 +2,7 @@
 
 namespace Modules\ProjectManagement\Http\Controllers;
 
+use App\Exceptions\CustomException;
 use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -84,24 +85,38 @@ class TaskController extends Controller
         );
     }
 
-    public function uploadFile(FileUploadRequest $request, $taskId)
+    public function uploadFile(FileUploadRequest $request, Task $task)
     {
-        $allFile = []; 
+        $allFile = [];
 
         // Start a database transaction
-        $message = DB::transaction(function () use ($request, &$allFile, $taskId) {
+        $message = DB::transaction(function () use ($request, &$allFile, $task) {
             if ($request->hasFile('files')) {
-                $allFileName = $this->taskRepo->uploadFileTask($request, 'files', $taskId);
-                $allFile[] = $allFileName; // Add to the array
+                $file = $request->file('files');
+                $uniqueFileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
+                $storagePath = "tasks/{$task->id}";
+                $file->storeAs($storagePath, $uniqueFileName, 'public');
+
+                try {
+                    $attach = TaskFile::create([
+                        'task_id' => $task->id,
+                        'files' => "{$storagePath}/{$uniqueFileName}",
+                        'uploaded_by' => auth()->user()->id
+
+                    ]);
+                } catch (\Exception $ex) {
+                    // $this->deleteAttachment($filename);
+                    throw new CustomException($ex->getMessage(), 404);
+                }
+                return "{$storagePath}/{$uniqueFileName}";
+            } else{
+                return "Error In Task Upload";
             }
-            
-            
-            return 'Successfully uploaded file(s)';
         });
-        
+
         return apiResponse(
-            data: $allFile, // return uploaded files info as part of the response
-            message: $message, // success message from the transaction
+            data: [],
+            message: "Successfully uploaded file",
             status: 'success'
         );
     }
