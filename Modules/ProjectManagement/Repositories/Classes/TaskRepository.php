@@ -54,7 +54,7 @@ class TaskRepository extends BaseRepository implements TaskInterface
                     'task_id' => $task->id,
                     'files' => 'filename',
                     'uploaded_by' => 1
-                   
+
                 ]);
             } catch (\Exception $ex) {
                // $this->deleteAttachment($filename);
