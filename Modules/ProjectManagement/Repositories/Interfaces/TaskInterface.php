@@ -14,4 +14,5 @@ interface TaskInterface
         array $relations = [],
         int $count = 15
     ): mixed;
+    public function uploadFileTask($request, $task_id);
 }

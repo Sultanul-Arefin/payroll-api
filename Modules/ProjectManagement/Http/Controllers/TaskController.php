@@ -4,12 +4,15 @@ namespace Modules\ProjectManagement\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\Task;
+use Modules\ProjectManagement\Entities\TaskFile;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
+use Modules\ProjectManagement\Http\Requests\FileUploadRequest;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
@@ -80,6 +83,29 @@ class TaskController extends Controller
             status: 'success'
         );
     }
+
+    public function uploadFile(FileUploadRequest $request, $taskId)
+    {
+        $allFile = []; 
+
+        // Start a database transaction
+        $message = DB::transaction(function () use ($request, &$allFile, $taskId) {
+            if ($request->hasFile('files')) {
+                $allFileName = $this->taskRepo->uploadFileTask($request, 'files', $taskId);
+                $allFile[] = $allFileName; // Add to the array
+            }
+            
+            
+            return 'Successfully uploaded file(s)';
+        });
+        
+        return apiResponse(
+            data: $allFile, // return uploaded files info as part of the response
+            message: $message, // success message from the transaction
+            status: 'success'
+        );
+    }
+
 
     /**
      * Show the specified resource.
