@@ -43,26 +43,4 @@ class TaskRepository extends BaseRepository implements TaskInterface
                 ->with($relations)
                 ->latest('id');
     }
-
-    public function uploadFileTask($request, $task_id)
-    {
-        $filename = $this->uploadAttachment($request, 'files', ("Tasks/{$task_id}"));
-        if ($filename) {
-            try {
-                $task = Task::find(1);
-                $attach = TaskFile::create([
-                    'task_id' => $task->id,
-                    'files' => 'filename',
-                    'uploaded_by' => 1
-
-                ]);
-            } catch (\Exception $ex) {
-               // $this->deleteAttachment($filename);
-                throw new CustomException($ex->getMessage(), 404);
-            }
-        } else {
-            throw new CustomException('Your File Not Accepted', 404);
-        }
-        return $attach;
-    }
 }
