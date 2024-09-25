@@ -121,6 +121,13 @@ class TaskController extends Controller
         );
     }
 
+    public function task_file(Task $task)
+    {
+        return apiResponse(
+            data: $task?->taskFiles
+        );
+    }
+
 
     /**
      * Show the specified resource.
