@@ -12,8 +12,7 @@ class FileUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'task_id'=>'',
-          'files' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',  
+          'files' => 'required|mimes:jpg,jpeg,png,pdf,docx|max:4096',
         ];
     }
 
