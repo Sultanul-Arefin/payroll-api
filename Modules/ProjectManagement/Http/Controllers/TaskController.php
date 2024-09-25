@@ -128,6 +128,18 @@ class TaskController extends Controller
         );
     }
 
+    public function delete_file(Request $request, TaskFile $task_file)
+    {
+        $request->validate([
+            '_method' => 'required'
+        ]);
+        $task_file->delete();
+        return apiResponse(
+            data: [],
+            message: 'File Deleted Successfully'
+        );
+    }
+
 
     /**
      * Show the specified resource.
