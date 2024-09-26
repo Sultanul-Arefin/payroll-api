@@ -123,8 +123,15 @@ class TaskController extends Controller
 
     public function task_file(Task $task)
     {
+        $data = $task?->taskFiles?->map(function($q){
+            $data['id'] = $q->id;
+            $data['task_id'] = $q->task_id;
+            $data['url'] = env('APP_URL') . "/storage/" . $q->files;
+            $data['uploaded_by'] = $q->uploaded_by;
+            return $data;
+        });
         return apiResponse(
-            data: $task?->taskFiles
+            data: $data
         );
     }
 
