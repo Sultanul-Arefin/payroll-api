@@ -36,14 +36,14 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
     {
         if($category->id == 7)
         {
-            return "company_deduction => {$this->deduction_details?->government_or_company_amount}, employee_contribution => {$this->deduction_details?->employee_amount}";
+            // return "company_deduction => {$this->deduction_details?->government_or_company_amount}, employee_contribution => {$this->deduction_details?->employee_amount}";
             return [
                 'company_deduction' => $this->deduction_details?->government_or_company_amount,
                 'employee_contribution' => $this->deduction_details?->employee_amount
             ];
         } elseif($category->id == 8)
         {
-            return "company_deduction => {$this->deduction_details?->government_or_company_amount}, employee_deduction => {$this->deduction_details?->employee_amount}";
+            // return "company_deduction => {$this->deduction_details?->government_or_company_amount}, employee_deduction => {$this->deduction_details?->employee_amount}";
             return [
                 'company_deduction' => $this->deduction_details?->government_or_company_amount,
                 'employee_deduction' => $this->deduction_details?->employee_amount
