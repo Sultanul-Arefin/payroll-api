@@ -75,12 +75,26 @@ class EmployeeSalaryItemsController extends Controller
     public function update_salary_item(EmployeeSalaryItem $employee_salary_item, Request $request)
     {
         $request->validate([
-            'amount' => 'required',
+            // 'amount' => 'required',
             '_method' => 'required'
         ]);
-        $employee_salary_item->update([
-            'amount' => $request->amount
-        ]);
+        if($employee_salary_item?->salaryItemsName?->salary_items_category_id == 7)
+        {
+            $employee_salary_item?->deduction_details?->update([
+                'employee_amount' => $request->employee_contribution,
+                'government_or_company_amount' => $request->company_deduction
+            ]);
+        } elseif($employee_salary_item?->salaryItemsName?->salary_items_category_id == 8)
+        {
+            $employee_salary_item?->deduction_details?->update([
+                'employee_amount' => $request->employee_deduction,
+                'government_or_company_amount' => $request->company_deduction
+            ]);
+        } else{
+            $employee_salary_item->update([
+                'amount' => $request->amount
+            ]);
+        }
         return apiResponse(
             data: $employee_salary_item,
             message: 'Salary Amount Updated Successfully'
