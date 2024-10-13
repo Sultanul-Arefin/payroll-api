@@ -94,10 +94,13 @@ class ReportController extends Controller
     public function create_digital_tax_report(Request $request)
     {
         $request->validate([
+            'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            // 'email' => 'required',
-            // 'is_mailable' => 'required'
+            'is_mailable' => 'required|in:0,1',
+            'ftp_host' => 'required_if:is_mailable,0',
+            'ftp_username' => 'required_if:is_mailable,0',
+            'ftp_password' => 'required_if:is_mailable,0'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
            ->where('month', $request->month)
@@ -124,10 +127,13 @@ class ReportController extends Controller
     public function send_digital_tax_report(Request $request)
     {
         $request->validate([
-            'email' => 'required',
+            'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            // 'is_mailable' => 'required'
+            'is_mailable' => 'required|in:0,1',
+            'ftp_host' => 'required_if:is_mailable,0',
+            'ftp_username' => 'required_if:is_mailable,0',
+            'ftp_password' => 'required_if:is_mailable,0'
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
@@ -152,9 +158,9 @@ class ReportController extends Controller
             $localFilePath = Storage::disk('public')->path($path); // Full path in local storage
 
             // FTP server details
-            $ftp_server = "tellpe.com";
-            $ftp_username = "payroll-ftp";
-            $ftp_password = "*4u3f1R4j";
+            $ftp_server = $request->ftp_host ?? "tellpe.com";
+            $ftp_username = $request->ftp_username ?? "payroll-ftp";
+            $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
 
             // Connect and login to FTP server
             $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
@@ -177,6 +183,11 @@ class ReportController extends Controller
 
             // Close FTP connection
             ftp_close($ftp_conn);
+
+            return apiResponse(
+                data: null,
+                message: 'File Sent to FTP Server'
+            );
         }
 
 
