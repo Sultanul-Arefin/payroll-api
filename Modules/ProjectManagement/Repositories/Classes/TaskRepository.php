@@ -1,15 +1,19 @@
 <?php
 
 namespace Modules\ProjectManagement\Repositories\Classes;
-
+use App\Http\Traits\Attachment;
+use App\Exceptions\CustomException;
 use App\Repositories\RepositoryClasses\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
+use Modules\ProjectManagement\Entities\TaskFile;
+use Modules\ProjectManagement\Http\Traits\TasksTrait;
 use Modules\ProjectManagement\Repositories\Interfaces\TaskInterface;
 
 class TaskRepository extends BaseRepository implements TaskInterface
 {
+    use Attachment;
     /**
      * Task Repository constructor.
      */

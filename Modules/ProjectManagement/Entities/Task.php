@@ -53,4 +53,8 @@ class Task extends Model
     function comments(): HasMany {
         return $this->hasMany(TaskComment::class, 'task_id', 'id');
     }
+    public function taskFiles()
+    {
+        return $this->hasMany(TaskFile::class,'task_id', 'id');
+    }
 }

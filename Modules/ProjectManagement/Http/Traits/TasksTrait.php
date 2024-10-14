@@ -71,4 +71,5 @@ trait TasksTrait
             message: 'Task Percentage Updated Successfully'
         );
     }
+    
 }

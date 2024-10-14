@@ -2,14 +2,18 @@
 
 namespace Modules\ProjectManagement\Http\Controllers;
 
+use App\Exceptions\CustomException;
 use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\Task;
+use Modules\ProjectManagement\Entities\TaskFile;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
 use Modules\ProjectManagement\Http\Requests\ChangeTaskColumnRequest;
+use Modules\ProjectManagement\Http\Requests\FileUploadRequest;
 use Modules\ProjectManagement\Http\Requests\StoreTaskRequest;
 use Modules\ProjectManagement\Http\Requests\UpdateTaskRequest;
 use Modules\ProjectManagement\Http\Resources\ProjectAssociatedResource;
@@ -80,6 +84,69 @@ class TaskController extends Controller
             status: 'success'
         );
     }
+
+    public function uploadFile(FileUploadRequest $request, Task $task)
+    {
+        $allFile = [];
+
+        // Start a database transaction
+        $message = DB::transaction(function () use ($request, &$allFile, $task) {
+            if ($request->hasFile('files')) {
+                $file = $request->file('files');
+                $uniqueFileName = rand(0, 999999999) . '_' . date('Ymdhis').'_' . rand(100, 999999999) . '.' . $file->getClientOriginalExtension();
+                $storagePath = "tasks/{$task->id}";
+                $file->storeAs($storagePath, $uniqueFileName, 'public');
+
+                try {
+                    $attach = TaskFile::create([
+                        'task_id' => $task->id,
+                        'files' => "{$storagePath}/{$uniqueFileName}",
+                        'uploaded_by' => auth()->user()->id
+
+                    ]);
+                } catch (\Exception $ex) {
+                    // $this->deleteAttachment($filename);
+                    throw new CustomException($ex->getMessage(), 404);
+                }
+                return "{$storagePath}/{$uniqueFileName}";
+            } else{
+                return "Error In Task Upload";
+            }
+        });
+
+        return apiResponse(
+            data: [],
+            message: "Successfully uploaded file",
+            status: 'success'
+        );
+    }
+
+    public function task_file(Task $task)
+    {
+        $data = $task?->taskFiles?->map(function($q){
+            $data['id'] = $q->id;
+            $data['task_id'] = $q->task_id;
+            $data['url'] = env('APP_URL') . "/storage/" . $q->files;
+            $data['uploaded_by'] = $q->uploaded_by;
+            return $data;
+        });
+        return apiResponse(
+            data: $data
+        );
+    }
+
+    public function delete_file(Request $request, TaskFile $task_file)
+    {
+        $request->validate([
+            '_method' => 'required'
+        ]);
+        $task_file->delete();
+        return apiResponse(
+            data: [],
+            message: 'File Deleted Successfully'
+        );
+    }
+
 
     /**
      * Show the specified resource.

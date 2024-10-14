@@ -16,6 +16,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
         Route::get('task/{project}', [TaskController::class, 'index']);
         Route::post('task', [TaskController::class, 'store']);
+        Route::post('upload-task/{task}', [TaskController::class, 'uploadFile'])->name('upload_file');
+        Route::get('task-file/{task}', [TaskController::class, 'task_file'])->name('task_file');
+        Route::delete('delete-file/{task_file}', [TaskController::class, 'delete_file'])->name('delete_file');
         Route::post('update-task/{task}', [TaskController::class, 'update']);
         Route::post('add-comment/{task}', [TaskController::class, 'add_comment']);
         Route::post('change-task-column', [TaskController::class, 'change_task_column']);

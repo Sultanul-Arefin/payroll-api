@@ -34,6 +34,7 @@ class UserResource extends JsonResource
             'user_details' => $this->user_details,
             'user_image' => $this->user_details?->changed_user_image,
             'attachments' => new UserAttachmentResource($this->whenLoaded('user_attachment')),
+            'is_editable' => auth()->user()->role_id === User::ADMIN ? 1 : 0
         ];
     }
 
