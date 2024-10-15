@@ -316,6 +316,7 @@ class AttendanceController extends Controller
         ]);
         Attendance::where('dates', $request->date)->update([
             'status' => Attendance::PRESENT,
+            'approved_by' => auth()->user()->id
         ]);
 
         return apiResponse(
@@ -328,7 +329,8 @@ class AttendanceController extends Controller
     public function approve_individual_attendance(Attendance $attendance)
     {
         $attendance->update([
-            'status' => Attendance::PRESENT
+            'status' => Attendance::PRESENT,
+            'approved_by' => auth()->user()->id
         ]);
 
         return apiResponse(
