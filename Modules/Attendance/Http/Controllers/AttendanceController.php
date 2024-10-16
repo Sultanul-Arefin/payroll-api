@@ -124,6 +124,7 @@ class AttendanceController extends Controller
                 'dates' => $request->dates,
                 'user_id' => auth()->user()->id,
                 'status' => Attendance::PENDING,
+                'approved_by' => auth()->user()->id
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
@@ -252,6 +253,7 @@ class AttendanceController extends Controller
                 'dates' => $request->dates,
                 'user_id' => $target_user->id,
                 'status' => Attendance::PRESENT,
+                'approved_by' => auth()->user()->id
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
