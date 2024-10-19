@@ -314,10 +314,16 @@ class AttendanceController extends Controller
         $request->validate([
             'date' => 'required',
         ]);
-        Attendance::where('dates', $request->date)->update([
-            'status' => Attendance::PRESENT,
-            'approved_by' => auth()->user()->id
-        ]);
+        Attendance::query()
+                ->whereHas(
+                    'user', function(Builder $builder){
+                        $builder->where('company_id', auth()->user()->company_id);
+                    }
+                )
+                ->where('dates', $request->date)->update([
+                    'status' => Attendance::PRESENT,
+                    'approved_by' => auth()->user()->id
+                ]);
 
         return apiResponse(
             data: null,
