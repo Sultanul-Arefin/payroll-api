@@ -16,6 +16,7 @@ class Attendance extends Model
         'dates',
         'user_id',
         'status',
+        'approved_by'
     ];
 
     protected static function newFactory()

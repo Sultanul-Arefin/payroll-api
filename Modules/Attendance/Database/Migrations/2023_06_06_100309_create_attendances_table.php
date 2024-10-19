@@ -22,6 +22,10 @@ return new class extends Migration
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
             $table->integer('status')->default(Attendance::PENDING);
+            $table
+                ->foreignId('approved_by')
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
