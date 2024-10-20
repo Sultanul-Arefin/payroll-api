@@ -109,15 +109,17 @@ class ReportController extends Controller
            ->get();
        $data = [
             'result' => DigitalTaxReportResource::collection($reports),
-            'month' => $request->month,
-            'year' => $request->year,
-            'email' => $request->email,
-            'is_mailable' => $request->is_mailable,
-            'ftp_data' => $request->ftp_host ? [
-                'ftp_host' => $request->ftp_host,
-                'ftp_username' => $request->ftp_username,
-                'ftp_password' => $request->ftp_password
-            ] : null
+            'tax_data' => [
+                'month' => $request->month,
+                'year' => $request->year,
+                'email' => $request->email,
+                'is_mailable' => $request->is_mailable,
+                'ftp_data' => $request->ftp_host ? [
+                    'ftp_host' => $request->ftp_host,
+                    'ftp_username' => $request->ftp_username,
+                    'ftp_password' => $request->ftp_password
+                ] : null
+            ]
         ];
         return apiResponse(
             data: $data
