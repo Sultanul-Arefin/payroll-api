@@ -14,6 +14,7 @@ use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use App\Http\Traits\Attachment;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -95,7 +96,8 @@ class ReportController extends Controller
         $request->validate([
             'month' => 'required',
             'year' => 'required',
-            'email' => 'required'
+            'email' => 'required',
+            'is_mailable' => 'required'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
            ->where('month', $request->month)
@@ -113,7 +115,8 @@ class ReportController extends Controller
         $request->validate([
             'email' => 'required',
             'month' => 'required',
-            'year' => 'required'
+            'year' => 'required',
+            'is_mailable' => 'required'
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
@@ -128,6 +131,43 @@ class ReportController extends Controller
         $options->set('defaultPaperSize', 'A4');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
+
+        if($request->is_mailable == 0){
+            // Save the PDF to storage (e.g., storage/app/reports)
+            $path = 'reports/digital_tax_report_' . time() . '.pdf'; // Generate a unique name for the file
+            Storage::disk('public')->put($path, $pdf->output());
+
+            // Get the full path to the saved file
+            $localFilePath = Storage::disk('public')->path($path); // Full path in local storage
+
+            // FTP server details
+            $ftp_server = "tellpe.com";
+            $ftp_username = "payroll-ftp";
+            $ftp_password = "*4u3f1R4j";
+
+            // Connect and login to FTP server
+            $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+            $login = ftp_login($ftp_conn, $ftp_username, $ftp_password);
+
+            // Check if login was successful
+            if (!$login) {
+                die("FTP login failed.");
+            }
+
+            // Remote file path on the FTP server
+            $remoteFile = time() . ".pdf";  // Change directory and filename as needed
+
+            // Upload the file to the FTP server
+            if (ftp_put($ftp_conn, $remoteFile, $localFilePath, FTP_BINARY)) {
+                // echo "Successfully uploaded {$path}.";
+            } else {
+                // echo "Error uploading {$path}.";
+            }
+
+            // Close FTP connection
+            ftp_close($ftp_conn);
+        }
+
 
        // return $pdf->download('digital_tax_report.pdf');
         Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
