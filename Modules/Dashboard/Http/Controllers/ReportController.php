@@ -96,7 +96,7 @@ class ReportController extends Controller
         $request->validate([
             'month' => 'required',
             'year' => 'required',
-            'email' => 'required',
+            // 'email' => 'required',
             // 'is_mailable' => 'required'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
@@ -104,7 +104,18 @@ class ReportController extends Controller
            ->whereYear('first_date', $request->year)
            ->with('employee', 'employee.user_details')
            ->get();
-       $data = ['result' => DigitalTaxReportResource::collection($reports), 'month' => $request->month, 'year' => $request->year];
+       $data = [
+            'result' => DigitalTaxReportResource::collection($reports),
+            'month' => $request->month,
+            'year' => $request->year,
+            'email' => $request->email,
+            'is_mailable' => $request->is_mailable,
+            'ftp_data' => $request->ftp_host ? [
+                'ftp_host' => $request->ftp_host,
+                'ftp_username' => $request->ftp_username,
+                'ftp_password' => $request->ftp_password
+            ] : null
+        ];
         return apiResponse(
             data: $data
         );
