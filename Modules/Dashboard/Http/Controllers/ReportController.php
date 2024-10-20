@@ -97,7 +97,7 @@ class ReportController extends Controller
             'month' => 'required',
             'year' => 'required',
             'email' => 'required',
-            'is_mailable' => 'required'
+            // 'is_mailable' => 'required'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
            ->where('month', $request->month)
@@ -116,7 +116,7 @@ class ReportController extends Controller
             'email' => 'required',
             'month' => 'required',
             'year' => 'required',
-            'is_mailable' => 'required'
+            // 'is_mailable' => 'required'
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
