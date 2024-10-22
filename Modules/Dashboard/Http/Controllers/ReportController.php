@@ -366,7 +366,6 @@ class ReportController extends Controller
             );
         }
 
-
        // return $pdf->download('digital_tax_report.pdf');
         Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
             $message->to($request->email)
