@@ -165,7 +165,13 @@ class ReportController extends Controller
             $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
 
             // Connect and login to FTP server
-            $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+            $ftp_conn = ftp_connect($ftp_server);
+            if (!$ftp_conn) {
+                return apiResponse(
+                    data: null,
+                    message: 'Couldn\'t connect to FTP Server! Please, Try Again!'
+                );
+            }
             $login = ftp_login($ftp_conn, $ftp_username, $ftp_password);
 
             // Check if login was successful
