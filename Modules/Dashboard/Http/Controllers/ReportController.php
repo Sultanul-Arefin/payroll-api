@@ -170,7 +170,10 @@ class ReportController extends Controller
 
             // Check if login was successful
             if (!$login) {
-                die("FTP login failed.");
+                return apiResponse(
+                    data: null,
+                    message: 'FTP Login Failed! Please, Try Again!'
+                );
             }
 
             // Remote file path on the FTP server
@@ -180,7 +183,10 @@ class ReportController extends Controller
             if (ftp_put($ftp_conn, $remoteFile, $localFilePath, FTP_BINARY)) {
                 // echo "Successfully uploaded {$path}.";
             } else {
-                // echo "Error uploading {$path}.";
+                return apiResponse(
+                    data: null,
+                    message: 'FTP Upload Failed! Please, Try Again!'
+                );
             }
 
             // Close FTP connection
@@ -234,35 +240,55 @@ class ReportController extends Controller
     public function create_digital_social_report(Request $request)
     {
         $request->validate([
+            'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            'email' => 'required'
+            'is_mailable' => 'required|in:0,1',
+            'ftp_host' => 'required_if:is_mailable,0',
+            'ftp_username' => 'required_if:is_mailable,0',
+            'ftp_password' => 'required_if:is_mailable,0'
         ]);
-        $result = [
-            [
-                'employee_name' => 'Test 1',
-                'details' => 'test details',
-                'staff_contribution' => 0000,
-                'company_contribution' => 0000,
-                'combined_contribution' => 00000
+       $reports = Payslip::where('company_id', auth()->user()->company->id)
+           ->where('month', $request->month)
+           ->whereYear('first_date', $request->year)
+           ->with('employee', 'employee.user_details')
+           ->get();
+       $data = [
+            'result' => [
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
+                [
+                    'employee_name' => 'Test 1',
+                    'details' => 'test details',
+                    'staff_contribution' => 0000,
+                    'company_contribution' => 0000,
+                    'combined_contribution' => 00000
+                ],
             ],
-            [
-                'employee_name' => 'Test 1',
-                'details' => 'test details',
-                'staff_contribution' => 0000,
-                'company_contribution' => 0000,
-                'combined_contribution' => 00000
-            ],
-            [
-                'employee_name' => 'Test 1',
-                'details' => 'test details',
-                'staff_contribution' => 0000,
-                'company_contribution' => 0000,
-                'combined_contribution' => 00000
-            ],
+            'tax_data' => [
+                'month' => $request->month,
+                'year' => $request->year,
+                'email' => $request->email,
+                'is_mailable' => $request->is_mailable,
+                'ftp_data' => $request->ftp_host ? [
+                    'ftp_host' => $request->ftp_host,
+                    'ftp_username' => $request->ftp_username,
+                    'ftp_password' => $request->ftp_password
+                ] : null
+            ]
         ];
-        $data = ['result' => $result, 'month' => $request->month, 'year' => $request->year];
-
         return apiResponse(
             data: $data
         );
@@ -271,9 +297,82 @@ class ReportController extends Controller
     public function send_digital_social_report(Request $request)
     {
         $request->validate([
-            'email' => 'required'
+            'email' => 'required_if:is_mailable,1|email',
+            'month' => 'required',
+            'year' => 'required',
+            'is_mailable' => 'required|in:0,1',
+            'ftp_host' => 'required_if:is_mailable,0',
+            'ftp_username' => 'required_if:is_mailable,0',
+            'ftp_password' => 'required_if:is_mailable,0'
         ]);
+        $reports = Payslip::where('company_id', auth()->user()->company->id)
+            ->where('month', $request->month)
+            ->whereYear('first_date', $request->year)
+            ->with('employee', 'employee.user_details')
+            ->get();
+        $data = [
+            'data' => $reports
+        ];
+        $pdf = PDF::loadView('reports.digital_tax_report', $data);
+        $options = $pdf->getOptions();
+        $options->set('defaultPaperSize', 'A4');
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
 
+        if($request->is_mailable == 0){
+            // Save the PDF to storage (e.g., storage/app/reports)
+            $path = 'reports/digital_tax_report_' . time() . '.pdf'; // Generate a unique name for the file
+            Storage::disk('public')->put($path, $pdf->output());
+
+            // Get the full path to the saved file
+            $localFilePath = Storage::disk('public')->path($path); // Full path in local storage
+
+            // FTP server details
+            $ftp_server = $request->ftp_host ?? "tellpe.com";
+            $ftp_username = $request->ftp_username ?? "payroll-ftp";
+            $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
+
+            // Connect and login to FTP server
+            $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+            $login = ftp_login($ftp_conn, $ftp_username, $ftp_password);
+
+            // Check if login was successful
+            if (!$login) {
+                return apiResponse(
+                    data: null,
+                    message: 'FTP Login Failed! Please, Try Again!'
+                );
+            }
+
+            // Remote file path on the FTP server
+            $remoteFile = time() . ".pdf";  // Change directory and filename as needed
+
+            // Upload the file to the FTP server
+            if (ftp_put($ftp_conn, $remoteFile, $localFilePath, FTP_BINARY)) {
+                // echo "Successfully uploaded {$path}.";
+            } else {
+                return apiResponse(
+                    data: null,
+                    message: 'FTP Upload Failed! Please, Try Again!'
+                );
+            }
+
+            // Close FTP connection
+            ftp_close($ftp_conn);
+
+            return apiResponse(
+                data: null,
+                message: 'File Sent to FTP Server'
+            );
+        }
+
+
+       // return $pdf->download('digital_tax_report.pdf');
+        Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
+            $message->to($request->email)
+                ->subject('Digital Tax Report')
+                ->attachData($pdf->output(), "digital_tax_report.pdf");
+        });
         return apiResponse(
             data: null,
             message: 'Email send successfully!'
