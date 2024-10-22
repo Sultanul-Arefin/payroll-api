@@ -15,15 +15,16 @@ return new class extends Migration
     {
         Schema::create('task_files', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id');
+            $table
+                ->foreignId('task_id')
+                ->constrained('tasks', 'id')
+                ->cascadeOnDelete();
             $table->string('files');
             $table
                 ->foreignId('uploaded_by')
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
             $table->timestamps();
-
-            $table->foreign('task_id')->on('id')->references('tasks')->onDelete('cascade');
         });
     }
 
