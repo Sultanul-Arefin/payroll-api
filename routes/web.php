@@ -22,7 +22,9 @@ Route::get('/', function () {
     );
 });
 
-Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::middleware(['token.auth'])->group(function () {
+    Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+});
 Route::get('test', function () {
     return apiResponse(
         data: null,
