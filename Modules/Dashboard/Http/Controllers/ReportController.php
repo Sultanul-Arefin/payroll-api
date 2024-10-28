@@ -15,6 +15,7 @@ use Modules\Payslip\Http\Resources\PayslipResource;
 use App\Http\Traits\Attachment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Modules\Dashboard\app\Transformers\DigitalSocialReportResource;
 
 class ReportController extends Controller
 {
@@ -260,29 +261,7 @@ class ReportController extends Controller
            ->with('employee', 'employee.user_details')
            ->get();
        $data = [
-            'result' => [
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-                [
-                    'employee_name' => 'Test 1',
-                    'details' => 'test details',
-                    'staff_contribution' => 0000,
-                    'company_contribution' => 0000,
-                    'combined_contribution' => 00000
-                ],
-            ],
+            'result' => DigitalSocialReportResource::collection($reports),
             'tax_data' => [
                 'month' => $request->month,
                 'year' => $request->year,
