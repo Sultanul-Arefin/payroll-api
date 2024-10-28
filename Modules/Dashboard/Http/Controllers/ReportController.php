@@ -13,6 +13,7 @@ use Modules\Dashboard\app\Transformers\DigitalTaxReportResource;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use App\Http\Traits\Attachment;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Modules\Dashboard\app\Transformers\DigitalSocialReportResource;
@@ -166,20 +167,25 @@ class ReportController extends Controller
             $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
 
             // Connect and login to FTP server
-            $ftp_conn = ftp_connect($ftp_server);
-            if (!$ftp_conn) {
+            try{
+                $ftp_conn = ftp_connect($ftp_server);
+            } catch(\Exception $ex){
                 return apiResponse(
                     data: null,
-                    message: 'Couldn\'t connect to FTP Server! Please, Try Again!'
+                    message: "FTP Connection Failed!",
+                    status: "error",
+                    statusCode: 403
                 );
             }
-            $login = ftp_login($ftp_conn, $ftp_username, $ftp_password);
 
-            // Check if login was successful
-            if (!$login) {
+            try{
+                ftp_login($ftp_conn, $ftp_username, $ftp_password);
+            } catch(\Exception $ex){
                 return apiResponse(
                     data: null,
-                    message: 'FTP Login Failed! Please, Try Again!'
+                    message: "FTP Login Failed! Please, Try with correct FTP credentials",
+                    status: "error",
+                    statusCode: 403
                 );
             }
 
@@ -318,14 +324,25 @@ class ReportController extends Controller
             $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
 
             // Connect and login to FTP server
-            $ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
-            $login = ftp_login($ftp_conn, $ftp_username, $ftp_password);
-
-            // Check if login was successful
-            if (!$login) {
+            try{
+                $ftp_conn = ftp_connect($ftp_server);
+            } catch(\Exception $ex){
                 return apiResponse(
                     data: null,
-                    message: 'FTP Login Failed! Please, Try Again!'
+                    message: "FTP Connection Failed!",
+                    status: "error",
+                    statusCode: 403
+                );
+            }
+
+            try{
+                ftp_login($ftp_conn, $ftp_username, $ftp_password);
+            } catch(\Exception $ex){
+                return apiResponse(
+                    data: null,
+                    message: "FTP Login Failed! Please, Try with correct FTP credentials",
+                    status: "error",
+                    statusCode: 403
                 );
             }
 
