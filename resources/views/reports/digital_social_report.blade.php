@@ -151,16 +151,13 @@
                 Year
             </th>
             <th>
-                Gross Pay
+                Staff Contribution
             </th>
             <th>
-                Income Tax
+                Company Contribution
             </th>
             <th>
-                Other Tax
-            </th>
-            <th>
-                Total Paid
+                Combined Contribution
             </th>
         </tr>
         </thead>
@@ -180,16 +177,13 @@
                         {{ date('Y'), strtotime($report->year) }}
                     </td>
                     <td>
-                        {{ $report->gross_pay_before_tax  }}
+                        {{ $report->employee_contribution_value  }}
                     </td>
                     <td>
-                        {{ $report->tax_value }}
+                        {{ $report->company_contribution_value }}
                     </td>
                     <td>
-                        {{ $report->tax_value  }}
-                    </td>
-                    <td>
-                        {{ $report->net_pay }}
+                        {{ $report->employee_contribution_value + $report->company_contribution_value  }}
                     </td>
                 </tr>
             @endforeach
