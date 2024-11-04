@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
 
-class ViewFrenchPayslipResource extends JsonResource
+class ViewUKPayslipResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -49,7 +49,6 @@ class ViewFrenchPayslipResource extends JsonResource
                     'total_gross_pay' => 30000,
                     'taxable_gross_pay' => 20400,
                     'ytd_tax_paid' => 0,
-                    'pension'=>50,
                     'total_staff_contribution' => 0,
                     'total_company_contribution' => 0,
                     'total_staff_cost' => 30000,
