@@ -15,8 +15,8 @@ class UserDetails extends Model
     public const USER_IMAGE_PATH = 'uploads/users/photo/';
 
     public const UNIVERSAL_PAYSLIP = 1;
-
     public const FRENCH_PAYSLIP = 2;
+    public const UK_PAYSLIP = 3;
 
     public const WEB_ATTENDANCE = 1;
 
