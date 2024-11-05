@@ -150,7 +150,7 @@ class UserController extends Controller
                     'national_identity_number' => $request->national_identity_number ?? $request->national_identity_number,
                     'others_number' => $request->others_number ?? json_encode($request->others_number),
                     'user_image' => $this->imageUpload($request, UserDetails::USER_IMAGE_PATH),
-                    'payslip_type' => $request->payslip_type == UserDetails::FRENCH_PAYSLIP ? UserDetails::FRENCH_PAYSLIP : UserDetails::UNIVERSAL_PAYSLIP,
+                    'payslip_type' => $request->payslip_type,
                     'attendance_type' => $request->attendance_type == UserDetails::MACHINE_ATTENDANCE ? UserDetails::MACHINE_ATTENDANCE : UserDetails::WEB_ATTENDANCE,
                 ]);
                 //file one
