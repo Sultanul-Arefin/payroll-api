@@ -113,6 +113,14 @@ class UserController extends Controller
             $request->merge(['wages' => null]);
         }
         try {
+
+            if ($request->country_id == '232') {
+                $request->validate([
+                    'state' => 'required|string|max:255',
+                    'region' => 'required|string|max:255',
+                ]);
+            }
+            
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
 
@@ -152,7 +160,10 @@ class UserController extends Controller
                     'user_image' => $this->imageUpload($request, UserDetails::USER_IMAGE_PATH),
                     'payslip_type' => $request->payslip_type,
                     'attendance_type' => $request->attendance_type == UserDetails::MACHINE_ATTENDANCE ? UserDetails::MACHINE_ATTENDANCE : UserDetails::WEB_ATTENDANCE,
+                    'state' => $request->state ?? $request->state,
+                    'region' => $request->region ?? $request->region,
                 ]);
+               
                 //file one
                 if ($request->hasFile('contract_letter')) {
                     $allFileName = $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter', $user->id);
@@ -235,6 +246,7 @@ class UserController extends Controller
             throw new CustomException($ex->getMessage(), 200);
         }
 
+   
         return apiResponse(
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email" : 'Mail could not sent',
@@ -468,6 +480,8 @@ class UserController extends Controller
                 'user_image' => $user_image,
                 'payslip_type' => $request->payslip_type ?? $user->user_details->payslip_type,
                 'attendance_type' => $request->attendance_type ?? $user->user_details->attendance_type,
+                'state' => $request->state ?? $request->state,
+                'region' => $request->region ?? $request->region,
             ]);
 
             $allFileArr = [];

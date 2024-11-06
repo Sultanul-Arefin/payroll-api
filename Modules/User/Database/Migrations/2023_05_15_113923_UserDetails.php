@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
-            $table->string('user_area')->nullable();
+            $table->string('region')->nullable();
             $table->string('user_city')->nullable();
             $table->string('zip_code')->nullable();
             $table->foreignId('country_id')
@@ -44,8 +44,11 @@ return new class extends Migration
             $table->string('user_image')->nullable();
             $table->integer('payslip_type')->default(UserDetails::UNIVERSAL_PAYSLIP);
             $table->integer('attendance_type')->default(UserDetails::WEB_ATTENDANCE);
+            $table->string('state')->nullable();
+            $table->string('region')->nullable();
             $table->timestamps();
         });
+
     }
 
     /**

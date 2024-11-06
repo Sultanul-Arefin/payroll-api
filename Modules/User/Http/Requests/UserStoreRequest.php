@@ -20,7 +20,7 @@ class UserStoreRequest extends FormRequest
             'user_phone' => 'required',
             'country_id' => 'required|exists:countries,id',
             'employee_type' => 'required|integer|in:1,2,3,4',
-            'payslip_type' => 'required|integer|in:1,2,3',
+            'payslip_type' => 'required|integer|in:1,2,3,4',
             'designation_id' => 'required|integer|exists:designations,id',
             'department_id' => 'required|integer|exists:departments,id',
             'assign_to' => 'required|integer|exists:users,id',

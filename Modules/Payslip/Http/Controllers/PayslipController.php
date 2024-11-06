@@ -16,6 +16,7 @@ use Modules\Payslip\Http\Resources\CategoryResource;
 use Modules\Payslip\Http\Resources\PayslipResource;
 use Modules\Payslip\Http\Resources\ViewFrenchPayslipResource;
 use Modules\Payslip\Http\Resources\ViewUKPayslipResource;
+use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
@@ -416,6 +417,42 @@ class PayslipController extends Controller
                 ),
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
                 'payslip_info' => new ViewUKPayslipResource($payslip),
+                'others' => array_merge(
+                    $payslip->only(['id', 'payment_date'])
+                )
+            ]
+        );
+    }
+
+    public function preview_usa_payslip(Payslip $payslip)
+    {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' =>'CONTRACTUAL'
+        ];
+        return apiResponse(
+            data: [
+                'user_info'=> array_merge(
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    [
+                        'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
+                    ],
+                    [
+                        'month' =>$payslip?->month,
+                        'pay_period'=>$payslip?->first_date . 'to' . $payslip->last_date
+                    ],
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name,
+                    ]
+
+                ),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'payslip_info' => new ViewUSAPayslipResource($payslip),
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date'])
                 )
