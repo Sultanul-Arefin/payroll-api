@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\StaffObjectiveController;
 use App\Http\Controllers\SiteSettingsController;
+use App\Http\Controllers\YoutubeVideoController;
 use Modules\Dashboard\Http\Controllers\ReportController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
@@ -38,6 +39,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // HELP ARTICLE SECTION
         Route::get('help-article-category', [HelpArticleController::class, 'help_article_category']);
         Route::get('help-article/{help_article}', [HelpArticleController::class, 'help_article']);
+
     });
 
     // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING
@@ -45,4 +47,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
     // SITE SETTINGS
     Route::get('site-settings', [SiteSettingsController::class, 'index']);
+
+    // YOUTUBE VIDEOS
+    Route::get('youtube-videos', [YoutubeVideoController::class, 'index']);
 });
