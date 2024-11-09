@@ -11,8 +11,13 @@ class YoutubeVideoController extends Controller
     {
         $youtube_videos = YoutubeVideo::get();
 
+        if(count($youtube_videos) > 0){
+            return apiResponse(
+                data: $youtube_videos
+            );
+        }
         return apiResponse(
-            data: $youtube_videos
+            data: null
         );
     }
 }
