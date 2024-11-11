@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users', 'id')
                 ->cascadeOnDelete();
-            $table->string('region')->nullable();
+            $table->string('user_area')->nullable();
             $table->string('user_city')->nullable();
             $table->string('zip_code')->nullable();
             $table->foreignId('country_id')

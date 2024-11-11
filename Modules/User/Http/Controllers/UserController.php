@@ -480,8 +480,8 @@ class UserController extends Controller
                 'user_image' => $user_image,
                 'payslip_type' => $request->payslip_type ?? $user->user_details->payslip_type,
                 'attendance_type' => $request->attendance_type ?? $user->user_details->attendance_type,
-                'state' => $request->state ?? $request->state,
-                'region' => $request->region ?? $request->region,
+                'state' => $request->state ?? $user->user_details->state ,
+                'region' => $request->region ?? $user->user_details->region,
             ]);
 
             $allFileArr = [];

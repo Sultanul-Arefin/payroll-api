@@ -2,11 +2,15 @@
 
 namespace Modules\Payslip\Http\Resources;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
+use Modules\LeaveManagement\Entities\UserLeave;
+use Modules\LeaveManagement\Entities\UserLeaveDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
+use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
 class ViewUSAPayslipResource extends JsonResource
 {
@@ -21,6 +25,7 @@ class ViewUSAPayslipResource extends JsonResource
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'deduction_details' => $this->get_deduction_details(),
+            'employee_id' =>$this->employee_id,
             'payment_date' => $this->payment_date,
             'fixed_pay_details' => $this->wages,
             'additional_pay' => $this->taxable_allowance,
@@ -41,10 +46,69 @@ class ViewUSAPayslipResource extends JsonResource
             'medicare_tax' => $this->year_to_date_medicare_tax,
             'total_deductions' => $this->year_to_date_total_deductions,
             'net_pay' => $this->year_to_date_net_pay,
+            'annual_leave' => $this->get_annual_leave_calculation($this->employee),
         ],
             'overall_calculation' => $this->overall_calculation(),
         ];
     }
+
+    public function get_annual_leave_calculation($employee)
+    {
+        return [
+            'annual_leave_quota' => $this->getAnnualLeaveQuota(),
+            'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+        ];
+    }
+
+    function getAnnualLeaveTaken($user_id): int {
+        $annual_leave_data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Annual Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        $data = UserLeave::query()
+                ->where('user_id', $user_id)
+                ->where('leave_type', $annual_leave_data->salary_items_id)
+                ->where('status', UserLeave::APPROVED)
+                ->get();
+        $count = 0;
+        foreach($data as $value){
+            $details = UserLeaveDetail::query()
+                ->where('user_leaves_id', $value->id)
+                ->count();
+            $count += $details;
+        }
+        return $count;
+    }
+
+    function getAnnualLeaveQuota(): int {
+        $data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Annual Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        return $data->no_of_days;
+    }
+
 
     public function get_deduction_details()
     {

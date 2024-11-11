@@ -20,6 +20,7 @@ use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
+use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
@@ -438,28 +439,28 @@ class PayslipController extends Controller
             $grossEarnings = $payslip->net_pay;
 
         // Deduction Calculations for employee
-            $federalTax = $grossEarnings * 0.10; // 10%
-            $additionalFederalIncomeTax = 150.00; // Fixed amount
-            $stateTax = $grossEarnings * 0.03; // 3%
-            $medicareTax = $grossEarnings * 0.015; // 1.5%
+                $federalTax = $grossEarnings * 0.10; // 10%
+                $additionalFederalIncomeTax = 150.00; // Fixed amount
+                $stateTax = $grossEarnings * 0.03; // 3%
+                $medicareTax = $grossEarnings * 0.015; // 1.5%
 
             // Total deductions
             $totalDeductions = $federalTax + $additionalFederalIncomeTax + $stateTax + $medicareTax;
 
                 //Employer Deduction Calculations ()
-                $federalTax = 8454.90;
-                $additionalFederalIncomeTax = 0;
-                $stateTax = 2482.92; 
-                $medicareTax =1942.08; 
+                $federalTaxEmployer = 8454.90;
+                $additionalFederalIncomeTaxEmployer = 0;
+                $stateTaxEmployer = 2482.92; 
+                $medicareTaxEmployer =1942.08; 
 
             // Total deductions employer
-            $totalDeductionsEmployer = $federalTax + $additionalFederalIncomeTax + $stateTax + $medicareTax;
+            $totalDeductionsEmployer = $federalTaxEmployer + $additionalFederalIncomeTaxEmployer + $stateTaxEmployer + $medicareTaxEmployer;
 
             // summary
-            $grossPay = $payslip->net_pay;
-            $taxShelter =0; //$payslip->tax_shelter ?? 0;
-            $section125 =100; //$payslip->section_125 ?? 0;
-            $strsRetirement =826.87; //$payslip->strs_retirement ?? 0;
+                $grossPay = $payslip->net_pay;
+                $taxShelter =0; //$payslip->tax_shelter ?? 0;
+                $section125 =100; //$payslip->section_125 ?? 0;
+                $strsRetirement =826.87; //$payslip->strs_retirement ?? 0;
 
             // Calculate Taxable Gross and Net Pay
             $taxableGross = $grossPay - ($taxShelter + $section125 + $strsRetirement);
@@ -516,10 +517,10 @@ class PayslipController extends Controller
                     
                     'employer' => 
                         [
-                            'federal_tax' => $federalTax,
-                            'additional_federal_income_tax' => $additionalFederalIncomeTax,
-                            'state_tax' => $stateTax,
-                            'medicare_tax' => $medicareTax,
+                            'federal_tax' => $federalTaxEmployer,
+                            'additional_federal_income_tax' => $additionalFederalIncomeTaxEmployer,
+                            'state_tax' => $stateTaxEmployer,
+                            'medicare_tax' => $medicareTaxEmployer,
                             'total_deductions' => $totalDeductionsEmployer,
                         ],
                 ],
@@ -547,13 +548,46 @@ class PayslipController extends Controller
                     ],
                         
                 
-                'net_pay' => $grossEarnings - $totalDeductions,
+                'net_pay' => $netPay,
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date'])
                 )
             ]
         );
     }
+
+    public function preview_indian_payslip(Payslip $payslip)
+    {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' => 'CONTRACTUAL'
+        ];
+        return apiResponse(
+            data: [
+                'user_info' => array_merge(
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    [
+                        'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
+                    ],
+                    [
+                        'month' => $payslip?->month,
+                        'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
+                    ],
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name,
+                    ]
+                ),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'payslip_info' => new ViewIndianPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
+            ]
+        );
+    }
+
 
     public function payslips()
     {
