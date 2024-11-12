@@ -435,54 +435,6 @@ class PayslipController extends Controller
             '4' =>'CONTRACTUAL'
         ];
 
-        // Fetch gross earnings from payslip data
-            $grossEarnings = $payslip->net_pay;
-
-        // Deduction Calculations for employee
-                $federalTax = $grossEarnings * 0.10; // 10%
-                $additionalFederalIncomeTax = 150.00; // Fixed amount
-                $stateTax = $grossEarnings * 0.03; // 3%
-                $medicareTax = $grossEarnings * 0.015; // 1.5%
-
-            // Total deductions
-            $totalDeductions = $federalTax + $additionalFederalIncomeTax + $stateTax + $medicareTax;
-
-                //Employer Deduction Calculations ()
-                $federalTaxEmployer = 8454.90;
-                $additionalFederalIncomeTaxEmployer = 0;
-                $stateTaxEmployer = 2482.92; 
-                $medicareTaxEmployer =1942.08; 
-
-            // Total deductions employer
-            $totalDeductionsEmployer = $federalTaxEmployer + $additionalFederalIncomeTaxEmployer + $stateTaxEmployer + $medicareTaxEmployer;
-
-            // summary
-                $grossPay = $payslip->net_pay;
-                $taxShelter =0; //$payslip->tax_shelter ?? 0;
-                $section125 =100; //$payslip->section_125 ?? 0;
-                $strsRetirement =826.87; //$payslip->strs_retirement ?? 0;
-
-            // Calculate Taxable Gross and Net Pay
-            $taxableGross = $grossPay - ($taxShelter + $section125 + $strsRetirement);
-            $netPay = $taxableGross - $totalDeductions;
-
-            // Year-to-Date (YTD) Calculations
-                $startOfYear = now()->startOfYear();
-                $yearToDatePayslips = Payslip::where('employee_id', $payslip->employee_id)
-                                    ->whereBetween('payment_date', [$startOfYear, $payslip->payment_date])
-                                    ->get();
-
-                $yearToDateGrossPay = $yearToDatePayslips->sum('net_pay');
-                $yearToDateTaxShelter = ($yearToDatePayslips->count() * $taxShelter);
-                $yearToDateSection125 = ($yearToDatePayslips->count() * $section125) ;
-                $yearToDateStrsRetirement = ($yearToDatePayslips->count() * $strsRetirement);;
-
-                // Calculate Year-to-Date Taxable Gross and Net Pay
-                $yearToDateTaxableGross = $yearToDateGrossPay - ($yearToDateTaxShelter + $yearToDateSection125 + $yearToDateStrsRetirement);
-                $yearToDateTotalDeductions = ($yearToDatePayslips->count() * $totalDeductions);
-                $yearToDateNetPay = $yearToDateTaxableGross - $yearToDateTotalDeductions;
-
-
         return apiResponse(
             data: [
                 'user_info'=> array_merge(
@@ -503,52 +455,6 @@ class PayslipController extends Controller
                 ),
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','company_address', 'government_employee_no', 'company_website', 'company_address']),
                 'payslip_info' => new ViewUSAPayslipResource($payslip),
-                
-                'deductions' => [
-
-                    'employee' => 
-                        [
-                            'federal_tax' => $federalTax,
-                            'additional_federal_income_tax' => $additionalFederalIncomeTax,
-                            'state_tax' => $stateTax,
-                            'medicare_tax' => $medicareTax,
-                            'total_deductions' => $totalDeductions,
-                        ],
-                    
-                    'employer' => 
-                        [
-                            'federal_tax' => $federalTaxEmployer,
-                            'additional_federal_income_tax' => $additionalFederalIncomeTaxEmployer,
-                            'state_tax' => $stateTaxEmployer,
-                            'medicare_tax' => $medicareTaxEmployer,
-                            'total_deductions' => $totalDeductionsEmployer,
-                        ],
-                ],
-
-                'summary' => [
-                    'current'=>
-                        [
-                            'gross_pay' => $grossPay,
-                            'tax_shelter' => $taxShelter,
-                            'section_125' => $section125,
-                            'strs_retirement' => $strsRetirement,
-                            'taxable_gross' => $taxableGross,
-                            'net_pay' => $netPay,
-                        ],
-                    'year_to_date' => 
-                        [
-                            'gross_pay' => $yearToDateGrossPay,
-                            'tax_shelter' => $yearToDateTaxShelter,
-                            'section_125' => $yearToDateSection125,
-                            'strs_retirement' => $yearToDateStrsRetirement,
-                            'taxable_gross' => $yearToDateTaxableGross,
-                            'total_deductions' => $yearToDateTotalDeductions,
-                            'net_pay' => $yearToDateNetPay,
-                        ],
-                    ],
-                        
-                
-                'net_pay' => $netPay,
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date'])
                 )
@@ -588,6 +494,7 @@ class PayslipController extends Controller
         );
     }
 
+    
 
     public function payslips()
     {
