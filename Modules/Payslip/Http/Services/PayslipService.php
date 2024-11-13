@@ -83,10 +83,11 @@ class PayslipService
             if($value->salaryItemsName->salaryItemsCategory->id == 7){
                 $deduction_value = DeductionDetails::query()
                     ->whereHas(
-                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
+                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id, $value) {
                             $builder
                                 ->where('company_id', $company_id)
                                 ->where('employee_id', $employee_id)
+                                ->where('id', $value->id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
                                         $builder->whereHas(
@@ -112,10 +113,11 @@ class PayslipService
             if($value->salaryItemsName->salaryItemsCategory->id == 8){
                 $deduction_value = DeductionDetails::query()
                     ->whereHas(
-                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
+                        'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id, $value) {
                             $builder
                                 ->where('company_id', $company_id)
                                 ->where('employee_id', $employee_id)
+                                ->where('id', $value->id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
                                         $builder->whereHas(
