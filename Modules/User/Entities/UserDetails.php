@@ -17,6 +17,7 @@ class UserDetails extends Model
     public const UNIVERSAL_PAYSLIP = 1;
     public const FRENCH_PAYSLIP = 2;
     public const UK_PAYSLIP = 3;
+    public const USA_PAYSLIP = 4;
 
     public const WEB_ATTENDANCE = 1;
 
@@ -48,6 +49,8 @@ class UserDetails extends Model
         'user_image',
         'payslip_type',
         'attendance_type',
+        'state',
+        'region',
     ];
 
     protected static function newFactory()

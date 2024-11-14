@@ -44,8 +44,11 @@ return new class extends Migration
             $table->string('user_image')->nullable();
             $table->integer('payslip_type')->default(UserDetails::UNIVERSAL_PAYSLIP);
             $table->integer('attendance_type')->default(UserDetails::WEB_ATTENDANCE);
+            $table->string('state')->nullable();
+            $table->string('region')->nullable();
             $table->timestamps();
         });
+
     }
 
     /**
