@@ -22,11 +22,11 @@ class EmployeeSalaryItemsController extends Controller
     {
         // validation for category_id 7 & 8
         $check_category = SalaryItemsName::where('id', $request->salary_item_id)->first();
-        if ($check_category->salary_items_category_id == 8 || $check_category->salary_items_category_id == 9) {
+        if ($check_category->salary_items_category_id == 7 || $check_category->salary_items_category_id == 8) {
             $request->validate([
                 'company_deduction' => 'required', // '1|2'
-                'employee_contribution' => $check_category->salary_items_category_id == 8 ? 'required' : 'nullable',
-                'employee_deduction' => $check_category->salary_items_category_id == 9 ? 'required' : 'nullable', // 1|3
+                'employee_contribution' => $check_category->salary_items_category_id == 7 ? 'required' : 'nullable',
+                'employee_deduction' => $check_category->salary_items_category_id == 8 ? 'required' : 'nullable', // 1|3
                 'amount' => 'nullable',
             ]);
         }
@@ -39,10 +39,10 @@ class EmployeeSalaryItemsController extends Controller
                 'employee_id' => $request->employee_id ?? null,
                 'amount' => $request->amount ?? null,
             ]);
-            if ($check_category->salary_items_category_id == 8 || $check_category->salary_items_category_id == 9) {
+            if ($check_category->salary_items_category_id == 7 || $check_category->salary_items_category_id == 8) {
                 $create_deduction = DeductionDetails::create([
                     'employee_salary_item_id' => $employee_salary->id,
-                    'employee_amount' => $check_category->salary_items_category_id == 8 ? $request->employee_contribution : $request->employee_deduction,
+                    'employee_amount' => $check_category->salary_items_category_id == 7 ? $request->employee_contribution : $request->employee_deduction,
                     'government_or_company_amount' => $request->company_deduction,
                 ]);
             }
