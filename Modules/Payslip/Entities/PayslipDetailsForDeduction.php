@@ -26,4 +26,8 @@ class PayslipDetailsForDeduction extends Model
     {
         return $this->belongsTo(SalaryItemsName::class, 'salary_item_id', 'id');
     }
+    public function payslip()
+    {
+        return $this->belongsTo(Payslip::class, 'payslip_id');
+    }
 }
