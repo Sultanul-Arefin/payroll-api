@@ -456,7 +456,7 @@ class PayslipController extends Controller
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','company_address', 'government_employee_no', 'company_website', 'company_address']),
                 'payslip_info' => new ViewUSAPayslipResource($payslip),
                 'others' => array_merge(
-                    $payslip->only(['id', 'payment_date'])
+                    $payslip->only(['id', 'payment_date','created_at'])
                 )
             ]
         );
