@@ -34,7 +34,7 @@ class ViewUSAPayslipResource extends JsonResource
             'total_fixed_pay' => $this->taxable_allowance,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => $this->gross_pay_before_tax,
+            'total_gross_pay' => $this->pay_due_before_deduction,
             //'taxable_gross_pay' => $this->gross_pay_before_tax,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
@@ -46,27 +46,10 @@ class ViewUSAPayslipResource extends JsonResource
             'summary' => [
                 'year_to_date' => $this->getYearToDateCalculations(),
             ],
+            'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
     }
-    private function calculate_taxable_gross_pay()
-    {
-        $gross_pay = $this->gross_pay_before_tax;
-        
-        // Get other deductions (should return an array of deductions)
-        $other_deduction = $this->get_other_deduction();
-        
-        // Sum up all employee amounts in the other_deduction array
-        if (is_array($other_deduction)) {
-            $other_deduction_total = array_sum(array_column($other_deduction, 'employee_amount'));
-        } else {
-            $other_deduction_total = 0;
-        }
 
-        // Ensure taxable gross pay doesn't go negative
-        $taxable_gross_pay = max(0, $gross_pay - $other_deduction_total);
-        
-        return $taxable_gross_pay;
-    }
     public function get_annual_leave_calculation($employee)
     {
         return [
@@ -123,6 +106,27 @@ class ViewUSAPayslipResource extends JsonResource
             ->first();
         return $data->no_of_days;
     }
+
+    private function calculate_taxable_gross_pay()
+    {
+        $gross_pay = $this->pay_due_before_deduction;
+        
+        // Get other deductions (should return an array of deductions)
+        $other_deduction = $this->get_other_deduction();
+        
+        // Sum up all employee amounts in the other_deduction array
+        if (is_array($other_deduction)) {
+            $other_deduction_total = array_sum(array_column($other_deduction, 'employee_amount'));
+        } else {
+            $other_deduction_total = 0;
+        }
+
+        // Ensure taxable gross pay doesn't go negative
+        $taxable_gross_pay = max(0, $gross_pay - $other_deduction_total);
+        
+        return $taxable_gross_pay;
+    }
+    
 
     public function get_other_deduction()
     {
