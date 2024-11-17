@@ -34,7 +34,7 @@ class ViewUSAPayslipResource extends JsonResource
             'total_fixed_pay' => $this->taxable_allowance,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => $this->gross_pay_before_tax,
+            'total_gross_pay' => $this->pay_due_before_deduction,
             //'taxable_gross_pay' => $this->gross_pay_before_tax,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
@@ -46,21 +46,9 @@ class ViewUSAPayslipResource extends JsonResource
             'summary' => [
                 'year_to_date' => $this->getYearToDateCalculations(),
             ],
+            'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
     }
-    private function calculate_taxable_gross_pay()
-{
-    $gross_pay = $this->gross_pay_before_tax;
-    $other_deduction = $this->get_other_deduction();
-
-    // Ensure $other_deduction is a numeric value
-    if (is_array($other_deduction)) {
-        $other_deduction = array_sum(array_column($other_deduction, 'employee_amount'));
-    }
-
-    // Ensure $other_deduction does not exceed $gross_pay to avoid negative values
-    return max(0, $gross_pay - $other_deduction);
-}
 
     public function get_annual_leave_calculation($employee)
     {
@@ -119,22 +107,44 @@ class ViewUSAPayslipResource extends JsonResource
         return $data->no_of_days;
     }
 
+    private function calculate_taxable_gross_pay()
+    {
+        $gross_pay = $this->pay_due_before_deduction;
+        
+        // Get other deductions (should return an array of deductions)
+        $other_deduction = $this->get_other_deduction();
+        
+        // Sum up all employee amounts in the other_deduction array
+        if (is_array($other_deduction)) {
+            $other_deduction_total = array_sum(array_column($other_deduction, 'employee_amount'));
+        } else {
+            $other_deduction_total = 0;
+        }
+
+        // Ensure taxable gross pay doesn't go negative
+        $taxable_gross_pay = max(0, $gross_pay - $other_deduction_total);
+        
+        return $taxable_gross_pay;
+    }
+    
+
     public function get_other_deduction()
     {
         $deduction_details = PayslipDetailsForDeduction::query()
-                            ->whereHas(
-                                'salary_item_name', function(Builder $builder){
-                                    $builder->where('salary_items_category_id', 8);
-                                }
-                            )
-                            ->where('payslip_id', $this->id)
-                            ->get();
-        
+                                ->whereHas(
+                                    'salary_item_name', function(Builder $builder){
+                                        $builder->where('salary_items_category_id', 8);  // Category 8 for deductions
+                                    }
+                                )
+                                ->where('payslip_id', $this->id)
+                                ->get();
+            
         $response = [];
         foreach($deduction_details as $value)
         {
             $yearlyAmount = $this->getYearlyDeductionForItem($value->salary_item_name->id);
-            
+                
+            // Return the necessary data as an array
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
                 'base' => $this->wages,
@@ -144,10 +154,8 @@ class ViewUSAPayslipResource extends JsonResource
             ]);
         }
     
-        return [
-            'deductions' => $response,
-        ];
-    }
+    return $response;  // Returns an array of deductions
+}
     
         /**
          * Calculate the yearly total of employee_amount for a specific deduction item (category 8).
