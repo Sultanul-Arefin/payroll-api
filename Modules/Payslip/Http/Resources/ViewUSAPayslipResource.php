@@ -250,7 +250,7 @@ class ViewUSAPayslipResource extends JsonResource
                                 ->whereBetween('payment_date', [$startOfYear, $this->payment_date])
                                 ->get();
 
-            $yearToDateGrossPay = $yearToDatePayslips->sum('gross_pay_before_tax');
+            $yearToDateGrossPay = $yearToDatePayslips->sum('pay_due_before_deduction');
 
             $yearToDateTaxableGross =$yearToDateGrossPay - ( $yearToDatePayslips->sum('other_company_deduction'));
             $yearToDateTotalDeductions = $yearToDatePayslips->sum('employee_contribution_value');
@@ -274,7 +274,7 @@ class ViewUSAPayslipResource extends JsonResource
                     'total_fixed_pay' => $this->wages - $this->leave_deduction,
                     'taxable_allowances' => $this->taxable_allowance,
                     'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
+                    'total_gross_pay' => $this->pay_due_before_deduction,
                     //'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
                     'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
                     'ytd_tax_paid' => 0,
@@ -291,7 +291,7 @@ class ViewUSAPayslipResource extends JsonResource
                     'total_fixed_pay' => $this->wages - $this->leave_deduction,
                     'taxable_allowances' => $this->taxable_allowance,
                     'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
+                    'total_gross_pay' => $this->pay_due_before_deduction,
                    // 'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
                    'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
                     'ytd_tax_paid' => 0,
