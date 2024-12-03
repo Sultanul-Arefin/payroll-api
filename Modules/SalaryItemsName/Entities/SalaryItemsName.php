@@ -18,7 +18,11 @@ class SalaryItemsName extends Model
         'salary_items_category_id',
         'name',
         'company_id',
+        'is_threshold',
     ];
+
+    public const INCOME_TAX_STRAIGHT = 1;
+    public const INCOME_TAX_THRESHOLD = 2;
 
     protected static function newFactory()
     {
