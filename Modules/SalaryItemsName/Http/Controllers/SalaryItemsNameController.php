@@ -46,6 +46,12 @@ class SalaryItemsNameController extends Controller
                 $leaveSalaryItems = $this->leaveSalaryItems->create($store);
             }
 
+            if (isset($request->tax_type) && $request->tax_type == "threshold") {
+                $update_item = $store->update([
+                    'is_threshold' => 2
+                ]);
+            }
+
             return apiResponse(
                 data: $store,
                 message: 'Salary Items Stored Successfully',
