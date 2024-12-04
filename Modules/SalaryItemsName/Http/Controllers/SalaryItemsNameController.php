@@ -3,8 +3,10 @@
 namespace Modules\SalaryItemsName\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 use Modules\SalaryItemsName\Http\Requests\StoreSalaryItemsName;
 use Modules\SalaryItemsName\Http\Resources\SalaryItemsNameResource;
 use Modules\SalaryItemsName\Http\Services\SalaryLeaveItemsService;
@@ -18,16 +20,22 @@ class SalaryItemsNameController extends Controller
     ) {
     }
 
-    public function index($id)
+    public function index(SalaryItemsCategory $salary_item_category, Request $request)
     {
         $rows = 15;
         if (request()?->has('rows')) {
             $rows = (int) request('rows');
         }
 
+        if ($salary_item_category->id == 5) {
+            $request->validate([
+                'tax_type' => 'required|in:straight,threshold',
+            ]);
+        }
+
         return SalaryItemsNameResource::collection(
             $this->salaryItemsNameRepo->allWithSearch(
-                $id,
+                $salary_item_category,
                 ['*'],
                 [],
                 $rows
