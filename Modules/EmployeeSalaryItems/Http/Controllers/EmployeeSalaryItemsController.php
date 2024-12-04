@@ -30,6 +30,12 @@ class EmployeeSalaryItemsController extends Controller
                 'amount' => 'nullable',
             ]);
         }
+        // validation for category_id 5
+        if ($check_category->salary_items_category_id == 5) {
+            $request->validate([
+                'tax_type' => 'required',
+            ]);
+        }
         $employee_salary = DB::transaction(function () use ($request, $check_category) {
             $employee_salary = EmployeeSalaryItem::create([
                 'salary_item_id' => $request->salary_item_id,
