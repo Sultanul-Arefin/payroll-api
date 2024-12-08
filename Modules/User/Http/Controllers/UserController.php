@@ -83,6 +83,16 @@ class UserController extends Controller
         $user->salary_items = $items->map(function ($item) use ($user) {
             return new UserBasicSalaryResource($item, $user->id);
         });
+        $check_if_fixed_pay_or_not = EmployeeSalaryItem::query()
+                    ->whereHas(
+                        'salaryItemsName', function(Builder $builder)use($user){
+                            $builder->where('employee_id', $user->id)
+                                ->where('name', "Wages");
+                        }
+                    )
+                    ->where('employee_id', $user->id)
+                    ->first();
+        $user->is_fixed = $check_if_fixed_pay_or_not->amount > 0 ? 1 : 0;
 
         return apiResponse(
             data: $user,
@@ -120,7 +130,7 @@ class UserController extends Controller
                     'region' => 'required|string|max:255',
                 ]);
             }
-            
+
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
 
@@ -163,7 +173,7 @@ class UserController extends Controller
                     'state' => $request->state ?? $request->state,
                     'region' => $request->region ?? $request->region,
                 ]);
-               
+
                 //file one
                 if ($request->hasFile('contract_letter')) {
                     $allFileName = $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter', $user->id);
@@ -246,7 +256,7 @@ class UserController extends Controller
             throw new CustomException($ex->getMessage(), 200);
         }
 
-   
+
         return apiResponse(
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email" : 'Mail could not sent',
