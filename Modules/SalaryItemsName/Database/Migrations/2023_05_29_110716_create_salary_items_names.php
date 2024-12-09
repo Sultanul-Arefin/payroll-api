@@ -25,7 +25,7 @@ return new class extends Migration
                 ->constrained('companies', 'id')
                 ->cascadeOnDelete();
             $table->string('name');
-            $table->integer('is_threshold')->default(SalaryItemsName::INCOME_TAX_STRAIGHT);
+            $table->integer('is_threshold')->default(0);
             $table->timestamps();
         });
     }
