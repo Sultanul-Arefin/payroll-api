@@ -2,6 +2,7 @@
 
 namespace Modules\EmployeeSalaryItems\Entities;
 
+use App\Models\ThresholdDetails;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,5 +50,10 @@ class EmployeeSalaryItem extends Model
     public function deduction_details(): HasOne
     {
         return $this->hasOne(DeductionDetails::class, 'employee_salary_item_id', 'id');
+    }
+
+    public function threshold_details(): HasOne
+    {
+        return $this->hasOne(ThresholdDetails::class, 'employee_salary_item_id', 'id');
     }
 }
