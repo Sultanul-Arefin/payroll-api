@@ -2,12 +2,14 @@
 
 namespace Modules\Payslip\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\Attendance\Entities\Attendance;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
@@ -170,7 +172,7 @@ class CategoryResource extends JsonResource
                         }
                     )
                     ->first('amount');
-                $hours_worked = $this->payslipService->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+                $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
                 if($hours_worked < 0){
                     $employee_associated_amount = 0;
                 } else{
@@ -238,5 +240,39 @@ class CategoryResource extends JsonResource
                 })
                 ->get()->sum('amount');
         }
+    }
+
+    // hours worked for employee
+    public function get_hours_worked($employee_id, $from_date, $to_date)
+    {
+        $attendances = Attendance::query()
+                        ->where('user_id', $employee_id)
+                        ->where('status', Attendance::PRESENT)
+                        ->whereBetween(
+                            'dates',
+                            [
+                                $from_date,
+                                $to_date
+                            ]
+                        )
+                        ->get();
+        $total_minutes = 0;
+        foreach($attendances as $value)
+        {
+            $details = $value->attendance_details;
+
+            foreach($details as $detail)
+            {
+                $inTime = Carbon::parse($detail->in_time);
+                $outTime = Carbon::parse($detail->out_time);
+
+                // Calculate the time difference in minutes and add it to the total
+                $timeDifferenceMinutes = $inTime->diffInHours($outTime); // have to check this code twice, there might be an issue in the inTime, outTime alignment
+                // previous alignment
+                // $timeDifferenceMinutes = $outTime->diffInHours($inTime);
+                $total_minutes += $timeDifferenceMinutes;
+            }
+        }
+        return $total_minutes;
     }
 }
