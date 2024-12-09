@@ -145,7 +145,7 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif ($category_id == 1) {
-            return EmployeeSalaryItem::query()
+            $amount = EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) {
                         $builder->where('name', 'Wages')
@@ -159,6 +159,26 @@ class CategoryResource extends JsonResource
                 ->where('company_id', auth()->user()->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
+            if($amount <= 0){
+                $hourly_amount = EmployeeSalaryItem::query()
+                    ->where('employee_id', request('employee_id'))
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Ordinary Time Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+                $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+                if($hours_worked < 0){
+                    $employee_associated_amount = 0;
+                } else{
+                    $employee_associated_amount = $hourly_amount->amount * $hours_worked;
+                }
+                return $employee_associated_amount;
+            }
+            return $amount;
         } elseif($category_id == 2){
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
