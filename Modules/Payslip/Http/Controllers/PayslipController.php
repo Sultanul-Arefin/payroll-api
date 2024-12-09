@@ -494,7 +494,7 @@ class PayslipController extends Controller
         );
     }
 
-    
+
 
     public function payslips()
     {
