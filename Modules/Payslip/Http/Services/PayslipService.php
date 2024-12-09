@@ -185,6 +185,26 @@ class PayslipService
             )
             ->sum('amount');
 
+        // CHECK IF HOURLY PAY
+        if($employee_associated_amount <= 0){
+            $hourly_amount = EmployeeSalaryItem::query()
+                ->where('employee_id', $employee_id)
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Ordinary Time Rate')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->first('amount');
+            $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+            if($hours_worked < 0){
+                $employee_associated_amount = 0;
+            } else{
+                $employee_associated_amount = $hourly_amount->amount * $hours_worked;
+            }
+        }
+
         return $employee_associated_amount;
     }
 
