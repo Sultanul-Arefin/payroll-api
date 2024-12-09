@@ -146,6 +146,9 @@ class PayslipService
     function getAmountCalculation($salary_item)
     {
         if($salary_item->salaryItemsName->name == "Wages"){
+            if($salary_item->amount <= 0){
+                return $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+            }
             return $salary_item->amount;
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
