@@ -25,7 +25,7 @@ class DashboardController extends Controller
             ->where('role_id', '!=', User::ADMIN)
             ->selectRaw('COUNT(*) as count')
             ->first();
-            
+
         return response()->json(['data' => $data]);
     }
 
@@ -49,7 +49,7 @@ class DashboardController extends Controller
     public function total_paid_salary()
     {
         $data = Payslip::where('company_id', auth()->user()->company_id)
-            ->selectRaw('SUM(total_pay_value) as total_paid_salary')
+            ->selectRaw('ROUND(SUM(total_pay_value), 2) as total_paid_salary')
             ->first();
         return response()->json(['data' => $data]);
     }
@@ -57,7 +57,7 @@ class DashboardController extends Controller
     public function total_staff_cost()
     {
         $data = Payslip::where('company_id', auth()->user()->company_id)
-            ->selectRaw('SUM(gross_pay_before_tax) as total_staff_cost')
+            ->selectRaw('ROUND(SUM(gross_pay_before_tax), 2) as total_staff_cost')
             ->first();
 
         return response()->json(['data' => $data]);
