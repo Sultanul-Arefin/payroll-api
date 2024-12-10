@@ -25,7 +25,7 @@ return new class extends Migration
                 ->constrained('companies', 'id')
                 ->cascadeOnDelete();
             $table->string('name');
-            $table->integer('is_threshold')->default(0);
+            $table->integer('is_threshold')->default(1); // 1 => straight, 2 => threshold
             $table->timestamps();
         });
     }
