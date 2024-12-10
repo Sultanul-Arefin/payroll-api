@@ -106,6 +106,14 @@ class EmployeeSalaryItemsController extends Controller
                 'employee_amount' => $request->employee_deduction,
                 'government_or_company_amount' => $request->company_deduction
             ]);
+        } elseif($employee_salary_item?->salaryItemsName?->salary_items_category_id == 5 && $employee_salary_item?->salaryItemsName?->is_threshold == 2){
+            $employee_salary_item?->threshold_details?->update([
+                'start_percentage_after' => $request->start_percentage_after,
+                'end_percentage_at' => $request->end_percentage_at
+            ]);
+            $employee_salary_item->update([
+                'amount' => $request->amount
+            ]);
         } else{
             $employee_salary_item->update([
                 'amount' => $request->amount
