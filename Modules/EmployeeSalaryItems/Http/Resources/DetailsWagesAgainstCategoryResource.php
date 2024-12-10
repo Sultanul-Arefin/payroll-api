@@ -29,6 +29,7 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             'salary_amount' => $this->getSalaryAmount($this->salaryItemsName?->salaryItemsCategory, $this->amount),
             'issue_to' => $this->is_general == 1 ? "All" : $this->employee?->name,
             'is_general' => 0,
+            'is_threshold' => $this->salaryItemsName->is_threshold == 2 ? 1 : 0
         ];
     }
 
@@ -47,6 +48,13 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             return [
                 'company_deduction' => $this->deduction_details?->government_or_company_amount,
                 'employee_deduction' => $this->deduction_details?->employee_amount
+            ];
+        } elseif($category->id == 5 && $this->salaryItemsName->is_threshold == 2)
+        {
+            return [
+                'amount' => $amount,
+                'start_percentage_after' => $this->threshold_details->start_percentage_after,
+                'end_percentage_at' => $this->threshold_details->end_percentage_at,
             ];
         } else{
             return $amount;
