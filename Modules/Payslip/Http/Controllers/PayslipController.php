@@ -171,6 +171,9 @@ class PayslipController extends Controller
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 7 || $salary_item->salaryItemsName->salaryItemsCategory->id == 8){
             return 'Emp: ' . $salary_item->deduction_details?->employee_amount . ', Cmp_Or_Othrs: ' . $salary_item->deduction_details?->government_or_company_amount;
         }
+        if($salary_item->is_percentage == 1){
+            return round($salary_item->amount / 100, 2);
+        }
         return $salary_item->amount;
     }
     /**

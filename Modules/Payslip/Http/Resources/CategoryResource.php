@@ -25,11 +25,6 @@ class CategoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-            // $this->merge(
-            //     Arr::only(parent::toArray($request), [
-            //         'id'
-            //     ])
-            // ),
             'category_id' => $this->id,
             'category_name' => $this->name,
             'amount' => $this->getAmount($this->id),
@@ -147,39 +142,7 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif ($category_id == 1) {
-            $amount = EmployeeSalaryItem::query()
-                ->whereHas(
-                    'salaryItemsName', function (Builder $builder) {
-                        $builder->where('name', 'Wages')
-                            ->whereHas(
-                                'salaryItemsCategory', function (Builder $builder) {
-                                    $builder->where('id', 1);
-                                }
-                            );
-                    }
-                )
-                ->where('company_id', auth()->user()->company_id)
-                ->where('employee_id', request('employee_id'))
-                ->get()->sum('amount');
-            if($amount <= 0){
-                $hourly_amount = EmployeeSalaryItem::query()
-                    ->where('employee_id', request('employee_id'))
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Ordinary Time Rate')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
-                $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
-                if($hours_worked < 0){
-                    $employee_associated_amount = 0;
-                } else{
-                    $employee_associated_amount = $hourly_amount->amount * $hours_worked;
-                }
-                return $employee_associated_amount;
-            }
+            $amount = $this->getCategoryIdOneAmount(1);
             return $amount;
         } elseif($category_id == 2){
             $unpaid_absent_count = UserLeave::query()
@@ -219,6 +182,52 @@ class CategoryResource extends JsonResource
                 ->where('employee_id', request('employee_id'))
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
+        } elseif($category_id == 5){
+            $straight =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->where('is_threshold', 1)
+                                ->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 0)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get()->sum('amount');
+            $threshold =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->where('is_threshold', 2)
+                                ->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get()->sum('amount');
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+            $threshold = ($categoryOneAmount / $threshold) * 100;
+            return round($straight + $threshold, 2);
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
@@ -240,6 +249,43 @@ class CategoryResource extends JsonResource
                 })
                 ->get()->sum('amount');
         }
+    }
+
+    public function getCategoryIdOneAmount($category_id){
+        $amount = EmployeeSalaryItem::query()
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('name', 'Wages')
+                        ->whereHas(
+                            'salaryItemsCategory', function (Builder $builder) {
+                                $builder->where('id', 1);
+                            }
+                        );
+                }
+            )
+            ->where('company_id', auth()->user()->company_id)
+            ->where('employee_id', request('employee_id'))
+            ->get()->sum('amount');
+        if($amount <= 0){
+            $hourly_amount = EmployeeSalaryItem::query()
+                ->where('employee_id', request('employee_id'))
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Ordinary Time Rate')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->first('amount');
+            $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+            if($hours_worked < 0){
+                $employee_associated_amount = 0;
+            } else{
+                $employee_associated_amount = $hourly_amount->amount * $hours_worked;
+            }
+            return $employee_associated_amount;
+        }
+        return $amount;
     }
 
     // hours worked for employee
