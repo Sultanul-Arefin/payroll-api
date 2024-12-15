@@ -226,8 +226,8 @@ class CategoryResource extends JsonResource
                 })
                 ->get()->sum('amount');
             $categoryOneAmount = $this->getCategoryIdOneAmount(1);
-            return $straight + $threshold;
-            $threshold = ($categoryOneAmount / $threshold) * 100;
+            $threshold = $categoryOneAmount * ($threshold / 100);
+            return $threshold;
             return round($straight + $threshold, 2);
         } else {
             return EmployeeSalaryItem::query()
