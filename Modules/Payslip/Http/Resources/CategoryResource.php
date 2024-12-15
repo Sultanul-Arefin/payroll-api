@@ -226,6 +226,7 @@ class CategoryResource extends JsonResource
                 })
                 ->get()->sum('amount');
             $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+            return $categoryOneAmount;
             $threshold = ($categoryOneAmount / $threshold) * 100;
             return round($straight + $threshold, 2);
         } else {
