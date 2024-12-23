@@ -26,6 +26,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->string('name');
             $table->integer('is_threshold')->default(1); // 1 => straight, 2 => threshold
+            $table
+                ->foreignId('country_id')
+                ->nullable()
+                ->constrained('countries', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
