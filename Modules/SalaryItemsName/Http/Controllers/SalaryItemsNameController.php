@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\SalaryItemsName\Http\Requests\StoreSalaryItemsName;
 use Modules\SalaryItemsName\Http\Resources\SalaryItemsNameResource;
 use Modules\SalaryItemsName\Http\Services\SalaryLeaveItemsService;
@@ -98,6 +99,28 @@ class SalaryItemsNameController extends Controller
             message: 'Country Wise Salary Items Stored Successfully',
             status: 'success',
             statusCode: 201
+        );
+    }
+
+    public function country_wise_salary_items()
+    {
+        $data = SalaryItemsName::query()
+                ->whereNotNull('country_id')
+                ->get()
+                ->map(function($item){
+                    $item->category = $item?->salaryItemsCategory?->name;
+                    $item->country = $item?->country?->only('name');
+                    unset($item->salary_items_category);
+                    unset($item->country_id);
+                    unset($item->salary_items_category_id);
+                    unset($item->created_at);
+                    unset($item->updated_at);
+                    unset($item->company_id);
+                    unset($item->is_threshold);
+                    return $item;
+                });
+        return apiResponse(
+            data: $data
         );
     }
 }
