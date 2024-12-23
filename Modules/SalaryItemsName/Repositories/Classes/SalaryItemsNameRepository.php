@@ -52,6 +52,12 @@ class SalaryItemsNameRepository extends BaseRepository implements SalaryItemsNam
                         $query->where('country_id', request('country_id'));
                     })
                 )
+                ->when(
+                    is_null(request('country_id')),
+                    fn(Builder $builder) => $builder->where(function($query){
+                        $query->whereNull('country_id');
+                    })
+                )
                 ->where('salary_items_category_id', $resource->id)
                 ->where('company_id', auth()->user()->company_id)
                 ->with($relations)
