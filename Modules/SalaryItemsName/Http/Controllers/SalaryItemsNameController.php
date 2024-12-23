@@ -81,4 +81,23 @@ class SalaryItemsNameController extends Controller
             ]);
         }
     }
+
+    public function country_wise_salary_item(Request $request)
+    {
+        $request->validate([
+            'salary_items_category_id' => 'required',
+            'name' => 'required',
+            'country_id' => 'required'
+        ]);
+        $request->merge([
+            'company_id' => auth()->user()->company_id,
+        ]);
+        $store = $this->salaryItemsNameRepo->create($request->toArray());
+        return apiResponse(
+            data: $store,
+            message: 'Country Wise Salary Items Stored Successfully',
+            status: 'success',
+            statusCode: 201
+        );
+    }
 }
