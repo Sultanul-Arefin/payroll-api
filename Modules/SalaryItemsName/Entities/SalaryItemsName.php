@@ -19,6 +19,7 @@ class SalaryItemsName extends Model
         'name',
         'company_id',
         'is_threshold',
+        'country_id'
     ];
 
     public const INCOME_TAX_STRAIGHT = 1;
