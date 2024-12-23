@@ -123,4 +123,19 @@ class SalaryItemsNameController extends Controller
             data: $data
         );
     }
+
+    public function delete_country_wise_salary_item(Request $request)
+    {
+        $request->validate([
+            'salary_item_id' => 'required',
+        ]);
+        $salary_item = SalaryItemsName::query()
+                    ->where('id', $request->salary_item_id)
+                    ->whereNotNull('country_id')
+                    ->delete();
+        return apiResponse(
+            data: null,
+            message: "Item Successfully Deleted"
+        );
+    }
 }
