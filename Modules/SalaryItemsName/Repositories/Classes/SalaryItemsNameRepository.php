@@ -46,6 +46,12 @@ class SalaryItemsNameRepository extends BaseRepository implements SalaryItemsNam
                         $query->where('is_threshold', SalaryItemsName::INCOME_TAX_THRESHOLD);
                     })
                 )
+                ->when(
+                    !is_null(request('country_id')),
+                    fn(Builder $builder) => $builder->where(function($query){
+                        $query->where('country_id', request('country_id'));
+                    })
+                )
                 ->where('salary_items_category_id', $resource->id)
                 ->where('company_id', auth()->user()->company_id)
                 ->with($relations)
