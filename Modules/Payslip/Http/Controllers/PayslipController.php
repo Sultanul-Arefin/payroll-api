@@ -496,10 +496,10 @@ class PayslipController extends Controller
                         'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_address']),
                 'payslip_info' => new ViewIndianPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
                 'others' => array_merge(
-                    $payslip->only(['id', 'payment_date',])
+                    $payslip->only(['id', 'payment_date','net_pay'])
                 )
             ]
         );
