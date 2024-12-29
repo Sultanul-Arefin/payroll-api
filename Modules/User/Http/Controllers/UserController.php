@@ -83,6 +83,16 @@ class UserController extends Controller
         $user->salary_items = $items->map(function ($item) use ($user) {
             return new UserBasicSalaryResource($item, $user->id);
         });
+        $check_if_fixed_pay_or_not = EmployeeSalaryItem::query()
+                    ->whereHas(
+                        'salaryItemsName', function(Builder $builder)use($user){
+                            $builder->where('employee_id', $user->id)
+                                ->where('name', "Wages");
+                        }
+                    )
+                    ->where('employee_id', $user->id)
+                    ->first();
+        $user->is_fixed = $check_if_fixed_pay_or_not->amount > 0 ? 1 : 0;
 
         return apiResponse(
             data: $user,
@@ -122,6 +132,7 @@ class UserController extends Controller
                 ]);
             }
 
+
             if ($request->country_id == '100') {
                 $request->validate([
                     'uan_no' => 'nullable|string|max:255',
@@ -130,7 +141,7 @@ class UserController extends Controller
                 ]);
             }
 
-            
+
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -154,7 +165,7 @@ class UserController extends Controller
                     'user_phone' => $request->user_phone,
                     'gender' => $request->gender,
                     'date_of_birth' => $request->date_of_birth,
-                    'joining_date' => $request->joining_date, 
+                    'joining_date' => $request->joining_date,
                     'payment_type' => $request->payment_type,
                     'bank_name' => $request->bank_name,
                     'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
@@ -176,7 +187,7 @@ class UserController extends Controller
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
 
                 ]);
-               
+
                 //file one
                 if ($request->hasFile('contract_letter')) {
                     $allFileName = $this->user_repo->userDocument($request->contract_letter, 'contract', 'contract_letter', $user->id);
@@ -259,12 +270,12 @@ class UserController extends Controller
             throw new CustomException($ex->getMessage(), 200);
         }
 
-   
+
         return apiResponse(
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email" : 'Mail could not sent',
             status: 'success'
-            
+
         );
     }
 

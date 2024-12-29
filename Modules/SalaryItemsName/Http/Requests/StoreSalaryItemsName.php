@@ -16,6 +16,7 @@ class StoreSalaryItemsName extends FormRequest
         return [
             'salary_items_category_id' => 'required',
             'name' => 'required',
+            'tax_type' => 'required_if:salary_items_category_id,5|in:straight,threshold',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace Modules\EmployeeSalaryItems\Http\Controllers;
 
+use App\Models\ThresholdDetails;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,14 @@ class EmployeeSalaryItemsController extends Controller
                 'amount' => 'nullable',
             ]);
         }
+        // validation for category_id 5
+        if ($check_category->salary_items_category_id == 5) {
+            $request->validate([
+                'tax_type' => 'required|in:straight,threshold',
+                'start_percentage_after' => 'required_if:tax_type,threshold|integer',
+                'end_percentage_at' => 'nullable|integer'
+            ]);
+        }
         $employee_salary = DB::transaction(function () use ($request, $check_category) {
             $employee_salary = EmployeeSalaryItem::create([
                 'salary_item_id' => $request->salary_item_id,
@@ -39,6 +48,13 @@ class EmployeeSalaryItemsController extends Controller
                 'employee_id' => $request->employee_id ?? null,
                 'amount' => $request->amount ?? null,
             ]);
+            if ($check_category->salary_items_category_id == 5) {
+                $create_deduction = ThresholdDetails::create([
+                    'employee_salary_item_id' => $employee_salary->id,
+                    'start_percentage_after' => $request->start_percentage_after,
+                    'end_percentage_at' => $request->end_percentage_at,
+                ]);
+            }
             if ($check_category->salary_items_category_id == 7 || $check_category->salary_items_category_id == 8) {
                 $create_deduction = DeductionDetails::create([
                     'employee_salary_item_id' => $employee_salary->id,
@@ -89,6 +105,14 @@ class EmployeeSalaryItemsController extends Controller
             $employee_salary_item?->deduction_details?->update([
                 'employee_amount' => $request->employee_deduction,
                 'government_or_company_amount' => $request->company_deduction
+            ]);
+        } elseif($employee_salary_item?->salaryItemsName?->salary_items_category_id == 5 && $employee_salary_item?->salaryItemsName?->is_threshold == 2){
+            $employee_salary_item?->threshold_details?->update([
+                'start_percentage_after' => $request->start_percentage_after,
+                'end_percentage_at' => $request->end_percentage_at
+            ]);
+            $employee_salary_item->update([
+                'amount' => $request->amount
             ]);
         } else{
             $employee_salary_item->update([
