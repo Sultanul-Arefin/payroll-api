@@ -239,7 +239,7 @@ class ViewUSAPayslipResource extends JsonResource
             }
             return [
                 'payslip_details' => $payslip_details,
-                'total_payslip_value_employee' => $payslip_value
+                'total_payslip_value_employee' => $this->pay_due_before_deduction,
             ];
         }
 
