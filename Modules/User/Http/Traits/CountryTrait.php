@@ -16,6 +16,13 @@ trait CountryTrait
                     '%'.request('search').'%'
                 );
             })
+            ->when(! is_null(request('starts_with')), function ($query) {
+                $query->where(
+                    'name',
+                    'LIKE',
+                    request('starts_with').'%'
+                );
+            })
             ->select('id', 'name')
             ->get();
 

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 return new class extends Migration
 {
@@ -24,6 +25,12 @@ return new class extends Migration
                 ->constrained('companies', 'id')
                 ->cascadeOnDelete();
             $table->string('name');
+            $table->integer('is_threshold')->default(1); // 1 => straight, 2 => threshold
+            $table
+                ->foreignId('country_id')
+                ->nullable()
+                ->constrained('countries', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

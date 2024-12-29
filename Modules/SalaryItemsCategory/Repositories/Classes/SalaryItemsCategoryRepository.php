@@ -39,6 +39,13 @@ class SalaryItemsCategoryRepository extends BaseRepository implements SalaryItem
                         [1, 2]
                     )
                 )
+                ->when(
+                    ! is_null(request('country_wise_salary_items')),
+                    fn (Builder $builder) => $builder->whereNotIn(
+                        'id',
+                        [1, 2, 5]
+                    )
+                )
                 ->with($relations)
                 ->latest();
     }

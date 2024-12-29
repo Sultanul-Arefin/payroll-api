@@ -19,5 +19,10 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('salary-items-name');
         Route::post('salary-items', [SalaryItemsNameController::class, 'store'])
             ->name('salary-items-name-store');
+        Route::get('country-wise-salary-items', [SalaryItemsNameController::class, 'country_wise_salary_items'])->name('country-wise-salary-items');
+        Route::post('country-wise-salary-item', [SalaryItemsNameController::class, 'country_wise_salary_item'])
+            ->name('country_wise_salary_item');
+        Route::post('delete-country-wise-salary-item', [SalaryItemsNameController::class, 'delete_country_wise_salary_item'])
+            ->name('delete_country_wise_salary_item');
     });
 });
