@@ -119,6 +119,7 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request) : JsonResponse
     {
+
         if (! $request->has('wages')) {
             $request->merge(['wages' => null]);
         }
@@ -131,9 +132,18 @@ class UserController extends Controller
                 ]);
             }
 
+
+            if ($request->country_id == '100') {
+                $request->validate([
+                    'uan_no' => 'nullable|string|max:255',
+                    'pf_no' => 'nullable|string|max:255',
+                    'esi_no' => 'nullable|string|max:255',
+                ]);
+            }
+
+
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
-
                 $user = $this->user_repo->create([
                     'designation_id' => $request->designation_id,
                     'assign_to' => $request->assign_to,
@@ -172,6 +182,10 @@ class UserController extends Controller
                     'attendance_type' => $request->attendance_type == UserDetails::MACHINE_ATTENDANCE ? UserDetails::MACHINE_ATTENDANCE : UserDetails::WEB_ATTENDANCE,
                     'state' => $request->state ?? $request->state,
                     'region' => $request->region ?? $request->region,
+                    'uan_no'    =>$request->uan_no ?? $request->uan_no,
+                    'pf_no'    =>$request->pf_no ?? $request->pf_no,
+                    'esi_no'    =>$request->esi_no ?? $request->esi_no,
+
                 ]);
 
                 //file one
@@ -261,6 +275,7 @@ class UserController extends Controller
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email" : 'Mail could not sent',
             status: 'success'
+
         );
     }
 
@@ -446,6 +461,21 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
+
+        if ($request->country_id == '232') {
+            $request->validate([
+                'state' => 'required|string|max:255',
+                'region' => 'required|string|max:255',
+            ]);
+        }
+
+        if ($request->country_id == '100') {
+            $request->validate([
+                'uan_no' => 'nullable|string|max:255',
+                'pf_no' => 'nullable|string|max:255',
+                'esi_no' => 'nullable|string|max:255',
+            ]);
+        }
       //  DB::transaction(function () use ($request, $user) {
 
             $user_details = UserDetails::where('user_id', $user->id)->first();
@@ -492,6 +522,9 @@ class UserController extends Controller
                 'attendance_type' => $request->attendance_type ?? $user->user_details->attendance_type,
                 'state' => $request->state ?? $user->user_details->state ,
                 'region' => $request->region ?? $user->user_details->region,
+                'uan_no'    =>$request->uan_no ?? $request->uan_no,
+                'pf_no'    =>$request->pf_no ?? $request->pf_no,
+                'esi_no'    =>$request->esi_no ?? $request->esi_no,
             ]);
 
             $allFileArr = [];
