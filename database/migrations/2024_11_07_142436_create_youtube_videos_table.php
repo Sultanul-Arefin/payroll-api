@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('page_title');
             $table->string('page_slug');
             $table->string('video_link');
+            $table->string('white_label')->nullable();
             $table->timestamps();
         });
     }
