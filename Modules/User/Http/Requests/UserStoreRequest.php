@@ -35,7 +35,7 @@ class UserStoreRequest extends FormRequest
             'overtime_rate' => 'required',
             'double_overtime_rate' => 'required',
             'recuperated_hour' => 'required',
-            'user_image' => 'mimes:jpg,jpeg,png|max:2048',
+            'user_image' => 'nullable|mimes:jpg,jpeg,png|max:2048',
             'contract_letter' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
             'national_id_card' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
             'cv' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
