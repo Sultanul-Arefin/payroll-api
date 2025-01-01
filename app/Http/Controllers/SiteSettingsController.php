@@ -9,10 +9,11 @@ class SiteSettingsController extends Controller
 {
     public function index()
     {
+        $domain = request('domain');
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-          CURLOPT_URL => env('ADMIN_APP_URL').'/api/v1/site-settings',
+          CURLOPT_URL => env('ADMIN_APP_URL')."/api/v1/site-settings?domain={$domain}",
           CURLOPT_RETURNTRANSFER => true,
           CURLOPT_ENCODING => '',
           CURLOPT_MAXREDIRS => 10,
