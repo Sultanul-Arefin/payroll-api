@@ -331,10 +331,23 @@ class PayslipService
                                 ->where('is_general', 1);
                         });
             })
-            ->sum('amount');
+            ->get();
         $categoryOneAmount = $this->getCategoryIdOneAmount(1);
-        $threshold = $categoryOneAmount * ($threshold / 100);
-        return round($straight + $threshold, 2);
+        $threshold_value = 0;
+        foreach($threshold as $value){
+            $percentage_amount = $value->amount; // get the percentage value
+            $threshold_details = $value->threshold_details; // get threshold details to check if the wages is between the details
+            if($threshold_details)
+            {
+                $start_percentage_after = $threshold_details->start_percentage_after;
+                $end_percentage_at = $threshold_details->end_percentage_at;
+
+                if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
+                    $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                }
+            }
+        }
+        return round($straight + $threshold_value, 2);
     }
 
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
