@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Services;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Modules\Attendance\Entities\Attendance;
@@ -332,7 +333,7 @@ class PayslipService
                         });
             })
             ->get();
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id);
         $threshold_value = 0;
         foreach($threshold as $value){
             $percentage_amount = $value->amount; // get the percentage value
@@ -772,7 +773,8 @@ class PayslipService
                           });
                 })
                 ->get();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+            $company = User::where('id', request('employee_id'))->first();
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id);
             $threshold_value = 0;
             foreach($threshold as $value){
                 $percentage_amount = $value->amount; // get the percentage value
@@ -811,7 +813,7 @@ class PayslipService
         }
     }
 
-    public function getCategoryIdOneAmount($category_id){
+    public function getCategoryIdOneAmount($category_id, $company_id){
         $amount = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
@@ -823,7 +825,7 @@ class PayslipService
                         );
                 }
             )
-            ->where('company_id', auth()->user()->company_id)
+            ->where('company_id', $company_id)
             ->where('employee_id', request('employee_id'))
             ->get()->sum('amount');
         if($amount <= 0){
