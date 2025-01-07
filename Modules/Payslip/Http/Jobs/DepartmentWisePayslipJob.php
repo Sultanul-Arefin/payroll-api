@@ -53,9 +53,9 @@ class DepartmentWisePayslipJob implements ShouldQueue
                 'company_id' => $this->auth_user->company_id
             ]);
             app(PayslipController::class)->run_payslip($request);
-            dump($user->id);
+            // dump($user->id);
         }
-        dump($this->auth_user->company_id);
+        // dump($this->auth_user->company_id);
         // dump([1,2,3,4]);
     }
 }
