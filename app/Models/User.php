@@ -67,6 +67,8 @@ class User extends Authenticatable
         'role_id',
         'customer_id',
         'employee_type',
+        'national_tax',
+        'regional_tax'
     ];
 
     /**
