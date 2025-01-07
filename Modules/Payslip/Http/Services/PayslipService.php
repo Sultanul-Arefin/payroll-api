@@ -333,7 +333,7 @@ class PayslipService
                         });
             })
             ->get();
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id);
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
         $threshold_value = 0;
         foreach($threshold as $value){
             $percentage_amount = $value->amount; // get the percentage value
@@ -774,7 +774,7 @@ class PayslipService
                 })
                 ->get();
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id);
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
             $threshold_value = 0;
             foreach($threshold as $value){
                 $percentage_amount = $value->amount; // get the percentage value
@@ -813,7 +813,7 @@ class PayslipService
         }
     }
 
-    public function getCategoryIdOneAmount($category_id, $company_id){
+    public function getCategoryIdOneAmount($category_id, $company_id, $employee_id){
         $amount = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
@@ -826,11 +826,11 @@ class PayslipService
                 }
             )
             ->where('company_id', $company_id)
-            ->where('employee_id', request('employee_id'))
+            ->where('employee_id', $employee_id)
             ->get()->sum('amount');
         if($amount <= 0){
             $hourly_amount = EmployeeSalaryItem::query()
-                ->where('employee_id', request('employee_id'))
+                ->where('employee_id', $employee_id)
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) {
                         $builder
