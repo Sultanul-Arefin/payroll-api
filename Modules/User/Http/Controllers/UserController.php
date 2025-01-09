@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Department\Entities\Department;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Entities\UserAttachment;
@@ -28,6 +29,7 @@ use Modules\User\Jobs\UserCreateMailJob;
 use Modules\User\Notifications\UserCreatedNotificationToAdmin;
 use Modules\User\Notifications\UserCreatedNotificationToUser;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
+use Spatie\Activitylog\Contracts\Activity;
 
 class UserController extends Controller
 {
@@ -185,8 +187,9 @@ class UserController extends Controller
                     'uan_no'    =>$request->uan_no ?? $request->uan_no,
                     'pf_no'    =>$request->pf_no ?? $request->pf_no,
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
-
                 ]);
+
+                $log_designation_department_salary = $this->storeActivityLog($user, $request->all());
 
                 //file one
                 if ($request->hasFile('contract_letter')) {
@@ -277,6 +280,44 @@ class UserController extends Controller
             status: 'success'
 
         );
+    }
+
+    public function storeActivityLog($user, $request)
+    {
+        // activity log designation
+        $department = Department::where('id', $request['department_id'])->first();
+
+        $activity = activity()
+            ->causedBy(auth()->user())
+            ->performedOn($user)
+            ->withProperties([
+                "title" => "Designation Added",
+                "description" => "{$user->name} designation is added to {$department->department_name} by auth()->user()->name",
+                "action_by" => [
+                    "name" => auth()->user()->name,
+                    "email" => auth()->user()->email,
+                    "phone" => auth()->user()->phone
+                ],
+                "type" => "designation"
+            ])
+            ->log('designation');
+
+
+        // activity log salary
+        $activity = activity()
+            ->causedBy(auth()->user())
+            ->performedOn($user)
+            ->withProperties([
+                "title" => "Salary Added",
+                "description" => "{$user->name} salary is added {$request['wages']} by auth()->user()->name",
+                "action_by" => [
+                    "name" => auth()->user()->name,
+                    "email" => auth()->user()->email,
+                    "phone" => auth()->user()->phone
+                ],
+                "type" => "salary"
+            ])
+            ->log('salary');
     }
 
     public function add_salary_items($salary_items, $employee_id)
@@ -488,6 +529,9 @@ class UserController extends Controller
                 }
                 $user_image = $this->imageUpload($request, UserDetails::USER_IMAGE_PATH);
             }
+
+            $log_designation_department_salary = $this->updateActivityLog($user, $request->all());
+
             $user_update = $this->user_repo->update($user->id, [
                 'name' => $request->name ?? $user->name,
                 'email' => $request->email ?? $user->email,
@@ -589,6 +633,59 @@ class UserController extends Controller
             message: 'Employee Profile Successfully Updated',
             status: 'success'
         );
+    }
+
+    public function updateActivityLog($user, $request)
+    {
+        // activity log designation
+        $department = Department::where('id', $request['department_id'])->first();
+
+        if($user->department_id != $request['department_id']){
+            $old_department = Department::where('id', $user->department_id)->first();
+            $activity = activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties([
+                    "title" => "Designation Updated",
+                    "description" => "{$user->name} designation is updated to {$department->department_name} from {$old_department} by auth()->user()->name",
+                    "action_by" => [
+                        "name" => auth()->user()->name,
+                        "email" => auth()->user()->email,
+                        "phone" => auth()->user()->phone
+                    ],
+                    "type" => "designation"
+                ])
+                ->log('designation');
+        }
+
+
+        // activity log salary
+        $wages = EmployeeSalaryItem::query()
+                ->where('employee_id', $user->id)
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Wages')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->sum('amount');
+        if($wages != $request['wages']){
+            $activity = activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties([
+                    "title" => "Salary Updated",
+                    "description" => "{$user->name} salary is updated to {$request['wages']} from {$wages} by auth()->user()->name",
+                    "action_by" => [
+                        "name" => auth()->user()->name,
+                        "email" => auth()->user()->email,
+                        "phone" => auth()->user()->phone
+                    ],
+                    "type" => "salary"
+                ])
+                ->log('salary');
+        }
     }
 
     public function validate_employee_email(Request $request)
