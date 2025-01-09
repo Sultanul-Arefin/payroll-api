@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Department\Entities\Department;
+use Modules\Designation\Entities\Designation;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Entities\UserAttachment;
@@ -285,14 +286,14 @@ class UserController extends Controller
     public function storeActivityLog($user, $request)
     {
         // activity log designation
-        $department = Department::where('id', $request['department_id'])->first();
+        $designation = Designation::where('id', $request['designation_id'])->first();
 
         $activity = activity()
             ->causedBy(auth()->user())
             ->performedOn($user)
             ->withProperties([
                 "title" => "Designation Added",
-                "description" => "{$user->name} designation is added to {$department->department_name} by auth()->user()->name",
+                "description" => "{$user->name} designation is added to {$designation->name} by auth()->user()->name",
                 "action_by" => [
                     "name" => auth()->user()->name,
                     "email" => auth()->user()->email,
@@ -638,16 +639,16 @@ class UserController extends Controller
     public function updateActivityLog($user, $request)
     {
         // activity log designation
-        $department = Department::where('id', $request['department_id'])->first();
+        $designation = Designation::where('id', $request['designation_id'])->first();
 
-        if($user->department_id != $request['department_id']){
-            $old_department = Department::where('id', $user->department_id)->first();
+        if($user->designation_id != $request['designation_id']){
+            $old_designation = Designation::where('id', $user->designation_id)->first();
             $activity = activity()
                 ->causedBy(auth()->user())
                 ->performedOn($user)
                 ->withProperties([
                     "title" => "Designation Updated",
-                    "description" => "{$user->name} designation is updated to {$department->department_name} from {$old_department} by auth()->user()->name",
+                    "description" => "{$user->name} designation is updated to {$designation->name} from {$old_designation} by auth()->user()->name",
                     "action_by" => [
                         "name" => auth()->user()->name,
                         "email" => auth()->user()->email,
