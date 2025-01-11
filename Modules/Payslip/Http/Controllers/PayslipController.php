@@ -62,6 +62,7 @@ class PayslipController extends Controller
             'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
         $user = User::where('id', request('employee_id'))->first();
+        return $user->salary_items;
 
         return apiResponse(
             data: $user->salary_items?->map(function ($s_items) {
