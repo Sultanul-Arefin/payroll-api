@@ -130,7 +130,8 @@ class User extends Authenticatable
                     $query->where('employee_id', $this->id) // Get items where employee_id matches user id
                           ->orWhere(function ($query) {
                               $query->whereNull('employee_id') // Get items where employee_id is null
-                                    ->where('is_general', 1); // and is_general is 1
+                                    ->where('is_general', 1) // and is_general is 1
+                                    ->where('company_id', auth()->user()->company_id);
                           });
                 });
     }
