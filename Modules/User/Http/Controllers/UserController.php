@@ -77,6 +77,7 @@ class UserController extends Controller
         $user->designation_name = $user->designation?->name;
         $user->assign_to_name = $user->assign_to_user?->name;
         $user->user_attachments = $user->user_attachments;
+        $user->company_name = $user?->company?->company_name;
         $items = SalaryItemsName::query()
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
                 $builder->where('employee_id', $user->id);
