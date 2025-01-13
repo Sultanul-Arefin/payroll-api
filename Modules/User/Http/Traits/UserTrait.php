@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Activitylog\Models\Activity;
 
 trait UserTrait
 {
@@ -169,6 +170,20 @@ trait UserTrait
                     'contacted_name' => auth()->user()->name
                 ]
             ]
+        );
+    }
+
+    public function activity_logs(User $user)
+    {
+        $activity_logs = Activity::query()
+                    ->where('subject_id', $user->id)
+                    ->where(function($query){
+                        $query->where('description', 'salary')
+                                ->orWhere('description', 'designation');
+                    })
+                    ->get();
+        return apiResponse(
+            data: $activity_logs
         );
     }
 }

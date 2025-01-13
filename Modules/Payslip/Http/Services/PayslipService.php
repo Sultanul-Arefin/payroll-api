@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Services;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Modules\Attendance\Entities\Attendance;
@@ -331,10 +332,23 @@ class PayslipService
                                 ->where('is_general', 1);
                         });
             })
-            ->sum('amount');
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1);
-        $threshold = $categoryOneAmount * ($threshold / 100);
-        return round($straight + $threshold, 2);
+            ->get();
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
+        $threshold_value = 0;
+        foreach($threshold as $value){
+            $percentage_amount = $value->amount; // get the percentage value
+            $threshold_details = $value->threshold_details; // get threshold details to check if the wages is between the details
+            if($threshold_details)
+            {
+                $start_percentage_after = $threshold_details->start_percentage_after;
+                $end_percentage_at = $threshold_details->end_percentage_at;
+
+                if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
+                    $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                }
+            }
+        }
+        return round($straight + $threshold_value, 2);
     }
 
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
@@ -758,10 +772,24 @@ class PayslipService
                                     ->where('is_general', 1);
                           });
                 })
-                ->get()->sum('amount');
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
-            $threshold = $categoryOneAmount * ($threshold / 100);
-            return round($straight + $threshold, 2);
+                ->get();
+            $company = User::where('id', request('employee_id'))->first();
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+            $threshold_value = 0;
+            foreach($threshold as $value){
+                $percentage_amount = $value->amount; // get the percentage value
+                $threshold_details = $value->threshold_details; // get threshold details to check if the wages is between the details
+                if($threshold_details)
+                {
+                    $start_percentage_after = $threshold_details->start_percentage_after;
+                    $end_percentage_at = $threshold_details->end_percentage_at;
+
+                    if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
+                        $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                    }
+                }
+            }
+            return round($straight + $threshold_value, 2);
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
@@ -785,7 +813,7 @@ class PayslipService
         }
     }
 
-    public function getCategoryIdOneAmount($category_id){
+    public function getCategoryIdOneAmount($category_id, $company_id, $employee_id){
         $amount = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
@@ -797,12 +825,12 @@ class PayslipService
                         );
                 }
             )
-            ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', request('employee_id'))
+            ->where('company_id', $company_id)
+            ->where('employee_id', $employee_id)
             ->get()->sum('amount');
         if($amount <= 0){
             $hourly_amount = EmployeeSalaryItem::query()
-                ->where('employee_id', request('employee_id'))
+                ->where('employee_id', $employee_id)
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) {
                         $builder

@@ -14,6 +14,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Department\Entities\Department;
+use Modules\Designation\Entities\Designation;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\SalaryItemsName\Entities\SalaryItemsName;
 use Modules\User\Entities\UserAttachment;
@@ -28,6 +30,7 @@ use Modules\User\Jobs\UserCreateMailJob;
 use Modules\User\Notifications\UserCreatedNotificationToAdmin;
 use Modules\User\Notifications\UserCreatedNotificationToUser;
 use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
+use Spatie\Activitylog\Contracts\Activity;
 
 class UserController extends Controller
 {
@@ -74,6 +77,7 @@ class UserController extends Controller
         $user->designation_name = $user->designation?->name;
         $user->assign_to_name = $user->assign_to_user?->name;
         $user->user_attachments = $user->user_attachments;
+        $user->company_name = $user?->company?->company_name;
         $items = SalaryItemsName::query()
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
                 $builder->where('employee_id', $user->id);
@@ -132,6 +136,10 @@ class UserController extends Controller
                 ]);
             }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
             if ($request->country_id == '100') {
                 $request->validate([
                     'uan_no' => 'nullable|string|max:255',
@@ -140,7 +148,11 @@ class UserController extends Controller
                 ]);
             }
 
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -164,7 +176,7 @@ class UserController extends Controller
                     'user_phone' => $request->user_phone,
                     'gender' => $request->gender,
                     'date_of_birth' => $request->date_of_birth,
-                    'joining_date' => $request->joining_date, 
+                    'joining_date' => $request->joining_date,
                     'payment_type' => $request->payment_type,
                     'bank_name' => $request->bank_name,
                     'bank_bic_or_swift_code' => $request->bank_bic_or_swift_code,
@@ -184,9 +196,14 @@ class UserController extends Controller
                     'uan_no'    =>$request->uan_no ?? $request->uan_no,
                     'pf_no'    =>$request->pf_no ?? $request->pf_no,
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
+<<<<<<< HEAD
                     'national_insurance_number' => $request->national_insurance_number ?? $request->national_insurance_number,
 
+=======
+>>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
                 ]);
+
+                $log_designation_department_salary = $this->storeActivityLog($user, $request->all());
 
                 //file one
                 if ($request->hasFile('contract_letter')) {
@@ -275,8 +292,46 @@ class UserController extends Controller
             data: null,
             message: $message ? "Successfully created user, you'll be notified shortly through email" : 'Mail could not sent',
             status: 'success'
-            
+
         );
+    }
+
+    public function storeActivityLog($user, $request)
+    {
+        // activity log designation
+        $designation = Designation::where('id', $request['designation_id'])->first();
+
+        $activity = activity()
+            ->causedBy(auth()->user())
+            ->performedOn($user)
+            ->withProperties([
+                "title" => "Designation Added",
+                "description" => "{$user->name} designation is added to {$designation->name} by auth()->user()->name",
+                "action_by" => [
+                    "name" => auth()->user()->name,
+                    "email" => auth()->user()->email,
+                    "phone" => auth()->user()->phone
+                ],
+                "type" => "designation"
+            ])
+            ->log('designation');
+
+
+        // activity log salary
+        $activity = activity()
+            ->causedBy(auth()->user())
+            ->performedOn($user)
+            ->withProperties([
+                "title" => "Salary Added",
+                "description" => "{$user->name} salary is added {$request['wages']} by auth()->user()->name",
+                "action_by" => [
+                    "name" => auth()->user()->name,
+                    "email" => auth()->user()->email,
+                    "phone" => auth()->user()->phone
+                ],
+                "type" => "salary"
+            ])
+            ->log('salary');
     }
 
     public function add_salary_items($salary_items, $employee_id)
@@ -488,6 +543,9 @@ class UserController extends Controller
                 }
                 $user_image = $this->imageUpload($request, UserDetails::USER_IMAGE_PATH);
             }
+
+            $log_designation_department_salary = $this->updateActivityLog($user, $request->all());
+
             $user_update = $this->user_repo->update($user->id, [
                 'name' => $request->name ?? $user->name,
                 'email' => $request->email ?? $user->email,
@@ -590,6 +648,59 @@ class UserController extends Controller
             message: 'Employee Profile Successfully Updated',
             status: 'success'
         );
+    }
+
+    public function updateActivityLog($user, $request)
+    {
+        // activity log designation
+        $designation = Designation::where('id', $request['designation_id'])->first();
+
+        if($user->designation_id != $request['designation_id']){
+            $old_designation = Designation::where('id', $user->designation_id)->first();
+            $activity = activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties([
+                    "title" => "Designation Updated",
+                    "description" => "{$user->name} designation is updated to {$designation->name} from {$old_designation} by auth()->user()->name",
+                    "action_by" => [
+                        "name" => auth()->user()->name,
+                        "email" => auth()->user()->email,
+                        "phone" => auth()->user()->phone
+                    ],
+                    "type" => "designation"
+                ])
+                ->log('designation');
+        }
+
+
+        // activity log salary
+        $wages = EmployeeSalaryItem::query()
+                ->where('employee_id', $user->id)
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Wages')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->sum('amount');
+        if($wages != $request['wages']){
+            $activity = activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties([
+                    "title" => "Salary Updated",
+                    "description" => "{$user->name} salary is updated to {$request['wages']} from {$wages} by auth()->user()->name",
+                    "action_by" => [
+                        "name" => auth()->user()->name,
+                        "email" => auth()->user()->email,
+                        "phone" => auth()->user()->phone
+                    ],
+                    "type" => "salary"
+                ])
+                ->log('salary');
+        }
     }
 
     public function validate_employee_email(Request $request)

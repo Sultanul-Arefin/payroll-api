@@ -28,6 +28,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('attach/store', [UserController::class, 'storeDocument'])->name('contract-document');
         Route::get('attach/delete/{id}', [UserController::class, 'deleteDocument']);
         Route::get('terminate-employee', [UserController::class, 'terminate_employee']);
+        Route::get('activity-logs/{user}', [UserController::class, 'activity_logs']);
 
         /**
          * User's Common Info

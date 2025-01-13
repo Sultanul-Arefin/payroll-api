@@ -70,7 +70,8 @@ class PayslipController extends Controller
                     'name' => $s_items->salaryItemsName?->name,
                     'hours_days' => $this->getHoursDaysCalculation($s_items),
                     'rate' => $this->getRateCalculation($s_items, $s_items->is_percentage),
-                    'amount' => $this->getAmountCalculation($s_items)
+                    'amount' => $this->getAmountCalculation($s_items),
+                    'base' => $s_items->id // salary item id
                 ];
             }),
             message: 'success',
@@ -175,6 +176,10 @@ class PayslipController extends Controller
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 7 || $salary_item->salaryItemsName->salaryItemsCategory->id == 8){
+            if($salary_item->is_percentage == 1)
+            {
+                return 'Emp: ' . $salary_item->deduction_details?->employee_amount . '%, Cmp_Or_Othrs: ' . $salary_item->deduction_details?->government_or_company_amount . '%';
+            }
             return 'Emp: ' . $salary_item->deduction_details?->employee_amount . ', Cmp_Or_Othrs: ' . $salary_item->deduction_details?->government_or_company_amount;
         }
         if($salary_item->is_percentage == 1){
@@ -183,7 +188,7 @@ class PayslipController extends Controller
         return $salary_item->amount;
     }
 
-    
+
     /**
      * Get All Salary Items to an Employee Ends
      */
@@ -224,7 +229,7 @@ class PayslipController extends Controller
             ],
         ]);
     }
-    
+
 
     public function run_payslip(Request $request)
     {
