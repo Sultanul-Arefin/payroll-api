@@ -34,6 +34,8 @@ return new class extends Migration
             $table->integer('staff_interaction_panel_status')->default(User::STAFF_INTERACTION_PANEL_NOT_GIVEN);
             $table->integer('role_id')->nullable();
             $table->string('customer_id')->nullable();
+            $table->string('national_tax')->nullable();
+            $table->string('regional_tax')->nullable();
             $table->integer('employee_type');
             $table->integer('company_id');
             $table->timestamp('email_verified_at')->nullable();

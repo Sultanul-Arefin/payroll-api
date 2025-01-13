@@ -35,8 +35,8 @@ class EmployeeSalaryItemsController extends Controller
         if ($check_category->salary_items_category_id == 5) {
             $request->validate([
                 'tax_type' => 'required|in:straight,threshold',
-                'start_percentage_after' => 'required_if:tax_type,threshold|integer',
-                'end_percentage_at' => 'nullable|integer'
+                'start_percentage_after' => 'required_if:tax_type,threshold',
+                'end_percentage_at' => 'nullable'
             ]);
         }
         $employee_salary = DB::transaction(function () use ($request, $check_category) {
@@ -48,7 +48,7 @@ class EmployeeSalaryItemsController extends Controller
                 'employee_id' => $request->employee_id ?? null,
                 'amount' => $request->amount ?? null,
             ]);
-            if ($check_category->salary_items_category_id == 5) {
+            if ($check_category->salary_items_category_id == 5 && $request->tax_type == "threshold") {
                 $create_deduction = ThresholdDetails::create([
                     'employee_salary_item_id' => $employee_salary->id,
                     'start_percentage_after' => $request->start_percentage_after,

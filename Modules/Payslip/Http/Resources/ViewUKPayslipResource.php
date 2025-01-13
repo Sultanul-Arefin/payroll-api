@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
+use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 
 class ViewUKPayslipResource extends JsonResource
@@ -34,7 +35,9 @@ class ViewUKPayslipResource extends JsonResource
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => 0.00,
             'total_net_pay' => $this->net_pay,
-            'overall_calculation' => $this->overall_calculation(),
+           // 'overall_calculation' => $this->overall_calculation(),
+            'year_to_date' => $this->getYearToDateCalculations(),
+        
         ];
     }
 
@@ -80,6 +83,29 @@ class ViewUKPayslipResource extends JsonResource
             'total_payslip_value' => $payslip_value
         ];
     }
+
+    public function getYearToDateCalculations()
+        {
+            $startOfYear = now()->startOfYear();
+            $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
+                                ->whereBetween('payment_date', [$startOfYear, $this->payment_date])
+                                ->get();
+
+            $yearToDateGrossPay = $yearToDatePayslips->sum('pay_due_before_deduction');
+
+            $yearToDateTaxableGross =$yearToDatePayslips->sum('gross_pay_before_tax');
+            $tax= $yearToDatePayslips->sum('tax_amount');
+            $yearToDateTotalTax = $yearToDatePayslips->sum(function ($payslip) {
+                return $payslip->tax_value + $payslip->post_tax_value;
+            });
+
+            return [
+                'gross_pay' => $yearToDateGrossPay,
+                'taxable_gross' => $yearToDateTaxableGross,
+                //'total_deductions' => $yearToDateTotalDeductions,
+                'total_tax' => $yearToDateTotalTax,
+            ];
+        }
 
     public function overall_calculation()
     {

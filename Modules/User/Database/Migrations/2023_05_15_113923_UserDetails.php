@@ -32,7 +32,11 @@ return new class extends Migration
             $table->string('pension_number')->nullable();
             $table->string('visa_number')->nullable();
             $table->string('work_permit_number')->nullable();
+            $table->string('uan_no')->nullable();
+            $table->string('pf_no')->nullable();
+            $table->string('esi_no')->nullable();
             $table->string('national_identity_number')->nullable();
+            $table->string('national_insurance_number')->nullable();
             $table->json('others_number')->nullable();
             $table->string('fax')->nullable();
             $table->string('passport')->nullable();
@@ -47,6 +51,7 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('region')->nullable();
             $table->timestamps();
+            
         });
 
     }

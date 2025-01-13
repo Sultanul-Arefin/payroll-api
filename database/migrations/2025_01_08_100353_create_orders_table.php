@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('youtube_videos', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('page_title');
-            $table->string('page_slug');
-            $table->string('video_link');
-            $table->string('white_label')->nullable();
+            $table->string('order_id')->unique();
+            $table->foreignId('customer_id')
+                ->constrained('users', 'id')
+                ->cascadeOnDelete();
+            $table->foreignId('package_id')
+                ->constrained('packages', 'id')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('youtube_videos');
+        Schema::dropIfExists('orders');
     }
 };

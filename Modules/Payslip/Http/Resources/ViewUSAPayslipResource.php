@@ -55,7 +55,10 @@ class ViewUSAPayslipResource extends JsonResource
         return [
             'annual_leave_quota' => $this->getAnnualLeaveQuota(),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id),
+            'sick_leave_quota' => $this->getSickLeaveQuota(),
+            'sick_leave_taken' => $this->getSickLeaveTaken($this->employee->id),
+            'remaining_sick_leave' => $this->getSickLeaveQuota() - $this->getSickLeaveTaken($this->employee->id),
         ];
     }
 
@@ -106,6 +109,50 @@ class ViewUSAPayslipResource extends JsonResource
             ->first();
         return $data->no_of_days;
     }
+
+    function getSickLeaveTaken($user_id): int
+{
+    $sick_leave_data = LeaveSalaryItems::query()
+        ->whereHas(
+            'salary_items_name',
+            function (Builder $builder) {
+                $builder
+                    ->where('name', 'Sick Leave')
+                    ->where('company_id', auth()->user()->company_id);
+            }
+        )
+        ->first();
+
+    $data = UserLeave::query()
+        ->where('user_id', $user_id)
+        ->where('leave_type', $sick_leave_data->salary_items_id)
+        ->where('status', UserLeave::APPROVED)
+        ->get();
+
+    $count = 0;
+    foreach ($data as $value) {
+        $details = UserLeaveDetail::query()
+            ->where('user_leaves_id', $value->id)
+            ->count();
+        $count += $details;
+    }
+    return $count;
+}
+
+function getSickLeaveQuota(): int
+{
+    $data = LeaveSalaryItems::query()
+        ->whereHas(
+            'salary_items_name',
+            function (Builder $builder) {
+                $builder
+                    ->where('name', 'Sick Leave')
+                    ->where('company_id', auth()->user()->company_id);
+            }
+        )
+        ->first();
+    return $data->no_of_days;
+}
 
     private function calculate_taxable_gross_pay()
     {
@@ -239,7 +286,7 @@ class ViewUSAPayslipResource extends JsonResource
             }
             return [
                 'payslip_details' => $payslip_details,
-                'total_payslip_value_employee' => $payslip_value
+                'total_payslip_value_employee' => $this->pay_due_before_deduction,
             ];
         }
 
