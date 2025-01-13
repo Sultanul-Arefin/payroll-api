@@ -461,7 +461,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','user_phone', 'joining_date', 'national_insurance_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','user_phone', 'joining_date','ni_category', 'national_insurance_number', 'tax_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],

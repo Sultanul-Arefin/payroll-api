@@ -57,6 +57,7 @@ class UserDetails extends Model
         'pf_no',
         'esi_no',
         'national_insurance_number',
+        'ni_category',
     ];
 
     protected static function newFactory()

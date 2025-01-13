@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('uan_no')->nullable();
             $table->string('pf_no')->nullable();
             $table->string('esi_no')->nullable();
+            $table->string('ni_category')->nullable();
             $table->string('national_identity_number')->nullable();
             $table->string('national_insurance_number')->nullable();
             $table->json('others_number')->nullable();
