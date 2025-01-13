@@ -136,10 +136,6 @@ class UserController extends Controller
                 ]);
             }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
             if ($request->country_id == '100') {
                 $request->validate([
                     'uan_no' => 'nullable|string|max:255',
@@ -147,12 +143,6 @@ class UserController extends Controller
                     'esi_no' => 'nullable|string|max:255',
                 ]);
             }
-
-<<<<<<< HEAD
-            
-=======
-
->>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -196,11 +186,7 @@ class UserController extends Controller
                     'uan_no'    =>$request->uan_no ?? $request->uan_no,
                     'pf_no'    =>$request->pf_no ?? $request->pf_no,
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
-<<<<<<< HEAD
                     'national_insurance_number' => $request->national_insurance_number ?? $request->national_insurance_number,
-
-=======
->>>>>>> 6e0ca2f91027dbd98140e1b9719dc2d658650156
                 ]);
 
                 $log_designation_department_salary = $this->storeActivityLog($user, $request->all());
