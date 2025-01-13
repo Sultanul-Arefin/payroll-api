@@ -133,7 +133,10 @@ class PayslipController extends Controller
             }
         }
 
-
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 7 || $salary_item->salaryItemsName->salaryItemsCategory->id == 8)
+        {
+            return $salary_item->amount;
+        }
         if($is_percentage==1){
             return $salary_item->amount . " %";
         }
