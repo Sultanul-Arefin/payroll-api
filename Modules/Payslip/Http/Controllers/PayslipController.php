@@ -21,6 +21,7 @@ use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
+use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
@@ -140,11 +141,11 @@ class PayslipController extends Controller
 
     function getAmountCalculation($salary_item)
     {
-        if ($salary_item->is_percentage == 1) {
-            // Assuming 'base_amount' is your gross pay or basic salary
-            $base_amount = $this->getBaseAmountForPercentage($salary_item);
-            return ($salary_item->amount / 100) * $base_amount;
-        }
+        // if ($salary_item->is_percentage == 1) {
+        //     // Assuming 'base_amount' is your gross pay or basic salary
+        //     $base_amount = $this->getBaseAmountForPercentage($salary_item);
+        //     return ($salary_item->amount / 100) * $base_amount;
+        // }
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
                 $hourly_amount = EmployeeSalaryItem::query()
@@ -455,7 +456,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','user_phone', 'joining_date', 'national_insurance_number', 'tax_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],
@@ -472,7 +473,7 @@ class PayslipController extends Controller
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
                 'payslip_info' => new ViewUKPayslipResource($payslip),
                 'others' => array_merge(
-                    $payslip->only(['id', 'payment_date'])
+                    $payslip->only(['id', 'payment_date',])
                 )
             ]
         );
@@ -534,6 +535,7 @@ class PayslipController extends Controller
                     ],
                     [
                         'month' => $payslip?->month,
+                        'year' =>$payslip->year,
                         'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
                     ],
                     [
@@ -546,6 +548,38 @@ class PayslipController extends Controller
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date','net_pay'])
                 )
+            ]
+        );
+    }
+
+    public function preview_african_payslip(Payslip $payslip)
+    {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' => 'CONTRACTUAL'
+        ];
+        return apiResponse(
+            data: [
+                'user_info' => array_merge(
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    [
+                        'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
+                    ],
+                    [
+                        'month' => $payslip?->month,
+                        'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
+                    ],
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name,
+                    ]
+                ),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'payslip_info' => new ViewAfricanPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );
     }

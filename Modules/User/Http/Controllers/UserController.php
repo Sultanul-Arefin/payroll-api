@@ -132,7 +132,6 @@ class UserController extends Controller
                 ]);
             }
 
-<<<<<<< HEAD
             if ($request->country_id == '100') {
                 $request->validate([
                     'uan_no' => 'nullable|string|max:255',
@@ -142,8 +141,6 @@ class UserController extends Controller
             }
 
             
-=======
->>>>>>> development
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -187,6 +184,7 @@ class UserController extends Controller
                     'uan_no'    =>$request->uan_no ?? $request->uan_no,
                     'pf_no'    =>$request->pf_no ?? $request->pf_no,
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
+                    'national_insurance_number' => $request->national_insurance_number ?? $request->national_insurance_number,
 
                 ]);
 
@@ -527,6 +525,7 @@ class UserController extends Controller
                 'uan_no'    =>$request->uan_no ?? $request->uan_no,
                 'pf_no'    =>$request->pf_no ?? $request->pf_no,
                 'esi_no'    =>$request->esi_no ?? $request->esi_no,
+                'national_insurance_number'=>$request->national_insurance_number ? $request->national_insurance_number : $user->user_details?->national_insurance_number,
             ]);
 
             $allFileArr = [];

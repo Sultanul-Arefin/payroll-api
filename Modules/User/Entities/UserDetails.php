@@ -19,6 +19,7 @@ class UserDetails extends Model
     public const UK_PAYSLIP = 3;
     public const USA_PAYSLIP = 4;
     public const INDIAN_PAYSLIP = 5;
+    public const AFRICAN_PAYSLIP = 6;
 
     public const WEB_ATTENDANCE = 1;
 
@@ -55,6 +56,7 @@ class UserDetails extends Model
         'uan_no',
         'pf_no',
         'esi_no',
+        'national_insurance_number',
     ];
 
     protected static function newFactory()
