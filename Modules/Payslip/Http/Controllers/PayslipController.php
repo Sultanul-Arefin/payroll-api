@@ -21,6 +21,7 @@ use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
+use Modules\Payslip\Http\Resources\LeavesDataResource;
 use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
@@ -48,6 +49,21 @@ class PayslipController extends Controller
             data: $request->all(),
             message: 'success',
             statusCode: 200
+        );
+    }
+
+    public function leaves_data(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d'
+        ]);
+
+        $user = User::where('id', $request->employee_id)->firstOrFail();
+
+        return apiResponse(
+            data: new LeavesDataResource($user)
         );
     }
 
