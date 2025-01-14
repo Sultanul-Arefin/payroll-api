@@ -17,20 +17,26 @@ use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
 class ViewIndianPayslipResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  Request  $request
+     * @return array|Arrayable|JsonSerializable
+     */
     public function toArray($request)
     {
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
-            'total_earnings' => $this->pay_due_before_deduction,
-            'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
+            'deduction_details' => $this->get_deduction_details(),
+            'payment_date' => $this->payment_date,
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => 0, // additional pay goes here
-            'wage_deduction' => $this->leave_deduction,
-            'total_fixed_pay' => $this->wages - $this->leave_deduction,
+            'additional_pay' => $this->taxable_allowance,
+            'wage_deduction' => $this->taxable_allowance,
+            'total_fixed_pay' => $this->taxable_allowance,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
             'total_gross_pay' => $this->gross_pay_before_tax,
-            'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+            'taxable_gross_pay' => $this->gross_pay_before_tax,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
@@ -52,63 +58,12 @@ class ViewIndianPayslipResource extends JsonResource
 
     public function get_annual_leave_calculation($employee)
     {
-        return [
-            'annual_leave_quota' => $this->getAnnualLeaveQuota(),
-            'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-        ];
-    }
-
-    function getAnnualLeaveTaken($user_id): int {
-        $annual_leave_data = LeaveSalaryItems::query()
-            ->whereHas(
-                'salary_items_name', function(Builder $builder){
-                    $builder
-                    ->where(
-                        'name',
-                        'Annual Leave',
-                    )->where(
-                        'company_id',
-                        auth()->user()->company_id
-                    );
-                }
-            )
-            ->first();
-        $data = UserLeave::query()
-                ->where('user_id', $user_id)
-                ->where('leave_type', $annual_leave_data->salary_items_id)
-                ->where('status', UserLeave::APPROVED)
-                ->get();
-        $count = 0;
-        foreach($data as $value){
-            $details = UserLeaveDetail::query()
-                ->where('user_leaves_id', $value->id)
-                ->count();
-            $count += $details;
-        }
-        return $count;
-    }
-
-    function getAnnualLeaveQuota(): int {
-        $data = LeaveSalaryItems::query()
-            ->whereHas(
-                'salary_items_name', function(Builder $builder){
-                    $builder
-                    ->where(
-                        'name',
-                        'Annual Leave'
-                    )->where(
-                        'company_id',
-                        auth()->user()->company_id
-                    );
-                }
-            )
-            ->first();
-        return $data->no_of_days;
-    }
-
-            public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-        { 
+        $deduction_details = PayslipDetailsForDeduction::query()
+                        ->where('payslip_id', $this->id)
+                        ->get();
+        $deduction_value = 0;
+        foreach($deduction_details as $dv)
+        {
                 if (!$from_date) {
                     $from_date = $this->first_date;
                 }
@@ -246,10 +201,10 @@ class ViewIndianPayslipResource extends JsonResource
             unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->amount, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
        // return $payslip_details;
-       return [
-        'payslip_details' => $payslip_details,
-        //'total_earnings' => $payslip_value
-    ];
+        return [
+            'payslip_details' => $payslip_details,
+            'total_payslip_value' => $payslip_value
+        ];
     }
 
     public function overall_calculation()
