@@ -4,6 +4,7 @@ namespace Modules\User\Http\Resources;
 
 use App\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
@@ -36,7 +37,7 @@ class UserResource extends JsonResource
             'user_image' => $this->user_details?->changed_user_image,
             'attachments' => new UserAttachmentResource($this->whenLoaded('user_attachment')),
             'is_editable' => auth()->user()->role_id === User::ADMIN ? 1 : 0,
-            'payment_type' => $this->getPaymentType()
+            'pay_frequency' => $this->getPaymentType()
         ];
     }
 
