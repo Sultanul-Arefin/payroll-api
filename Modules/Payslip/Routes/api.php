@@ -5,6 +5,7 @@ use Modules\Payslip\Http\Controllers\PayslipController;
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('request-for-payslip', [PayslipController::class, 'request_for_payslip']);
+        Route::post('leaves-data', [PayslipController::class, 'leaves_data']);
         Route::get('employee-salary-items', [PayslipController::class, 'employee_salary_items']);
         Route::get('employee-salary-items-calculation', [PayslipController::class, 'employee_salary_items_calculation']);
         Route::post('run-payslip', [PayslipController::class, 'run_payslip'])
