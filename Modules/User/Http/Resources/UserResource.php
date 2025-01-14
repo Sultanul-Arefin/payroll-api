@@ -55,7 +55,7 @@ class UserResource extends JsonResource
                 }
             )
             ->where('company_id', auth()->user()->company_id)
-            ->where('employee_id', auth()->user()->id)
+            ->where('employee_id', $this->id)
             ->get()->sum('amount');
         if($amount > 0){
             return "Monthly";
