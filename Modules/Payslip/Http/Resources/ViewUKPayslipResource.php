@@ -22,7 +22,7 @@ class ViewUKPayslipResource extends JsonResource
     {
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
-            //'deduction_details' => $this->get_deduction_details(),
+            'deduction_details' => $this->get_deduction_details(),
             'payment_date' => $this->payment_date,
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
@@ -50,31 +50,31 @@ class ViewUKPayslipResource extends JsonResource
         ];
     }
 
-    // public function get_deduction_details()
-    // {
-    //     $deduction_details = PayslipDetailsForDeduction::query()
-    //                     ->where('payslip_id', $this->id)
-    //                     ->get();
-    //     $deduction_value = 0;
-    //     foreach($deduction_details as $dv)
-    //     {
-    //         $dv->pay_details = $dv->salary_item_name?->name;
-    //         $dv->title = $dv->title;
-    //         $dv->employee_amount = $dv->employee_amount;
-    //         $dv->government_or_company_amount = $dv->government_or_company_amount;
+    public function get_deduction_details()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                        ->where('payslip_id', $this->id)
+                        ->get();
+        $deduction_value = 0;
+        foreach($deduction_details as $dv)
+        {
+            $dv->pay_details = $dv->salary_item_name?->name;
+            $dv->title = $dv->title;
+            $dv->employee_amount = $dv->employee_amount;
+            $dv->government_or_company_amount = $dv->government_or_company_amount;
 
-    //         // deduction_calculation
-    //         $deduction_value += $dv->employee_amount;
+            // deduction_calculation
+            $deduction_value += $dv->employee_amount;
 
-    //         unset($dv->payslip_id, $dv->salary_item_id, $dv->created_at, $dv->updated_at, $dv->pay_details, $dv->salary_item_name, $dv->id);
-    //     }
+            unset($dv->payslip_id, $dv->salary_item_id, $dv->created_at, $dv->updated_at, $dv->pay_details, $dv->salary_item_name, $dv->id);
+        }
 
-    //     return [
-    //         //'title' => $value?->salary_item_name?->name,
-    //         'deduction_details' => $deduction_details,
-    //         'total_deduction_value' => $deduction_value
-    //     ];
-    // }
+        return [
+            //'title' => $value?->salary_item_name?->name,
+            'deduction_details' => $deduction_details,
+            'total_deduction_value' => $deduction_value
+        ];
+    }
 
     public function get_other_deduction()
     {

@@ -41,6 +41,7 @@ class ViewUSAPayslipResource extends JsonResource
             //'staff_social_charges' => 0.00,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'other_deduction_summary' => $this->get_other_deduction(),
+            'deduction_tex' => $this->get_social_deduction(),
             'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
             'overall_calculation' => $this->overall_calculation(),
             'summary' => [
@@ -48,6 +49,32 @@ class ViewUSAPayslipResource extends JsonResource
             ],
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
+    }
+
+    public function get_social_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 8);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
+                            return $deduction_details;
+        $response = [];
+        foreach($deduction_details as $value)
+        {
+            array_push($response, [
+                'title' => $value?->salary_item_name?->name,
+                'base' => $this->wages,
+                'employee_rate' => $value->employee_amount,
+                'tax_value' => $value->tax_value,
+                'company_rate' => $value->government_or_company_amount,
+                'company_amount' => $value->government_or_company_amount
+            ]);
+        }
+        return $response;
     }
 
     public function get_annual_leave_calculation($employee)
