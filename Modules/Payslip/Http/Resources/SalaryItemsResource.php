@@ -36,8 +36,8 @@ class SalaryItemsResource extends JsonResource
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
                 // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
-                $hours_worked = request('working_hours');
-                return number_format($hours_worked, 2) . " hours";
+                $hours_worked = (int)request('working_hours');
+                return round($hours_worked, 2) . " hours";
             }
             return "1 month";
         }
@@ -96,7 +96,7 @@ class SalaryItemsResource extends JsonResource
                         }
                     )
                     ->first('amount');
-                $hours_worked = request('working_hours');
+                $hours_worked = (int)request('working_hours');
                 // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
                 if($hours_worked < 0){
                     $employee_associated_amount = 0;

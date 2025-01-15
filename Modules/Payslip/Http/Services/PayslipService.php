@@ -149,7 +149,7 @@ class PayslipService
     {
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                return round(request('working_hours'), 2) . " hours";
+                return round((int)request('working_hours'), 2) . " hours";
             }
         }
         return "1 month";
@@ -159,7 +159,7 @@ class PayslipService
     {
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                $hours_worked = request('working_hours');
+                $hours_worked = (int)request('working_hours');
                 $hourly_amount = EmployeeSalaryItem::query()
                     ->where('employee_id', request('employee_id'))
                     ->whereHas(
@@ -229,7 +229,7 @@ class PayslipService
                     }
                 )
                 ->first('amount');
-            $hours_worked = request('working_hours');
+            $hours_worked = (int)request('working_hours');
             // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
             if($hours_worked < 0){
                 $employee_associated_amount = 0;
@@ -712,7 +712,7 @@ class PayslipService
                         }
                     )
                     ->first('amount');
-                $hours_worked = request('working_hours');
+                $hours_worked = (int)request('working_hours');
                 // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
                 if($hours_worked < 0){
                     $employee_associated_amount = 0;
