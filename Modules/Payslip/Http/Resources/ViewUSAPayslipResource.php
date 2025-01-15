@@ -31,7 +31,7 @@ class ViewUSAPayslipResource extends JsonResource
             'payment_date' => $this->payment_date,
             'fixed_pay_details' => $this->wages,
             'additional_pay' => $this->taxable_allowance,
-            'wage_deduction' => $this->taxable_allowance,
+            'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => $this->taxable_allowance,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
