@@ -22,6 +22,7 @@ use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
 use Modules\Payslip\Http\Resources\LeavesDataResource;
+use Modules\Payslip\Http\Resources\SalaryItemsResource;
 use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
@@ -79,6 +80,12 @@ class PayslipController extends Controller
             'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
         $user = User::where('id', request('employee_id'))->first();
+
+        return apiResponse(
+            data: SalaryItemsResource::collection(
+                $user->salary_items
+            )
+        );
 
         return apiResponse(
             data: $user->salary_items?->map(function ($s_items) {
