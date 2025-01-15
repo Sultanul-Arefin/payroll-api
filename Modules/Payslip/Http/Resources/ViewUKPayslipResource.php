@@ -43,6 +43,7 @@ class ViewUKPayslipResource extends JsonResource
             'other_deduction' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
             'staff_social_charges' => 0.00,
+           'income_tax' => $this->getIncomeTax($this->payslip_details),
             'total_net_pay' => $this->net_pay,
            // 'overall_calculation' => $this->overall_calculation(),
             'year_to_date' => $this->getYearToDateCalculations(),
@@ -126,8 +127,11 @@ class ViewUKPayslipResource extends JsonResource
         return $response;
     }
 
+   
 
     public function get_payslip_details($payslip_details){
+
+        return $payslip_details;
         $payslip_value = 0;
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
@@ -145,6 +149,29 @@ class ViewUKPayslipResource extends JsonResource
             'total_payslip_value' => $payslip_value
         ];
     }
+
+    private function getIncomeTax($payslipDetails)
+{
+    $filteredDetails = [];
+    $totalAmount = 0;
+
+    foreach ($payslipDetails as $detail) {
+        if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
+            $filteredDetails[] = [
+                'pay_details' => $detail['pay_details'],
+                'base_amount_or_hours' => $detail['base_amount_or_hours'],
+                'rate' => $detail['rate'],
+            ];
+            $totalAmount += $detail['rate']; // Accumulate the total rate
+        }
+    }
+
+    return [
+        'filtered_details' => $filteredDetails,
+        'total_amount' => $totalAmount,
+        'total_cost'=>$totalAmount + $this->total_employee_deduction,
+    ];
+}
 
     // public function getYearToDateCalculations()
     //     {

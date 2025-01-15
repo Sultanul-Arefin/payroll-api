@@ -167,7 +167,7 @@ class ViewIndianPayslipResource extends JsonResource
                 'total_working_days' => $present_days,
                 //'annual_leave_days' => $annual_leave_days,
                 //'sick_leave_days' => $sick_leave_days,
-                'lop_days' => $unpaid_leave_days + $Absent_leave_days,
+                'lop_days' =>$Absent_leave_days,
                 'leaves_taken' => $approved_leave_days,
                 'paid_days' => $present_days + $approved_leave_days,
             ];
