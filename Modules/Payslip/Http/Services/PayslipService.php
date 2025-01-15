@@ -621,6 +621,41 @@ class PayslipService
         return $total_minutes;
     }
 
+    public function getSalaryItemAmount($name)
+    {
+        return EmployeeSalaryItem::query()
+                    ->where('employee_id', request('employee_id'))
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) use($name) {
+                            $builder
+                                ->where('name', $name)
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+    }
+
+    public function getCategoryOneOtherValues($category_id, $employee_id)
+    {
+        $overtime = null;
+        if(request('overtime')){
+            $overtime = (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate")->amount;
+        }
+        $double_overtime = null;
+        if(request('double_overtime')){
+            $double_overtime = (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate")->amount;
+        }
+        $bonus = null;
+        if(request('bonus')){
+            $bonus = (int)request('bonus') * $this->getSalaryItemAmount("Bonus")->amount;
+        }
+        return [
+            'overtime' => $overtime,
+            'double_overtime' => $double_overtime,
+            'bonus' => $bonus
+        ];
+    }
+
     // employee-salary-items-calculation
     public function getAmountForEmployee($category_id, $employee_id)
     {
@@ -687,6 +722,18 @@ class PayslipService
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif ($category_id == 1) {
+            $overtime = 0;
+            if(request('overtime')){
+                $overtime = (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate")->amount;
+            }
+            $double_overtime = 0;
+            if(request('double_overtime')){
+                $double_overtime = (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate")->amount;
+            }
+            $bonus = 0;
+            if(request('bonus')){
+                $bonus = (int)request('bonus') * $this->getSalaryItemAmount("Bonus")->amount;
+            }
             $amount = EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) {
@@ -719,9 +766,9 @@ class PayslipService
                 } else{
                     $employee_associated_amount = $hourly_amount->amount * $hours_worked;
                 }
-                return $employee_associated_amount;
+                return $employee_associated_amount + $overtime + $double_overtime + $bonus;
             }
-            return $amount;
+            return $amount + $overtime + $double_overtime + $bonus;
         } elseif($category_id == 2){
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
