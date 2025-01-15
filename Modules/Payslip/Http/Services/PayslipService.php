@@ -149,7 +149,7 @@ class PayslipService
     {
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                return round($this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date')), 2) . " hours";
+                return round(request('working_hours'), 2) . " hours";
             }
         }
         return "1 month";
