@@ -131,7 +131,7 @@ class ViewUKPayslipResource extends JsonResource
 
     public function get_payslip_details($payslip_details){
 
-        return $payslip_details;
+        
         $payslip_value = 0;
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
