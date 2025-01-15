@@ -64,6 +64,7 @@ class PayslipService
                 PayslipDetail::create([
                     'payslip_id' => $payslip_id,
                     'salary_item_id' => $value->salary_item_id,
+                    'base_amount_or_hours' => $this->getBaseAmountOrHours($value),
                     'amount' => $this->getAmountCalculation($value),
                     // 'amount' => $value->amount,
                 ]);
@@ -144,11 +145,38 @@ class PayslipService
         }
     }
 
+    function getBaseAmountOrHours($salary_item)
+    {
+        if($salary_item->salaryItemsName->name == "Wages"){
+            if($salary_item->amount <= 0){
+                return round($this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date')), 2) . " hours";
+            }
+        }
+        return "1 month";
+    }
+
     function getAmountCalculation($salary_item)
     {
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                return $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+                $hours_worked = request('working_hours');
+                $hourly_amount = EmployeeSalaryItem::query()
+                    ->where('employee_id', request('employee_id'))
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Ordinary Time Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+                if($hours_worked < 0){
+                    $employee_associated_amount = 0;
+                } else{
+                    $employee_associated_amount = $hourly_amount->amount * $hours_worked;
+                }
+                return round($employee_associated_amount, 2);
+                // return $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
             }
             return $salary_item->amount;
         }
