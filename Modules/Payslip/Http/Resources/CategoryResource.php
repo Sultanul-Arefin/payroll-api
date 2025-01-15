@@ -290,7 +290,7 @@ class CategoryResource extends JsonResource
                     }
                 )
                 ->first('amount');
-            $hours_worked = request('working_hours');
+            $hours_worked = (int)request('working_hours');
             // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
             if($hours_worked < 0){
                 $employee_associated_amount = 0;
