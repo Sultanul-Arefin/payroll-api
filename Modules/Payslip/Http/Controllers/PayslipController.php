@@ -257,6 +257,23 @@ class PayslipController extends Controller
         ]);
     }
 
+    public function getCategoryOneOtherValues($employee_id)
+    {
+        $overtime = 0;
+        if(request('overtime')){
+            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate")->amount;
+        }
+        $double_overtime = 0;
+        if(request('double_overtime')){
+            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate")->amount;
+        }
+        $bonus = 0;
+        if(request('bonus')){
+            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus")->amount;
+        }
+        return $overtime + $double_overtime + $bonus;
+    }
+
 
     public function run_payslip(Request $request)
     {
@@ -268,6 +285,7 @@ class PayslipController extends Controller
         ]);
 
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
+        $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
         if($request->company_id){
             $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
         } else{
@@ -329,7 +347,7 @@ class PayslipController extends Controller
             $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, auth()->user()->company_id);
         }
 
-        $total_pay = $get_basic - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic
+        $total_pay = ($get_basic + $get_category_one_other_values) - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic & other values
         $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
         $gross_pay_after_tax = $gross_pay_before_tax - ($get_income_taxes + $get_additional_taxes_tax_top_up); // have to deduct (income tax & additional taxes tax top up) from previous value
         $pay_due_before_deductions = $gross_pay_after_tax + $get_non_taxable_allowance; // have to add previous value with non taxable allowance
