@@ -60,7 +60,8 @@ class PayslipService
             })
             ->get();
         foreach ($employee_associated_amount as $value) {
-            if($this->getAmountCalculation($value) != 0){
+            // if($this->getAmountCalculation($value) != 0){
+            if($this->getAmountCalculation($value) >= 0){
                 PayslipDetail::create([
                     'payslip_id' => $payslip_id,
                     'salary_item_id' => $value->salary_item_id,
