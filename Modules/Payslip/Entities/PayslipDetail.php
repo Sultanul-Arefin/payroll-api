@@ -15,7 +15,8 @@ class PayslipDetail extends Model
         'payslip_id',
         'salary_item_id',
         'amount',
-        'base_amount_or_hours'
+        'base_amount_or_hours',
+        'rate'
     ];
 
     /**

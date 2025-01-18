@@ -67,7 +67,7 @@ class PayslipService
                     'salary_item_id' => $value->salary_item_id,
                     'base_amount_or_hours' => $this->getBaseAmountOrHours($value),
                     'amount' => $this->getAmountCalculation($value),
-                    // 'amount' => $value->amount,
+                    'rate' => $value->amount,
                 ]);
             }
         }
