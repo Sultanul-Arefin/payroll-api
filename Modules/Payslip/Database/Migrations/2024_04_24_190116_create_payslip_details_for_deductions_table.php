@@ -25,6 +25,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->double('employee_amount', 8, 2)->default(0.00);
             $table->double('government_or_company_amount', 8, 2)->default(0.00);
+            $table->string('employee_amount_rate')->default(0);
+            $table->string('government_or_company_amount_rate')->default(0);
             $table->timestamps();
         });
     }

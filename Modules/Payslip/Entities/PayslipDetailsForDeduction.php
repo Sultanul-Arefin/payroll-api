@@ -19,7 +19,9 @@ class PayslipDetailsForDeduction extends Model
         'payslip_id',
         'salary_item_id',
         'employee_amount',
-        'government_or_company_amount'
+        'government_or_company_amount',
+        'employee_amount_rate',
+        'government_or_company_amount_rate'
     ];
 
     public function salary_item_name(): BelongsTo

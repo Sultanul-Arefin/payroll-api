@@ -9,6 +9,7 @@ use Modules\Attendance\Entities\Attendance;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
+use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 
@@ -108,8 +109,10 @@ class PayslipService
                     PayslipDetailsForDeduction::create([
                         'payslip_id' => $payslip_id,
                         'salary_item_id' => $dv->employee_salary_item?->salary_item_id,
-                        'employee_amount' => $dv->employee_amount,
-                        'government_or_company_amount' => $dv->government_or_company_amount
+                        'employee_amount' => $this->payslipDetailsForDeductionAmount($payslip_id, $value->is_percentage, $dv->employee_amount),
+                        'government_or_company_amount' => $this->payslipDetailsForDeductionAmount($payslip_id, $value->is_percentage, $dv->government_or_company_amount),
+                        'employee_amount_rate' => $value->is_percentage == 1 ? $dv->employee_amount . " %" : $dv->employee_amount,
+                        'government_or_company_amount_rate' => $value->is_percentage == 1 ? $dv->government_or_company_amount . " %" : $dv->government_or_company_amount,
                     ]);
                 }
             }
@@ -138,12 +141,26 @@ class PayslipService
                     PayslipDetailsForDeduction::create([
                         'payslip_id' => $payslip_id,
                         'salary_item_id' => $dv->employee_salary_item?->salary_item_id,
-                        'employee_amount' => $dv->employee_amount,
-                        'government_or_company_amount' => $dv->government_or_company_amount
+                        'employee_amount' => $this->payslipDetailsForDeductionAmount($payslip_id, $value->is_percentage, $dv->employee_amount),
+                        // 'employee_amount' => $dv->employee_amount,
+                        'government_or_company_amount' => $this->payslipDetailsForDeductionAmount($payslip_id, $value->is_percentage, $dv->government_or_company_amount),
+                        'employee_amount_rate' => $value->is_percentage == 1 ? $dv->employee_amount . " %" : $dv->employee_amount,
+                        'government_or_company_amount_rate' => $value->is_percentage == 1 ? $dv->government_or_company_amount . " %" : $dv->government_or_company_amount,
                     ]);
                 }
             }
         }
+    }
+
+    public function payslipDetailsForDeductionAmount($payslip_id, $is_percentage, $amount)
+    {
+        $payslip = Payslip::where('id', $payslip_id)->first();
+        $taxable_gross_pay = $payslip->gross_pay_before_tax;
+
+        if($is_percentage == 1){
+            return round($taxable_gross_pay * ($amount / 100), 2);
+        }
+        return $amount;
     }
 
     function getBaseAmountOrHours($salary_item)
@@ -724,8 +741,19 @@ class PayslipService
                             );
                     }
                 )
-                ->get()
-                ->sum('employee_amount');
+                ->get();
+                // ->sum('employee_amount');
+
+            $employee_deduction_value = 0;
+            foreach($employee_deduction as $value)
+            {
+                $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+                if($value->employee_salary_item->is_percentage == 1){
+                    $employee_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+                } else{
+                    $employee_deduction_value += round($value->employee_amount, 2);
+                }
+            }
 
             // GET CATEGORY ID 8 DEDUCTION VALUE
             $other_complimentary_deduction = DeductionDetails::query()
@@ -745,9 +773,20 @@ class PayslipService
                             );
                     }
                 )
-                ->get()
-                ->sum('employee_amount');
-            return $employee_deduction + $other_complimentary_deduction;
+                ->get();
+                // ->sum('employee_amount');
+
+                $other_deduction_value = 0;
+                foreach($other_complimentary_deduction as $value)
+                {
+                    $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+                    if($value->employee_salary_item->is_percentage == 1){
+                        $other_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+                    } else{
+                        $other_deduction_value += round($value->employee_amount, 2);
+                    }
+                }
+            return $employee_deduction_value + $other_deduction_value;
         } elseif ($category_id == 8) {
             return [
                 'company_government_contribution' => 0.00,
