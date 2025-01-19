@@ -118,10 +118,10 @@ class ViewPayslipResource extends JsonResource
         {
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
-                'base' => $this->wages,
-                'employee_rate' => $value->employee_amount,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount,
+                'company_rate' => $value->government_or_company_amount_rate,
                 'company_amount' => $value->government_or_company_amount
             ]);
         }
@@ -143,11 +143,11 @@ class ViewPayslipResource extends JsonResource
         {
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
-                'base' => $this->wages,
-                'employee_rate' => $value->employee_amount,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->gross_pay_before_tax,
                 'employee_amount' => $value->employee_amount,
                 'company_rate' => $value->government_or_company_amount,
-                'company_amount' => $value->government_or_company_amount
+                'company_amount' => $value->government_or_company_amount_rate
             ]);
         }
         return $response;
