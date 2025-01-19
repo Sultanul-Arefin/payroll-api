@@ -31,9 +31,11 @@ class ViewPayslipResource extends JsonResource
             'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => $this->gross_pay_before_tax,
+            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
+            // 'total_gross_pay' => $this->gross_pay_before_tax,
             // 'taxable_gross_pay' => $this->gross_pay_before_tax, // this is added due to question from Nabila. Have to check the calculation again
-            'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance
+            // 'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
