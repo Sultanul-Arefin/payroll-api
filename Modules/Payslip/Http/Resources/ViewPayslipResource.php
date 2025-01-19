@@ -40,8 +40,8 @@ class ViewPayslipResource extends JsonResource
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
-            'social_decution' => $this->get_social_deduction(),
-            'other_decution' => $this->get_other_deduction(),
+            'social_deduction' => $this->get_social_deduction(),
+            'other_deduction' => $this->get_other_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
     }
@@ -146,8 +146,8 @@ class ViewPayslipResource extends JsonResource
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount,
-                'company_amount' => $value->government_or_company_amount_rate
+                'company_rate' => $value->government_or_company_amount_rate,
+                'company_amount' => $value->government_or_company_amount
             ]);
         }
         return $response;
