@@ -44,6 +44,8 @@ class ViewPayslipResource extends JsonResource
             'overall_calculation' => $this->overall_calculation(),
             'social_deduction' => $this->get_social_deduction(),
             'other_deduction' => $this->get_other_deduction(),
+            'total_social_deduction' => $this->get_total_social_deduction(),
+            'total_other_deduction' => $this->get_total_other_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
     }
@@ -153,6 +155,58 @@ class ViewPayslipResource extends JsonResource
             ]);
         }
         return $response;
+    }
+
+    public function get_total_other_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 8);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
+        $total = 0;
+        foreach($deduction_details as $value)
+        {
+            $total += $value->employee_amount + $value->government_or_company_amount;
+            // array_push($response, [
+            //     'title' => $value?->salary_item_name?->name,
+            //     'base' => $this->gross_pay_before_tax,
+            //     'employee_rate' => $value->employee_amount_rate,
+            //     'employee_amount' => $value->employee_amount,
+            //     'company_rate' => $value->government_or_company_amount_rate,
+            //     'company_amount' => $value->government_or_company_amount
+            // ]);
+        }
+        return $total;
+    }
+
+    public function get_total_social_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 7);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
+        $total = 0;
+        foreach($deduction_details as $value)
+        {
+            $total += $value->employee_amount + $value->government_or_company_amount;
+            // array_push($response, [
+            //     'title' => $value?->salary_item_name?->name,
+            //     'base' => $this->gross_pay_before_tax,
+            //     'employee_rate' => $value->employee_amount_rate,
+            //     'employee_amount' => $value->employee_amount,
+            //     'company_rate' => $value->government_or_company_amount_rate,
+            //     'company_amount' => $value->government_or_company_amount
+            // ]);
+        }
+        return $total;
     }
 
     public function get_staff_social_charges()
