@@ -26,7 +26,6 @@ class ViewUSAPayslipResource extends JsonResource
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'deduction_details' => $this->get_deduction_details(),
-            'total_deductions' => $this->calculateDeductionsAndTax(),
             'employee_id' =>$this->employee_id,
             'payment_date' => $this->payment_date,
             'fixed_pay_details' => $this->wages,
@@ -45,6 +44,8 @@ class ViewUSAPayslipResource extends JsonResource
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'other_deduction_summary' => $this->get_other_deduction(),
             'income_tax' => $this->getIncomeTaxAndCategoryDetails($this->payslip_details),
+            'total_deductions' => $this->total_employee_deduction,
+            'total_company_deduction' => $this->company_contribution,
             //'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
             //'overall_calculation' => $this->overall_calculation(),
             'total_net_pay' => $this->net_pay,
@@ -161,122 +162,73 @@ function getSickLeaveQuota(): int
             return $data->no_of_days;
         }
 
-    private function calculate_taxable_gross_pay()
-    {
-        $gross_pay = $this->pay_due_before_deduction;
-        
-        // Get other deductions (should return an array of deductions)
-        $other_deduction = $this->get_other_deduction();
-        
-        // Sum up all employee amounts in the other_deduction array
-        if (is_array($other_deduction)) {
-            $other_deduction_total = array_sum(array_column($other_deduction, 'employee_amount'));
-        } else {
-            $other_deduction_total = 0;
-        }
-
-        // Ensure taxable gross pay doesn't go negative
-        $taxable_gross_pay = max(0, $gross_pay - $other_deduction_total);
-        
-        return $taxable_gross_pay;
-    }
-    
+   
 
     public function get_other_deduction()
     {
         $deduction_details = PayslipDetailsForDeduction::query()
-                                ->whereHas(
-                                    'salary_item_name', function(Builder $builder){
-                                        $builder->where('salary_items_category_id', 8);  // Category 8 for deductions
-                                    }
-                                )
-                                ->where('payslip_id', $this->id)
-                                ->get();
-            
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 8);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
         $response = [];
+
         foreach($deduction_details as $value)
         {
-            $yearlyAmount = $this->getYearlyDeductionForItem($value->salary_item_name->id);
-                
-            // Return the necessary data as an array
+
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
                 'base' => $this->wages,
                 'employee_rate' => $value->employee_amount,
                 'employee_amount' => $value->employee_amount,
-                'yearly_employee_amount' => $yearlyAmount,
+                'company_rate' => $value->government_or_company_amount,
+                'company_amount' => $value->government_or_company_amount
             ]);
         }
+        return $response;
+
+    }
     
-    return $response;  // Returns an array of deductions
-}
-    
-        /**
-         * Calculate the yearly total of employee_amount for a specific deduction item (category 8).
-         *
-         * @param int $salaryItemId
-         * @return float
-         */
-        public function getYearlyDeductionForItem($salaryItemId)
-        {
-            // Define the start of the year
-            $startOfYear = now()->startOfYear();
-        
-            // Get the total employee_amount for the year for this employee for the specific salary item
-            return PayslipDetailsForDeduction::query()
-                        ->whereHas('salary_item_name', function (Builder $builder) use ($salaryItemId) {
-                            $builder->where('id', $salaryItemId)
-                                    ->where('salary_items_category_id', 8);
-                        })
-                        ->whereHas('payslip', function (Builder $query) use ($startOfYear) {
-                            $query->where('employee_id', $this->employee_id)
-                                ->whereBetween('payment_date', [$startOfYear, now()]);
-                        })
-                        ->sum('employee_amount');
-        }
         
 
         public function get_deduction_details()
         {
-            $deduction_details = PayslipDetailsForDeduction::query()
-                ->whereHas(
-                    'salary_item_name', function(Builder $builder){
-                        $builder->where('salary_items_category_id', 7);
-                    }
-                )
-                ->where('payslip_id', $this->id)
-                ->get();
+            
+                $deduction_details = PayslipDetailsForDeduction::query()
+                                    ->whereHas(
+                                        'salary_item_name', function(Builder $builder){
+                                            $builder->where('salary_items_category_id', 7);
+                                        }
+                                    )
+                                    ->where('payslip_id', $this->id)
+                                    ->get();
+                $response = [];
+                foreach($deduction_details as $value)
+                {
+                    array_push($response, [
+                        'title' => $value?->salary_item_name?->name,
+                        'base' => $this->wages,
+                        'employee_rate' => $value->employee_amount,
+                        'employee_amount' => $value->employee_amount,
+                        'company_rate' => $value->government_or_company_amount,
+                        'company_amount' => $value->government_or_company_amount
+                    ]);
+                }
+                return $response;
 
-                        
-            $deduction_value = 0;
-            $deduction_values=0;
+        }
+
         
-            foreach($deduction_details as $dv)
-            {
-                $dv->pay_details = $dv->salary_item_name?->name;
-                $dv->employee_amount = $dv->employee_amount;
-                $dv->government_or_company_amount = $dv->government_or_company_amount;
 
-            //deduction_calculation
-            $deEmployee=  $deduction_value += $dv->employee_amount;
-            $deEmployer=  $deduction_values += $dv->government_or_company_amount;
-                
-                unset($dv->salary_item, $dv->id, $dv->amount, $dv->created_at, $dv->updated_at, $dv->payslip_id, $dv->salary_item_id,$dv->pay_details);
-                //return $deduction_details;
-            }
-            return [
-                'deduction_details' => $deduction_details,
-                'total_deduction_value_employee' => $deEmployee ?? 0,
-                'total_deduction_valueEmployer' => $deEmployer ?? 0,
-                
-            ];
-        }
         public function get_staff_social_charges()
-        {
-            return PayslipDetailsForDeduction::query()
-                    ->where('payslip_id', $this->id)
-                    ->sum('employee_amount');
-        }
+                {
+                    return PayslipDetailsForDeduction::query()
+                            ->where('payslip_id', $this->id)
+                            ->sum('employee_amount');
+                }
 
         private function getIncomeTaxAndCategoryDetails($payslipDetails)
             {
@@ -297,6 +249,7 @@ function getSickLeaveQuota(): int
                 return [
                     'filtered_details' => $filteredDetails,
                     'total_amount' => $totalAmount,
+                    'total_deductions_tax'=>$totalAmount + $this->total_employee_deduction,
                 ];
             }
 
@@ -390,19 +343,7 @@ function getSickLeaveQuota(): int
                             ];
                         }
 
-        public function calculateDeductionsAndTax()
-                {
-                    $deductionDetails = $this->get_deduction_details();
-                    $incomeTaxDetails = $this->getIncomeTaxAndCategoryDetails($this->payslip_details);
-
-                    return [
-                        'total_deductions' => $deductionDetails['total_deduction_value_employee'] ?? 0,
-                        'total_income_tax' => $incomeTaxDetails['total_amount'] ?? 0,
-                        'combined_total' => 
-                            ($deductionDetails['total_deduction_value_employee'] ?? 0) + 
-                            ($incomeTaxDetails['total_amount'] ?? 0),
-                    ];
-                }
+        
 
     public function overall_calculation()
     {

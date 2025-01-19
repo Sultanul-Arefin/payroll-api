@@ -39,7 +39,7 @@ class ViewIndianPayslipResource extends JsonResource
             'social_decution' => $this->get_social_deduction(),
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
-            'total_company_deduction' => $this->get_total_company_deduction(),
+            'total_company_deduction' => $this->company_contribution,
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
             'attendance' => $this->getTotalAttendanceDays(
                 $this->employee->id,
@@ -189,10 +189,8 @@ class ViewIndianPayslipResource extends JsonResource
                                 ->where('payslip_id', $this->id)
                                 ->get();
             $response = [];
-            $total_company_amount = 0;
             foreach($deduction_details as $value)
             {
-                $total_company_amount += $value->government_or_company_amount;
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
                     'base' => $this->wages,
@@ -202,10 +200,7 @@ class ViewIndianPayslipResource extends JsonResource
                     'company_amount' => $value->government_or_company_amount
                 ]);
             }
-            return [
-                'deductions' => $response,
-                'total_company_amount' => $total_company_amount,
-            ];
+            return $response;
         }
     
         public function get_social_deduction()
@@ -219,10 +214,8 @@ class ViewIndianPayslipResource extends JsonResource
                                 ->where('payslip_id', $this->id)
                                 ->get();
             $response = [];
-            $total_company_amount = 0;
             foreach($deduction_details as $value)
             {
-                $total_company_amount += $value->government_or_company_amount;
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
                     'base' => $this->wages,
@@ -232,21 +225,10 @@ class ViewIndianPayslipResource extends JsonResource
                     'company_amount' => $value->government_or_company_amount
                 ]);
             }
-            return [
-                'deductions' => $response,
-                'total_company_amount' => $total_company_amount,
-            ];
+            return $response;
         }
     
-        public function get_total_company_deduction()
-    {
-        $other_deduction = $this->get_other_deduction();
-        $social_deduction = $this->get_social_deduction();
-    
-        $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
-    
-        return $total_company_amount;
-    }
+        
 
     public function get_staff_social_charges()
     {
