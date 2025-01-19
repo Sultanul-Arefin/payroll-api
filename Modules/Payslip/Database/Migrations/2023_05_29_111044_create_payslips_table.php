@@ -32,6 +32,7 @@ return new class extends Migration
             $table->double('hours_worked', 6, 2)->nullable(); // can store total 6 digits, 4 digits before point, & 2 after point
             // $table->double('amount', 8, 2); // can store total 8 digits, 6 digits before decimal, & 2 after decimal
             $table->double('wages', 8, 2); // wages_val -> basic/basic rate calculation with hour
+            $table->double('additional_pay', 8, 2)->default(0.00); // bonus/overtime/double overtime
             $table->double('leave_deduction', 8, 2)->default(0.00); // deduction_val -> leave related deduction calculation
             $table->double('total_pay_value', 8, 2); // total_pay_val -> wages - leave_deduction
             $table->double('taxable_allowance', 8, 2)->default(0.00); // allowance_val -> taxable allowance
