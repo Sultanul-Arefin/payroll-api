@@ -28,7 +28,7 @@ class ViewPayslipResource extends JsonResource
             'fixed_pay_details' => $this->wages,
             'additional_pay' => $this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
-            'total_fixed_pay' => $this->wages - $this->leave_deduction,
+            'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
             'total_gross_pay' => $this->gross_pay_before_tax,
