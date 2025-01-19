@@ -26,22 +26,26 @@ class ViewPayslipResource extends JsonResource
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => 0, // additional pay goes here
+            'additional_pay' => $this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
-            'total_fixed_pay' => $this->wages - $this->leave_deduction,
+            'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => $this->gross_pay_before_tax,
+            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
+            // 'total_gross_pay' => $this->gross_pay_before_tax,
             // 'taxable_gross_pay' => $this->gross_pay_before_tax, // this is added due to question from Nabila. Have to check the calculation again
-            'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance
+            // 'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
-            'social_decution' => $this->get_social_deduction(),
-            'other_decution' => $this->get_other_deduction(),
+            'social_deduction' => $this->get_social_deduction(),
+            'other_deduction' => $this->get_other_deduction(),
+            'total_social_deduction' => $this->get_total_social_deduction(),
+            'total_other_deduction' => $this->get_total_other_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
     }
@@ -118,10 +122,10 @@ class ViewPayslipResource extends JsonResource
         {
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
-                'base' => $this->wages,
-                'employee_rate' => $value->employee_amount,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount,
+                'company_rate' => $value->government_or_company_amount_rate,
                 'company_amount' => $value->government_or_company_amount
             ]);
         }
@@ -143,14 +147,66 @@ class ViewPayslipResource extends JsonResource
         {
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
-                'base' => $this->wages,
-                'employee_rate' => $value->employee_amount,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount,
+                'company_rate' => $value->government_or_company_amount_rate,
                 'company_amount' => $value->government_or_company_amount
             ]);
         }
         return $response;
+    }
+
+    public function get_total_other_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 8);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
+        $total = 0;
+        foreach($deduction_details as $value)
+        {
+            $total += $value->employee_amount + $value->government_or_company_amount;
+            // array_push($response, [
+            //     'title' => $value?->salary_item_name?->name,
+            //     'base' => $this->gross_pay_before_tax,
+            //     'employee_rate' => $value->employee_amount_rate,
+            //     'employee_amount' => $value->employee_amount,
+            //     'company_rate' => $value->government_or_company_amount_rate,
+            //     'company_amount' => $value->government_or_company_amount
+            // ]);
+        }
+        return $total;
+    }
+
+    public function get_total_social_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+                            ->whereHas(
+                                'salary_item_name', function(Builder $builder){
+                                    $builder->where('salary_items_category_id', 7);
+                                }
+                            )
+                            ->where('payslip_id', $this->id)
+                            ->get();
+        $total = 0;
+        foreach($deduction_details as $value)
+        {
+            $total += $value->employee_amount + $value->government_or_company_amount;
+            // array_push($response, [
+            //     'title' => $value?->salary_item_name?->name,
+            //     'base' => $this->gross_pay_before_tax,
+            //     'employee_rate' => $value->employee_amount_rate,
+            //     'employee_amount' => $value->employee_amount,
+            //     'company_rate' => $value->government_or_company_amount_rate,
+            //     'company_amount' => $value->government_or_company_amount
+            // ]);
+        }
+        return $total;
     }
 
     public function get_staff_social_charges()

@@ -33,6 +33,7 @@ class Payslip extends Model
         'payment_date',
         'hours_worked',
         'wages',
+        'additional_pay',
         'leave_deduction',
         'total_pay_value',
         'taxable_allowance',

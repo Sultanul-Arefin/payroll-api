@@ -468,7 +468,7 @@ class PayslipService
     public function government_deduction_amount($employee_id, $company_id)
     {
         // GET VALUE FROM CATEGORY 7
-        $employee_contribution_value = DeductionDetails::query()
+        $employee_contribution = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -485,8 +485,20 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('employee_amount');
+            ->get();
+            // ->sum('employee_amount');
+
+        $employee_contribution_value = 0;
+        foreach($employee_contribution as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $employee_contribution_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+            } else{
+                $employee_contribution_value += round($value->employee_amount, 2);
+            }
+        }
+
 
         // GET VALUE FROM CATEGORY 8
         $other_company_deduction = DeductionDetails::query()
@@ -506,16 +518,27 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('employee_amount');
+            ->get();
+            // ->sum('employee_amount');
 
-        return $employee_contribution_value + $other_company_deduction;
+        $other_company_deduction_value = 0;
+        foreach($other_company_deduction as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $other_company_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+            } else{
+                $other_company_deduction_value += round($value->employee_amount, 2);
+            }
+        }
+
+        return $employee_contribution_value + $other_company_deduction_value;
     }
 
     public function other_complimentary_deduction_amount($employee_id, $company_id)
     {
         // GET VALUE FROM CATEGORY 7
-        $company_contribution_value = DeductionDetails::query()
+        $company_contribution = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -532,8 +555,19 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('government_or_company_amount');
+            ->get();
+            // ->sum('government_or_company_amount');
+
+        $company_contribution_value = 0;
+        foreach($company_contribution as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
+            } else{
+                $company_contribution_value += round($value->government_or_company_amount, 2);
+            }
+        }
 
         // GET VALUE FROM CATEGORY 8
         $other_company_contribution = DeductionDetails::query()
@@ -553,15 +587,26 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('government_or_company_amount');
+            ->get();
+            // ->sum('government_or_company_amount');
 
-        return $company_contribution_value + $other_company_contribution;
+        $other_company_contribution_value = 0;
+        foreach($other_company_contribution as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $other_company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
+            } else{
+                $other_company_contribution_value += round($value->government_or_company_amount, 2);
+            }
+        }
+
+        return $company_contribution_value + $other_company_contribution_value;
     }
 
     public function company_contribution_value($employee_id, $company_id)
     {
-        return DeductionDetails::query()
+        $company_contribution = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -578,13 +623,25 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('government_or_company_amount');
+            ->get();
+            // ->sum('government_or_company_amount');
+
+        $company_contribution_value = 0;
+        foreach($company_contribution as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
+            } else{
+                $company_contribution_value += round($value->government_or_company_amount, 2);
+            }
+        }
+        return $company_contribution_value;
     }
 
     public function employee_contribution_value($employee_id, $company_id)
     {
-        return DeductionDetails::query()
+        $employee_deduction = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -601,13 +658,25 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('employee_amount');
+            ->get();
+            // ->sum('employee_amount');
+
+        $employee_deduction_value = 0;
+        foreach($employee_deduction as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $employee_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+            } else{
+                $employee_deduction_value += round($value->employee_amount, 2);
+            }
+        }
+        return $employee_deduction_value;
     }
 
     public function other_company_deduction($employee_id, $company_id)
     {
-        return DeductionDetails::query()
+        $other_company_deduction = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -624,13 +693,25 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('employee_amount');
+            ->get();
+            // ->sum('employee_amount');
+
+        $other_company_deduction_value = 0;
+        foreach($other_company_deduction as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $other_company_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
+            } else{
+                $other_company_deduction_value += round($value->employee_amount, 2);
+            }
+        }
+        return $other_company_deduction_value;
     }
 
     public function other_company_contribution($employee_id, $company_id)
     {
-        return DeductionDetails::query()
+        $other_company_contribution = DeductionDetails::query()
             ->whereHas(
                 'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id) {
                     $builder
@@ -647,8 +728,20 @@ class PayslipService
                         );
                 }
             )
-            ->get()
-            ->sum('government_or_company_amount');
+            ->get();
+            // ->sum('government_or_company_amount');
+
+        $other_company_contribution_value = 0;
+        foreach($other_company_contribution as $value)
+        {
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            if($value->employee_salary_item->is_percentage == 1){
+                $other_company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
+            } else{
+                $other_company_contribution_value += round($value->government_or_company_amount, 2);
+            }
+        }
+        return $other_company_contribution_value;
     }
 
     // hours worked for employee
