@@ -29,8 +29,9 @@ class ViewIndianPayslipResource extends JsonResource
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => $this->gross_pay_before_tax,
-            'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
+            //'staff_social_charges' => 0.00,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
@@ -190,12 +191,14 @@ class ViewIndianPayslipResource extends JsonResource
                                 ->get();
             $response = [];
             $total_company_amount = 0;
+            $total_employee_amount=0;
             foreach($deduction_details as $value)
             {
                 $total_company_amount += $value->government_or_company_amount;
+                $total_employee_amount += $value->employee_amount;
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
-                    'base' => $this->wages,
+                    'base' => $this->gross_pay_before_tax,
                     'employee_rate' => $value->employee_amount,
                     'employee_amount' => $value->employee_amount,
                     'company_rate' => $value->government_or_company_amount,
@@ -205,6 +208,7 @@ class ViewIndianPayslipResource extends JsonResource
             return [
                 'deductions' => $response,
                 'total_company_amount' => $total_company_amount,
+                'total_employee_amount' => $total_employee_amount,
             ];
         }
     
@@ -220,12 +224,16 @@ class ViewIndianPayslipResource extends JsonResource
                                 ->get();
             $response = [];
             $total_company_amount = 0;
+            $total_employee_amount=0;
+
             foreach($deduction_details as $value)
             {
                 $total_company_amount += $value->government_or_company_amount;
+                $total_employee_amount += $value->employee_amount;
+
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
-                    'base' => $this->wages,
+                    'base' => $this->gross_pay_before_tax,
                     'employee_rate' => $value->employee_amount,
                     'employee_amount' => $value->employee_amount,
                     'company_rate' => $value->government_or_company_amount,
@@ -235,18 +243,23 @@ class ViewIndianPayslipResource extends JsonResource
             return [
                 'deductions' => $response,
                 'total_company_amount' => $total_company_amount,
+                'total_employee_amount' => $total_employee_amount,
             ];
         }
     
         public function get_total_company_deduction()
-    {
-        $other_deduction = $this->get_other_deduction();
-        $social_deduction = $this->get_social_deduction();
-    
-        $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
-    
-        return $total_company_amount;
-    }
+            {
+                $other_deduction = $this->get_other_deduction();
+                $social_deduction = $this->get_social_deduction();
+
+                $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
+                $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
+
+                return [
+                    'total_company_amount' => $total_company_amount,
+                    'total_employee_amount' => $total_employee_amount,
+                ];
+            }
 
     public function get_staff_social_charges()
     {
