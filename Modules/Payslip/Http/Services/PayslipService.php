@@ -67,7 +67,7 @@ class PayslipService
                 PayslipDetail::create([
                     'payslip_id' => $payslip_id,
                     'salary_item_id' => $value->salary_item_id,
-                    'base_amount_or_hours' => $this->getBaseAmountOrHours($value),
+                    'base_amount_or_hours' => $this->getBaseAmountOrHours($value, $payslip_id),
                     'rate' => $this->getRate($value),
                     'amount' => $this->getAmountCalculation($value),
                 ]);
@@ -208,7 +208,7 @@ class PayslipService
         return $salary_item->amount;
     }
 
-    function getBaseAmountOrHours($salary_item)
+    function getBaseAmountOrHours($salary_item, $payslip_id)
     {
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
@@ -237,10 +237,12 @@ class PayslipService
             return (int)request('recuperated_hours') . " hours";
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
-            return "Threshold Base Amount";
+            $payslip = Payslip::where('id', $payslip_id)->first();
+            return ((($payslip->wages + $payslip->additional_pay) - $payslip->leave_deduction) + $payslip->taxable_allowance + $payslip->non_taxable_allowance) - $payslip->non_taxable_allowance;
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
-            return "Income Tax Base Amount";
+            $payslip = Payslip::where('id', $payslip_id)->first();
+            return ((($payslip->wages + $payslip->additional_pay) - $payslip->leave_deduction) + $payslip->taxable_allowance + $payslip->non_taxable_allowance) - $payslip->non_taxable_allowance;
         }
         return "1 month";
     }
