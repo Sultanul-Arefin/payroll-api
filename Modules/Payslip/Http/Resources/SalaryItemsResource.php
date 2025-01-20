@@ -28,7 +28,7 @@ class SalaryItemsResource extends JsonResource
             'hours_days' => $this->getHoursDaysCalculation($this),
             'rate' => $this->getRateCalculation($this, $this->is_percentage),
             'amount' => $this->getAmountCalculation($this),
-            'base' => $this->id // salary item id
+            'base' => $this->id // salary item id,
         ];
     }
 
@@ -98,7 +98,7 @@ class SalaryItemsResource extends JsonResource
             return $salary_item->amount;
         }
         if($is_percentage==1){
-            return $salary_item->amount . " %";
+            return $salary_item->amount ? $salary_item->amount . " %" : null;
         }
         return $salary_item->amount;
     }

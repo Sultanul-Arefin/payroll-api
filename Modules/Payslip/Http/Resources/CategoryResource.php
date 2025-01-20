@@ -227,7 +227,9 @@ class CategoryResource extends JsonResource
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
         } elseif($category_id == 5){
-            $straight =  EmployeeSalaryItem::query()
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+
+            $straight_without_percentage =  EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->where('is_threshold', 1)
@@ -248,6 +250,35 @@ class CategoryResource extends JsonResource
                           });
                 })
                 ->get()->sum('amount');
+            $straight_percentage =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->where('is_threshold', 1)
+                                ->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get();
+            $straight_percentage_value = 0;
+            foreach($straight_percentage as $value)
+            {
+                $straight_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            }
+
+            $straight = $straight_without_percentage + $straight_percentage_value;
+
             $threshold =  EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) use ($category_id) {
@@ -269,7 +300,7 @@ class CategoryResource extends JsonResource
                           });
                 })
                 ->get();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+
             $threshold_value = 0;
             foreach($threshold as $value){
                 $percentage_amount = $value->amount; // get the percentage value
