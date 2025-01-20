@@ -183,7 +183,7 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1)
         {
-            return EmployeeSalaryItem::query()
+            $value = EmployeeSalaryItem::query()
                     ->where('employee_id', request('employee_id'))
                     ->whereHas(
                         'salaryItemsName', function (Builder $builder) use($salary_item) {
@@ -193,6 +193,7 @@ class PayslipService
                         }
                     )
                     ->first('amount');
+            return $value->amount;
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
             return "Threshold";
