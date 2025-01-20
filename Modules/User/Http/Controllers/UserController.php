@@ -82,7 +82,7 @@ class UserController extends Controller
             ->whereHas('employeeSalaryItem', function (Builder $builder) use ($user) {
                 $builder->where('employee_id', $user->id);
             })
-            ->whereNotIn('name', ['Annual Leave', 'Sick Leave'])
+            ->whereNotIn('salary_items_category_id', [2])
             ->get();
         $user->salary_items = $items->map(function ($item) use ($user) {
             return new UserBasicSalaryResource($item, $user->id);
