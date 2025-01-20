@@ -205,6 +205,12 @@ class PayslipService
             }
             return $salary_item->amount;
         }
+        if($salary_item->salaryItemsName->salary_items_category_id == 6){
+            if($salary_item->is_percentage == 1){
+                return $salary_item->amount . " %";
+            }
+            return $salary_item->amount;
+        }
         return $salary_item->amount;
     }
 
@@ -325,9 +331,16 @@ class PayslipService
                 if($salary_item->is_percentage == 1){
                     return round(($categoryOneAmount * ($salary_item->amount / 100)), 2);
                 } else{
-                    round($salary_item->amount, 2);
+                    return round($salary_item->amount, 2);
                 }
             }
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 6){
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            if($salary_item->is_percentage == 1){
+                return round(($categoryOneAmount * ($salary_item->amount / 100)), 2);
+            }
+            return round($salary_item->amount, 2);
         }
         return $salary_item->amount;
     }
@@ -1181,6 +1194,57 @@ class PayslipService
                 }
             }
             return round($straight + $threshold_value, 2);
+        } elseif($category_id == 6){
+            $company = User::where('id', request('employee_id'))->first();
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+
+            $without_percentage_value =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 0)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get()->sum('amount');
+            $with_percentage =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get();
+            $with_percentage_value = 0;
+            foreach($with_percentage as $value)
+            {
+                $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            }
+
+            return round($without_percentage_value + $with_percentage_value, 2);
         } else {
             $amount = EmployeeSalaryItem::query()
                 ->whereHas(
