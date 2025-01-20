@@ -166,6 +166,34 @@ class PayslipService
 
     public function getRate($salary_item)
     {
+        if($salary_item->salaryItemsName->name == "Wages"){
+            if($salary_item->amount <= 0){
+                $hourly_amount = EmployeeSalaryItem::query()
+                    ->where('employee_id', request('employee_id'))
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Ordinary Time Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+                return $hourly_amount->amount;
+            }
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 1)
+        {
+            return EmployeeSalaryItem::query()
+                    ->where('employee_id', request('employee_id'))
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) use($salary_item) {
+                            $builder
+                                ->where('name', $salary_item->salaryItemsName->name)
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+        }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
             return "Threshold";
         }
