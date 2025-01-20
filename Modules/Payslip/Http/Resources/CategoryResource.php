@@ -316,6 +316,56 @@ class CategoryResource extends JsonResource
                 }
             }
             return round($straight + $threshold_value, 2);
+        } elseif($category_id == 6){
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1);
+
+            $without_percentage_value =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 0)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get()->sum('amount');
+            $with_percentage =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get();
+            $with_percentage_value = 0;
+            foreach($with_percentage as $value)
+            {
+                $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            }
+
+            return round($without_percentage_value + $with_percentage_value, 2);
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(
