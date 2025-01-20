@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Services;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Modules\Attendance\Entities\Attendance;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
@@ -68,7 +69,7 @@ class PayslipService
                     'salary_item_id' => $value->salary_item_id,
                     'base_amount_or_hours' => $this->getBaseAmountOrHours($value),
                     'amount' => $this->getAmountCalculation($value),
-                    'rate' => $value->amount,
+                    'rate' => $this->getRate($value),
                 ]);
             }
         }
@@ -163,6 +164,21 @@ class PayslipService
         return $amount;
     }
 
+    public function getRate($salary_item)
+    {
+        if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
+            return "Threshold";
+        }
+        if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
+            if($salary_item->is_percentage == 1)
+            {
+                return $salary_item->amount . " %";
+            }
+            return $salary_item->amount;
+        }
+        return $salary_item->amount;
+    }
+
     function getBaseAmountOrHours($salary_item)
     {
         if($salary_item->salaryItemsName->name == "Wages"){
@@ -190,6 +206,12 @@ class PayslipService
         }
         if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
             return (int)request('recuperated_hours') . " hours";
+        }
+        if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
+            return "Threshold Base Amount";
+        }
+        if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
+            return "Income Tax Base Amount";
         }
         return "1 month";
     }
@@ -249,6 +271,32 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
+        }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 5){
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
+
+                $threshold_value = 0;
+                $percentage_amount = $salary_item->amount; // get the percentage value
+                $threshold_details = $salary_item->threshold_details; // get threshold details to check if the wages is between the details
+                if($threshold_details)
+                {
+                    $start_percentage_after = $threshold_details->start_percentage_after;
+                    $end_percentage_at = $threshold_details->end_percentage_at;
+
+                    if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
+                        $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                    }
+                }
+                return $threshold_value;
+            }
+            if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
+                if($salary_item->is_percentage == 1){
+                    return round(($categoryOneAmount * ($salary_item->amount / 100)), 2);
+                } else{
+                    round($salary_item->amount, 2);
+                }
+            }
         }
         return $salary_item->amount;
     }
@@ -390,8 +438,8 @@ class PayslipService
 
     public function get_income_taxes_amount($employee_id, $company_id)
     {
-        $straight = EmployeeSalaryItem::query()
-            // ->where('employee_id', $employee_id)
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
+        $straight_without_percentage = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
                     $builder->where('is_threshold', 1)
@@ -408,6 +456,32 @@ class PayslipService
                         });
             })
             ->sum('amount');
+        $straight_percentage = EmployeeSalaryItem::query()
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder->where('is_threshold', 1)
+                            ->where('salary_items_category_id', 5);
+                }
+            )
+            ->where('company_id', $company_id)
+            ->where('is_percentage', 1)
+            ->where(function ($query) use($employee_id){
+                $query->where('employee_id', $employee_id)
+                        ->orWhere(function ($query) {
+                            $query->whereNull('employee_id')
+                                ->where('is_general', 1);
+                        });
+            })
+            ->get();
+
+        $straight_percentage_value = 0;
+        foreach($straight_percentage as $value)
+        {
+            $straight_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+        }
+
+        $straight = $straight_without_percentage + $straight_percentage_value;
+
         $threshold = EmployeeSalaryItem::query()
             // ->where('employee_id', $employee_id)
             ->whereHas(
@@ -426,7 +500,6 @@ class PayslipService
                         });
             })
             ->get();
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
         $threshold_value = 0;
         foreach($threshold as $value){
             $percentage_amount = $value->amount; // get the percentage value
@@ -879,7 +952,7 @@ class PayslipService
                         $other_deduction_value += round($value->employee_amount, 2);
                     }
                 }
-            return $employee_deduction_value + $other_deduction_value;
+            return round($employee_deduction_value + $other_deduction_value, 2);
         } elseif ($category_id == 8) {
             return [
                 'company_government_contribution' => 0.00,
@@ -945,9 +1018,9 @@ class PayslipService
                 } else{
                     $employee_associated_amount = $hourly_amount->amount * $hours_worked;
                 }
-                return $employee_associated_amount + $overtime + $double_overtime + $bonus;
+                return round($employee_associated_amount + $overtime + $double_overtime + $bonus, 2);
             }
-            return $amount + $overtime + $double_overtime + $bonus;
+            return round($amount + $overtime + $double_overtime + $bonus, 2);
         } elseif($category_id == 2){
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
@@ -987,7 +1060,10 @@ class PayslipService
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
         } elseif($category_id == 5){
-            $straight =  EmployeeSalaryItem::query()
+            $company = User::where('id', request('employee_id'))->first();
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+
+            $straight_without_percentage = EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->where('is_threshold', 1)
@@ -1008,6 +1084,35 @@ class PayslipService
                           });
                 })
                 ->get()->sum('amount');
+            $straight_percentage = EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->where('is_threshold', 1)
+                                ->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                        ->orWhere(function ($query) {
+                            $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                        });
+                })
+                ->get();
+            $straight_percentage_value = 0;
+            foreach($straight_percentage as $value)
+            {
+                $straight_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            }
+
+            $straight = $straight_without_percentage + $straight_percentage_value;
+
             $threshold =  EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) use ($category_id) {
@@ -1029,8 +1134,7 @@ class PayslipService
                           });
                 })
                 ->get();
-            $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+
             $threshold_value = 0;
             foreach($threshold as $value){
                 $percentage_amount = $value->amount; // get the percentage value
@@ -1047,7 +1151,7 @@ class PayslipService
             }
             return round($straight + $threshold_value, 2);
         } else {
-            return EmployeeSalaryItem::query()
+            $amount = EmployeeSalaryItem::query()
                 ->whereHas(
                     'salaryItemsName', function (Builder $builder) use ($category_id) {
                         $builder->whereHas(
@@ -1066,6 +1170,7 @@ class PayslipService
                           });
                 })
                 ->get()->sum('amount');
+            return round($amount, 2);
         }
     }
 
@@ -1095,7 +1200,8 @@ class PayslipService
                     }
                 )
                 ->first('amount');
-            $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
+            $hours_worked = (int)request('working_hours');
+            // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
             if($hours_worked < 0){
                 $employee_associated_amount = 0;
             } else{
