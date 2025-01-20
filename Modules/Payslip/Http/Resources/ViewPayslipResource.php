@@ -220,7 +220,8 @@ class ViewPayslipResource extends JsonResource
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
             $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
-            $payslip_detail->rate = $payslip_detail->amount;
+            $payslip_detail->rate = $payslip_detail->rate;
+            $payslip_detail->amount = $payslip_detail->amount;
             $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
 
             // unset these keys from the response
