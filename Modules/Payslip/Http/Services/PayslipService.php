@@ -568,10 +568,10 @@ class PayslipService
 
         $without_percentage_value =  EmployeeSalaryItem::query()
             ->whereHas(
-                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                'salaryItemsName', function (Builder $builder) {
                     $builder->whereHas(
-                                'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                    $builder->where('id', $category_id);
+                                'salaryItemsCategory', function (Builder $builder) {
+                                    $builder->where('id', 6);
                                 }
                     );
                 }
@@ -588,10 +588,10 @@ class PayslipService
             ->get()->sum('amount');
         $with_percentage =  EmployeeSalaryItem::query()
             ->whereHas(
-                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                'salaryItemsName', function (Builder $builder) {
                     $builder->whereHas(
-                                'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                    $builder->where('id', $category_id);
+                                'salaryItemsCategory', function (Builder $builder) {
+                                    $builder->where('id', 6);
                                 }
                     );
                 }
