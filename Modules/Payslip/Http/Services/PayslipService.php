@@ -563,23 +563,56 @@ class PayslipService
 
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
     {
-        $employee_associated_amount = EmployeeSalaryItem::query()
-            // ->where('employee_id', $employee_id)
+        $company = User::where('id', request('employee_id'))->first();
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+
+        $without_percentage_value =  EmployeeSalaryItem::query()
             ->whereHas(
-                'salaryItemsName', function (Builder $builder) {
-                    $builder->where('salary_items_category_id', 6);
+                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                    $builder->whereHas(
+                                'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                    $builder->where('id', $category_id);
+                                }
+                    );
                 }
             )
-            ->where('company_id', $company_id)
-            ->where(function ($query) use($employee_id){
-                $query->where('employee_id', $employee_id)
+            ->where('company_id', auth()->user()->company_id)
+            ->where('is_percentage', 0)
+            ->where(function ($query) {
+                $query->where('employee_id', request('employee_id'))
                         ->orWhere(function ($query) {
                             $query->whereNull('employee_id')
                                 ->where('is_general', 1);
                         });
             })
-            ->sum('amount');
-        return $employee_associated_amount;
+            ->get()->sum('amount');
+        $with_percentage =  EmployeeSalaryItem::query()
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) use ($category_id) {
+                    $builder->whereHas(
+                                'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                    $builder->where('id', $category_id);
+                                }
+                    );
+                }
+            )
+            ->where('company_id', auth()->user()->company_id)
+            ->where('is_percentage', 1)
+            ->where(function ($query) {
+                $query->where('employee_id', request('employee_id'))
+                        ->orWhere(function ($query) {
+                            $query->whereNull('employee_id')
+                                ->where('is_general', 1);
+                        });
+            })
+            ->get();
+        $with_percentage_value = 0;
+        foreach($with_percentage as $value)
+        {
+            $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+        }
+
+        return round($without_percentage_value + $with_percentage_value, 2);
     }
 
     public function government_deduction_amount($employee_id, $company_id)
