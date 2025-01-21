@@ -231,10 +231,10 @@ class PayslipService
             return (int)request('sick_leave') . " hours";
         }
         if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
-            return (int)request('unpaid_sick_leave');
+            return (int)request('unpaid_sick_leave') . " hours";
         }
         if(request('absent') && $salary_item->salaryItemsName?->name == "Absent"){
-            return (int)request('absent');
+            return (int)request('absent') . " hours";
         }
         if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
             return (int)request('overtime') . " hours";
@@ -297,6 +297,7 @@ class PayslipService
                 // return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
                 return 0;
             }
+
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
                 return (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate")->amount;
             }
@@ -313,6 +314,12 @@ class PayslipService
             return 0;
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
+            if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
+                return (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+            }
+            if(request('absent') && $salary_item->salaryItemsName?->name == "Absent"){
+                return (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+            }
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 5){
