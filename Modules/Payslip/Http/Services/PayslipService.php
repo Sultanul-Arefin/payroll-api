@@ -230,6 +230,12 @@ class PayslipService
         if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
             return (int)request('sick_leave') . " hours";
         }
+        if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
+            return (int)request('unpaid_sick_leave');
+        }
+        if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
+            return (int)request('absent');
+        }
         if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
             return (int)request('overtime') . " hours";
         }
@@ -399,6 +405,15 @@ class PayslipService
 
     public function get_staff_deduction_sick_absent_amount($employee_id, $company_id)
     {
+        $total = 0;
+        if(request('absent')){
+            $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+        }
+        if(request('unpaid_sick_leave')){
+            $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+        }
+        return $total; // this calculation is done from payload when creating payslips.
+
         $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
                                         'salary_item', function(Builder $builder)use($company_id){
@@ -1099,6 +1114,15 @@ class PayslipService
             }
             return round($amount + $overtime + $double_overtime + $bonus, 2);
         } elseif($category_id == 2){
+            $total = 0;
+            if(request('absent')){
+                $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+            }
+            if(request('unpaid_sick_leave')){
+                $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+            }
+            return $total; // this calculation is done from payload when creating payslips.
+
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
                                         'salary_item', function(Builder $builder){
