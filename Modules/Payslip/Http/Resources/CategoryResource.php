@@ -678,7 +678,7 @@ class CategoryResource extends JsonResource
                 })
                 ->get();
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
             $threshold_value = 0;
             foreach($threshold as $value){
                 $percentage_amount = $value->amount; // get the percentage value
