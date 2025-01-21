@@ -564,7 +564,7 @@ class PayslipService
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
     {
         $company = User::where('id', request('employee_id'))->first();
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
 
         $without_percentage_value =  EmployeeSalaryItem::query()
             ->whereHas(
@@ -1138,7 +1138,7 @@ class PayslipService
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
         } elseif($category_id == 5){
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
 
             $straight_without_percentage = EmployeeSalaryItem::query()
                 ->whereHas(
@@ -1229,7 +1229,7 @@ class PayslipService
             return round($straight + $threshold_value, 2);
         } elseif($category_id == 6){
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->id, $employee_id);
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
 
             $without_percentage_value =  EmployeeSalaryItem::query()
                 ->whereHas(
@@ -1277,7 +1277,7 @@ class PayslipService
                 $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
             }
 
-            return round($without_percentage_value + $with_percentage_value, 2);
+            return round(($without_percentage_value + $with_percentage_value), 2);
         } else {
             $amount = EmployeeSalaryItem::query()
                 ->whereHas(
