@@ -230,10 +230,10 @@ class PayslipService
         if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
             return (int)request('sick_leave') . " hours";
         }
-        if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
+        if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
             return (int)request('unpaid_sick_leave');
         }
-        if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
+        if(request('absent') && $salary_item->salaryItemsName?->name == "Absent"){
             return (int)request('absent');
         }
         if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
