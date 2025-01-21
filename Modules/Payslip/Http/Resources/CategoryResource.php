@@ -189,6 +189,15 @@ class CategoryResource extends JsonResource
             $amount = $this->getCategoryIdOneAmount(1);
             return $amount;
         } elseif($category_id == 2){
+            $total = 0;
+            if(request('absent')){
+                $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+            }
+            if(request('unpaid_sick_leave')){
+                $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+            }
+            return $total; // this calculation is done from payload when creating payslips.
+
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
                                         'salary_item', function(Builder $builder){
