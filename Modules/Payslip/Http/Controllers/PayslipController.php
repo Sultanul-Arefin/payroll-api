@@ -84,7 +84,7 @@ class PayslipController extends Controller
         return apiResponse(
             data: SalaryItemsResource::collection(
                 $user->salary_items->filter(function ($item) {
-                    return !in_array($item->salaryItemsName->name, ['Annual Leave', 'Sick Leave']);
+                    return !in_array($item->salaryItemsName->name, ['Annual Leave', 'Sick Leave', 'Unpaid Sick Leave', 'Absent']);
                 })
             )
         );
@@ -253,7 +253,7 @@ class PayslipController extends Controller
                 'category_one_other_values' => $this->payslipService->getCategoryOneOtherValues(1, $request->employee_id),
                 'gross_pay_before_tax' => (($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id),
                 'gross_pay_after_tax' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id)),
-                '6' => $this->payslipService->getAmountForEmployee(6, $request->employee_id),
+                // '2' => $this->payslipService->getAmountForEmployee(2, $request->employee_id), // for testing specific category value
                 'pay_due_before_deduction' => (((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
                 'net_pay' => ((((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id)) - $this->payslipService->getAmountForEmployee(7, $request->employee_id),
             ],
