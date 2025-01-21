@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Resources;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Arrayable;
@@ -34,18 +35,18 @@ class CategoryResource extends JsonResource
     public function getAmount($category_id)
     {
         if ($category_id == 7) {
-
+            $employee_id = request('employee_id');
             $employee_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', request('employee_id'))
+                            ->where('employee_id', $employee_id)
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
                                         'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                            $builder->where('id', $category_id);
+                                            $builder->where('id', 7);
                                         }
                                     );
                                 }
@@ -69,10 +70,10 @@ class CategoryResource extends JsonResource
             // GET CATEGORY ID 8 DEDUCTION VALUE
             $other_complimentary_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', request('employee_id'))
+                            ->where('employee_id', $employee_id)
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
@@ -606,6 +607,15 @@ class CategoryResource extends JsonResource
             }
             return $amount + $overtime + $double_overtime + $bonus;
         } elseif($category_id == 2){
+            $total = 0;
+            if(request('absent')){
+                $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+            }
+            if(request('unpaid_sick_leave')){
+                $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+            }
+            return $total; // this calculation is done from payload when creating payslips.
+
             $unpaid_absent_count = UserLeave::query()
                                     ->whereHas(
                                         'salary_item', function(Builder $builder){
@@ -703,6 +713,57 @@ class CategoryResource extends JsonResource
                 }
             }
             return round($straight + $threshold_value, 2);
+        } elseif($category_id == 6){
+            $company = User::where('id', request('employee_id'))->first();
+            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+
+            $without_percentage_value =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 0)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get()->sum('amount');
+            $with_percentage =  EmployeeSalaryItem::query()
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($category_id) {
+                        $builder->whereHas(
+                                    'salaryItemsCategory', function (Builder $builder) use ($category_id) {
+                                        $builder->where('id', $category_id);
+                                    }
+                        );
+                    }
+                )
+                ->where('company_id', auth()->user()->company_id)
+                ->where('is_percentage', 1)
+                ->where(function ($query) {
+                    $query->where('employee_id', request('employee_id'))
+                          ->orWhere(function ($query) {
+                              $query->whereNull('employee_id')
+                                    ->where('is_general', 1);
+                          });
+                })
+                ->get();
+            $with_percentage_value = 0;
+            foreach($with_percentage as $value)
+            {
+                $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            }
+
+            return round(($without_percentage_value + $with_percentage_value), 2);
         } else {
             return EmployeeSalaryItem::query()
                 ->whereHas(

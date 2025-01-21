@@ -992,7 +992,7 @@ class PayslipService
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
                                         'salaryItemsCategory', function (Builder $builder) use ($category_id) {
-                                            $builder->where('id', $category_id);
+                                            $builder->where('id', 7);
                                         }
                                     );
                                 }
@@ -1110,9 +1110,9 @@ class PayslipService
                 } else{
                     $employee_associated_amount = $hourly_amount->amount * $hours_worked;
                 }
-                return round($employee_associated_amount + $overtime + $double_overtime + $bonus, 2);
+                return round(($employee_associated_amount + $overtime + $double_overtime + $bonus), 2);
             }
-            return round($amount + $overtime + $double_overtime + $bonus, 2);
+            return round(($amount + $overtime + $double_overtime + $bonus), 2);
         } elseif($category_id == 2){
             $total = 0;
             if(request('absent')){
