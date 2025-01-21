@@ -40,6 +40,9 @@ class LeavesDataResource extends JsonResource
 
     public function getLeaveData($employee_id, $leave)
     {
+        $user = auth()->user();
+        $working_hours_per_day = $user->company?->working_hours_per_day;
+
         if($leave == "annual_leave")
         {
             $annual_leave_data = LeaveSalaryItems::query()
@@ -82,7 +85,7 @@ class LeavesDataResource extends JsonResource
             if($count <= 0){
                 return null;
             }
-            return $count;
+            return $count * $working_hours_per_day;
         }
         elseif($leave == "sick_leave")
         {
@@ -126,7 +129,92 @@ class LeavesDataResource extends JsonResource
             if($count <= 0){
                 return null;
             }
-            return $count;
+            return $count * $working_hours_per_day;
+        } elseif($leave == "absent")
+        {
+            $absent_leave_data = LeaveSalaryItems::query()
+                ->whereHas(
+                    'salary_items_name', function(Builder $builder){
+                        $builder
+                        ->where(
+                            'name',
+                            'Absent'
+                        )->where(
+                            'company_id',
+                            auth()->user()->company_id
+                        );
+                    }
+                )
+                ->first();
+            $data = UserLeave::query()
+                    ->where('user_id', $employee_id)
+                    ->where('leave_type', $absent_leave_data->salary_items_id)
+                    ->where('status', UserLeave::APPROVED)
+                    ->whereHas(
+                        'leave_details', function(Builder $builder){
+                            $builder->whereBetween(
+                                'dates',
+                                [
+                                    request('from_date'),
+                                    request('to_date')
+                                ]
+                            );
+                        }
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $details = UserLeaveDetail::query()
+                    ->where('user_leaves_id', $value->id)
+                    ->count();
+                $count += $details;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $working_hours_per_day;
+        } elseif($leave == "unpaid_sick_leave"){
+            $unpaid_sick_leave_data = LeaveSalaryItems::query()
+                ->whereHas(
+                    'salary_items_name', function(Builder $builder){
+                        $builder
+                        ->where(
+                            'name',
+                            'Unpaid Sick Leave'
+                        )->where(
+                            'company_id',
+                            auth()->user()->company_id
+                        );
+                    }
+                )
+                ->first();
+            $data = UserLeave::query()
+                    ->where('user_id', $employee_id)
+                    ->where('leave_type', $unpaid_sick_leave_data->salary_items_id)
+                    ->where('status', UserLeave::APPROVED)
+                    ->whereHas(
+                        'leave_details', function(Builder $builder){
+                            $builder->whereBetween(
+                                'dates',
+                                [
+                                    request('from_date'),
+                                    request('to_date')
+                                ]
+                            );
+                        }
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $details = UserLeaveDetail::query()
+                    ->where('user_leaves_id', $value->id)
+                    ->count();
+                $count += $details;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $working_hours_per_day;
         }
     }
 

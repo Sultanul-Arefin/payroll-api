@@ -52,6 +52,12 @@ class SalaryItemsResource extends JsonResource
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
                 return (int)request('sick_leave');
             }
+            if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
+                return (int)request('unpaid_sick_leave');
+            }
+            if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
+                return (int)request('absent');
+            }
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
                 return (int)request('overtime');
             }
@@ -142,6 +148,12 @@ class SalaryItemsResource extends JsonResource
             }
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
                 return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
+            }
+            if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
+                return (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+            }
+            if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
+                return (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
             }
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
                 return (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate")->amount;
