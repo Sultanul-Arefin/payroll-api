@@ -199,9 +199,9 @@ class ViewIndianPayslipResource extends JsonResource
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
                     'base' => $this->gross_pay_before_tax,
-                    'employee_rate' => $value->employee_amount,
+                    'employee_rate' => $value->employee_amount_rate,
                     'employee_amount' => $value->employee_amount,
-                    'company_rate' => $value->government_or_company_amount,
+                    'company_rate' => $value->government_or_company_amount_rate,
                     'company_amount' => $value->government_or_company_amount
                 ]);
             }
@@ -234,9 +234,9 @@ class ViewIndianPayslipResource extends JsonResource
                 array_push($response, [
                     'title' => $value?->salary_item_name?->name,
                     'base' => $this->gross_pay_before_tax,
-                    'employee_rate' => $value->employee_amount,
+                    'employee_rate' => $value->employee_amount_rate,
                     'employee_amount' => $value->employee_amount,
-                    'company_rate' => $value->government_or_company_amount,
+                    'company_rate' => $value->government_or_company_amount_rate,
                     'company_amount' => $value->government_or_company_amount
                 ]);
             }
@@ -273,13 +273,17 @@ class ViewIndianPayslipResource extends JsonResource
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
             $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
-            $payslip_detail->rate = $payslip_detail->amount;
-            $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
-
+            $payslip_detail->rate = $payslip_detail->rate;
+            $payslip_detail->amount = $payslip_detail->amount;
+            if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+            } else {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+            }
             $payslip_value += $payslip_detail->amount;
 
             // unset these keys from the response
-            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->amount, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
        // return $payslip_details;
        return [

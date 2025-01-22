@@ -9,6 +9,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
+use Carbon\Carbon;
+
 
 class ViewUKPayslipResource extends JsonResource
 {
@@ -102,9 +104,9 @@ class ViewUKPayslipResource extends JsonResource
             array_push($response, [
                 'title' => $value?->salary_item_name?->name,
                 'base' => $this->gross_pay_before_tax,
-                'employee_rate' => $value->employee_amount,
+                'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount,
+                'company_rate' => $value->government_or_company_amount_rate,
                 'company_amount' => $value->government_or_company_amount
             ]);
         }
@@ -140,9 +142,9 @@ class ViewUKPayslipResource extends JsonResource
                     array_push($response, [
                         'title' => $value?->salary_item_name?->name,
                         'base' => $this->gross_pay_before_tax,
-                        'employee_rate' => $value->employee_amount,
+                        'employee_rate' => $value->employee_amount_rate,
                         'employee_amount' => $value->employee_amount,
-                        'company_rate' => $value->government_or_company_amount,
+                        'company_rate' => $value->government_or_company_amount_rate,
                         'company_amount' => $value->government_or_company_amount
                     ]);
                 }
@@ -173,13 +175,18 @@ class ViewUKPayslipResource extends JsonResource
         foreach($payslip_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
             $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
-            $payslip_detail->rate = $payslip_detail->amount;
-            $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+            $payslip_detail->rate = $payslip_detail->rate;
+            $payslip_detail->amount = $payslip_detail->amount;
+            if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+            } else {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+            }
 
             // payslip_calculation
             $payslip_value += $payslip_detail->amount;
             // unset these keys from the response
-            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->amount, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return [
             'payslip_details' => $payslip_details,
@@ -207,35 +214,93 @@ class ViewUKPayslipResource extends JsonResource
     //             'tex' => $tax,
     //         ];
     //     }
-    public function getYearToDateCalculations()
-{
-    $startOfYear = now()->startOfYear();
+//     public function getYearToDateCalculations()
+// {
+//     $startOfYear = now()->startOfYear();
 
+//     $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
+//         ->whereBetween('payment_date', [$startOfYear, $this->payment_date])
+//         ->get();
+
+//     // Calculate yearly gross pay
+//     $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
+//         return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
+//             + $payslip->taxable_allowance + $payslip->non_taxable_allowance;
+//     });
+
+//     // Calculate yearly taxable gross pay
+//     $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
+//         return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
+//             + $payslip->taxable_allowance;
+//     });
+
+//     // Calculate yearly net pay
+//     $yearToDateNetPay = $yearToDatePayslips->sum(function ($payslip) {
+//         return $payslip->tax_value + $payslip->post_tax_value;
+//     });
+//     // Return all calculations as an array
+//     return [
+//         'gross_pay' => $yearToDateGrossPay,
+//         'taxable_gross' => $yearToDateTaxableGross,
+//         'tax' => $yearToDateNetPay,
+//     ];
+// }
+
+public function getYearToDateCalculations()
+{
+    // payment_date starting year
+    $paymentDate = Carbon::parse($this->payment_date);
+    $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
+
+    // // Devaging
+    // \Log::info('Start of Year: ' . $startOfYear);
+    // \Log::info('Payment Date: ' . $paymentDate->toDateString());
+    // \Log::info('Employee ID: ' . $this->employee->id);
+
+    // payslip Filter
     $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
-        ->whereBetween('payment_date', [$startOfYear, $this->payment_date])
+        ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
         ->get();
 
-    // Calculate yearly gross pay
+    if ($yearToDatePayslips->isEmpty()) {
+        \Log::warning('No Payslips found in range.', [
+            'employee_id' => $this->employee->id,
+            'start_of_year' => $startOfYear,
+            'payment_date' => $paymentDate->toDateString(),
+        ]);
+        return [
+            'gross_pay' => 0,
+            'taxable_gross' => 0,
+            'tax' => 0,
+        ];
+    }
+
+    // Yearly Gross Pay
     $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
-        return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
-            + $payslip->taxable_allowance + $payslip->non_taxable_allowance;
+        return (
+            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            + $payslip->taxable_allowance
+            + $payslip->non_taxable_allowance
+        );
     });
 
-    // Calculate yearly taxable gross pay
+    // Yearly Taxable Gross Pay
     $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
-        return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
-            + $payslip->taxable_allowance;
+        return (
+            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            + $payslip->taxable_allowance
+        );
     });
 
-    // Calculate yearly net pay
-    $yearToDateNetPay = $yearToDatePayslips->sum(function ($payslip) {
+    // Yearly Net Pay
+    $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
         return $payslip->tax_value + $payslip->post_tax_value;
     });
-    // Return all calculations as an array
+
     return [
         'gross_pay' => $yearToDateGrossPay,
         'taxable_gross' => $yearToDateTaxableGross,
-        'tax' => $yearToDateNetPay,
+        'tax' => $yearToDateTaxPay,
     ];
 }
 
