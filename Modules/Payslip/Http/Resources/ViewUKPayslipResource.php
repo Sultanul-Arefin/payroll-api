@@ -29,7 +29,7 @@ class ViewUKPayslipResource extends JsonResource
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => $this->taxable_allowance,
+            'additional_pay' =>  $this->additional_pay, // additional pay goes here
             //'wage_deduction' => $this->taxable_allowance,
             'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
@@ -214,37 +214,7 @@ class ViewUKPayslipResource extends JsonResource
     //             'tex' => $tax,
     //         ];
     //     }
-//     public function getYearToDateCalculations()
-// {
-//     $startOfYear = now()->startOfYear();
 
-//     $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
-//         ->whereBetween('payment_date', [$startOfYear, $this->payment_date])
-//         ->get();
-
-//     // Calculate yearly gross pay
-//     $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
-//         return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
-//             + $payslip->taxable_allowance + $payslip->non_taxable_allowance;
-//     });
-
-//     // Calculate yearly taxable gross pay
-//     $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
-//         return (($payslip->wages + $payslip->taxable_allowance) - $payslip->leave_deduction)
-//             + $payslip->taxable_allowance;
-//     });
-
-//     // Calculate yearly net pay
-//     $yearToDateNetPay = $yearToDatePayslips->sum(function ($payslip) {
-//         return $payslip->tax_value + $payslip->post_tax_value;
-//     });
-//     // Return all calculations as an array
-//     return [
-//         'gross_pay' => $yearToDateGrossPay,
-//         'taxable_gross' => $yearToDateTaxableGross,
-//         'tax' => $yearToDateNetPay,
-//     ];
-// }
 
 public function getYearToDateCalculations()
 {
@@ -278,7 +248,7 @@ public function getYearToDateCalculations()
     // Yearly Gross Pay
     $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
         return (
-            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
             + $payslip->taxable_allowance
             + $payslip->non_taxable_allowance
         );
@@ -287,7 +257,7 @@ public function getYearToDateCalculations()
     // Yearly Taxable Gross Pay
     $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
         return (
-            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
             + $payslip->taxable_allowance
         );
     });

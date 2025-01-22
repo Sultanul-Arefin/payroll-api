@@ -33,7 +33,7 @@ class ViewUSAPayslipResource extends JsonResource
             'employee_id' =>$this->employee_id,
             'payment_date' => $this->payment_date,
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => $this->taxable_allowance,
+            'additional_pay' => $this->additional_pay,
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
@@ -439,7 +439,7 @@ public function getYearToDateCalculations()
     // Yearly Gross Pay
     $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
         return (
-            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
             + $payslip->taxable_allowance
             + $payslip->non_taxable_allowance
         );
@@ -448,7 +448,7 @@ public function getYearToDateCalculations()
     // Yearly Taxable Gross Pay
     $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
         return (
-            ($payslip->wages + $payslip->taxable_allowance - $payslip->leave_deduction)
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
             + $payslip->taxable_allowance
         );
     });

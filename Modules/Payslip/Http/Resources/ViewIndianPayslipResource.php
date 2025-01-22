@@ -24,7 +24,7 @@ class ViewIndianPayslipResource extends JsonResource
             'total_earnings' => $this->pay_due_before_deduction,
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
-            'additional_pay' => 0, // additional pay goes here
+            'additional_pay' =>$this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
