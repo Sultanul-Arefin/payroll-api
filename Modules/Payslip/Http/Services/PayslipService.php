@@ -323,7 +323,9 @@ class PayslipService
             return $salary_item->amount * $this->get_leave_details(request('employee_id'), $salary_item->salaryItemsName->id); // * no of leave days/hours
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 5){
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
+
             if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
 
                 $threshold_value = 0;
@@ -334,24 +336,25 @@ class PayslipService
                     $start_percentage_after = $threshold_details->start_percentage_after;
                     $end_percentage_at = $threshold_details->end_percentage_at;
 
-                    if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
-                        $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                    if ($start_percentage_after <= $gross_pay_before_tax && $end_percentage_at >= $gross_pay_before_tax) {
+                        $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
                     }
                 }
                 return $threshold_value;
             }
             if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
                 if($salary_item->is_percentage == 1){
-                    return round(($categoryOneAmount * ($salary_item->amount / 100)), 2);
+                    return round(($gross_pay_before_tax * ($salary_item->amount / 100)), 2);
                 } else{
                     return round($salary_item->amount, 2);
                 }
             }
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 6){
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
             if($salary_item->is_percentage == 1){
-                return round(($categoryOneAmount * ($salary_item->amount / 100)), 2);
+                return round(($gross_pay_before_tax * ($salary_item->amount / 100)), 2);
             }
             return round($salary_item->amount, 2);
         }
@@ -504,7 +507,8 @@ class PayslipService
 
     public function get_income_taxes_amount($employee_id, $company_id)
     {
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
+        // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
+        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
         $straight_without_percentage = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
@@ -543,7 +547,7 @@ class PayslipService
         $straight_percentage_value = 0;
         foreach($straight_percentage as $value)
         {
-            $straight_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            $straight_percentage_value += ($gross_pay_before_tax * ($value->amount / 100));
         }
 
         $straight = $straight_without_percentage + $straight_percentage_value;
@@ -575,8 +579,8 @@ class PayslipService
                 $start_percentage_after = $threshold_details->start_percentage_after;
                 $end_percentage_at = $threshold_details->end_percentage_at;
 
-                if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
-                    $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                if ($start_percentage_after <= $gross_pay_before_tax && $end_percentage_at >= $gross_pay_before_tax) {
+                    $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
                 }
             }
         }
@@ -586,7 +590,8 @@ class PayslipService
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
     {
         $company = User::where('id', request('employee_id'))->first();
-        $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+        // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
 
         $without_percentage_value =  EmployeeSalaryItem::query()
             ->whereHas(
@@ -631,7 +636,7 @@ class PayslipService
         $with_percentage_value = 0;
         foreach($with_percentage as $value)
         {
-            $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+            $with_percentage_value += ($gross_pay_before_tax * ($value->amount / 100));
         }
 
         return round($without_percentage_value + $with_percentage_value, 2);
@@ -1169,7 +1174,8 @@ class PayslipService
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
         } elseif($category_id == 5){
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+            // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
 
             $straight_without_percentage = EmployeeSalaryItem::query()
                 ->whereHas(
@@ -1216,7 +1222,7 @@ class PayslipService
             $straight_percentage_value = 0;
             foreach($straight_percentage as $value)
             {
-                $straight_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+                $straight_percentage_value += ($gross_pay_before_tax * ($value->amount / 100));
             }
 
             $straight = $straight_without_percentage + $straight_percentage_value;
@@ -1252,15 +1258,16 @@ class PayslipService
                     $start_percentage_after = $threshold_details->start_percentage_after;
                     $end_percentage_at = $threshold_details->end_percentage_at;
 
-                    if ($start_percentage_after <= $categoryOneAmount && $end_percentage_at >= $categoryOneAmount) {
-                        $threshold_value += ($categoryOneAmount * ($percentage_amount / 100));
+                    if ($start_percentage_after <= $gross_pay_before_tax && $end_percentage_at >= $gross_pay_before_tax) {
+                        $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
                     }
                 }
             }
             return round($straight + $threshold_value, 2);
         } elseif($category_id == 6){
             $company = User::where('id', request('employee_id'))->first();
-            $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+            // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
 
             $without_percentage_value =  EmployeeSalaryItem::query()
                 ->whereHas(
@@ -1305,7 +1312,7 @@ class PayslipService
             $with_percentage_value = 0;
             foreach($with_percentage as $value)
             {
-                $with_percentage_value += ($categoryOneAmount * ($value->amount / 100));
+                $with_percentage_value += ($gross_pay_before_tax * ($value->amount / 100));
             }
 
             return round(($without_percentage_value + $with_percentage_value), 2);
