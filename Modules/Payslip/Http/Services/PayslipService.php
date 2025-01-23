@@ -286,16 +286,16 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
             if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
-                // return (int)request('maternity_leave') * $this->getSalaryItemAmount("Maternity Time Rate")->amount;
-                return 0;
+                return (int)request('maternity_leave') * $this->getSalaryItemAmount("Maternity Time Rate")->amount;
+                // return 0;
             }
             if(request('annual_leave') && $salary_item->salaryItemsName?->name == "Holiday Rate"){
-                // return (int)request('annual_leave') * $this->getSalaryItemAmount("Holiday Rate")->amount;
-                return 0;
+                return (int)request('annual_leave') * $this->getSalaryItemAmount("Holiday Rate")->amount;
+                // return 0;
             }
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
-                // return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
-                return 0;
+                return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
+                // return 0;
             }
 
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
@@ -308,8 +308,8 @@ class PayslipService
                 return (int)request('bonus') * $this->getSalaryItemAmount("Bonus")->amount;
             }
             if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
-                // return (int)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour")->amount;
-                return 0;
+                return (int)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour")->amount;
+                // return 0;
             }
             return 0;
         }
