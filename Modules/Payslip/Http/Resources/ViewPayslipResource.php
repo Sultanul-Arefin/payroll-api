@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\LeaveManagement\Entities\UserLeaveDetail;
+use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
@@ -58,24 +59,27 @@ class ViewPayslipResource extends JsonResource
             'annual_leave_quota' => $this->getAnnualLeaveQuota(),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
             // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getTotalAnnualLeaveTaken($this->employee->id)
         ];
     }
 
     function getTotalAnnualLeaveTaken($user_id): mixed {
         $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
         $payslip_details = PayslipDetail::query()
                         ->whereHas(
-                            'payslip', function(Builder $builder){
-                                $builder->whereYear('first_date', Carbon::now()->year)
-                                ->whereBetween('first_date', [
-                                    Carbon::create(Carbon::now()->year, 1, 1), // Start of the year
-                                    Carbon::create(Carbon::now()->year, 12, 31), // End of the year
-                                ])
-                                ->whereBetween('last_date', [
-                                    Carbon::create(Carbon::now()->year, 1, 1),
-                                    Carbon::create(Carbon::now()->year, 12, 31),
-                                ]);
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
                             }
                         )
                         ->whereHas(
