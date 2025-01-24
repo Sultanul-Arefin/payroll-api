@@ -377,6 +377,26 @@ class PayslipService
         return $count;
     }
 
+    public function get_pay_frequency($employee_id)
+    {
+        $employee_associated_amount = EmployeeSalaryItem::query()
+            ->where('employee_id', $employee_id)
+            ->whereHas(
+                'salaryItemsName', function (Builder $builder) {
+                    $builder
+                        ->where('name', 'Wages')
+                        ->where('salary_items_category_id', 1);
+                }
+            )
+            ->sum('amount');
+
+        // CHECK IF HOURLY PAY
+        if($employee_associated_amount <= 0){
+            return Payslip::PAY_FREQUENCY_HOURLY;
+        }
+        return Payslip::PAY_FREQUENCY_MONTHLY;
+    }
+
     public function get_basic_amount($employee_id)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()

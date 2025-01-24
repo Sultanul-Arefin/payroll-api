@@ -287,6 +287,7 @@ class PayslipController extends Controller
             'payment_date' => 'required|date_format:Y-m-d',
         ]);
 
+        $get_pay_frequency = $this->payslipService->get_pay_frequency($request->employee_id);
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
         $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
         if($request->company_id){
@@ -381,12 +382,13 @@ class PayslipController extends Controller
         /**
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-        $calculation = DB::transaction(function () use ($request, $get_basic, $get_category_one_other_values, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked, $get_government_deduction, $get_other_complimentary_deduction, $get_company_contribution_value, $get_employee_contribution_value, $get_other_company_deduction, $get_other_company_contribution) {
+        $calculation = DB::transaction(function () use ($request, $get_pay_frequency, $get_basic, $get_category_one_other_values, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked, $get_government_deduction, $get_other_complimentary_deduction, $get_company_contribution_value, $get_employee_contribution_value, $get_other_company_deduction, $get_other_company_contribution) {
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
                 'company_id' => $request->company_id ?? auth()->user()->company_id,
                 'month' => (new DateTime($request->from_date))->format('F'), // month name
+                'pay_frequency' => $get_pay_frequency,
                 'amount' => $total_amount,
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
