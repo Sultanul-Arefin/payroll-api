@@ -58,8 +58,8 @@ class ViewPayslipResource extends JsonResource
         return [
             'annual_leave_quota' => $this->getAnnualLeaveQuota(),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-            // 'remaining_annual_leave' => $this->getTotalAnnualLeaveTaken($this->employee->id)
+            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)
         ];
     }
 
