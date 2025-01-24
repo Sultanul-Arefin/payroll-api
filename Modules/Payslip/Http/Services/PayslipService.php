@@ -67,6 +67,7 @@ class PayslipService
                 PayslipDetail::create([
                     'payslip_id' => $payslip_id,
                     'salary_item_id' => $value->salary_item_id,
+                    'employee_salary_item_id' => $value->id,
                     'base_amount_or_hours' => $this->getBaseAmountOrHours($value, $payslip_id),
                     'rate' => $this->getRate($value),
                     'amount' => $this->getAmountCalculation($value),
