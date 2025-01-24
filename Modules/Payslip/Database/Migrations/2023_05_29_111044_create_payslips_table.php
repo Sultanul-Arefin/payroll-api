@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('month');
             $table->integer('email_flag')->default(Payslip::EMAIL_NOT_SENT);
             $table->integer('notification_flag')->default(Payslip::NOTIFICATION_NOT_SENT);
+            $table->integer('pay_frequency')->default(Payslip::PAY_FREQUENCY_MONTHLY);
             $table->date('first_date');
             $table->date('last_date');
             $table->date('payment_date');
