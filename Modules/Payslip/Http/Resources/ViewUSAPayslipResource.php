@@ -12,6 +12,7 @@ use Modules\LeaveManagement\Entities\UserLeaveDetail;
 use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
+use Modules\Payslip\Entities\PayslipDetail;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -65,41 +66,96 @@ class ViewUSAPayslipResource extends JsonResource
         return [
             'annual_leave_quota' => $this->getAnnualLeaveQuota(),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id),
+            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id),
+            'remaining_sick_leave' => $this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id),
             'sick_leave_quota' => $this->getSickLeaveQuota(),
             'sick_leave_taken' => $this->getSickLeaveTaken($this->employee->id),
-            'remaining_sick_leave' => $this->getSickLeaveQuota() - $this->getSickLeaveTaken($this->employee->id),
+            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
         ];
     }
 
-    function getAnnualLeaveTaken($user_id): int {
-        $annual_leave_data = LeaveSalaryItems::query()
-            ->whereHas(
-                'salary_items_name', function(Builder $builder){
-                    $builder
-                    ->where(
-                        'name',
-                        'Annual Leave'
-                    )->where(
-                        'company_id',
-                        auth()->user()->company_id
-                    );
-                }
-            )
-            ->first();
-        $data = UserLeave::query()
-                ->where('user_id', $user_id)
-                ->where('leave_type', $annual_leave_data->salary_items_id)
-                ->where('status', UserLeave::APPROVED)
-                ->get();
-        $count = 0;
-        foreach($data as $value){
-            $details = UserLeaveDetail::query()
-                ->where('user_leaves_id', $value->id)
-                ->count();
-            $count += $details;
+    function getTotalAnnualLeaveTaken($user_id): mixed {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Holiday Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_annual_leave = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_annual_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
-        return $count;
+        return ceil($total_annual_leave / $working_hours_per_day);
+    }
+
+    function getAnnualLeaveTaken($user_id): mixed {
+        // $payslip_details = $this->payslip_details;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder){
+                                $builder->where('id', $this->id);
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Holiday Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_annual_leave = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_annual_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_annual_leave / $working_hours_per_day);
+        
     }
 
     function getAnnualLeaveQuota(): int {
@@ -120,49 +176,106 @@ class ViewUSAPayslipResource extends JsonResource
         return $data->no_of_days;
     }
 
-    function getSickLeaveTaken($user_id): int
-            {
-                $sick_leave_data = LeaveSalaryItems::query()
-                    ->whereHas(
-                        'salary_items_name',
-                        function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Sick Leave')
-                                ->where('company_id', auth()->user()->company_id);
-                        }
-                    )
-                    ->first();
-
-                $data = UserLeave::query()
-                    ->where('user_id', $user_id)
-                    ->where('leave_type', $sick_leave_data->salary_items_id)
-                    ->where('status', UserLeave::APPROVED)
-                    ->get();
-
-                $count = 0;
-                foreach ($data as $value) {
-                    $details = UserLeaveDetail::query()
-                        ->where('user_leaves_id', $value->id)
-                        ->count();
-                    $count += $details;
-                }
-                return $count;
-            }
-
-function getSickLeaveQuota(): int
+    function getTotalSickLeaveTaken($user_id): mixed {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Paid Sick Leave Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_sick_leave = 0;
+        foreach($payslip_details as $value)
         {
-            $data = LeaveSalaryItems::query()
-                ->whereHas(
-                    'salary_items_name',
-                    function (Builder $builder) {
-                        $builder
-                            ->where('name', 'Sick Leave')
-                            ->where('company_id', auth()->user()->company_id);
-                    }
-                )
-                ->first();
-            return $data->no_of_days;
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_sick_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
+        return ceil($total_sick_leave / $working_hours_per_day);
+    }
+
+    function getSickLeaveTaken($user_id): mixed {
+        // $payslip_details = $this->payslip_details;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder){
+                                $builder->where('id', $this->id);
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Paid Sick Leave Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_sick_leave = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_sick_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_sick_leave / $working_hours_per_day);
+        
+    }
+
+    function getSickLeaveQuota(): int {
+        $data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Sick Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        return $data->no_of_days;
+    }
 
    
 
