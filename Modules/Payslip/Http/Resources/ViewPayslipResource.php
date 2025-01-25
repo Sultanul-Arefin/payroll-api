@@ -324,12 +324,13 @@ class ViewPayslipResource extends JsonResource
                 [
                     'hours' => $this->hours_worked,
                     'overtime_hours' => 0, // calculate full working hours & get overtime
-                    'total_fixed_pay' => $this->wages - $this->leave_deduction,
+                    'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
                     'taxable_allowances' => $this->taxable_allowance,
                     'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
-                    'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+                    'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
+                    'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance
                     'ytd_tax_paid' => 0,
+                    'tax_amount' => $this->tax_value + $this->post_tax_value,
                     'total_staff_contribution' => $this->total_employee_deduction,
                     'total_company_contribution' => $this->company_contribution,
                     'total_staff_cost' => $this->net_pay,
