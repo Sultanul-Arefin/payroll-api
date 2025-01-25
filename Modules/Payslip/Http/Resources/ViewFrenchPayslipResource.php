@@ -267,27 +267,18 @@ class ViewFrenchPayslipResource extends JsonResource
 
     public function get_payslip_details($payslip_details){
         foreach($payslip_details as $payslip_detail){
-            if($payslip_detail?->salary_item?->salaryItemsCategory?->id == 1 || $payslip_detail?->salary_item?->salaryItemsCategory?->id == 2 || $payslip_detail?->salary_item?->salaryItemsCategory?->id == 3){
-                $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
-                $payslip_detail->rate = $payslip_detail->rate;
-                $payslip_detail->amount = $payslip_detail->amount;
-                if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
-                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
-                } else {
-                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
-                }
+            $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+            $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+            $payslip_detail->rate = $payslip_detail->rate;
+            $payslip_detail->amount = $payslip_detail->amount;
+            if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+            } else {
+                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
             }
 
             // unset these keys from the response
-            unset(
-                $payslip_detail->salary_item,
-                $payslip_detail->id,
-                $payslip_detail->created_at,
-                $payslip_detail->updated_at,
-                $payslip_detail->payslip_id,
-                $payslip_detail->salary_item_id
-            );
+            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return $payslip_details;
     }

@@ -495,7 +495,7 @@ class PayslipController extends Controller
                     ]
                 ),
                 'company_info' => $payslip?->employee?->company,
-                'payslip_info' => new ViewUKPayslipResource($payslip),
+                'payslip_info' => new ViewFrenchPayslipResource($payslip),
             ]
         );
     }
