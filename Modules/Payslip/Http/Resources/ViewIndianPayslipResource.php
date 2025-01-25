@@ -286,13 +286,13 @@ class ViewIndianPayslipResource extends JsonResource
                             'employee_salary_item', function(Builder $builder){
                                 $builder->whereHas(
                                     'salaryItemsName', function(Builder $builder){
-                                        $builder->where('name', 'like', '%' . 'Absent Rate' . '%');
+                                        $builder->where('name', 'like', '%' . 'Absent' . '%');
                                     }
                                 );
                             }
                         )
                         ->get();
-        $total_sick_leave = 0;
+        $total_lop_day = 0;
         foreach($payslip_details as $value)
         {
             // Get "base_amount_or_hours" and remove "hours"
@@ -301,12 +301,12 @@ class ViewIndianPayslipResource extends JsonResource
             // Convert to numeric value
             $numericBaseAmount = (float)$baseAmount;
 
-            $total_sick_leave += $numericBaseAmount;
+            $total_lop_day += $numericBaseAmount;
 
             // Calculate the value (base * rate)
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
-        return ceil($total_sick_leave / $working_hours_per_day);
+        return ceil($total_lop_day / $working_hours_per_day);
         
     }
 
