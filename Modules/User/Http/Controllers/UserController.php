@@ -129,12 +129,12 @@ class UserController extends Controller
         }
         try {
 
-            if ($request->country_id == '232') {
-                $request->validate([
-                    'state' => 'required|string|max:255',
-                    'region' => 'required|string|max:255',
-                ]);
-            }
+            // if ($request->country_id == '232') {
+            //     $request->validate([
+            //         'state' => 'required|string|max:255',
+            //         'region' => 'required|string|max:255',
+            //     ]);
+            // }
 
             if ($request->country_id == '100') {
                 $request->validate([
@@ -143,6 +143,8 @@ class UserController extends Controller
                     'esi_no' => 'nullable|string|max:255',
                 ]);
             }
+
+            
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -187,6 +189,8 @@ class UserController extends Controller
                     'pf_no'    =>$request->pf_no ?? $request->pf_no,
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
                     'national_insurance_number' => $request->national_insurance_number ?? $request->national_insurance_number,
+                    'ni_category'    =>$request->ni_category ?? $request->ni_category,
+
                 ]);
 
                 $log_designation_department_salary = $this->storeActivityLog($user, $request->all());
@@ -503,12 +507,12 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
 
-        if ($request->country_id == '232') {
-            $request->validate([
-                'state' => 'required|string|max:255',
-                'region' => 'required|string|max:255',
-            ]);
-        }
+        // if ($request->country_id == '232') {
+        //     $request->validate([
+        //         'state' => 'required|string|max:255',
+        //         'region' => 'required|string|max:255',
+        //     ]);
+        // }
 
         if ($request->country_id == '100') {
             $request->validate([
@@ -570,6 +574,7 @@ class UserController extends Controller
                 'pf_no'    =>$request->pf_no ?? $request->pf_no,
                 'esi_no'    =>$request->esi_no ?? $request->esi_no,
                 'national_insurance_number'=>$request->national_insurance_number ? $request->national_insurance_number : $user->user_details?->national_insurance_number,
+                'ni_category'    =>$request->ni_category ?? $request->ni_category,
             ]);
 
             $allFileArr = [];
