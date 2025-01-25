@@ -196,7 +196,7 @@ class ViewUKPayslipResource extends JsonResource
                             'employee_salary_item', function(Builder $builder){
                                 $builder->whereHas(
                                     'salaryItemsName', function(Builder $builder){
-                                        $builder->where('name', 'like', '%' . 'Holiday Rate' . '%');
+                                        $builder->where('name', 'like', '%' . 'Paid Sick Leave Rate' . '%');
                                     }
                                 );
                             }
