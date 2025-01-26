@@ -1014,12 +1014,13 @@ class PayslipService
     // employee-salary-items-calculation
     public function getAmountForEmployee($category_id, $employee_id)
     {
+        $user = User::where('id', $employee_id)->first();
         if ($category_id == 7) {
             $employee_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id, $user) {
                         $builder
-                            ->where('company_id', auth()->user()->company_id)
+                            ->where('company_id', $user->company_id)
                             ->where('employee_id', $employee_id)
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
@@ -1049,9 +1050,9 @@ class PayslipService
             // GET CATEGORY ID 8 DEDUCTION VALUE
             $other_complimentary_deduction = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id, $user) {
                         $builder
-                            ->where('company_id', auth()->user()->company_id)
+                            ->where('company_id', $user->company_id)
                             ->where('employee_id', $employee_id)
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
@@ -1095,7 +1096,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
         } elseif ($category_id == 1) {
@@ -1122,7 +1123,7 @@ class PayslipService
                             );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get()->sum('amount');
             if($amount <= 0){
@@ -1189,7 +1190,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('employee_id', request('employee_id'))
                 ->get();
             return $count * ($absent_unpaid_value->count() > 0 ? $absent_unpaid_value[0]->amount : 0);
@@ -1209,7 +1210,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('is_percentage', 0)
                 ->where(function ($query) {
                     $query->where('employee_id', request('employee_id'))
@@ -1230,7 +1231,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('is_percentage', 1)
                 ->where(function ($query) {
                     $query->where('employee_id', request('employee_id'))
@@ -1259,7 +1260,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('is_percentage', 1)
                 ->where(function ($query) {
                     $query->where('employee_id', request('employee_id'))
@@ -1300,7 +1301,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('is_percentage', 0)
                 ->where(function ($query) {
                     $query->where('employee_id', request('employee_id'))
@@ -1320,7 +1321,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where('is_percentage', 1)
                 ->where(function ($query) {
                     $query->where('employee_id', request('employee_id'))
@@ -1348,7 +1349,7 @@ class PayslipService
                         );
                     }
                 )
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', $user->company_id)
                 ->where(function ($query) use($employee_id){
                     $query->where('employee_id', $employee_id)
                           ->orWhere(function ($query) {
