@@ -51,12 +51,14 @@ class DepartmentWisePayslipJob implements ShouldQueue
         //     ->send(new SendPassword($this->username, $this->password));
         $users = User::where('department_id', $this->department_id)->where('company_id', $this->auth_user->company_id)->get();
         foreach($users as $user){
+
             $request = new Request([
                 'employee_id' => $user->id,
                 'from_date' => $this->from_date,
                 'to_date' => $this->to_date,
                 'payment_date' => $this->payment_date,
-                'company_id' => $this->auth_user->company_id,'working_hours' => $this->get_hours_worked($user->id, request('from_date'), request('to_date')),
+                'company_id' => $this->auth_user->company_id,
+                'working_hours' => $this->get_hours_worked($user->id, request('from_date'), request('to_date')),
                 'maternity_leave' => $this->getLeaveData($user->id, "maternity_leave"),
                 'annual_leave' => $this->getLeaveData($user->id, "annual_leave"),
                 'sick_leave' => $this->getLeaveData($user->id, "sick_leave"),
