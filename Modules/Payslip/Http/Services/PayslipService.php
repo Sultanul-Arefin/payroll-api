@@ -1232,7 +1232,7 @@ class PayslipService
                 )
                 ->where('company_id', $user->company_id)
                 ->where('is_percentage', 1)
-                ->where(function ($query) {
+                ->where(function ($query) use($employee_id){
                     $query->where('employee_id', $employee_id)
                         ->orWhere(function ($query) {
                             $query->whereNull('employee_id')
