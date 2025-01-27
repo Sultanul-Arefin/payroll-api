@@ -5,6 +5,7 @@ namespace Modules\Payslip\Http\Services;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Modules\Attendance\Entities\Attendance;
 use Modules\EmployeeSalaryItems\Entities\DeductionDetails;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
@@ -1125,6 +1126,11 @@ class PayslipService
                 ->where('company_id', $user->company_id)
                 ->where('employee_id', $employee_id)
                 ->get()->sum('amount');
+            Log::info('log', [
+                'user' => $user,
+                'company' => $user->company_id,
+                'user_id' => $employee_id
+            ]);
             if($amount <= 0){
                 $hourly_amount = EmployeeSalaryItem::query()
                     ->where('employee_id', $employee_id)
