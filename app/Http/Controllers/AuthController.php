@@ -95,6 +95,7 @@ class AuthController extends Controller
                 ],
                 'packageId' => auth()->user()->company?->associated_package?->package_id,
                 'role' => auth()->user()->role_id,
+                'working_hours_per_day' => auth()->user()->company?->working_hours_per_day
             ],
             message: 'User logged in successful'
         );

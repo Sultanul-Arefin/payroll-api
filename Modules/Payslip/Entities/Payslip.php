@@ -21,6 +21,9 @@ class Payslip extends Model
 
     public const NOTIFICATION_NOT_SENT = 0;
 
+    public const PAY_FREQUENCY_MONTHLY = 1;
+    public const PAY_FREQUENCY_HOURLY = 2;
+
     protected $fillable = [
         'employee_id',
         'company_id',
@@ -28,11 +31,13 @@ class Payslip extends Model
         // 'amount',
         'email_flag',
         'notification_flag',
+        'pay_frequency',
         'first_date',
         'last_date',
         'payment_date',
         'hours_worked',
         'wages',
+        'additional_pay',
         'leave_deduction',
         'total_pay_value',
         'taxable_allowance',

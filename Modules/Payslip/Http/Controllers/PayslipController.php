@@ -21,6 +21,8 @@ use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
+use Modules\Payslip\Http\Resources\LeavesDataResource;
+use Modules\Payslip\Http\Resources\SalaryItemsResource;
 use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
@@ -51,6 +53,21 @@ class PayslipController extends Controller
         );
     }
 
+    public function leaves_data(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required',
+            'from_date' => 'required|date|date_format:Y-m-d',
+            'to_date' => 'required|date|date_format:Y-m-d'
+        ]);
+
+        $user = User::where('id', $request->employee_id)->firstOrFail();
+
+        return apiResponse(
+            data: new LeavesDataResource($user)
+        );
+    }
+
     /**
      * Get All Salary Items to an Employee Starts
      */
@@ -63,6 +80,14 @@ class PayslipController extends Controller
             'payment_date' => 'required|date|date_format:Y-m-d',
         ]);
         $user = User::where('id', request('employee_id'))->first();
+
+        return apiResponse(
+            data: SalaryItemsResource::collection(
+                $user->salary_items->filter(function ($item) {
+                    return !in_array($item->salaryItemsName->name, ['Annual Leave', 'Sick Leave', 'Unpaid Sick Leave', 'Absent']);
+                })
+            )
+        );
 
         return apiResponse(
             data: $user->salary_items?->map(function ($s_items) {
@@ -224,13 +249,32 @@ class PayslipController extends Controller
             $salary_category
         )->additional([
             'meta' => [
-                'total_pay' => $this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id),
-                'gross_pay_before_tax' => ($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id),
-                'gross_pay_after_tax' => (($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id)),
-                'pay_due_before_deduction' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
-                'net_pay' => (((($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id)) - $this->payslipService->getAmountForEmployee(7, $request->employee_id),
+                'total_pay' => ($this->payslipService->getAmountForEmployee(1, $request->employee_id) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)),
+                'category_one_other_values' => $this->payslipService->getCategoryOneOtherValues(1, $request->employee_id),
+                'gross_pay_before_tax' => (($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id),
+                'gross_pay_after_tax' => ((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id)),
+                '7' => $this->payslipService->getAmountForEmployee(7, $request->employee_id), // for testing specific category value
+                'pay_due_before_deduction' => (((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id),
+                'net_pay' => ((((($this->payslipService->getAmountForEmployee(1, $request->employee_id)) - $this->payslipService->getAmountForEmployee(2, $request->employee_id)) + $this->payslipService->getAmountForEmployee(3, $request->employee_id)) - ($this->payslipService->getAmountForEmployee(5, $request->employee_id) + $this->payslipService->getAmountForEmployee(6, $request->employee_id))) + $this->payslipService->getAmountForEmployee(4, $request->employee_id)) - $this->payslipService->getAmountForEmployee(7, $request->employee_id),
             ],
         ]);
+    }
+
+    public function getCategoryOneOtherValues($employee_id)
+    {
+        $overtime = 0;
+        if(request('overtime')){
+            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate")->amount;
+        }
+        $double_overtime = 0;
+        if(request('double_overtime')){
+            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate")->amount;
+        }
+        $bonus = 0;
+        if(request('bonus')){
+            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus")->amount;
+        }
+        return $overtime + $double_overtime + $bonus;
     }
 
 
@@ -243,7 +287,9 @@ class PayslipController extends Controller
             'payment_date' => 'required|date_format:Y-m-d',
         ]);
 
+        $get_pay_frequency = $this->payslipService->get_pay_frequency($request->employee_id);
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
+        $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
         if($request->company_id){
             $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
         } else{
@@ -305,7 +351,7 @@ class PayslipController extends Controller
             $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, auth()->user()->company_id);
         }
 
-        $total_pay = $get_basic - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic
+        $total_pay = ($get_basic + $get_category_one_other_values) - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic & other values
         $gross_pay_before_tax = $total_pay + $get_taxable_allowance; // have to add previous value with taxable allowance
         $gross_pay_after_tax = $gross_pay_before_tax - ($get_income_taxes + $get_additional_taxes_tax_top_up); // have to deduct (income tax & additional taxes tax top up) from previous value
         $pay_due_before_deductions = $gross_pay_after_tax + $get_non_taxable_allowance; // have to add previous value with non taxable allowance
@@ -336,18 +382,20 @@ class PayslipController extends Controller
         /**
          * $get_total_deduction_amount_for_attendance = $this->payslipService->get_total_deduction_amount_for_attendance($request->employee_id);
          */
-        $calculation = DB::transaction(function () use ($request, $get_basic, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked, $get_government_deduction, $get_other_complimentary_deduction, $get_company_contribution_value, $get_employee_contribution_value, $get_other_company_deduction, $get_other_company_contribution) {
+        $calculation = DB::transaction(function () use ($request, $get_pay_frequency, $get_basic, $get_category_one_other_values, $get_staff_deduction_sick_absent, $total_pay, $get_taxable_allowance, $gross_pay_before_tax, $gross_pay_after_tax, $get_income_taxes, $get_additional_taxes_tax_top_up, $get_non_taxable_allowance, $pay_due_before_deductions, $total_amount, $hours_worked, $get_government_deduction, $get_other_complimentary_deduction, $get_company_contribution_value, $get_employee_contribution_value, $get_other_company_deduction, $get_other_company_contribution) {
             /** create payslip */
             $payslip = Payslip::create([
                 'employee_id' => $request->employee_id,
                 'company_id' => $request->company_id ?? auth()->user()->company_id,
                 'month' => (new DateTime($request->from_date))->format('F'), // month name
+                'pay_frequency' => $get_pay_frequency,
                 'amount' => $total_amount,
                 'first_date' => $request->from_date,
                 'last_date' => $request->to_date,
                 'payment_date' => $request->payment_date,
                 'hours_worked' => $hours_worked,
                 'wages' => $get_basic,
+                'additional_pay' => $get_category_one_other_values,
                 'leave_deduction' => $get_staff_deduction_sick_absent,
                 'total_pay_value' => $total_pay,
                 'taxable_allowance' => $get_taxable_allowance,
@@ -415,7 +463,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -428,7 +476,7 @@ class PayslipController extends Controller
                         'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );
@@ -439,6 +487,7 @@ class PayslipController extends Controller
         return apiResponse(
             data: [
                 'user_info' => array_merge(
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
                     $payslip?->employee->toArray(),
                     [
                         'department' => $payslip?->employee?->department?->department_name,
@@ -464,7 +513,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','user_phone', 'joining_date','ni_category', 'national_insurance_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],
@@ -478,7 +527,7 @@ class PayslipController extends Controller
                     ]
 
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewUKPayslipResource($payslip),
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date',])
@@ -501,7 +550,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],
@@ -515,7 +564,7 @@ class PayslipController extends Controller
                     ]
 
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','company_address', 'government_employee_no', 'company_website', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewUSAPayslipResource($payslip),
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date','created_at'])
@@ -537,7 +586,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date','bank_name','bank_iban_or_account_no', 'esi_no', 'pf_no','uan_no']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','tax_number','social_security_number','pension_number','visa_number','work_permit_number','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','bank_bic_or_swift_code','state','region', 'user_phone', 'joining_date','bank_name','bank_iban_or_account_no', 'esi_no', 'pf_no','uan_no']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -551,7 +600,7 @@ class PayslipController extends Controller
                         'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewIndianPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date','net_pay'])
@@ -573,7 +622,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -586,7 +635,7 @@ class PayslipController extends Controller
                         'designation' => $payslip?->employee?->designation?->name,
                     ]
                 ),
-                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email', 'government_employee_no', 'company_website', 'company_address']),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewAfricanPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );

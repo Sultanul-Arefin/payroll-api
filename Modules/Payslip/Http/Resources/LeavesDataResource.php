@@ -1,98 +1,60 @@
 <?php
 
-namespace Modules\Payslip\Http\Jobs;
+namespace Modules\Payslip\Http\Resources;
 
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Request;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
+use JsonSerializable;
 use Modules\Attendance\Entities\Attendance;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\LeaveManagement\Entities\UserLeaveDetail;
-use Modules\Payslip\Http\Controllers\PayslipController;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
-use Modules\User\Emails\SendPassword;
 
-class DepartmentWisePayslipJob implements ShouldQueue
+class LeavesDataResource extends JsonResource
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $auth_user;
-    public $department_id;
-    public $from_date;
-    public $to_date;
-    public $payment_date;
-
     /**
-     * Create a new message instance.
+     * Transform the resource into an array.
+     *
+     * @param  Request  $request
+     * @return array|Arrayable|JsonSerializable
      */
-    public function __construct($auth_user, $department_id, $from_date, $to_date, $payment_date)
+    public function toArray($request)
     {
-        $this->auth_user = $auth_user;
-        $this->department_id = $department_id;
-        $this->from_date = $from_date;
-        $this->to_date = $to_date;
-        $this->payment_date = $payment_date;
-    }
-
-    /**
-     * Execute the job.
-     */
-    public function handle(): void
-    {
-        // Mail::to($this->email)
-        //     ->send(new SendPassword($this->username, $this->password));
-        $users = User::where('department_id', $this->department_id)->where('company_id', $this->auth_user->company_id)->get();
-        foreach($users as $user){
-
-            $request = new Request([
-                'employee_id' => $user->id,
-                'from_date' => $this->from_date,
-                'to_date' => $this->to_date,
-                'payment_date' => $this->payment_date,
-                'company_id' => $this->auth_user->company_id,
-                'working_hours' => $this->get_hours_worked($user->id, request('from_date'), request('to_date')),
-                'maternity_leave' => $this->getLeaveData($user->id, "maternity_leave"),
-                'annual_leave' => $this->getLeaveData($user->id, "annual_leave"),
-                'sick_leave' => $this->getLeaveData($user->id, "sick_leave"),
-                'absent' => $this->getLeaveData($user->id, "absent"),
-                'unpaid_sick_leave' => $this->getLeaveData($user->id, "unpaid_sick_leave"),
-                'overtime' => $this->getLeaveData($user->id, "overtime"),
-                'double_overtime' => $this->getLeaveData($user->id, "double_overtime"),
-                'recuperated_hours' => $this->getLeaveData($user->id, "recuperated_hours"),
-                'bonus' => $this->getLeaveData($user->id, "bonus")
-            ]);
-            app(PayslipController::class)->run_payslip($request);
-            // dump($user->id);
-        }
-        // dump($this->auth_user->company_id);
-        // dump([1,2,3,4]);
+        return [
+            'working_hours' => $this->get_hours_worked($this->id, request('from_date'), request('to_date')),
+            'maternity_leave' => $this->getLeaveData($this->id, "maternity_leave"),
+            'annual_leave' => $this->getLeaveData($this->id, "annual_leave"),
+            'sick_leave' => $this->getLeaveData($this->id, "sick_leave"),
+            'absent' => $this->getLeaveData($this->id, "absent"),
+            'unpaid_sick_leave' => $this->getLeaveData($this->id, "unpaid_sick_leave"),
+            'overtime' => $this->getLeaveData($this->id, "overtime"),
+            'double_overtime' => $this->getLeaveData($this->id, "double_overtime"),
+            'recuperated_hours' => $this->getLeaveData($this->id, "recuperated_hours"),
+            'bonus' => $this->getLeaveData($this->id, "bonus")
+        ];
     }
 
     public function getLeaveData($employee_id, $leave)
     {
-        $user = User::where('id', $employee_id)->first();
+        $user = auth()->user();
         $working_hours_per_day = $user->company?->working_hours_per_day;
 
         if($leave == "annual_leave")
         {
             $annual_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
-                    'salary_items_name', function(Builder $builder) use($user){
+                    'salary_items_name', function(Builder $builder){
                         $builder
                         ->where(
                             'name',
                             'Annual Leave'
                         )->where(
                             'company_id',
-                            $user->company_id
+                            auth()->user()->company_id
                         );
                     }
                 )
@@ -129,14 +91,14 @@ class DepartmentWisePayslipJob implements ShouldQueue
         {
             $sick_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
-                    'salary_items_name', function(Builder $builder)use($user){
+                    'salary_items_name', function(Builder $builder){
                         $builder
                         ->where(
                             'name',
                             'Sick Leave'
                         )->where(
                             'company_id',
-                            $user->company_id
+                            auth()->user()->company_id
                         );
                     }
                 )
@@ -172,14 +134,14 @@ class DepartmentWisePayslipJob implements ShouldQueue
         {
             $absent_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
-                    'salary_items_name', function(Builder $builder)use($user){
+                    'salary_items_name', function(Builder $builder){
                         $builder
                         ->where(
                             'name',
                             'Absent'
                         )->where(
                             'company_id',
-                            $user->company_id
+                            auth()->user()->company_id
                         );
                     }
                 )
@@ -214,14 +176,14 @@ class DepartmentWisePayslipJob implements ShouldQueue
         } elseif($leave == "unpaid_sick_leave"){
             $unpaid_sick_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
-                    'salary_items_name', function(Builder $builder)use($user){
+                    'salary_items_name', function(Builder $builder){
                         $builder
                         ->where(
                             'name',
                             'Unpaid Sick Leave'
                         )->where(
                             'company_id',
-                            $user->company_id
+                            auth()->user()->company_id
                         );
                     }
                 )

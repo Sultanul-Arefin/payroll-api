@@ -16,7 +16,8 @@ class SalaryItemsCategoryService
                 'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
                     $builder
                         ->where('company_id', auth()->user()->company_id)
-                        ->where('salary_items_category_id', $salary_items_category_id);
+                        ->where('salary_items_category_id', $salary_items_category_id)
+                        ->whereNotIn('name', ['Annual Leave', 'Sick Leave']);
                 }
             )
             ->latest()
