@@ -264,15 +264,15 @@ class PayslipController extends Controller
     {
         $overtime = 0;
         if(request('overtime')){
-            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate")->amount;
+            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = 0;
         if(request('double_overtime')){
-            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate")->amount;
+            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = 0;
         if(request('bonus')){
-            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus")->amount;
+            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
         return $overtime + $double_overtime + $bonus;
     }
@@ -291,15 +291,15 @@ class PayslipController extends Controller
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
         $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
         if($request->company_id){
-            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
+            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
-        if($request->company_id){
-            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
-        } else{
-            $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
-        }
+        // if($request->company_id){
+        //     $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id);
+        // } else{
+        //     $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, auth()->user()->company_id);
+        // }
         if($request->company_id){
             $get_taxable_allowance = $this->payslipService->get_taxable_allowance_amount($request->employee_id, $request->company_id);
         } else{
@@ -416,9 +416,9 @@ class PayslipController extends Controller
 
             /** add the payslip details */
             if($request->company_id){
-                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, $request->company_id);
+                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, $request->company_id, $request->from_date, $request->to_date);
             } else{
-                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, auth()->user()->company_id);
+                $this->payslipService->add_payslip_details($payslip->id, $request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
             }
             /** notification to user */
             // $payslip->employee->notify(new PayslipCreatedNotificationToUser(auth()->user(), $payslip));
