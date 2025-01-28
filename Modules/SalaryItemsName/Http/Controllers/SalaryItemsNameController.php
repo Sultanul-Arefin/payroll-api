@@ -61,6 +61,12 @@ class SalaryItemsNameController extends Controller
                 ]);
             }
 
+            if (isset($request->tax_type) && $request->tax_type == "straight") {
+                $update_item = $store->update([
+                    'is_threshold' => 1
+                ]);
+            }
+
             return apiResponse(
                 data: $store,
                 message: 'Salary Items Stored Successfully',
