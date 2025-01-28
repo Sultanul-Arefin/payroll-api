@@ -1265,7 +1265,7 @@ class PayslipService
     }
 
     // employee-salary-items-calculation
-    public function getAmountForEmployee($category_id, $employee_id, $from_date=null, $to_date=null)
+    public function getAmountForEmployee($category_id, $employee_id, $from_date="", $to_date="")
     {
         $user = User::where('id', $employee_id)->first();
         if ($category_id == 7) {
@@ -1410,12 +1410,12 @@ class PayslipService
             if(request('absent')){
                 $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             } else{
-                $total += $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+                $total += (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             }
             if(request('unpaid_sick_leave')){
                 $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             } else{
-                $total += $this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+                $total += (int)$this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             }
             return $total; // this calculation is done from payload when creating payslips.
 
