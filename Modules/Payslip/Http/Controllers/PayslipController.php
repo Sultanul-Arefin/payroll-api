@@ -311,44 +311,44 @@ class PayslipController extends Controller
             $get_non_taxable_allowance = $this->payslipService->get_non_taxable_allowance_amount($request->employee_id, auth()->user()->company_id);
         }
         if($request->company_id){
-            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, $request->company_id);
+            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, auth()->user()->company_id);
+            $get_income_taxes = $this->payslipService->get_income_taxes_amount($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
         if($request->company_id){
-            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, $request->company_id);
+            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, auth()->user()->company_id);
+            $get_additional_taxes_tax_top_up = $this->payslipService->get_additional_taxes_tax_top_up_amount($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
         if($request->company_id){
-            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, $request->company_id); // employee deduction total
+            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date); // employee deduction total
         } else{
-            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, auth()->user()->company_id); // employee deduction total
+            $get_government_deduction = $this->payslipService->government_deduction_amount($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date); // employee deduction total
         }
         if($request->company_id){
-            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, $request->company_id); // company contribution total
+            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date); // company contribution total
         } else{
-            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, auth()->user()->company_id); // company contribution total
+            $get_other_complimentary_deduction = $this->payslipService->other_complimentary_deduction_amount($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date); // company contribution total
         }
         if($request->company_id){
-            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, $request->company_id);
+            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, auth()->user()->company_id);
+            $get_company_contribution_value = $this->payslipService->company_contribution_value($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
         if($request->company_id){
-            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, $request->company_id);
+            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, auth()->user()->company_id);
+            $get_employee_contribution_value = $this->payslipService->employee_contribution_value($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
         if($request->company_id){
-            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, $request->company_id);
+            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, auth()->user()->company_id);
+            $get_other_company_deduction = $this->payslipService->other_company_deduction($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
         if($request->company_id){
-            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, $request->company_id);
+            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
-            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, auth()->user()->company_id);
+            $get_other_company_contribution = $this->payslipService->other_company_contribution($request->employee_id, auth()->user()->company_id, $request->from_date, $request->to_date);
         }
 
         $total_pay = ($get_basic + $get_category_one_other_values) - $get_staff_deduction_sick_absent; // have to deduct unpaid leave from basic & other values
