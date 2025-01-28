@@ -54,6 +54,9 @@ class PayslipService
                                     //         $builder->whereNotIn('salary_items_category_id', [1,2]);
                                     //     }
                                     // )
+                                    ->whereHas('salaryItemsName', function (Builder $builder) {
+                                        $builder->whereNotIn('name', ['Annual Leave', 'Sick Leave']);
+                                    })
             ->whereNotNull('amount')
             ->where('company_id', $company_id)
             ->where(function ($query) use($employee_id){
