@@ -300,7 +300,12 @@ class ViewPayslipResource extends JsonResource
     }
 
     public function get_payslip_details($payslip_details){
-        foreach($payslip_details as $payslip_detail){
+        // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
+        $filtered_details = $payslip_details->filter(function ($payslip_detail) {
+            return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
+        });
+
+        foreach($filtered_details as $payslip_detail){
             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
             $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
             $payslip_detail->rate = $payslip_detail->rate;
