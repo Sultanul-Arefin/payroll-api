@@ -1406,17 +1406,35 @@ class PayslipService
             }
             return round(($amount + $overtime + $double_overtime + $bonus), 2);
         } elseif($category_id == 2){
+            Log::info('a', [
+                '1' => (int)request('absent'),
+                '2' => $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount,
+                '3' => (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date)
+            ]);
             $total = 0;
             if(request('absent')){
                 $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             } else{
+                Log::info('b', [
+                    '1' => (int)request('absent'),
+                    '2' => $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount,
+                    '3' => (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date)
+                ]);
                 $total += (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             }
             if(request('unpaid_sick_leave')){
                 $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             } else{
+                Log::info('c', [
+                    '1' => (int)request('absent'),
+                    '2' => $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount,
+                    '3' => (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date)
+                ]);
                 $total += (int)$this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             }
+            Log::info('d', [
+                '1' => $total
+            ]);
             return $total; // this calculation is done from payload when creating payslips.
 
             $unpaid_absent_count = UserLeave::query()
