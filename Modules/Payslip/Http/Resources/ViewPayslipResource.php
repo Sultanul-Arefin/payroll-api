@@ -71,12 +71,12 @@ class ViewPayslipResource extends JsonResource
                             'payslip', function(Builder $builder) use($user_id, $payslip_year){
                                 $builder
                                     ->whereBetween('first_date', [
-                                        date("${payslip_year}-1-1"), // Start of the year
-                                        date("${payslip_year}-12-31"), // End of the year
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
                                     ])
                                     ->whereBetween('last_date', [
-                                        date("${payslip_year}-1-1"), // Start of the year
-                                        date("${payslip_year}-12-31"), // End of the year
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
                                     ])
                                     ->where('employee_id', $user_id)
                                     ->orderBy('created_at', 'ASC');
@@ -317,19 +317,80 @@ class ViewPayslipResource extends JsonResource
         return $payslip_details;
     }
 
+    public function getOvertimeHours($payslip_details)
+    {
+        $overtime = 0;
+        foreach($payslip_details as $value)
+        {
+            if ($value->pay_details == "Overtime Rate") {
+                $overtime = $value?->base_amount_or_hours;
+            }
+        }
+        return $overtime;
+    }
+
+    public function getTotalOvertimeHours($payslip_details)
+    {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+
+        $user_id = $this->employee_id;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Overtime Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_overtime_hours = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_overtime_hours += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_overtime_hours / $working_hours_per_day);
+    }
+
     public function overall_calculation()
     {
         return [
             'monthly' => [
                 [
                     'hours' => $this->hours_worked,
-                    'overtime_hours' => 0, // calculate full working hours & get overtime
+                    'overtime_hours' => $this->getOvertimeHours($this->payslip_details), // calculate full working hours & get overtime
                     'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
                     'taxable_allowances' => $this->taxable_allowance,
                     'non_taxable_allowances' => $this->non_taxable_allowance,
                     'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
                     'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance
-                    'ytd_tax_paid' => 0,
+                    'ytd_tax_paid' => $this->tax_value + $this->post_tax_value,
                     'tax_amount' => $this->tax_value + $this->post_tax_value,
                     'total_staff_contribution' => $this->total_employee_deduction,
                     'total_company_contribution' => $this->company_contribution,
@@ -339,21 +400,93 @@ class ViewPayslipResource extends JsonResource
             ],
             'yearly' => [
                 [
-                    'hours' => $this->hours_worked,
-                    'overtime_hours' => 0,
-                    'total_fixed_pay' => $this->wages - $this->leave_deduction,
-                    'taxable_allowances' => $this->taxable_allowance,
-                    'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
-                    'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-                    'ytd_tax_paid' => 0,
-                    'total_staff_contribution' => $this->total_employee_deduction,
-                    'total_company_contribution' => $this->company_contribution,
-                    'total_staff_cost' => $this->net_pay,
-                    'total_net_pay' => $this->net_pay,
+                    'hours' => $this->get_yearly_data("hours")['hours'],
+                    'overtime_hours' => $this->getTotalOvertimeHours($this->payslip_details),
+                    'total_fixed_pay' => $this->get_yearly_data("total_fixed_pay")['total_fixed_pay'],
+                    'taxable_allowances' => $this->get_yearly_data("taxable_allowances")['taxable_allowances'],
+                    'non_taxable_allowances' => $this->get_yearly_data("non_taxable_allowances")['non_taxable_allowances'],
+                    'total_gross_pay' => $this->get_yearly_data("total_gross_pay")['total_gross_pay'],
+                    'taxable_gross_pay' => $this->get_yearly_data("taxable_gross_pay")['taxable_gross_pay'],
+                    'ytd_tax_paid' => $this->get_yearly_data("ytd_tax_paid")['ytd_tax_paid'],
+                    'tax_amount' => $this->get_yearly_data("tax_amount")['tax_amount'],
+                    'total_staff_contribution' => $this->get_yearly_data("total_staff_contribution")['total_staff_contribution'],
+                    'total_company_contribution' => $this->get_yearly_data("total_company_contribution")['total_company_contribution'],
+                    'total_staff_cost' => $this->get_yearly_data("total_staff_cost")['total_staff_cost'],
+                    'total_net_pay' => $this->get_yearly_data("total_net_pay")['total_net_pay'],
                 ],
             ],
             'total_net_pay' => $this->net_pay,
         ];
+    }
+
+    public function get_yearly_data($key)
+    {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_data = Payslip::query()
+                                    ->whereBetween('first_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $this->employee->id)
+                                    ->orderBy('created_at', 'ASC')
+                                    ->get();
+        $data['hours'] = 0;
+        $data['overtime_hours'] = 0;
+        $data['total_fixed_pay'] = 0;
+        $data['taxable_allowances'] = 0;
+        $data['non_taxable_allowances'] = 0;
+        $data['total_gross_pay'] = 0;
+        $data['taxable_gross_pay'] = 0;
+        $data['ytd_tax_paid'] = 0;
+        $data['tax_amount'] = 0;
+        $data['total_staff_contribution'] = 0;
+        $data['total_company_contribution'] = 0;
+        $data['total_staff_cost'] = 0;
+        $data['total_net_pay'] = 0;
+        foreach($payslip_data as $value)
+        {
+            if($key == "hours"){
+                $data['hours'] += $value->hours_worked;
+            }
+            if($key == "total_fixed_pay"){
+                $data["total_fixed_pay"] += $value->wages - $value->leave_deduction;
+            }
+            if($key == "taxable_allowances"){
+                $data["taxable_allowances"] += $value->taxable_allowance;
+            }
+            if($key == "non_taxable_allowances"){
+                $data["non_taxable_allowances"] += $value->non_taxable_allowance;
+            }
+            if($key == "total_gross_pay"){
+                $data["total_gross_pay"] += $value->gross_pay_before_tax;
+            }
+            if($key == "taxable_gross_pay"){
+                $data["taxable_gross_pay"] += $value->gross_pay_before_tax - $value->non_taxable_allowance;
+            }
+            if($key == "ytd_tax_paid"){
+                $data["ytd_tax_paid"] += $value->tax_value + $value->post_tax_value;
+            }
+            if($key == "tax_amount"){
+                $data["tax_amount"] += $value->tax_value + $value->post_tax_value;
+            }
+            if($key == "total_staff_contribution"){
+                $data["total_staff_contribution"] += $value->total_employee_deduction;
+            }
+            if($key == "total_company_contribution"){
+                $data["total_company_contribution"] += $value->company_contribution;
+            }
+            if($key == "total_staff_cost"){
+                $data["total_staff_cost"] += $value->net_pay;
+            }
+            if($key == "total_net_pay"){
+                $data["total_net_pay"] += $value->net_pay;
+            }
+        }
+        return $data;
     }
 }
