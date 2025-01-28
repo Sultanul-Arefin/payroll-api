@@ -391,7 +391,7 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 5){
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
 
             if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
 
@@ -419,7 +419,7 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 6){
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $salary_item->company_id, $salary_item->employee_id);
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id) - $this->getAmountForEmployee(2, $salary_item->employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $salary_item->employee_id);
             if($salary_item->is_percentage == 1){
                 return round(($gross_pay_before_tax * ($salary_item->amount / 100)), 2);
             }
@@ -779,10 +779,10 @@ class PayslipService
         return $employee_associated_amount;
     }
 
-    public function get_income_taxes_amount($employee_id, $company_id)
+    public function get_income_taxes_amount($employee_id, $company_id, $from_date, $to_date)
     {
         // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company_id, $employee_id);
-        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
         $straight_without_percentage = EmployeeSalaryItem::query()
             ->whereHas(
                 'salaryItemsName', function (Builder $builder) {
@@ -861,11 +861,11 @@ class PayslipService
         return round($straight + $threshold_value, 2);
     }
 
-    public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id)
+    public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id, $from_date, $to_date)
     {
         $user = User::where('id', $employee_id)->first();
         // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
-        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+        $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
 
         $without_percentage_value =  EmployeeSalaryItem::query()
             ->whereHas(
@@ -916,7 +916,7 @@ class PayslipService
         return round($without_percentage_value + $with_percentage_value, 2);
     }
 
-    public function government_deduction_amount($employee_id, $company_id)
+    public function government_deduction_amount($employee_id, $company_id, $from_date, $to_date)
     {
         // GET VALUE FROM CATEGORY 7
         $employee_contribution = DeductionDetails::query()
@@ -942,7 +942,7 @@ class PayslipService
         $employee_contribution_value = 0;
         foreach($employee_contribution as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $employee_contribution_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
             } else{
@@ -975,7 +975,7 @@ class PayslipService
         $other_company_deduction_value = 0;
         foreach($other_company_deduction as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $other_company_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
             } else{
@@ -986,7 +986,7 @@ class PayslipService
         return $employee_contribution_value + $other_company_deduction_value;
     }
 
-    public function other_complimentary_deduction_amount($employee_id, $company_id)
+    public function other_complimentary_deduction_amount($employee_id, $company_id, $from_date, $to_date)
     {
         // GET VALUE FROM CATEGORY 7
         $company_contribution = DeductionDetails::query()
@@ -1012,7 +1012,7 @@ class PayslipService
         $company_contribution_value = 0;
         foreach($company_contribution as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
             } else{
@@ -1044,7 +1044,7 @@ class PayslipService
         $other_company_contribution_value = 0;
         foreach($other_company_contribution as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $other_company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
             } else{
@@ -1055,7 +1055,7 @@ class PayslipService
         return $company_contribution_value + $other_company_contribution_value;
     }
 
-    public function company_contribution_value($employee_id, $company_id)
+    public function company_contribution_value($employee_id, $company_id, $from_date, $to_date)
     {
         $company_contribution = DeductionDetails::query()
             ->whereHas(
@@ -1080,7 +1080,7 @@ class PayslipService
         $company_contribution_value = 0;
         foreach($company_contribution as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
             } else{
@@ -1090,7 +1090,7 @@ class PayslipService
         return $company_contribution_value;
     }
 
-    public function employee_contribution_value($employee_id, $company_id)
+    public function employee_contribution_value($employee_id, $company_id, $from_date, $to_date)
     {
         $employee_deduction = DeductionDetails::query()
             ->whereHas(
@@ -1115,7 +1115,7 @@ class PayslipService
         $employee_deduction_value = 0;
         foreach($employee_deduction as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $employee_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
             } else{
@@ -1125,7 +1125,7 @@ class PayslipService
         return $employee_deduction_value;
     }
 
-    public function other_company_deduction($employee_id, $company_id)
+    public function other_company_deduction($employee_id, $company_id, $from_date, $to_date)
     {
         $other_company_deduction = DeductionDetails::query()
             ->whereHas(
@@ -1150,7 +1150,7 @@ class PayslipService
         $other_company_deduction_value = 0;
         foreach($other_company_deduction as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $other_company_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
             } else{
@@ -1160,7 +1160,7 @@ class PayslipService
         return $other_company_deduction_value;
     }
 
-    public function other_company_contribution($employee_id, $company_id)
+    public function other_company_contribution($employee_id, $company_id, $from_date, $to_date)
     {
         $other_company_contribution = DeductionDetails::query()
             ->whereHas(
@@ -1185,7 +1185,7 @@ class PayslipService
         $other_company_contribution_value = 0;
         foreach($other_company_contribution as $value)
         {
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
             if($value->employee_salary_item->is_percentage == 1){
                 $other_company_contribution_value += round($gross_pay_before_tax * ($value->government_or_company_amount / 100), 2);
             } else{
@@ -1265,7 +1265,7 @@ class PayslipService
     }
 
     // employee-salary-items-calculation
-    public function getAmountForEmployee($category_id, $employee_id)
+    public function getAmountForEmployee($category_id, $employee_id, $from_date=null, $to_date=null)
     {
         $user = User::where('id', $employee_id)->first();
         if ($category_id == 7) {
@@ -1292,7 +1292,7 @@ class PayslipService
             $employee_deduction_value = 0;
             foreach($employee_deduction as $value)
             {
-                $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+                $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
                 if($value->employee_salary_item->is_percentage == 1){
                     $employee_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
                 } else{
@@ -1324,7 +1324,7 @@ class PayslipService
                 $other_deduction_value = 0;
                 foreach($other_complimentary_deduction as $value)
                 {
-                    $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+                    $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
                     if($value->employee_salary_item->is_percentage == 1){
                         $other_deduction_value += round($gross_pay_before_tax * ($value->employee_amount / 100), 2);
                     } else{
@@ -1409,9 +1409,13 @@ class PayslipService
             $total = 0;
             if(request('absent')){
                 $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+            } else{
+                $total += $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             }
             if(request('unpaid_sick_leave')){
                 $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+            } else{
+                $total += $this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             }
             return $total; // this calculation is done from payload when creating payslips.
 
@@ -1455,7 +1459,7 @@ class PayslipService
         } elseif($category_id == 5){
             $company = User::where('id', $employee_id)->first();
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
 
             $straight_without_percentage = EmployeeSalaryItem::query()
                 ->whereHas(
@@ -1547,7 +1551,7 @@ class PayslipService
         } elseif($category_id == 6){
             $company = User::where('id', $employee_id)->first();
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
-            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id)) + $this->getAmountForEmployee(3, $employee_id);
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $employee_id) - $this->getAmountForEmployee(2, $employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $employee_id);
 
             $without_percentage_value =  EmployeeSalaryItem::query()
                 ->whereHas(
