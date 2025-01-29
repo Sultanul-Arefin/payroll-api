@@ -28,8 +28,9 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             'category' => $this->salaryItemsName?->salaryItemsCategory?->name,
             'salary_amount' => $this->getSalaryAmount($this->salaryItemsName?->salaryItemsCategory, $this->amount),
             'issue_to' => $this->is_general == 1 ? "All" : $this->employee?->name,
-            'is_general' => 0,
-            'is_threshold' => $this->salaryItemsName->is_threshold == 2 ? 1 : 0
+            'is_general' => $this->is_general, // 1 => All, 0 => For Specific employees
+            'is_percentage' => $this->is_percentage, // 1 => true, 0 => false
+            'is_threshold' => $this->salaryItemsName->is_threshold == 2 ? 1 : 0 // 1 => true, 0 => false
         ];
     }
 
