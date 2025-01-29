@@ -463,7 +463,7 @@ class ViewPayslipResource extends JsonResource
                 $data['hours'] += $value->hours_worked;
             }
             if($key == "total_fixed_pay"){
-                $data["total_fixed_pay"] += $value->wages - $value->leave_deduction;
+                $data["total_fixed_pay"] += ($value->wages + $value->additional_pay) - $value->leave_deduction;
             }
             if($key == "taxable_allowances"){
                 $data["taxable_allowances"] += $value->taxable_allowance;
