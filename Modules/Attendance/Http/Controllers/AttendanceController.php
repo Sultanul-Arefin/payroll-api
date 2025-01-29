@@ -28,7 +28,7 @@ class AttendanceController extends Controller
 
     public function index()
     {
-        $rows = 15;
+        $rows = 100;
         if (request()?->has('rows')) {
             $rows = (int) request('rows');
         }
