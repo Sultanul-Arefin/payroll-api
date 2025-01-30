@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Company\Entities\Company;
 
 class Payslip extends Model
 {
@@ -74,6 +75,11 @@ class Payslip extends Model
     /**
      * other methods
      */
+
+     public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
     public function employee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'employee_id', 'id');
