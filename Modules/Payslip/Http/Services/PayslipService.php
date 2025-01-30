@@ -225,7 +225,11 @@ class PayslipService
 
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                return round((int)request('working_hours'), 2) . " hours";
+                if(request('working_hours')){
+                    return round((int)request('working_hours'), 2) . " hours";
+                } else{
+                    return round((int)$this->get_hours_worked($user->id, $from_date, $to_date), 2) . " hours";
+                }
             }
         }
         if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
@@ -300,7 +304,11 @@ class PayslipService
 
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
-                $hours_worked = (int)request('working_hours');
+                if(request('working_hours')){
+                    $hours_worked = (int)request('working_hours');
+                } else{
+                    $hours_worked = (int)$this->get_hours_worked($user->id, $from_date, $to_date);
+                }
                 $hourly_amount = EmployeeSalaryItem::query()
                     ->where('employee_id', $employee_id)
                     ->whereHas(
@@ -463,7 +471,7 @@ class PayslipService
         return Payslip::PAY_FREQUENCY_MONTHLY;
     }
 
-    public function get_basic_amount($employee_id)
+    public function get_basic_amount($employee_id, $from_date, $to_date)
     {
         $employee_associated_amount = EmployeeSalaryItem::query()
             ->where('employee_id', $employee_id)
@@ -488,7 +496,12 @@ class PayslipService
                     }
                 )
                 ->first('amount');
-            $hours_worked = (int)request('working_hours');
+            if(request('working_hours')){
+                $hours_worked = (int)request('working_hours');
+            } else{
+                $hours_worked = (int)$this->get_hours_worked($user->id, $from_date, $to_date);
+            }
+
             // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
             if($hours_worked < 0){
                 $employee_associated_amount = 0;

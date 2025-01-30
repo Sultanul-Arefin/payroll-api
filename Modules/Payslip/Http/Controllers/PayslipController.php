@@ -288,7 +288,7 @@ class PayslipController extends Controller
         ]);
 
         $get_pay_frequency = $this->payslipService->get_pay_frequency($request->employee_id);
-        $get_basic = $this->payslipService->get_basic_amount($request->employee_id);
+        $get_basic = $this->payslipService->get_basic_amount($request->employee_id, $request->from_date, $request->to_date);
         $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
         if($request->company_id){
             $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
