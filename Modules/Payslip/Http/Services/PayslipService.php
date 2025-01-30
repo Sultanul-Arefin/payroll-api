@@ -226,9 +226,9 @@ class PayslipService
         if($salary_item->salaryItemsName->name == "Wages"){
             if($salary_item->amount <= 0){
                 if(request('working_hours')){
-                    return round((int)request('working_hours'), 2) . " hours";
+                    return (int)request('working_hours') . " hours";
                 } else{
-                    return round((int)$this->get_hours_worked($user->id, $from_date, $to_date), 2) . " hours";
+                    return (int)$this->get_hours_worked($user->id, $from_date, $to_date) . " hours";
                 }
             }
         }
