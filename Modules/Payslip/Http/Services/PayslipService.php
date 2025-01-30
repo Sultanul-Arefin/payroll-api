@@ -499,7 +499,7 @@ class PayslipService
             if(request('working_hours')){
                 $hours_worked = (int)request('working_hours');
             } else{
-                $hours_worked = (int)$this->get_hours_worked($user->id, $from_date, $to_date);
+                $hours_worked = (int)$this->get_hours_worked($employee_id, $from_date, $to_date);
             }
 
             // $hours_worked = $this->get_hours_worked(request('employee_id'), request('from_date'), request('to_date'));
