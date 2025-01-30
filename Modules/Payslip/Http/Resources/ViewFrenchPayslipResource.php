@@ -340,7 +340,7 @@ class ViewFrenchPayslipResource extends JsonResource
         $total_overtime_hours = 0;
         foreach($payslip_details as $value)
         {
-            // Get "base_amount_or_hours" and remove "hours"
+            // Get "base_amount_or_hours" and remove  "hours"
             $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
 
             // Convert to numeric value
