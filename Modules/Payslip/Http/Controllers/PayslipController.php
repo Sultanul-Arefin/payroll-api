@@ -362,7 +362,7 @@ class PayslipController extends Controller
         $total_amount = $pay_due_before_deductions - $total_employee_contribution_for_deduction;
 
         // GET HOURS WORKED
-        $hours_worked = $this->payslipService->get_hours_worked($request->employee_id, $request->from_date, $request->to_date);
+        $hours_worked = (int)$this->payslipService->get_hours_worked($request->employee_id, $request->from_date, $request->to_date);
 
         // return [
         //     'basic' => $get_basic,
