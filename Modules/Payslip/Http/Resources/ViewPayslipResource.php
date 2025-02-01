@@ -407,7 +407,7 @@ class ViewPayslipResource extends JsonResource
                     'total_net_pay' => $this->net_pay,
                 ],
             ],
-            'yearly' => [
+            'yearly' => [ // yearly one column will be updated
                 [
                     'hours' => $this->get_yearly_data("hours")['hours'],
                     'overtime_hours' => $this->getTotalOvertimeHours($this->payslip_details),
