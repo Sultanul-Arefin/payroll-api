@@ -43,15 +43,25 @@ class ViewIndianPayslipResource extends JsonResource
             'total_deductions' => $this->total_employee_deduction,
             'total_company_deduction' => $this->get_total_company_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
-            'attendance' => $this->getTotalAttendanceDays(
-                $this->employee->id,
-                $this->start_date,
-                $this->end_date
-            ),
+            // 'attendance' => $this->getTotalAttendanceDays(
+            //     $this->employee->id,
+            //     $this->start_date,
+            //     $this->end_date
+            // ),
             'net_salary' => $this->net_pay,
            // 'overall_calculation' => $this->overall_calculation(),
+           'attendance'=>$this->getTotalWorkingDaysAttribute(),
         ];
     }
+
+    // public function getTotalWorkingDaysAttribute()
+    // {  
+        
+    //     if ($this->hours_worked && $this->company && $this->company->working_hours_per_day) {
+    //         return round($this->hours_worked / $this->company->working_hours_per_day, 2);
+    //     }
+    //     return null;
+    // }
 
     
     public function get_annual_leave_calculation($employee)
@@ -310,107 +320,83 @@ class ViewIndianPayslipResource extends JsonResource
         
     }
 
-    public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-                { 
+    
+
+    // public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
+    //             { 
 
                     
-                        if (!$from_date) {
-                            $from_date = $this->first_date;
-                        }
-                        if (!$to_date) {
-                            $to_date = $this->last_date;
-                        }
+    //                     if (!$from_date) {
+    //                         $from_date = $this->first_date;
+    //                     }
+    //                     if (!$to_date) {
+    //                         $to_date = $this->last_date;
+    //                     }
 
                 
-                    $present_days = Attendance::query()
-                        ->where('user_id', $employee_id)
-                        ->whereBetween('dates', [$from_date, $to_date])
-                        ->where('status', Attendance::PRESENT) // Only count "Present" days
-                        ->count();
-                       // return $present_days;
+    //                 $present_days = Attendance::query()
+    //                     ->where('user_id', $employee_id)
+    //                     ->whereBetween('dates', [$from_date, $to_date])
+    //                     ->where('status', Attendance::PRESENT) // Only count "Present" days
+    //                     ->count();
+    //                    // return $present_days;
 
-                        $lop_days=$this->getAbsentTaken($this->employee->id);
-                        $total_leave_taken=$this->getAnnualLeaveTaken($this->employee->id)+$this->getSickLeaveTaken($this->employee->id);
-                        $paid_days=$total_leave_taken+$present_days;
+    //                     $lop_days=$this->getAbsentTaken($this->employee->id);
+    //                     $total_leave_taken=$this->getAnnualLeaveTaken($this->employee->id)+$this->getSickLeaveTaken($this->employee->id);
+    //                     $paid_days=$total_leave_taken+$present_days;
                         
-                        return 
-                                    [
-                                        'total_working_days' => $present_days,
-                                        'lop_days' =>  $lop_days,
-                                        'leaves_taken' =>$total_leave_taken,
-                                        'paid_days' =>$paid_days,
-                                    ];
-               }
+    //                     return 
+    //                                 [
+    //                                     'total_working_days' => $present_days,
+    //                                     'lop_days' =>  $lop_days,
+    //                                     'leaves_taken' =>$total_leave_taken,
+    //                                     'paid_days' =>$paid_days,
+    //                                 ];
+    //            }
 
 
-            // public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-            //     { 
-            //             if (!$from_date) {
-            //                 $from_date = $this->first_date;
-            //             }
-            //             if (!$to_date) {
-            //                 $to_date = $this->last_date;
-            //             }
+        // public function getTotalWorkingDaysAttribute()
+        //        {  
+        //            if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
+        //                return null;
+        //            }
+               
+        //            $lop_days = $this->getAbsentTaken($this->employee->id);
+        //            $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
+        //            $total_working_days = round($this->hours_worked / $this->company->working_hours_per_day, 2);
+        //            $paid_days = $total_leave_taken + $total_working_days;
+               
+        //            return [
+        //                'total_working_days' => $total_working_days,
+        //                'lop_days' => $lop_days,
+        //                'leaves_taken' => $total_leave_taken,
+        //                'paid_days' => $paid_days,
+        //            ];
+        // }
 
-                
-            //         $present_days = Attendance::query()
-            //             ->where('user_id', $employee_id)
-            //             ->whereBetween('dates', [$from_date, $to_date])
-            //             ->where('status', Attendance::PRESENT) // Only count "Present" days
-            //             ->count();
+        public function getTotalWorkingDaysAttribute()
+            {  
+                    
+                    if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
+                        $total_working_days = 0;
+                    } else {
+                        $total_working_days = round($this->hours_worked / ($this->company->working_hours_per_day+$this->company->lunch_and_others_per_day), 2);
+                    }
 
-                
-            //         $getLeaveDays = function ($employee_id, $leave_type_name, $from_date, $to_date) {
-            //             $leave_data = LeaveSalaryItems::query()
-            //                 ->whereHas('salary_items_name', function (Builder $builder) use ($leave_type_name) {
-            //                     $builder
-            //                         ->where('name', $leave_type_name)
-            //                         ->where('company_id', auth()->user()->company_id);
-            //                 })
-            //                 ->first();
+                    $lop_days = $this->getAbsentTaken($this->employee->id);
+                    $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
+                    $paid_days = $total_leave_taken + $total_working_days;
 
-            //             if (!$leave_data) {
-            //                 return 0; 
-            //             }
+                    return [
+                        'total_working_days' => $total_working_days,
+                        'lop_days' => $lop_days,
+                        'leaves_taken' => $total_leave_taken,
+                        'paid_days' => $paid_days,
+                    ];
+            }
 
-            //             return UserLeave::query()
-            //                 ->where('user_id', $employee_id)
-            //                 ->where('status', UserLeave::APPROVED) // Only consider approved leaves
-            //                 ->where('leave_type', $leave_data->salary_items_id)
-            //                 ->whereHas('leave_details', function ($query) use ($from_date, $to_date) {
-            //                     $query->whereBetween('dates', [$from_date, $to_date]);
-            //                 })
-            //                 ->withCount(['leave_details as leave_days_count' => function ($query) use ($from_date, $to_date) {
-            //                     $query->whereBetween('dates', [$from_date, $to_date]);
-            //                 }])
-            //                 ->get()
-            //                 ->sum('leave_days_count'); // Sum all the leave days for the user
-            //         };
 
-            //         // Calculate Annual Leave Days
-            //         $annual_leave_days = $getLeaveDays($employee_id, 'Annual Leave', $from_date, $to_date);
-
-            //         // Calculate Sick Leave Days
-            //         $sick_leave_days = $getLeaveDays($employee_id, 'Sick Leave', $from_date, $to_date);
-            //         $unpaid_leave_days = $getLeaveDays($employee_id, 'Unpaid Sick Leave', $from_date, $to_date);
-            //         $Absent_leave_days = $getLeaveDays($employee_id, 'Absent', $from_date, $to_date);
-
-            //         // Total approved leave days (Annual + Sick)
-            //         $approved_leave_days = $annual_leave_days + $sick_leave_days;
-
-            //         // Total attendance days = Present days + Approved leave days
-            //         return [
-            //             'total_working_days' => $present_days,
-            //             //'annual_leave_days' => $annual_leave_days,
-            //             //'sick_leave_days' => $sick_leave_days,
-            //             'lop_days' => $Absent_leave_days,
-            //             'leaves_taken' => $approved_leave_days,
-            //             'paid_days' => $present_days + $approved_leave_days,
-            //         ];
-            //     }
-
-        
-
+           
 
 
         public function get_other_deduction()

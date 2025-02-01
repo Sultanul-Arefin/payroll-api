@@ -439,10 +439,10 @@ class ViewFrenchPayslipResource extends JsonResource
                 $data["non_taxable_allowances"] += $value->non_taxable_allowance;
             }
             if($key == "total_gross_pay"){
-                $data["total_gross_pay"] += $value->gross_pay_before_tax;
+                $data["total_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance;
             }
             if($key == "taxable_gross_pay"){
-                $data["taxable_gross_pay"] += $value->gross_pay_before_tax - $value->non_taxable_allowance;
+                $data["taxable_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance - $value->non_taxable_allowance;
             }
             if($key == "ytd_tax_paid"){
                 $data["ytd_tax_paid"] += $value->tax_value + $value->post_tax_value;
