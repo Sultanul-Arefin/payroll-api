@@ -380,7 +380,7 @@ class ViewIndianPayslipResource extends JsonResource
                     if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
                         $total_working_days = 0;
                     } else {
-                        $total_working_days = round($this->hours_worked / $this->company->working_hours_per_day, 2);
+                        $total_working_days = round($this->hours_worked / ($this->company->working_hours_per_day+$this->company->lunch_and_others_per_day), 2);
                     }
 
                     $lop_days = $this->getAbsentTaken($this->employee->id);
