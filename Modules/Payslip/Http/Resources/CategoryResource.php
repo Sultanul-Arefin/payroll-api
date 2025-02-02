@@ -117,9 +117,10 @@ class CategoryResource extends JsonResource
                 'employee_deduction' => $employee_deduction_value + $other_deduction_value,
             ];
         } elseif ($category_id == 8) {
+            $employee_id = request('employee_id');
             $company_government_contribution = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
                             ->where(function ($query) use($employee_id){
@@ -157,7 +158,7 @@ class CategoryResource extends JsonResource
             // GET CATEGORY ID 7 DEDUCTION VALUE
             $company_other_complimentary_contribution = DeductionDetails::query()
                 ->whereHas(
-                    'employee_salary_item', function (Builder $builder) use ($category_id) {
+                    'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
                             ->where(function ($query) use($employee_id){
