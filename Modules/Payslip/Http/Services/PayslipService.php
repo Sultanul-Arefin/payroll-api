@@ -102,7 +102,13 @@ class PayslipService
                         'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id, $value) {
                             $builder
                                 ->where('company_id', $company_id)
-                                ->where('employee_id', $employee_id)
+                                ->where(function ($query) use($employee_id){
+                                    $query->where('employee_id', $employee_id)
+                                          ->orWhere(function ($query) {
+                                              $query->whereNull('employee_id')
+                                                    ->where('is_general', 1);
+                                          });
+                                })
                                 ->where('id', $value->id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
@@ -134,7 +140,13 @@ class PayslipService
                         'employee_salary_item', function (Builder $builder) use ($employee_id, $company_id, $value) {
                             $builder
                                 ->where('company_id', $company_id)
-                                ->where('employee_id', $employee_id)
+                                ->where(function ($query) use($employee_id){
+                                    $query->where('employee_id', $employee_id)
+                                          ->orWhere(function ($query) {
+                                              $query->whereNull('employee_id')
+                                                    ->where('is_general', 1);
+                                          });
+                                })
                                 ->where('id', $value->id)
                                 ->whereHas(
                                     'salaryItemsName', function (Builder $builder){
