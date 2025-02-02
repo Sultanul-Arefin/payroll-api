@@ -1211,7 +1211,10 @@ class PayslipService
     // hours worked for employee
     public function get_hours_worked($employee_id, $from_date, $to_date)
     {
-        $attendances = Attendance::query()
+        if(request('working_hours')){
+            $hours_worked = (int)request('working_hours');
+        } else{
+            $attendances = Attendance::query()
                         ->where('user_id', $employee_id)
                         ->where('status', Attendance::PRESENT)
                         ->whereBetween(
@@ -1222,24 +1225,25 @@ class PayslipService
                             ]
                         )
                         ->get();
-        $total_minutes = 0;
-        foreach($attendances as $value)
-        {
-            $details = $value->attendance_details;
-
-            foreach($details as $detail)
+            $hours_worked = 0;
+            foreach($attendances as $value)
             {
-                $inTime = Carbon::parse($detail->in_time);
-                $outTime = Carbon::parse($detail->out_time);
+                $details = $value->attendance_details;
 
-                // Calculate the time difference in minutes and add it to the total
-                $timeDifferenceMinutes = $inTime->diffInHours($outTime); // have to check this code twice, there might be an issue in the inTime, outTime alignment
-                // previous alignment
-                // $timeDifferenceMinutes = $outTime->diffInHours($inTime);
-                $total_minutes += $timeDifferenceMinutes;
+                foreach($details as $detail)
+                {
+                    $inTime = Carbon::parse($detail->in_time);
+                    $outTime = Carbon::parse($detail->out_time);
+
+                    // Calculate the time difference in minutes and add it to the total
+                    $timeDifferenceMinutes = $inTime->diffInHours($outTime); // have to check this code twice, there might be an issue in the inTime, outTime alignment
+                    // previous alignment
+                    // $timeDifferenceMinutes = $outTime->diffInHours($inTime);
+                    $hours_worked += $timeDifferenceMinutes;
+                }
             }
         }
-        return $total_minutes;
+        return $hours_worked;
     }
 
     public function getSalaryItemAmount($name, $employee_id)
