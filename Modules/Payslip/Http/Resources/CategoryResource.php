@@ -41,7 +41,13 @@ class CategoryResource extends JsonResource
                     'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', $employee_id)
+                            ->where(function ($query) use($employee_id){
+                                $query->where('employee_id', $employee_id)
+                                      ->orWhere(function ($query) {
+                                          $query->whereNull('employee_id')
+                                                ->where('is_general', 1);
+                                      });
+                            })
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
@@ -73,7 +79,13 @@ class CategoryResource extends JsonResource
                     'employee_salary_item', function (Builder $builder) use ($category_id, $employee_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', $employee_id)
+                            ->where(function ($query) use($employee_id){
+                                $query->where('employee_id', $employee_id)
+                                      ->orWhere(function ($query) {
+                                          $query->whereNull('employee_id')
+                                                ->where('is_general', 1);
+                                      });
+                            })
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
@@ -110,7 +122,13 @@ class CategoryResource extends JsonResource
                     'employee_salary_item', function (Builder $builder) use ($category_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', request('employee_id'))
+                            ->where(function ($query) use($employee_id){
+                                $query->where('employee_id', $employee_id)
+                                      ->orWhere(function ($query) {
+                                          $query->whereNull('employee_id')
+                                                ->where('is_general', 1);
+                                      });
+                            })
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
@@ -142,7 +160,13 @@ class CategoryResource extends JsonResource
                     'employee_salary_item', function (Builder $builder) use ($category_id) {
                         $builder
                             ->where('company_id', auth()->user()->company_id)
-                            ->where('employee_id', request('employee_id'))
+                            ->where(function ($query) use($employee_id){
+                                $query->where('employee_id', $employee_id)
+                                      ->orWhere(function ($query) {
+                                          $query->whereNull('employee_id')
+                                                ->where('is_general', 1);
+                                      });
+                            })
                             ->whereHas(
                                 'salaryItemsName', function (Builder $builder) use ($category_id) {
                                     $builder->whereHas(
