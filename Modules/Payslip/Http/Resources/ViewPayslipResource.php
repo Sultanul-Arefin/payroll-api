@@ -432,14 +432,15 @@ class ViewPayslipResource extends JsonResource
     {
         $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
         $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_month = date('m', strtotime($this->first_date));
         $payslip_data = Payslip::query()
                                     ->whereBetween('first_date', [
                                         date("$payslip_year-1-1"), // Start of the year
-                                        date("$payslip_year-12-31"), // End of the year
+                                        date("$payslip_year-$payslip_month-31"), // End of the year
                                     ])
                                     ->whereBetween('last_date', [
                                         date("$payslip_year-1-1"), // Start of the year
-                                        date("$payslip_year-12-31"), // End of the year
+                                        date("$payslip_year-$payslip_month-31"), // End of the year
                                     ])
                                     ->where('employee_id', $this->employee->id)
                                     ->orderBy('created_at', 'ASC')
