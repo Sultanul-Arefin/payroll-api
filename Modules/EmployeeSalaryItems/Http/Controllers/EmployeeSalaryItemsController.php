@@ -117,7 +117,7 @@ class EmployeeSalaryItemsController extends Controller
             ]);
         } else{
             $employee_salary_item->update([
-                'amount' => $request->amount
+                'amount' => $request->amount ?? $employee_salary_item->amount
             ]);
         }
         // UPDATE OTHER INFORMATION
