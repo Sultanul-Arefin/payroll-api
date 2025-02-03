@@ -92,7 +92,10 @@ class EmployeeSalaryItemsController extends Controller
     {
         $request->validate([
             // 'amount' => 'required',
-            '_method' => 'required'
+            '_method' => 'required',
+            'is_percentage' => 'required',
+            'is_general' => 'required',
+            'employee_id' => 'required_if:is_general,0'
         ]);
         if($employee_salary_item?->salaryItemsName?->salary_items_category_id == 7)
         {
@@ -119,6 +122,12 @@ class EmployeeSalaryItemsController extends Controller
                 'amount' => $request->amount
             ]);
         }
+        // UPDATE OTHER INFORMATION
+        $employee_salary_item->update([
+            'is_percentage' => $request->is_percentage ?? $employee_salary_item->is_percentage,
+            'is_general' => $request->is_general ?? $employee_salary_item->is_general,
+            'employee_id' => $request->employee_id ?? $employee_salary_item->employee_id
+        ]);
         return apiResponse(
             data: $employee_salary_item,
             message: 'Salary Amount Updated Successfully'
