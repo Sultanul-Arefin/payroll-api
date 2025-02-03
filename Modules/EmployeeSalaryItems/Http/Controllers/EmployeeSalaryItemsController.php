@@ -94,7 +94,6 @@ class EmployeeSalaryItemsController extends Controller
             // 'amount' => 'required',
             '_method' => 'required',
             'is_percentage' => 'required',
-            'is_general' => 'required',
             'employee_id' => 'required_if:is_general,0'
         ]);
         if($employee_salary_item?->salaryItemsName?->salary_items_category_id == 7)
