@@ -26,6 +26,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         ->name('preview-african-payslip');
         Route::get('payslips', [PayslipController::class, 'payslips'])
             ->name('payslips');
+        Route::get('payslips/{payslip}', [PayslipController::class, 'show'])
+            ->name('payslips.show');
         Route::delete('delete-payslip/{payslip}', [PayslipController::class, 'delete_payslip'])
             ->name('payslip.delete');
         Route::get('payslips-history', [PayslipController::class, 'payslips_history'])
