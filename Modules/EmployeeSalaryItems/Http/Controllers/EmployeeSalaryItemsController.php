@@ -90,9 +90,6 @@ class EmployeeSalaryItemsController extends Controller
 
     public function update_salary_item(EmployeeSalaryItem $employee_salary_item, Request $request)
     {
-        return apiResponse(
-            data: gettype($request->employee_id)
-        );
         $request->validate([
             // 'amount' => 'required',
             '_method' => 'required',
@@ -127,7 +124,7 @@ class EmployeeSalaryItemsController extends Controller
         $employee_salary_item->update([
             'is_percentage' => $request->is_percentage ?? $employee_salary_item->is_percentage,
             'is_general' => $request->is_general ?? $employee_salary_item->is_general,
-            'employee_id' => ($request->employee_id &&  isset($request->employee_id)) ? $request->employee_id : $employee_salary_item->employee_id
+            'employee_id' => ($request->employee_id &&  $request->employee_id != "null") ? $request->employee_id : $employee_salary_item->employee_id
         ]);
         return apiResponse(
             data: $employee_salary_item,
