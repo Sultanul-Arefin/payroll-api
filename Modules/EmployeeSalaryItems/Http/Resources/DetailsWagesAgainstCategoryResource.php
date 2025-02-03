@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class DetailsWagesAgainstCategoryResource extends JsonResource
 {
@@ -26,11 +27,12 @@ class DetailsWagesAgainstCategoryResource extends JsonResource
             ),
             'item_name' => $this->salaryItemsName?->name,
             'category' => $this->salaryItemsName?->salaryItemsCategory?->name,
+            'category_id' => $this->salaryItemsName?->salaryItemsCategory?->id,
             'salary_amount' => $this->getSalaryAmount($this->salaryItemsName?->salaryItemsCategory, $this->amount),
             'issue_to' => $this->is_general == 1 ? "All" : $this->employee?->name,
             'is_general' => $this->is_general, // 1 => All, 0 => For Specific employees
             'is_percentage' => $this->is_percentage, // 1 => true, 0 => false
-            'is_threshold' => $this->salaryItemsName->is_threshold == 2 ? 1 : 0 // 1 => true, 0 => false
+            'is_threshold' => $this->salaryItemsName->is_threshold == SalaryItemsName::INCOME_TAX_THRESHOLD ? 1 : 0 // 1 => true, 0 => false
         ];
     }
 
