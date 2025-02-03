@@ -662,6 +662,15 @@ class PayslipController extends Controller
         );
     }
 
+    public function show(Payslip $payslip)
+    {
+        $payslip->pay_frequency = 'Monthly';
+        $payslip->pay_type = $payslip->pay_frequency == Payslip::PAY_FREQUENCY_HOURLY ? 'hourly' : 'monthly';
+        return apiResponse(
+            data: $payslip->only('id', 'employee_id', 'month', 'first_date', 'last_date', 'payment_date', 'pay_frequency', 'pay_type')
+        );
+    }
+
     public function delete_payslip(Payslip $payslip, Request $request)
     {
         $payslip->delete();
