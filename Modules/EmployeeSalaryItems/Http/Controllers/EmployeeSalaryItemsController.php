@@ -90,6 +90,9 @@ class EmployeeSalaryItemsController extends Controller
 
     public function update_salary_item(EmployeeSalaryItem $employee_salary_item, Request $request)
     {
+        return apiResponse(
+            data: gettype($request->employee_id)
+        );
         $request->validate([
             // 'amount' => 'required',
             '_method' => 'required',
