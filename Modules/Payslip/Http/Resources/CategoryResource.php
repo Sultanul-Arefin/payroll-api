@@ -346,7 +346,7 @@ class CategoryResource extends JsonResource
                     $start_percentage_after = $threshold_details->start_percentage_after;
                     $end_percentage_at = $threshold_details->end_percentage_at;
 
-                    if ($start_percentage_after <= $gross_pay_before_tax && $end_percentage_at >= $gross_pay_before_tax) {
+                    if ($start_percentage_after <= $gross_pay_before_tax && (is_null($end_percentage_at) || $end_percentage_at >= $gross_pay_before_tax)) {
                         $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
                     }
                 }
