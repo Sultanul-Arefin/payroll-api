@@ -98,22 +98,22 @@ class EmployeeSalaryItemsController extends Controller
         if($employee_salary_item?->salaryItemsName?->salary_items_category_id == 7)
         {
             $employee_salary_item?->deduction_details?->update([
-                'employee_amount' => $request->employee_contribution,
-                'government_or_company_amount' => $request->company_deduction
+                'employee_amount' => $request->employee_contribution ?? $employee_salary_item?->deduction_details?->employee_amount,
+                'government_or_company_amount' => $request->company_deduction ?? $employee_salary_item?->deduction_details?->government_or_company_amount
             ]);
         } elseif($employee_salary_item?->salaryItemsName?->salary_items_category_id == 8)
         {
             $employee_salary_item?->deduction_details?->update([
-                'employee_amount' => $request->employee_deduction,
-                'government_or_company_amount' => $request->company_deduction
+                'employee_amount' => $request->employee_deduction ?? $employee_salary_item?->deduction_details?->employee_amount,
+                'government_or_company_amount' => $request->company_deduction ?? $employee_salary_item?->deduction_details?->government_or_company_amount
             ]);
         } elseif($employee_salary_item?->salaryItemsName?->salary_items_category_id == 5 && $employee_salary_item?->salaryItemsName?->is_threshold == 2){
             $employee_salary_item?->threshold_details?->update([
-                'start_percentage_after' => $request->start_percentage_after,
-                'end_percentage_at' => $request->end_percentage_at
+                'start_percentage_after' => $request->start_percentage_after ?? $employee_salary_item?->threshold_details?->start_percentage_after,
+                'end_percentage_at' => $request->end_percentage_at ?? $employee_salary_item?->threshold_details?->end_percentage_at
             ]);
             $employee_salary_item->update([
-                'amount' => $request->amount
+                'amount' => $request->amount ?? $employee_salary_item->amount
             ]);
         } else{
             $employee_salary_item->update([
