@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
 
 class UserBasicSalaryResource extends JsonResource
 {
@@ -41,6 +42,8 @@ class UserBasicSalaryResource extends JsonResource
             'amount' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->amount ?? 0,
             'is_general' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->is_general ?? 0,
             'is_percentage' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->is_percentage ?? 0,
+            'category_id' => $this->salaryItemsCategory?->id,
+            'is_threshold' => $this->is_threshold == SalaryItemsName::INCOME_TAX_THRESHOLD ? 1 : 0, // 1 => true, 0 => false
             'category' => $this->salaryItemsCategory?->name,
             'time_month_hour' => null,
             'time_per' => null,
