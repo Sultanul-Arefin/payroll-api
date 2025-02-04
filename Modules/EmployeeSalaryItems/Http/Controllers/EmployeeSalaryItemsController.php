@@ -122,7 +122,7 @@ class EmployeeSalaryItemsController extends Controller
         }
         // UPDATE OTHER INFORMATION
         $employee_salary_item->update([
-            'is_percentage' => $request->is_percentage ?? $employee_salary_item->is_percentage,
+            'is_percentage' => ($request->is_percentage && $request->is_percentage == "true") ? 1 : 0,
             'is_general' => $request->is_general ?? $employee_salary_item->is_general,
             'employee_id' => ($request->employee_id &&  $request->employee_id != "null") ? $request->employee_id : $employee_salary_item->employee_id
         ]);
