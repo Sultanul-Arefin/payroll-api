@@ -44,6 +44,7 @@ class UserBasicSalaryResource extends JsonResource
             'is_percentage' => $this->employeeSalaryItem->where('employee_id', $this->user_id)->first()?->is_percentage ?? 0,
             'category_id' => $this->salaryItemsCategory?->id,
             'is_threshold' => $this->is_threshold == SalaryItemsName::INCOME_TAX_THRESHOLD ? 1 : 0, // 1 => true, 0 => false
+            'threshold_value' => $this->getThresholdValue(),
             'category' => $this->salaryItemsCategory?->name,
             'time_month_hour' => null,
             'time_per' => null,
@@ -52,6 +53,25 @@ class UserBasicSalaryResource extends JsonResource
             'is_deletable' => $this->is_deletable($this->salaryItemsCategory),
             'employee_salary_item_id' => $this->getEmployeeSalaryItemId()
         ];
+    }
+
+    private function getThresholdValue()
+    {
+        if($this->salaryItemsCategory->id == 5 && $this->is_threshold == SalaryItemsName::INCOME_TAX_THRESHOLD)
+        {
+            $get_employee_salary_item = EmployeeSalaryItem::query()
+                                ->whereHas('salaryItemsName', function(Builder $builder){
+                                    $builder->where('name', 'like', $this->name)
+                                            ->where('company_id', auth()->user()->company_id);
+                                })
+                                ->where('employee_id', $this->user_id)
+                                ->first();
+            return [
+                'start_percentage_after' => $get_employee_salary_item?->threshold_details?->start_percentage_after,
+                'end_percentage_at' => $get_employee_salary_item?->threshold_details?->end_percentage_at
+            ];
+        }
+        return 0;
     }
 
     private function getGovernmentAmount()
