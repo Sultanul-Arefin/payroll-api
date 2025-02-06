@@ -310,7 +310,7 @@ class PayslipService
 
             $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id, $from_date, $to_date) - $this->getAmountForEmployee(2, $salary_item->employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $salary_item->employee_id, $from_date, $to_date);
 
-
+            // UPDATED THRESHOLD CALCULATION
             $taxableAmount = 0;
             $percentage_amount = $salary_item->amount; // get the percentage value
             $threshold_details = $salary_item->threshold_details; // get threshold details to check if the wages is between the details
