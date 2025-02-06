@@ -914,7 +914,7 @@ class PayslipService
                 }
             }
         }
-        return round($straight + $threshold_value, 2);
+        return round($straight + ceil($threshold_value), 2);
     }
 
     public function get_additional_taxes_tax_top_up_amount($employee_id, $company_id, $from_date, $to_date)
