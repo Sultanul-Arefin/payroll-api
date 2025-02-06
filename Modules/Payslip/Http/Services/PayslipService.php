@@ -446,7 +446,7 @@ class PayslipService
                         // break;
                     }
                 }
-                return round($threshold_value, 2);
+                return round(ceil($threshold_value), 2);
             }
             if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
                 if($salary_item->is_percentage == 1){
@@ -1697,7 +1697,7 @@ class PayslipService
                     }
                 }
             }
-            return round($straight + $threshold_value, 2);
+            return round($straight + ceil($threshold_value), 2);
         } elseif($category_id == 6){
             $company = User::where('id', $employee_id)->first();
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1, $company->company_id, $employee_id);
