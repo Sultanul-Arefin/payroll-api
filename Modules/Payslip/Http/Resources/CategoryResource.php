@@ -363,7 +363,7 @@ class CategoryResource extends JsonResource
                     }
                 }
             }
-            return round($straight + $threshold_value, 2);
+            return round($straight + ceil($threshold_value), 2);
         } elseif($category_id == 6){
             // $categoryOneAmount = $this->getCategoryIdOneAmount(1);
             $gross_pay_before_tax = ($this->getAmountForEmployee(1, request('employee_id')) - $this->getAmountForEmployee(2, request('employee_id'))) + $this->getAmountForEmployee(3, request('employee_id'));
