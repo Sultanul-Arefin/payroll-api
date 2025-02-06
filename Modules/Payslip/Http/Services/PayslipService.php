@@ -305,8 +305,32 @@ class PayslipService
             return (int)request('recuperated_hours') . " hours";
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
-            $payslip = Payslip::where('id', $payslip_id)->first();
-            return ((($payslip->wages + $payslip->additional_pay) - $payslip->leave_deduction) + $payslip->taxable_allowance + $payslip->non_taxable_allowance) - $payslip->non_taxable_allowance;
+            // $payslip = Payslip::where('id', $payslip_id)->first();
+            // return ((($payslip->wages + $payslip->additional_pay) - $payslip->leave_deduction) + $payslip->taxable_allowance + $payslip->non_taxable_allowance) - $payslip->non_taxable_allowance;
+
+            $gross_pay_before_tax = ($this->getAmountForEmployee(1, $salary_item->employee_id, $from_date, $to_date) - $this->getAmountForEmployee(2, $salary_item->employee_id, $from_date, $to_date)) + $this->getAmountForEmployee(3, $salary_item->employee_id, $from_date, $to_date);
+
+
+            $taxableAmount = 0;
+            $percentage_amount = $salary_item->amount; // get the percentage value
+            $threshold_details = $salary_item->threshold_details; // get threshold details to check if the wages is between the details
+            if($threshold_details)
+            {
+                $start = $threshold_details->start_percentage_after;
+                $end = $threshold_details->end_percentage_at;
+
+                if($gross_pay_before_tax > $start){
+                    $taxableAmount = ($end === null || $gross_pay_before_tax < $end) ? $gross_pay_before_tax - $start : $end - $start;
+
+                    return $taxableAmount;
+                    // $threshold_value += $taxableAmount * ($percentage_amount / 100);
+                }
+
+                if($gross_pay_before_tax < $end || $end === null){
+                    // break;
+                }
+            }
+            return round(ceil($taxableAmount), 2);
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
             $payslip = Payslip::where('id', $payslip_id)->first();
