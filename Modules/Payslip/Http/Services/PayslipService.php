@@ -219,7 +219,7 @@ class PayslipService
             return $value->amount;
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
-            return "Threshold";
+            return "Threshold(" . $salary_item->amount . ")";
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
             if($salary_item->is_percentage == 1)
