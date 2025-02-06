@@ -446,7 +446,7 @@ class PayslipService
                         // break;
                     }
                 }
-                return $threshold_value;
+                return round($threshold_value, 2);
             }
             if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 1){
                 if($salary_item->is_percentage == 1){
