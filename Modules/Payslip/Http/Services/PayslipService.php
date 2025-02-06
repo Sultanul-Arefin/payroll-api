@@ -427,11 +427,23 @@ class PayslipService
                 $threshold_details = $salary_item->threshold_details; // get threshold details to check if the wages is between the details
                 if($threshold_details)
                 {
-                    $start_percentage_after = $threshold_details->start_percentage_after;
-                    $end_percentage_at = $threshold_details->end_percentage_at;
+                    // $start_percentage_after = $threshold_details->start_percentage_after;
+                    // $end_percentage_at = $threshold_details->end_percentage_at;
 
-                    if ($start_percentage_after <= $gross_pay_before_tax && (is_null($end_percentage_at) || $end_percentage_at >= $gross_pay_before_tax)) {
-                        $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
+                    // if ($start_percentage_after <= $gross_pay_before_tax && (is_null($end_percentage_at) || $end_percentage_at >= $gross_pay_before_tax)) {
+                    //     $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
+                    // }
+                    $start = $threshold_details->start_percentage_after;
+                    $end = $threshold_details->end_percentage_at;
+
+                    if($gross_pay_before_tax > $start){
+                        $taxableAmount = ($end === null || $gross_pay_before_tax < $end) ? $gross_pay_before_tax - $start : $end - $start;
+
+                        $threshold_value += $taxableAmount * ($percentage_amount / 100);
+                    }
+
+                    if($gross_pay_before_tax < $end || $end === null){
+                        // break;
                     }
                 }
                 return $threshold_value;
@@ -882,11 +894,23 @@ class PayslipService
             $threshold_details = $value->threshold_details; // get threshold details to check if the wages is between the details
             if($threshold_details)
             {
-                $start_percentage_after = $threshold_details->start_percentage_after;
-                $end_percentage_at = $threshold_details->end_percentage_at;
+                // $start_percentage_after = $threshold_details->start_percentage_after;
+                // $end_percentage_at = $threshold_details->end_percentage_at;
 
-                if ($start_percentage_after <= $gross_pay_before_tax && (is_null($end_percentage_at) || $end_percentage_at >= $gross_pay_before_tax)) {
-                    $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
+                // if ($start_percentage_after <= $gross_pay_before_tax && (is_null($end_percentage_at) || $end_percentage_at >= $gross_pay_before_tax)) {
+                //     $threshold_value += ($gross_pay_before_tax * ($percentage_amount / 100));
+                // }
+                $start = $threshold_details->start_percentage_after;
+                $end = $threshold_details->end_percentage_at;
+
+                if($gross_pay_before_tax > $start){
+                    $taxableAmount = ($end === null || $gross_pay_before_tax < $end) ? $gross_pay_before_tax - $start : $end - $start;
+
+                    $threshold_value += $taxableAmount * ($percentage_amount / 100);
+                }
+
+                if($gross_pay_before_tax < $end || $end === null){
+                    break;
                 }
             }
         }
