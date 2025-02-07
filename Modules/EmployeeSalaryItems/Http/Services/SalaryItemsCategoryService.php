@@ -12,14 +12,43 @@ class SalaryItemsCategoryService
         $count
     ) {
         return EmployeeSalaryItem::query()
-            ->whereHas(
-                'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
-                    $builder
-                        ->where('company_id', auth()->user()->company_id)
-                        ->where('salary_items_category_id', $salary_items_category_id)
-                        ->whereNotIn('name', ['Annual Leave', 'Sick Leave']);
-                }
-            )
+            ->when($salary_items_category_id == 1, function ($query) use($salary_items_category_id){
+                $query->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('salary_items_category_id', $salary_items_category_id)
+                            ->whereNotIn('name', ['Absent Rate', 'Absent', 'Unpaid Sick Leave', 'Unpaid Sick Leave Rate', 'Sick Leave']);
+                    }
+                );
+            })
+            ->when($salary_items_category_id == 2, function ($query) use($salary_items_category_id){
+                $query->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('salary_items_category_id', 1)
+                            ->whereIn('name', ['Absent Rate', 'Unpaid Sick Leave Rate']);
+                    }
+                );
+            })
+            ->when($salary_items_category_id != 1 && $salary_items_category_id != 2, function ($query) use($salary_items_category_id){
+                $query->whereHas(
+                    'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
+                        $builder
+                            ->where('company_id', auth()->user()->company_id)
+                            ->where('salary_items_category_id', $salary_items_category_id);
+                    }
+                );
+            })
+            // ->whereHas(
+            //     'salaryItemsName', function (Builder $builder) use ($salary_items_category_id) {
+            //         $builder
+            //             ->where('company_id', auth()->user()->company_id)
+            //             ->where('salary_items_category_id', $salary_items_category_id)
+            //             ->whereNotIn('name', ['Annual Leave', 'Sick Leave']);
+            //     }
+            // )
             ->latest()
             ->cursorPaginate($count);
     }
