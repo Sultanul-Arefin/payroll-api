@@ -205,34 +205,30 @@ class PayslipService
             }
         }
         if($salary_item->salaryItemsName->name == "Unpaid Sick Leave"){
-            if($salary_item->amount <= 0){
-                $hourly_amount = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Unpaid Sick Leave Rate')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
-                return $hourly_amount->amount;
-            }
+            $amount = EmployeeSalaryItem::query()
+                ->where('employee_id', $employee_id)
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Unpaid Sick Leave Rate')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->first('amount');
+            return $amount->amount;
         }
         if($salary_item->salaryItemsName->name == "Absent"){
-            if($salary_item->amount <= 0){
-                $hourly_amount = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Absent Rate')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
-                return $hourly_amount->amount;
-            }
+            $amount = EmployeeSalaryItem::query()
+                ->where('employee_id', $employee_id)
+                ->whereHas(
+                    'salaryItemsName', function (Builder $builder) {
+                        $builder
+                            ->where('name', 'Absent Rate')
+                            ->where('salary_items_category_id', 1);
+                    }
+                )
+                ->first('amount');
+            return $amount->amount;
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1)
         {
