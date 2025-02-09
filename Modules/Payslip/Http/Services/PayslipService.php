@@ -218,6 +218,20 @@ class PayslipService
                     ->first('amount');
             return $value->amount;
         }
+        if($salary_item->salaryItemsName->salaryItemsCategory->id == 2)
+        {
+            $value = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) use($salary_item) {
+                            $builder
+                                ->where('name', $salary_item->salaryItemsName->name)
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            return $value->amount;
+        }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
             return "Threshold(" . $salary_item->amount . "%)";
         }
