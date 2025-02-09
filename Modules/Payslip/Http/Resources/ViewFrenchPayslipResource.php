@@ -40,6 +40,7 @@ class ViewFrenchPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
+            'company_social_charges' => $this->get_company_social_charges(), // company social charge goes here
             'total_net_pay' => $this->net_pay,
             'overall_calculation' => $this->overall_calculation(),
             'social_deduction' => $this->get_social_deduction(),
@@ -264,6 +265,13 @@ class ViewFrenchPayslipResource extends JsonResource
         return PayslipDetailsForDeduction::query()
                 ->where('payslip_id', $this->id)
                 ->sum('employee_amount');
+    }
+
+    public function get_company_social_charges()
+    {
+        return PayslipDetailsForDeduction::query()
+                ->where('payslip_id', $this->id)
+                ->sum('government_or_company_amount');
     }
 
     public function get_payslip_details($payslip_details){
