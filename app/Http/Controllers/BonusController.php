@@ -35,7 +35,7 @@ class BonusController extends Controller
             return $this->get_basic($employee_id) % $amount;
         }
         if($type == 2){
-            $amount / $this->get_ordinary_time_rate($employee_id);
+           return $amount / $this->get_ordinary_time_rate($employee_id);
         }
         // return match($type){
         //     "0" => $amount,
