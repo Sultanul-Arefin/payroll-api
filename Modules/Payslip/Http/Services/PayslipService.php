@@ -321,15 +321,43 @@ class PayslipService
         }
         if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
             return (int)request('overtime') . " hours";
+        } elseif($salary_item->salaryItemsName?->name == "Overtime Rate"){
+            $total = $this->getLeaveData($user->id, "overtime", $from_date, $to_date);
+            // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+
+            if($total > 0){
+                return $total . " hours";
+            }
         }
         if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
             return (int)request('double_overtime') . " hours";
+        } elseif($salary_item->salaryItemsName?->name == "Double Overtime Rate"){
+            $total = $this->getLeaveData($user->id, "double_overtime", $from_date, $to_date);
+            // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+
+            if($total > 0){
+                return $total . " hours";
+            }
         }
         if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
             return (int)request('bonus') . " hours";
+        } elseif($salary_item->salaryItemsName?->name == "Bonus"){
+            $total = $this->getLeaveData($user->id, "bonus", $from_date, $to_date);
+            // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+
+            if($total > 0){
+                return $total . " hours";
+            }
         }
         if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
             return (int)request('recuperated_hours') . " hours";
+        } elseif($salary_item->salaryItemsName?->name == "Recuperated Hour"){
+            $total = $this->getLeaveData($user->id, "recuperated_hours", $from_date, $to_date);
+            // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+
+            if($total > 0){
+                return $total . " hours";
+            }
         }
         if($salary_item->salaryItemsName->salary_items_category_id == 5 && $salary_item->salaryItemsName->is_threshold == 2){
             // $payslip = Payslip::where('id', $payslip_id)->first();
