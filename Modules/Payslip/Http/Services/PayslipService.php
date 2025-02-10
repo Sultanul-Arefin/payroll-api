@@ -279,10 +279,10 @@ class PayslipService
             }
         }
         if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
-            return (int)request('maternity_leave') . " hours";
+            return (float)request('maternity_leave') . " hours";
         }
         if(request('annual_leave') && $salary_item->salaryItemsName?->name == "Holiday Rate"){
-            return (int)request('annual_leave') . " hours";
+            return (float)request('annual_leave') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Holiday Rate"){
             $total = $this->getLeaveData($user->id, "annual_leave", $from_date, $to_date);
 
@@ -291,7 +291,7 @@ class PayslipService
             }
         }
         if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
-            return (int)request('sick_leave') . " hours";
+            return (float)request('sick_leave') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
             $total = $this->getLeaveData($user->id, "sick_leave", $from_date, $to_date);
 
@@ -300,7 +300,7 @@ class PayslipService
             }
         }
         if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
-            return (int)request('unpaid_sick_leave') . " hours";
+            return (float)request('unpaid_sick_leave') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
             $total = $this->getLeaveData($user->id, "unpaid_sick_leave", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -310,7 +310,7 @@ class PayslipService
             }
         }
         if(request('absent') && $salary_item->salaryItemsName?->name == "Absent"){
-            return (int)request('absent') . " hours";
+            return (float)request('absent') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Absent"){
             $total = $this->getLeaveData($user->id, "absent", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -320,7 +320,7 @@ class PayslipService
             }
         }
         if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
-            return (int)request('overtime') . " hours";
+            return (float)request('overtime') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Overtime Rate"){
             $total = $this->getLeaveData($user->id, "overtime", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -330,7 +330,7 @@ class PayslipService
             }
         }
         if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
-            return (int)request('double_overtime') . " hours";
+            return (float)request('double_overtime') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Double Overtime Rate"){
             $total = $this->getLeaveData($user->id, "double_overtime", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -340,7 +340,7 @@ class PayslipService
             }
         }
         if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
-            return (int)request('bonus') . " hours";
+            return (float)request('bonus') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Bonus"){
             $total = $this->getLeaveData($user->id, "bonus", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -350,7 +350,7 @@ class PayslipService
             }
         }
         if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
-            return (int)request('recuperated_hours') . " hours";
+            return (float)request('recuperated_hours') . " hours";
         } elseif($salary_item->salaryItemsName?->name == "Recuperated Hour"){
             $total = $this->getLeaveData($user->id, "recuperated_hours", $from_date, $to_date);
             // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -429,11 +429,11 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
             if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
-                return (int)request('maternity_leave') * $this->getSalaryItemAmount("Maternity Time Rate", $employee_id)->amount;
+                return (float)request('maternity_leave') * $this->getSalaryItemAmount("Maternity Time Rate", $employee_id)->amount;
                 // return 0;
             }
             if(request('annual_leave') && $salary_item->salaryItemsName?->name == "Holiday Rate"){
-                return (int)request('annual_leave') * $this->getSalaryItemAmount("Holiday Rate", $employee_id)->amount;
+                return (float)request('annual_leave') * $this->getSalaryItemAmount("Holiday Rate", $employee_id)->amount;
                 // return 0;
             } elseif($salary_item->salaryItemsName?->name == "Holiday Rate"){
                 $total = $this->getLeaveData($employee_id, "annual_leave", $from_date, $to_date);
@@ -444,7 +444,7 @@ class PayslipService
                 return 0;
             }
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
-                return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate", $employee_id)->amount;
+                return (float)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate", $employee_id)->amount;
                 // return 0;
             } elseif($salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
                 $total = $this->getLeaveData($employee_id, "sick_leave", $from_date, $to_date);
@@ -456,7 +456,7 @@ class PayslipService
             }
 
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
-                return (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+                return (float)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
             } elseif($salary_item->salaryItemsName?->name == "Overtime Rate"){
                 $total = $this->getLeaveData($employee_id, "overtime", $from_date, $to_date);
 
@@ -466,7 +466,7 @@ class PayslipService
                 return 0;
             }
             if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
-                return (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+                return (float)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
             } elseif($salary_item->salaryItemsName?->name == "Double Overtime Rate"){
                 $total = $this->getLeaveData($employee_id, "double_overtime", $from_date, $to_date);
 
@@ -476,7 +476,7 @@ class PayslipService
                 return 0;
             }
             if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
-                return (int)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+                return (float)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
             } elseif($salary_item->salaryItemsName?->name == "Bonus"){
                 $total = $this->getLeaveData($employee_id, "bonus", $from_date, $to_date);
 
@@ -486,7 +486,7 @@ class PayslipService
                 return 0;
             }
             if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
-                return (int)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour", $employee_id)->amount;
+                return (float)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour", $employee_id)->amount;
                 // return 0;
             } elseif($salary_item->salaryItemsName?->name == "Recuperated Hour"){
                 $total = $this->getLeaveData($employee_id, "recuperated_hours", $from_date, $to_date);
@@ -500,7 +500,7 @@ class PayslipService
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 2){
             if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
-                return (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+                return (float)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             } elseif($salary_item->salaryItemsName?->name == "Unpaid Sick Leave"){
                 $total = $this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date);
                 // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -511,7 +511,7 @@ class PayslipService
                 return 0;
             }
             if(request('absent') && $salary_item->salaryItemsName?->name == "Absent"){
-                return (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+                return (float)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             } elseif($salary_item->salaryItemsName?->name == "Absent"){
                 $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date);
                 // $total = $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
@@ -923,12 +923,12 @@ class PayslipService
     {
         $total = 0;
         if(request('absent')){
-            $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+            $total += (float)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
         } else{
             $total += $this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
         }
         if(request('unpaid_sick_leave')){
-            $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+            $total += (float)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
         } else{
             $total += $this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id, )->amount;
             // Log::info('unpaid_sick_leave', [
@@ -1734,24 +1734,24 @@ class PayslipService
             ]);
             $total = 0;
             if(request('absent')){
-                $total += (int)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+                $total += (float)request('absent') * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             } else{
                 Log::info('b', [
                     '1' => (int)request('absent'),
                     '2' => $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount,
                     '3' => (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date)
                 ]);
-                $total += (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
+                $total += (float)$this->getLeaveData($employee_id, "absent", $from_date, $to_date) * $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount;
             }
             if(request('unpaid_sick_leave')){
-                $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+                $total += (float)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             } else{
                 Log::info('c', [
                     '1' => (int)request('absent'),
                     '2' => $this->getSalaryItemAmount("Absent Rate", $employee_id)->amount,
                     '3' => (int)$this->getLeaveData($employee_id, "absent", $from_date, $to_date)
                 ]);
-                $total += (int)$this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
+                $total += (float)$this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
             }
             Log::info('d', [
                 '1' => $total
