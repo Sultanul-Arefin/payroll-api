@@ -931,9 +931,9 @@ class PayslipService
             $total += (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id)->amount;
         } else{
             $total += $this->getLeaveData($employee_id, "unpaid_sick_leave", $from_date, $to_date) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate", $employee_id, )->amount;
-            Log::info('unpaid_sick_leave', [
-                'a' => $total
-            ]);
+            // Log::info('unpaid_sick_leave', [
+            //     'a' => $total
+            // ]);
         }
         return $total; // this calculation is done from payload when creating payslips.
 
