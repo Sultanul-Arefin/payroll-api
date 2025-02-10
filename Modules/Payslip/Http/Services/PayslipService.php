@@ -1677,14 +1677,20 @@ class PayslipService
             $overtime = 0;
             if(request('overtime')){
                 $overtime = (float)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+            } else{
+                $overtime = $this->getLeaveData($employee_id, "overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
             }
             $double_overtime = 0;
             if(request('double_overtime')){
                 $double_overtime = (float)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+            } else{
+                $double_overtime = $this->getLeaveData($employee_id, "double_overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
             }
             $bonus = 0;
             if(request('bonus')){
                 $bonus = (float)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+            } else{
+                $bonus = $this->getLeaveData($employee_id, "bonus", $from_date, $to_date) * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
             }
             $amount = EmployeeSalaryItem::query()
                 ->whereHas(
