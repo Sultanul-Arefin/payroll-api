@@ -329,7 +329,7 @@ class ViewPayslipResource extends JsonResource
     public function get_base_amount_or_hours($get_base_amount_or_hours){
         $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
         if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
-            $numericValue = (int)$matches[1];
+            $numericValue = (float)$matches[1];
             $result = $numericValue / $working_hours_per_day;
             return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
         } else {
