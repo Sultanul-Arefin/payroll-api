@@ -1550,19 +1550,19 @@ class PayslipService
     {
         $overtime = null;
         if(request('overtime')){
-            $overtime = (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+            $overtime = (float)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         } else{
             $overtime = $this->getLeaveData($employee_id, "overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = null;
         if(request('double_overtime')){
-            $double_overtime = (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+            $double_overtime = (float)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         } else{
             $double_overtime = $this->getLeaveData($employee_id, "double_overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = null;
         if(request('bonus')){
-            $bonus = (int)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+            $bonus = (float)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
         } else{
             $bonus = $this->getLeaveData($employee_id, "bonus", $from_date, $to_date) * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
@@ -1676,15 +1676,15 @@ class PayslipService
         } elseif ($category_id == 1) {
             $overtime = 0;
             if(request('overtime')){
-                $overtime = (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+                $overtime = (float)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
             }
             $double_overtime = 0;
             if(request('double_overtime')){
-                $double_overtime = (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+                $double_overtime = (float)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
             }
             $bonus = 0;
             if(request('bonus')){
-                $bonus = (int)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+                $bonus = (float)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
             }
             $amount = EmployeeSalaryItem::query()
                 ->whereHas(
