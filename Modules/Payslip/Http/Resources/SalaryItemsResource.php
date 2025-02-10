@@ -44,31 +44,31 @@ class SalaryItemsResource extends JsonResource
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1)
         {
             if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
-                return (int)request('maternity_leave');
+                return number_format((int)request('maternity_leave'), 2);
             }
             if(request('annual_leave') && $salary_item->salaryItemsName?->name == "Holiday Rate"){
-                return (int)request('annual_leave');
+                return number_format((int)request('annual_leave'), 2);
             }
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
-                return (int)request('sick_leave');
+                return number_format((int)request('sick_leave'), 2);
             }
             if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
-                return (int)request('unpaid_sick_leave');
+                return number_format((int)request('unpaid_sick_leave'), 2);
             }
             if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
-                return (int)request('absent');
+                return number_format((int)request('absent'), 2);
             }
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
-                return (int)request('overtime');
+                return number_format((int)request('overtime'), 2);
             }
             if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
-                return (int)request('double_overtime');
+                return number_format((int)request('double_overtime'), 2);
             }
             if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
-                return (int)request('bonus');
+                return number_format((int)request('bonus'), 2);
             }
             if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
-                return (int)request('recuperated_hours');
+                return number_format((int)request('recuperated_hours'), 2);
             }
             return 0; // this will come from no. of leave days
         }
