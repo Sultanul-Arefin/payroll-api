@@ -278,7 +278,7 @@ class DepartmentWisePayslipJob implements ShouldQueue
             if($count <= 0){
                 return null;
             }
-            return $count ;
+            return $count;
         }
         elseif($leave == "double_overtime")
         {

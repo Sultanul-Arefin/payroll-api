@@ -261,19 +261,19 @@ class PayslipController extends Controller
         ]);
     }
 
-    public function getCategoryOneOtherValues($employee_id)
+    public function getCategoryOneOtherValues($employee_id, $request)
     {
         $overtime = 0;
-        if(request('overtime')){
-            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+        if(request('overtime') || isset($request['overtime'])){
+            $overtime = (int)request('overtime') ?? $request['overtime'] * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = 0;
-        if(request('double_overtime')){
-            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+        if(request('double_overtime') || isset($request['double_overtime'])){
+            $double_overtime = (int)request('double_overtime') ?? $request['double_overtime'] * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = 0;
-        if(request('bonus')){
-            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
+        if(request('bonus') || isset($request['bonus'])){
+            $bonus = (int)request('bonus') ?? $request['bonus'] * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
         return $overtime + $double_overtime + $bonus;
     }
@@ -290,7 +290,7 @@ class PayslipController extends Controller
 
         $get_pay_frequency = $this->payslipService->get_pay_frequency($request->employee_id);
         $get_basic = $this->payslipService->get_basic_amount($request->employee_id, $request->from_date, $request->to_date);
-        $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id);
+        $get_category_one_other_values = $this->getCategoryOneOtherValues($request->employee_id, $request);
         if($request->company_id){
             $get_staff_deduction_sick_absent = $this->payslipService->get_staff_deduction_sick_absent_amount($request->employee_id, $request->company_id, $request->from_date, $request->to_date);
         } else{
