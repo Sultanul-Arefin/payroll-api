@@ -37,7 +37,7 @@ class ViewIndianPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
-            'total_net_pay' => $this->net_pay, 
+            'total_net_pay' => $this->net_pay,
             'social_decution' => $this->get_social_deduction(),
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
@@ -55,15 +55,15 @@ class ViewIndianPayslipResource extends JsonResource
     }
 
     // public function getTotalWorkingDaysAttribute()
-    // {  
-        
+    // {
+
     //     if ($this->hours_worked && $this->company && $this->company->working_hours_per_day) {
     //         return round($this->hours_worked / $this->company->working_hours_per_day, 2);
     //     }
     //     return null;
     // }
 
-    
+
     public function get_annual_leave_calculation($employee)
     {
         return [
@@ -161,7 +161,7 @@ class ViewIndianPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_annual_leave / $working_hours_per_day);
-        
+
     }
 
     function getAnnualLeaveQuota(): int {
@@ -262,7 +262,7 @@ class ViewIndianPayslipResource extends JsonResource
                 // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
             }
             return ceil($total_sick_leave / $working_hours_per_day);
-        
+
     }
 
     function getSickLeaveQuota(): int {
@@ -317,15 +317,15 @@ class ViewIndianPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_lop_day / $working_hours_per_day);
-        
+
     }
 
-    
+
 
     // public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-    //             { 
+    //             {
 
-                    
+
     //                     if (!$from_date) {
     //                         $from_date = $this->first_date;
     //                     }
@@ -333,7 +333,7 @@ class ViewIndianPayslipResource extends JsonResource
     //                         $to_date = $this->last_date;
     //                     }
 
-                
+
     //                 $present_days = Attendance::query()
     //                     ->where('user_id', $employee_id)
     //                     ->whereBetween('dates', [$from_date, $to_date])
@@ -344,8 +344,8 @@ class ViewIndianPayslipResource extends JsonResource
     //                     $lop_days=$this->getAbsentTaken($this->employee->id);
     //                     $total_leave_taken=$this->getAnnualLeaveTaken($this->employee->id)+$this->getSickLeaveTaken($this->employee->id);
     //                     $paid_days=$total_leave_taken+$present_days;
-                        
-    //                     return 
+
+    //                     return
     //                                 [
     //                                     'total_working_days' => $present_days,
     //                                     'lop_days' =>  $lop_days,
@@ -356,16 +356,16 @@ class ViewIndianPayslipResource extends JsonResource
 
 
         // public function getTotalWorkingDaysAttribute()
-        //        {  
+        //        {
         //            if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
         //                return null;
         //            }
-               
+
         //            $lop_days = $this->getAbsentTaken($this->employee->id);
         //            $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
         //            $total_working_days = round($this->hours_worked / $this->company->working_hours_per_day, 2);
         //            $paid_days = $total_leave_taken + $total_working_days;
-               
+
         //            return [
         //                'total_working_days' => $total_working_days,
         //                'lop_days' => $lop_days,
@@ -375,8 +375,8 @@ class ViewIndianPayslipResource extends JsonResource
         // }
 
         public function getTotalWorkingDaysAttribute()
-            {  
-                    
+            {
+
                     if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
                         $total_working_days = 0;
                     } else {
@@ -396,7 +396,7 @@ class ViewIndianPayslipResource extends JsonResource
             }
 
 
-           
+
 
 
         public function get_other_deduction()
@@ -431,7 +431,7 @@ class ViewIndianPayslipResource extends JsonResource
                 'total_employee_amount' => $total_employee_amount,
             ];
         }
-    
+
         public function get_social_deduction()
         {
             $deduction_details = PayslipDetailsForDeduction::query()
@@ -466,7 +466,7 @@ class ViewIndianPayslipResource extends JsonResource
                 'total_employee_amount' => $total_employee_amount,
             ];
         }
-    
+
         public function get_total_company_deduction()
             {
                 $other_deduction = $this->get_other_deduction();
@@ -524,7 +524,8 @@ class ViewIndianPayslipResource extends JsonResource
 
             // } else{
                 $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
+
                 $payslip_detail->rate = $payslip_detail->rate;
                 $payslip_detail->amount = $payslip_detail->amount;
                 if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
@@ -542,6 +543,17 @@ class ViewIndianPayslipResource extends JsonResource
             'payslip_details' => $filtered_details->values(),
             //'total_earnings' => $payslip_value
         ];
+    }
+
+    public function get_base_amount_or_hours($get_base_amount_or_hours){
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
+            $numericValue = (int)$matches[1];
+            $result = $numericValue / $working_hours_per_day;
+            return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
+        } else {
+            return $get_base_amount_or_hours;
+        }
     }
 
     public function getOvertimeHours($payslip_details)

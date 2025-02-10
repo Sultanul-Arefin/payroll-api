@@ -54,7 +54,7 @@ class ViewUKPayslipResource extends JsonResource
            // 'overall_calculation' => $this->overall_calculation(),
             'year_to_date' => $this->getYearToDateCalculations(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
-        
+
         ];
     }
 
@@ -152,7 +152,7 @@ class ViewUKPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_annual_leave / $working_hours_per_day);
-        
+
     }
 
     function getAnnualLeaveQuota(): int {
@@ -253,7 +253,7 @@ class ViewUKPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_sick_leave / $working_hours_per_day);
-        
+
     }
 
     function getSickLeaveQuota(): int {
@@ -417,7 +417,7 @@ class ViewUKPayslipResource extends JsonResource
     //     ];
     // }
 
-    
+
 
     public function get_payslip_details($payslip_details){
         $payslip_value = 0;
@@ -431,7 +431,7 @@ class ViewUKPayslipResource extends JsonResource
 
             // } else{
                 $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
                 $payslip_detail->rate = $payslip_detail->rate;
                 $payslip_detail->amount = $payslip_detail->amount;
                 if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
@@ -448,6 +448,17 @@ class ViewUKPayslipResource extends JsonResource
             'payslip_details' => $filtered_details->values(),
             'total_payslip_value' => $payslip_value
         ];
+    }
+
+    public function get_base_amount_or_hours($get_base_amount_or_hours){
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
+            $numericValue = (int)$matches[1];
+            $result = $numericValue / $working_hours_per_day;
+            return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
+        } else {
+            return $get_base_amount_or_hours;
+        }
     }
 
     // public function getYearToDateCalculations()

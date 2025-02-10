@@ -285,7 +285,7 @@ class ViewFrenchPayslipResource extends JsonResource
 
             // } else{
                 $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
                 $payslip_detail->rate = $payslip_detail->rate;
                 $payslip_detail->amount = $payslip_detail->amount;
                 if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
@@ -299,6 +299,17 @@ class ViewFrenchPayslipResource extends JsonResource
             unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return $filtered_details->values();
+    }
+
+    public function get_base_amount_or_hours($get_base_amount_or_hours){
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
+            $numericValue = (int)$matches[1];
+            $result = $numericValue / $working_hours_per_day;
+            return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
+        } else {
+            return $get_base_amount_or_hours;
+        }
     }
 
     public function getOvertimeHours($payslip_details)
@@ -360,6 +371,17 @@ class ViewFrenchPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_overtime_hours / $working_hours_per_day);
+    }
+
+    public function get_base_amount_or_hours($get_base_amount_or_hours){
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
+            $numericValue = (int)$matches[1];
+            $result = $numericValue / $working_hours_per_day;
+            return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
+        } else {
+            return $get_base_amount_or_hours;
+        }
     }
 
     public function overall_calculation()
