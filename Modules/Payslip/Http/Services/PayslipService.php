@@ -809,8 +809,8 @@ class PayslipService
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            $from_date,
+                            $to_date
                         ]
                     )
                     ->get();
@@ -831,8 +831,8 @@ class PayslipService
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            $from_date,
+                            $to_date
                         ]
                     )
                     ->get();
@@ -853,8 +853,8 @@ class PayslipService
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            $from_date,
+                            $to_date
                         ]
                     )
                     ->get();
@@ -875,8 +875,8 @@ class PayslipService
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            $from_date,
+                            $to_date
                         ]
                     )
                     ->get();
