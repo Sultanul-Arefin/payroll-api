@@ -27,7 +27,6 @@ class SpecificEmployeePayslipJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $auth_user;
-    public $request;
     public $employee_ids;
     public $from_date;
     public $to_date;
@@ -36,10 +35,9 @@ class SpecificEmployeePayslipJob implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct($auth_user, $request, $employee_ids, $from_date, $to_date, $payment_date)
+    public function __construct($auth_user, $employee_ids, $from_date, $to_date, $payment_date)
     {
         $this->auth_user = $auth_user;
-        $this->request = $request;
         $this->employee_ids = $employee_ids;
         $this->from_date = $from_date;
         $this->to_date = $to_date;
@@ -56,7 +54,7 @@ class SpecificEmployeePayslipJob implements ShouldQueue
         foreach($this->employee_ids as $employee_id){
             $user = User::where('id', $employee_id)->where('company_id', $this->auth_user->company_id)->first();
 
-            $this->request = new Request([
+            $request = new Request([
                 'employee_id' => $user->id,
                 'from_date' => $this->from_date,
                 'to_date' => $this->to_date,
@@ -73,7 +71,7 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                 'recuperated_hours' => $this->getLeaveData($user->id, "recuperated_hours"),
                 'bonus' => $this->getLeaveData($user->id, "bonus")
             ]);
-            app(PayslipController::class)->run_payslip($this->request);
+            app(PayslipController::class)->run_payslip($request);
             // dump($user->id);
         }
         // dump($this->auth_user->company_id);
