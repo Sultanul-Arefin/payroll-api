@@ -393,26 +393,59 @@ class ViewUKPayslipResource extends JsonResource
             }
 
 
+    // public function get_payslip_details($payslip_details){
+    //     $payslip_value = 0;
+    //     foreach($payslip_details as $payslip_detail){
+    //         $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+    //         $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+    //         $payslip_detail->rate = $payslip_detail->rate;
+    //         $payslip_detail->amount = $payslip_detail->amount;
+    //         if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+    //             $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+    //         } else {
+    //             $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+    //         }
+
+    //         // payslip_calculation
+    //         $payslip_value += $payslip_detail->amount;
+    //         // unset these keys from the response
+    //         unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+    //     }
+    //     return [
+    //         'payslip_details' => $payslip_details,
+    //         'total_payslip_value' => $payslip_value
+    //     ];
+    // }
+
+
+
     public function get_payslip_details($payslip_details){
         $payslip_value = 0;
-        foreach($payslip_details as $payslip_detail){
-            $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-            $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
-            $payslip_detail->rate = $payslip_detail->rate;
-            $payslip_detail->amount = $payslip_detail->amount;
-            if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
-                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
-            } else {
-                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
-            }
+        // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
+        $filtered_details = $payslip_details->filter(function ($payslip_detail) {
+            return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
+        });
 
-            // payslip_calculation
+        foreach($filtered_details as $payslip_detail){
+            // if($payslip_detail->salary_item->name == "Annual Leave" || $payslip_detail->salary_item->name == "Annual Leave"){
+
+            // } else{
+                $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->rate = $payslip_detail->rate;
+                $payslip_detail->amount = $payslip_detail->amount;
+                if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+                } else {
+                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+                }
+            // }
             $payslip_value += $payslip_detail->amount;
             // unset these keys from the response
             unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
         return [
-            'payslip_details' => $payslip_details,
+            'payslip_details' => $filtered_details->values(),
             'total_payslip_value' => $payslip_value
         ];
     }
@@ -448,6 +481,68 @@ class ViewUKPayslipResource extends JsonResource
     //             'tex' => $tax,
     //         ];
     //     }
+
+    public function getOvertimeHours($payslip_details)
+    {
+        $overtime = 0;
+        foreach($payslip_details as $value)
+        {
+            if ($value->pay_details == "Overtime Rate") {
+                $overtime = $value?->base_amount_or_hours;
+            }
+        }
+        return $overtime;
+    }
+
+    public function getTotalOvertimeHours($payslip_details)
+    {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+
+        $user_id = $this->employee_id;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Overtime Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_overtime_hours = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_overtime_hours += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_overtime_hours / $working_hours_per_day);
+    }
+
 
 
 public function getYearToDateCalculations()

@@ -43,15 +43,25 @@ class ViewIndianPayslipResource extends JsonResource
             'total_deductions' => $this->total_employee_deduction,
             'total_company_deduction' => $this->get_total_company_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
-            'attendance' => $this->getTotalAttendanceDays(
-                $this->employee->id,
-                $this->start_date,
-                $this->end_date
-            ),
+            // 'attendance' => $this->getTotalAttendanceDays(
+            //     $this->employee->id,
+            //     $this->start_date,
+            //     $this->end_date
+            // ),
             'net_salary' => $this->net_pay,
            // 'overall_calculation' => $this->overall_calculation(),
+           'attendance'=>$this->getTotalWorkingDaysAttribute(),
         ];
     }
+
+    // public function getTotalWorkingDaysAttribute()
+    // {
+
+    //     if ($this->hours_worked && $this->company && $this->company->working_hours_per_day) {
+    //         return round($this->hours_worked / $this->company->working_hours_per_day, 2);
+    //     }
+    //     return null;
+    // }
 
 
     public function get_annual_leave_calculation($employee)
@@ -286,13 +296,13 @@ class ViewIndianPayslipResource extends JsonResource
                             'employee_salary_item', function(Builder $builder){
                                 $builder->whereHas(
                                     'salaryItemsName', function(Builder $builder){
-                                        $builder->where('name', 'like', '%' . 'Absent Rate' . '%');
+                                        $builder->where('name', 'like', '%' . 'Absent' . '%');
                                     }
                                 );
                             }
                         )
                         ->get();
-        $total_sick_leave = 0;
+        $total_lop_day = 0;
         foreach($payslip_details as $value)
         {
             // Get "base_amount_or_hours" and remove "hours"
@@ -301,113 +311,89 @@ class ViewIndianPayslipResource extends JsonResource
             // Convert to numeric value
             $numericBaseAmount = (float)$baseAmount;
 
-            $total_sick_leave += $numericBaseAmount;
+            $total_lop_day += $numericBaseAmount;
 
             // Calculate the value (base * rate)
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
-        return ceil($total_sick_leave / $working_hours_per_day);
+        return ceil($total_lop_day / $working_hours_per_day);
 
     }
 
-    public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-                {
 
 
-                        if (!$from_date) {
-                            $from_date = $this->first_date;
-                        }
-                        if (!$to_date) {
-                            $to_date = $this->last_date;
-                        }
+    // public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
+    //             {
 
 
-                    $present_days = Attendance::query()
-                        ->where('user_id', $employee_id)
-                        ->whereBetween('dates', [$from_date, $to_date])
-                        ->where('status', Attendance::PRESENT) // Only count "Present" days
-                        ->count();
-                       // return $present_days;
-
-                        $lop_days=$this->getAbsentTaken($this->employee->id);
-                        $total_leave_taken=$this->getAnnualLeaveTaken($this->employee->id)+$this->getSickLeaveTaken($this->employee->id);
-                        $paid_days=$total_leave_taken+$present_days;
-
-                        return
-                                    [
-                                        'total_working_days' => $present_days,
-                                        'lop_days' =>  $lop_days,
-                                        'leaves_taken' =>$total_leave_taken,
-                                        'paid_days' =>$paid_days,
-                                    ];
-               }
+    //                     if (!$from_date) {
+    //                         $from_date = $this->first_date;
+    //                     }
+    //                     if (!$to_date) {
+    //                         $to_date = $this->last_date;
+    //                     }
 
 
-            // public function getTotalAttendanceDays($employee_id, $from_date, $to_date)
-            //     {
-            //             if (!$from_date) {
-            //                 $from_date = $this->first_date;
-            //             }
-            //             if (!$to_date) {
-            //                 $to_date = $this->last_date;
-            //             }
+    //                 $present_days = Attendance::query()
+    //                     ->where('user_id', $employee_id)
+    //                     ->whereBetween('dates', [$from_date, $to_date])
+    //                     ->where('status', Attendance::PRESENT) // Only count "Present" days
+    //                     ->count();
+    //                    // return $present_days;
+
+    //                     $lop_days=$this->getAbsentTaken($this->employee->id);
+    //                     $total_leave_taken=$this->getAnnualLeaveTaken($this->employee->id)+$this->getSickLeaveTaken($this->employee->id);
+    //                     $paid_days=$total_leave_taken+$present_days;
+
+    //                     return
+    //                                 [
+    //                                     'total_working_days' => $present_days,
+    //                                     'lop_days' =>  $lop_days,
+    //                                     'leaves_taken' =>$total_leave_taken,
+    //                                     'paid_days' =>$paid_days,
+    //                                 ];
+    //            }
 
 
-            //         $present_days = Attendance::query()
-            //             ->where('user_id', $employee_id)
-            //             ->whereBetween('dates', [$from_date, $to_date])
-            //             ->where('status', Attendance::PRESENT) // Only count "Present" days
-            //             ->count();
+        // public function getTotalWorkingDaysAttribute()
+        //        {
+        //            if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
+        //                return null;
+        //            }
 
+        //            $lop_days = $this->getAbsentTaken($this->employee->id);
+        //            $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
+        //            $total_working_days = round($this->hours_worked / $this->company->working_hours_per_day, 2);
+        //            $paid_days = $total_leave_taken + $total_working_days;
 
-            //         $getLeaveDays = function ($employee_id, $leave_type_name, $from_date, $to_date) {
-            //             $leave_data = LeaveSalaryItems::query()
-            //                 ->whereHas('salary_items_name', function (Builder $builder) use ($leave_type_name) {
-            //                     $builder
-            //                         ->where('name', $leave_type_name)
-            //                         ->where('company_id', auth()->user()->company_id);
-            //                 })
-            //                 ->first();
+        //            return [
+        //                'total_working_days' => $total_working_days,
+        //                'lop_days' => $lop_days,
+        //                'leaves_taken' => $total_leave_taken,
+        //                'paid_days' => $paid_days,
+        //            ];
+        // }
 
-            //             if (!$leave_data) {
-            //                 return 0;
-            //             }
+        public function getTotalWorkingDaysAttribute()
+            {
 
-            //             return UserLeave::query()
-            //                 ->where('user_id', $employee_id)
-            //                 ->where('status', UserLeave::APPROVED) // Only consider approved leaves
-            //                 ->where('leave_type', $leave_data->salary_items_id)
-            //                 ->whereHas('leave_details', function ($query) use ($from_date, $to_date) {
-            //                     $query->whereBetween('dates', [$from_date, $to_date]);
-            //                 })
-            //                 ->withCount(['leave_details as leave_days_count' => function ($query) use ($from_date, $to_date) {
-            //                     $query->whereBetween('dates', [$from_date, $to_date]);
-            //                 }])
-            //                 ->get()
-            //                 ->sum('leave_days_count'); // Sum all the leave days for the user
-            //         };
+                    if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
+                        $total_working_days = 0;
+                    } else {
+                        $total_working_days = round($this->hours_worked / ($this->company->working_hours_per_day+$this->company->lunch_and_others_per_day), 2);
+                    }
 
-            //         // Calculate Annual Leave Days
-            //         $annual_leave_days = $getLeaveDays($employee_id, 'Annual Leave', $from_date, $to_date);
+                    $lop_days = $this->getAbsentTaken($this->employee->id);
+                    $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
+                    $paid_days = $total_leave_taken + $total_working_days;
 
-            //         // Calculate Sick Leave Days
-            //         $sick_leave_days = $getLeaveDays($employee_id, 'Sick Leave', $from_date, $to_date);
-            //         $unpaid_leave_days = $getLeaveDays($employee_id, 'Unpaid Sick Leave', $from_date, $to_date);
-            //         $Absent_leave_days = $getLeaveDays($employee_id, 'Absent', $from_date, $to_date);
-
-            //         // Total approved leave days (Annual + Sick)
-            //         $approved_leave_days = $annual_leave_days + $sick_leave_days;
-
-            //         // Total attendance days = Present days + Approved leave days
-            //         return [
-            //             'total_working_days' => $present_days,
-            //             //'annual_leave_days' => $annual_leave_days,
-            //             //'sick_leave_days' => $sick_leave_days,
-            //             'lop_days' => $Absent_leave_days,
-            //             'leaves_taken' => $approved_leave_days,
-            //             'paid_days' => $present_days + $approved_leave_days,
-            //         ];
-            //     }
+                    return [
+                        'total_working_days' => $total_working_days,
+                        'lop_days' => $lop_days,
+                        'leaves_taken' => $total_leave_taken,
+                        'paid_days' => $paid_days,
+                    ];
+            }
 
 
 
@@ -502,40 +488,123 @@ class ViewIndianPayslipResource extends JsonResource
                 ->sum('employee_amount');
     }
 
+    // public function get_payslip_details($payslip_details){
+    //     $payslip_value = 0;
+    //     foreach($payslip_details as $payslip_detail){
+    //         $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+    //         $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+    //         $payslip_detail->rate = $payslip_detail->rate;
+    //         $payslip_detail->amount = $payslip_detail->amount;
+    //         if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+    //             $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+    //         } else {
+    //             $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+    //         }
+    //         $payslip_value += $payslip_detail->amount;
+
+    //         // unset these keys from the response
+    //         unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+    //     }
+    //    // return $payslip_details;
+    //    return [
+    //     'payslip_details' => $payslip_details,
+    //     //'total_earnings' => $payslip_value
+    // ];
+    // }
+
     public function get_payslip_details($payslip_details){
         $payslip_value = 0;
-        foreach($payslip_details as $payslip_detail){
-            $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-            $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
-            $payslip_detail->rate = $payslip_detail->rate;
-            $payslip_detail->amount = $payslip_detail->amount;
-            if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
-                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
-            } else {
-                $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
-            }
+        // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
+        $filtered_details = $payslip_details->filter(function ($payslip_detail) {
+            return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
+        });
+
+        foreach($filtered_details as $payslip_detail){
+            // if($payslip_detail->salary_item->name == "Annual Leave" || $payslip_detail->salary_item->name == "Annual Leave"){
+
+            // } else{
+                $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->rate = $payslip_detail->rate;
+                $payslip_detail->amount = $payslip_detail->amount;
+                if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+                } else {
+                    $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+                }
+            // }
             $payslip_value += $payslip_detail->amount;
 
             // unset these keys from the response
             unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
         }
-       // return $payslip_details;
-       return [
-           'payslip_details' => $payslip_details,
-        //'total_earnings' => $payslip_value
+        return [
+            'payslip_details' => $filtered_details->values(),
+            //'total_earnings' => $payslip_value
         ];
     }
 
-    public function get_base_amount_or_hours($get_base_amount_or_hours){
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
-        if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
-            $numericValue = (int)$matches[1];
-            $result = $numericValue / $working_hours_per_day;
-            return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
-        } else {
-            return $get_base_amount_or_hours;
+    public function getOvertimeHours($payslip_details)
+    {
+        $overtime = 0;
+        foreach($payslip_details as $value)
+        {
+            if ($value->pay_details == "Overtime Rate") {
+                $overtime = $value?->base_amount_or_hours;
+            }
         }
+        return $overtime;
     }
+
+    public function getTotalOvertimeHours($payslip_details)
+    {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+
+        $user_id = $this->employee_id;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Overtime Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_overtime_hours = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_overtime_hours += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_overtime_hours / $working_hours_per_day);
+    }
+
 
     public function overall_calculation()
     {

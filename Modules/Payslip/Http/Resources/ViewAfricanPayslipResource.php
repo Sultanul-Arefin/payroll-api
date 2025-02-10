@@ -47,6 +47,7 @@ class ViewAfricanPayslipResource extends JsonResource
             'other_decution' => $this->get_other_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
             'day_by_day_details' => $this->getDayByDayDetails($this->start_date, $this->end_date, $this->employee->id),
+            // 'day_by_day_details' => $this->getDayByDayDetails($this->start_date, $this->end_date, $this->employee->id),
             
         ];
     }
