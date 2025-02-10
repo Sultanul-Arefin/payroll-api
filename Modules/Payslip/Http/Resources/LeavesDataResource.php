@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Resources;
 
+use App\Models\Bonus;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,6 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use JsonSerializable;
 use Modules\Attendance\Entities\Attendance;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
 use Modules\LeaveManagement\Entities\UserLeave;
 use Modules\LeaveManagement\Entities\UserLeaveDetail;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
@@ -130,7 +132,8 @@ class LeavesDataResource extends JsonResource
                 return null;
             }
             return $count * $working_hours_per_day;
-        } elseif($leave == "absent")
+        }
+        elseif($leave == "absent")
         {
             $absent_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
@@ -173,7 +176,9 @@ class LeavesDataResource extends JsonResource
                 return null;
             }
             return $count * $working_hours_per_day;
-        } elseif($leave == "unpaid_sick_leave"){
+        }
+        elseif($leave == "unpaid_sick_leave")
+        {
             $unpaid_sick_leave_data = LeaveSalaryItems::query()
                 ->whereHas(
                     'salary_items_name', function(Builder $builder){
@@ -215,6 +220,134 @@ class LeavesDataResource extends JsonResource
                 return null;
             }
             return $count * $working_hours_per_day;
+        }
+        elseif($leave == "overtime")
+        {
+            $overtime_rate = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Overtime Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::OVERTIME)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $overtime_rate->amount;
+        }
+        elseif($leave == "double_overtime")
+        {
+            $double_overtime_rate = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Double Overtime Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::DOUBLE_OVERTIME)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $double_overtime_rate->amount;
+        }
+        elseif($leave == "recuperated_hours")
+        {
+            $recuperated_hour_rate = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Recuperated Hour')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::RECUPERATED)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $recuperated_hour_rate->amount;
+        }
+        elseif($leave == "bonus")
+        {
+            $bonus_rate = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Bonus')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereIn('type', [Bonus::BONUS_HOURLY, Bonus::BONUS_SALARY_BASIC, Bonus::BONUS_DIRECT_AMOUNT])
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count * $bonus_rate->amount;
         }
     }
 
