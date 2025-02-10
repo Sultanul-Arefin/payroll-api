@@ -56,10 +56,10 @@ class ViewUSAPayslipResource extends JsonResource
                 'year_to_date' => $this->getYearToDateCalculations(),
             ],
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
-        ];	
+        ];
     }
 
-    
+
 
     public function get_annual_leave_calculation($employee)
     {
@@ -155,7 +155,7 @@ class ViewUSAPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_annual_leave / $working_hours_per_day);
-        
+
     }
 
     function getAnnualLeaveQuota(): int {
@@ -256,7 +256,7 @@ class ViewUSAPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_sick_leave / $working_hours_per_day);
-        
+
     }
 
     function getSickLeaveQuota(): int {
@@ -277,7 +277,7 @@ class ViewUSAPayslipResource extends JsonResource
         return $data->no_of_days;
     }
 
-   
+
 
     public function get_other_deduction()
     {
@@ -318,12 +318,12 @@ class ViewUSAPayslipResource extends JsonResource
         ];
 
     }
-    
-        
+
+
 
         public function get_deduction_details()
         {
-            
+
                 $deduction_details = PayslipDetailsForDeduction::query()
                                     ->whereHas(
                                         'salary_item_name', function(Builder $builder){
@@ -382,13 +382,13 @@ class ViewUSAPayslipResource extends JsonResource
                     return [
                         'total_deductions' => $deductionDetails['total_employee_amount'] ?? 0,
                         'total_income_tax' => $incomeTaxDetails['total_amount'] ?? 0,
-                        'combined_total' => 
-                            ($deductionDetails['total_employee_amount'] ?? 0) + 
+                        'combined_total' =>
+                            ($deductionDetails['total_employee_amount'] ?? 0) +
                             ($incomeTaxDetails['total_amount'] ?? 0),
                     ];
                 }
 
-        
+
 
         public function get_staff_social_charges()
                 {
@@ -445,11 +445,11 @@ class ViewUSAPayslipResource extends JsonResource
         {
             $payslip_value = 0;
             $filteredDetails = [];
-        
+
             foreach ($payslip_details as $payslip_detail) {
                 $payslip_detail->pay_details = $payslip_detail->salary_item->name ?? 'N/A';
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours ?? 0;
-                $payslip_detail->rate = $payslip_detail->rate ?? 0;        
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours) ?? 0;
+                $payslip_detail->rate = $payslip_detail->rate ?? 0;
                 $payslip_detail->amount = $payslip_detail->amount ?? 0;
                 if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
                     $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
@@ -460,9 +460,9 @@ class ViewUSAPayslipResource extends JsonResource
                 if (in_array($payslip_detail->category_id, [5, 6])) {
                     continue;
                 }
-        
+
                 $payslip_value += $payslip_detail->amount;
-        
+
                 // Unset unnecessary keys
                 unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
 
@@ -475,18 +475,29 @@ class ViewUSAPayslipResource extends JsonResource
                 //     $payslip_detail->payslip_id,
                 //     $payslip_detail->salary_item_id
                 // );
-        
+
                 $filteredDetails[] = $payslip_detail;
             }
-        
+
             return [
                 'payslip_details' => $filteredDetails,
                 'total_payslip_value_employee' => $payslip_value,
             ];
         }
-        
 
-       
+        public function get_base_amount_or_hours($get_base_amount_or_hours){
+            $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+            if (preg_match('/(\d+)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
+                $numericValue = (int)$matches[1];
+                $result = $numericValue / $working_hours_per_day;
+                return $get_base_amount_or_hours . "(" . number_format($result, 2) . " day(s))";
+            } else {
+                return $get_base_amount_or_hours;
+            }
+        }
+
+
+
 
 //        public function getYearToDateCalculations()
 // {
@@ -578,7 +589,7 @@ public function getYearToDateCalculations()
     ];
 }
 
-        
+
 
     public function overall_calculation()
     {
