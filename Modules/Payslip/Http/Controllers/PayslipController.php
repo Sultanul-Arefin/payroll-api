@@ -264,16 +264,16 @@ class PayslipController extends Controller
     public function getCategoryOneOtherValues($employee_id, $request)
     {
         $overtime = 0;
-        if(request('overtime') || isset($request['overtime'])){
-            $overtime = (int)request('overtime') ?? $request['overtime'] * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+        if(request('overtime') || isset($request->overtime)){
+            $overtime = (int)request('overtime') ?? $request->overtime * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = 0;
-        if(request('double_overtime') || isset($request['double_overtime'])){
-            $double_overtime = (int)request('double_overtime') ?? $request['double_overtime'] * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+        if(request('double_overtime') || isset($request->double_overtime)){
+            $double_overtime = (int)request('double_overtime') ?? $request->double_overtime * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = 0;
-        if(request('bonus') || isset($request['bonus'])){
-            $bonus = (int)request('bonus') ?? $request['bonus'] * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
+        if(request('bonus') || isset($request->bonus)){
+            $bonus = (int)request('bonus') ?? $request->bonus * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
         return $overtime + $double_overtime + $bonus;
     }
