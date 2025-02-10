@@ -28,14 +28,23 @@ class BonusController extends Controller
 
     public function calculate_generalize_amount($type, $amount, $employee_id)
     {
-        return match($type){
-            "0" => $amount,
-            "3" => $amount,
-            "4" => $amount,
-            "5" => $amount,
-            "1" => $this->get_basic($employee_id) % $amount,
-            "2" => $amount / $this->get_ordinary_time_rate($employee_id)
-        };
+        if($type == 0 || $type == 3 || $type == 4 || $type == 5){
+            return $amount;
+        }
+        if($type == 1){
+            return $this->get_basic($employee_id) % $amount;
+        }
+        if($type == 2){
+            $amount / $this->get_ordinary_time_rate($employee_id);
+        }
+        // return match($type){
+        //     "0" => $amount,
+        //     "3" => $amount,
+        //     "4" => $amount,
+        //     "5" => $amount,
+        //     "1" => $this->get_basic($employee_id) % $amount,
+        //     "2" => $amount / $this->get_ordinary_time_rate($employee_id)
+        // };
     }
 
     public function get_ordinary_time_rate($employee_id)
