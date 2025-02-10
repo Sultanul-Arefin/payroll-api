@@ -1546,19 +1546,25 @@ class PayslipService
                     ->first('amount');
     }
 
-    public function getCategoryOneOtherValues($category_id, $employee_id)
+    public function getCategoryOneOtherValues($category_id, $employee_id, $from_date, $to_date)
     {
         $overtime = null;
         if(request('overtime')){
             $overtime = (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+        } else{
+            $overtime = $this->getLeaveData($employee_id, "overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = null;
         if(request('double_overtime')){
             $double_overtime = (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+        } else{
+            $double_overtime = $this->getLeaveData($employee_id, "double_overtime", $from_date, $to_date) * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = null;
         if(request('bonus')){
             $bonus = (int)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+        } else{
+            $bonus = $this->getLeaveData($employee_id, "bonus", $from_date, $to_date) * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
         return [
             'overtime' => $overtime,

@@ -141,31 +141,31 @@ class SalaryItemsResource extends JsonResource
         }
         if($salary_item->salaryItemsName->salaryItemsCategory->id == 1){
             if(request('maternity_leave') && $salary_item->salaryItemsName?->name == "Maternity Time Rate"){
-                return (int)request('maternity_leave') * $this->getSalaryItemAmount("Maternity Time Rate")->amount;
+                return number_format((int)request('maternity_leave'), 2) * $this->getSalaryItemAmount("Maternity Time Rate")->amount;
             }
             if(request('annual_leave') && $salary_item->salaryItemsName?->name == "Holiday Rate"){
-                return (int)request('annual_leave') * $this->getSalaryItemAmount("Holiday Rate")->amount;
+                return number_format((int)request('annual_leave'), 2) * $this->getSalaryItemAmount("Holiday Rate")->amount;
             }
             if(request('sick_leave') && $salary_item->salaryItemsName?->name == "Paid Sick Leave Rate"){
-                return (int)request('sick_leave') * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
+                return number_format((int)request('sick_leave'), 2) * $this->getSalaryItemAmount("Paid Sick Leave Rate")->amount;
             }
             if(request('unpaid_sick_leave') && $salary_item->salaryItemsName?->name == "Unpaid Sick Leave Rate"){
-                return (int)request('unpaid_sick_leave') * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
+                return number_format((int)request('unpaid_sick_leave'), 2) * $this->getSalaryItemAmount("Unpaid Sick Leave Rate")->amount;
             }
             if(request('absent') && $salary_item->salaryItemsName?->name == "Absent Rate"){
-                return (int)request('absent') * $this->getSalaryItemAmount("Absent Rate")->amount;
+                return number_format((int)request('absent'), 2) * $this->getSalaryItemAmount("Absent Rate")->amount;
             }
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
-                return (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate")->amount;
+                return number_format((int)request('overtime'), 2) * $this->getSalaryItemAmount("Overtime Rate")->amount;
             }
             if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
-                return (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate")->amount;
+                return number_format((int)request('double_overtime'), 2) * $this->getSalaryItemAmount("Double Overtime Rate")->amount;
             }
             if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
-                return (int)request('bonus') * $this->getSalaryItemAmount("Bonus")->amount;
+                return number_format((int)request('bonus'), 2) * $this->getSalaryItemAmount("Bonus")->amount;
             }
             if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
-                return (int)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour")->amount;
+                return number_format((int)request('recuperated_hours'), 2) * $this->getSalaryItemAmount("Recuperated Hour")->amount;
             }
             return 0;
         }
