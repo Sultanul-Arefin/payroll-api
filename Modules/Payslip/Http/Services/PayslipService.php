@@ -849,7 +849,7 @@ class PayslipService
             if($count <= 0){
                 return null;
             }
-            return $count ;
+            return number_format($count, 2);
         }
         elseif($leave == "double_overtime")
         {
@@ -871,7 +871,7 @@ class PayslipService
             if($count <= 0){
                 return null;
             }
-            return $count;
+            return number_format($count, 2);
         }
         elseif($leave == "recuperated_hours")
         {
@@ -893,7 +893,7 @@ class PayslipService
             if($count <= 0){
                 return null;
             }
-            return $count;
+            return number_format($count, 2);
         }
         elseif($leave == "bonus")
         {
@@ -915,7 +915,7 @@ class PayslipService
             if($count <= 0){
                 return null;
             }
-            return $count;
+            return number_format($count, 2);
         }
     }
 
