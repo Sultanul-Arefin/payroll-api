@@ -431,7 +431,7 @@ class ViewUKPayslipResource extends JsonResource
 
             // } else{
                 $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours;
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
                 $payslip_detail->rate = $payslip_detail->rate;
                 $payslip_detail->amount = $payslip_detail->amount;
                 if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
