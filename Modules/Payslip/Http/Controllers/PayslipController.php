@@ -446,7 +446,7 @@ class PayslipController extends Controller
             'employee_ids.*' => 'integer|exists:users,id'
         ]);
         if(isset($request->employee_ids)){
-            SpecificEmployeePayslipJob::dispatch(auth()->user(), $request->employee_ids, $request->from_date, $request->to_date, $request->payment_date);
+            SpecificEmployeePayslipJob::dispatch(auth()->user(), $request, $request->employee_ids, $request->from_date, $request->to_date, $request->payment_date);
         } else{
             DepartmentWisePayslipJob::dispatch(auth()->user(), $request->department_id, $request->from_date, $request->to_date, $request->payment_date);
         }
