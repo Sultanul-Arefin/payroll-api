@@ -21,6 +21,7 @@ use Modules\Payslip\Http\Resources\ViewUSAPayslipResource;
 use Modules\Payslip\Http\Resources\ViewPayslipResource;
 use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Http\Jobs\DepartmentWisePayslipJob;
+use Modules\Payslip\Http\Jobs\SpecificEmployeePayslipJob;
 use Modules\Payslip\Http\Resources\LeavesDataResource;
 use Modules\Payslip\Http\Resources\SalaryItemsResource;
 use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
@@ -441,8 +442,14 @@ class PayslipController extends Controller
             'from_date' => 'required|date_format:Y-m-d',
             'to_date' => 'required|date_format:Y-m-d',
             'payment_date' => 'required|date_format:Y-m-d',
+            'employee_ids' => 'nullable|array',
+            'employee_ids.*' => 'integer|exists:users,id'
         ]);
-        DepartmentWisePayslipJob::dispatch(auth()->user(), $request->department_id, $request->from_date, $request->to_date, $request->payment_date);
+        if(isset($request->employee_ids)){
+            SpecificEmployeePayslipJob::dispatch(auth()->user(), $request->employee_ids, $request->from_date, $request->to_date, $request->payment_date);
+        } else{
+            DepartmentWisePayslipJob::dispatch(auth()->user(), $request->department_id, $request->from_date, $request->to_date, $request->payment_date);
+        }
         // AFTER COMPLETING THE JOB, HAVE TO SEND A NOTIFICATION
         return apiResponse(
             data: null,
