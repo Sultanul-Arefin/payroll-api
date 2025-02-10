@@ -2,6 +2,7 @@
 
 namespace Modules\Payslip\Http\Services;
 
+use App\Models\Bonus;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -428,16 +429,44 @@ class PayslipService
 
             if(request('overtime') && $salary_item->salaryItemsName?->name == "Overtime Rate"){
                 return (int)request('overtime') * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+            } elseif($salary_item->salaryItemsName?->name == "Overtime Rate"){
+                $total = $this->getLeaveData($employee_id, "overtime", $from_date, $to_date);
+
+                if($total > 0){
+                    return $total * $this->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+                }
+                return 0;
             }
             if(request('double_overtime') && $salary_item->salaryItemsName?->name == "Double Overtime Rate"){
                 return (int)request('double_overtime') * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+            } elseif($salary_item->salaryItemsName?->name == "Double Overtime Rate"){
+                $total = $this->getLeaveData($employee_id, "double_overtime", $from_date, $to_date);
+
+                if($total > 0){
+                    return $total * $this->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+                }
+                return 0;
             }
             if(request('bonus') && $salary_item->salaryItemsName?->name == "Bonus"){
                 return (int)request('bonus') * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+            } elseif($salary_item->salaryItemsName?->name == "Bonus"){
+                $total = $this->getLeaveData($employee_id, "bonus", $from_date, $to_date);
+
+                if($total > 0){
+                    return $total * $this->getSalaryItemAmount("Bonus", $employee_id)->amount;
+                }
+                return 0;
             }
             if(request('recuperated_hours') && $salary_item->salaryItemsName?->name == "Recuperated Hour"){
                 return (int)request('recuperated_hours') * $this->getSalaryItemAmount("Recuperated Hour", $employee_id)->amount;
                 // return 0;
+            } elseif($salary_item->salaryItemsName?->name == "Recuperated Hour"){
+                $total = $this->getLeaveData($employee_id, "recuperated_hours", $from_date, $to_date);
+
+                if($total > 0){
+                    return $total * $this->getSalaryItemAmount("Recuperated Hour", $employee_id)->amount;
+                }
+                return 0;
             }
             return 0;
         }
@@ -771,6 +800,94 @@ class PayslipService
                 return null;
             }
             return $count * $working_hours_per_day;
+        }
+        elseif($leave == "overtime")
+        {
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::OVERTIME)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count ;
+        }
+        elseif($leave == "double_overtime")
+        {
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::DOUBLE_OVERTIME)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count;
+        }
+        elseif($leave == "recuperated_hours")
+        {
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->where('type', Bonus::RECUPERATED)
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count;
+        }
+        elseif($leave == "bonus")
+        {
+            $data = Bonus::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereIn('type', [Bonus::BONUS_HOURLY, Bonus::BONUS_SALARY_BASIC, Bonus::BONUS_DIRECT_AMOUNT])
+                    ->whereBetween(
+                        'date',
+                        [
+                            request('from_date'),
+                            request('to_date')
+                        ]
+                    )
+                    ->get();
+            $count = 0;
+            foreach($data as $value){
+                $count += $value->generalize_amount;
+            }
+            if($count <= 0){
+                return null;
+            }
+            return $count;
         }
     }
 
