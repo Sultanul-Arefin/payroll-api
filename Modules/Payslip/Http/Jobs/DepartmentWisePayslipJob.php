@@ -260,16 +260,6 @@ class DepartmentWisePayslipJob implements ShouldQueue
         }
         elseif($leave == "overtime")
         {
-            $overtime_rate = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Overtime Rate')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
             $data = Bonus::query()
                     ->where('employee_id', $employee_id)
                     ->where('type', Bonus::OVERTIME)
@@ -288,20 +278,10 @@ class DepartmentWisePayslipJob implements ShouldQueue
             if($count <= 0){
                 return null;
             }
-            return $count * $overtime_rate->amount;
+            return $count ;
         }
         elseif($leave == "double_overtime")
         {
-            $double_overtime_rate = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Double Overtime Rate')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
             $data = Bonus::query()
                     ->where('employee_id', $employee_id)
                     ->where('type', Bonus::DOUBLE_OVERTIME)
@@ -320,20 +300,10 @@ class DepartmentWisePayslipJob implements ShouldQueue
             if($count <= 0){
                 return null;
             }
-            return $count * $double_overtime_rate->amount;
+            return $count;
         }
         elseif($leave == "recuperated_hours")
         {
-            $recuperated_hour_rate = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Recuperated Hour')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
             $data = Bonus::query()
                     ->where('employee_id', $employee_id)
                     ->where('type', Bonus::RECUPERATED)
@@ -352,20 +322,10 @@ class DepartmentWisePayslipJob implements ShouldQueue
             if($count <= 0){
                 return null;
             }
-            return $count * $recuperated_hour_rate->amount;
+            return $count;
         }
         elseif($leave == "bonus")
         {
-            $bonus_rate = EmployeeSalaryItem::query()
-                    ->where('employee_id', $employee_id)
-                    ->whereHas(
-                        'salaryItemsName', function (Builder $builder) {
-                            $builder
-                                ->where('name', 'Bonus')
-                                ->where('salary_items_category_id', 1);
-                        }
-                    )
-                    ->first('amount');
             $data = Bonus::query()
                     ->where('employee_id', $employee_id)
                     ->whereIn('type', [Bonus::BONUS_HOURLY, Bonus::BONUS_SALARY_BASIC, Bonus::BONUS_DIRECT_AMOUNT])
@@ -384,7 +344,7 @@ class DepartmentWisePayslipJob implements ShouldQueue
             if($count <= 0){
                 return null;
             }
-            return $count * $bonus_rate->amount;
+            return $count;
         }
     }
 
