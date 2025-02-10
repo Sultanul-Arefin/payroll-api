@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BonusController;
 use App\Http\Controllers\HelpArticleController;
 use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // HELP ARTICLE SECTION
         Route::get('help-article-category', [HelpArticleController::class, 'help_article_category']);
         Route::get('help-article/{help_article}', [HelpArticleController::class, 'help_article']);
+
+        // BONUS SECTION OF TIME MANAGEMENTS
+        Route::post('add_bonuses', [BonusController::class, 'store']);
 
     });
 
