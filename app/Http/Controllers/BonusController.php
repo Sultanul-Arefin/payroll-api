@@ -32,7 +32,17 @@ class BonusController extends Controller
             return $amount;
         }
         if($type == 1){
-            return $this->get_basic($employee_id) * ($amount / 100);
+            $basic = EmployeeSalaryItem::query()
+                    ->where('employee_id', $employee_id)
+                    ->whereHas(
+                        'salaryItemsName', function (Builder $builder) {
+                            $builder
+                                ->where('name', 'Ordinary Time Rate')
+                                ->where('salary_items_category_id', 1);
+                        }
+                    )
+                    ->first('amount');
+            return ($this->get_basic($employee_id) * ($amount / 100)) / $basic->amount;
         }
         if($type == 2){
            return $amount / $this->get_ordinary_time_rate($employee_id);
