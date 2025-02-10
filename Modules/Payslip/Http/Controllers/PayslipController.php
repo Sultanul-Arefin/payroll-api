@@ -265,19 +265,19 @@ class PayslipController extends Controller
     {
         $overtime = 0;
         if(request('overtime')){
-            $overtime = (int)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
+            $overtime = (float)request('overtime') * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         } else{
             $overtime = $this->payslipService->getLeaveData($employee_id, "overtime", $from_date, $to_date) * $this->payslipService->getSalaryItemAmount("Overtime Rate", $employee_id)->amount;
         }
         $double_overtime = 0;
         if(request('double_overtime')){
-            $double_overtime = (int)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
+            $double_overtime = (float)request('double_overtime') * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         } else{
             $double_overtime = $this->payslipService->getLeaveData($employee_id, "double_overtime", $from_date, $to_date) * $this->payslipService->getSalaryItemAmount("Double Overtime Rate", $employee_id)->amount;
         }
         $bonus = 0;
         if(request('bonus')){
-            $bonus = (int)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
+            $bonus = (float)request('bonus') * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
         } else{
             $bonus = $this->payslipService->getLeaveData($employee_id, "bonus", $from_date, $to_date) * $this->payslipService->getSalaryItemAmount("Bonus", $employee_id)->amount;
         }
