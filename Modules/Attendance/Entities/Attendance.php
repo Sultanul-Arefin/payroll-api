@@ -2,11 +2,13 @@
 
 namespace Modules\Attendance\Entities;
 
+use App\Models\Overtime;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Attendance extends Model
 {
@@ -32,6 +34,11 @@ class Attendance extends Model
     public function attendance_details(): HasMany
     {
         return $this->hasMany(AttendanceDetail::class, 'attendance_id', 'id');
+    }
+
+    public function overtime(): HasOne
+    {
+        return $this->hasOne(Overtime::class, 'attendance_id', 'id');
     }
 
     public function user(): BelongsTo

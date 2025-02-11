@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Attendance\Entities\Attendance;
 
 class Overtime extends Model
 {
@@ -20,4 +22,12 @@ class Overtime extends Model
         'hour',
         'given_by'
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function attendance(): BelongsTo
+    {
+        return $this->belongsTo(Attendance::class, 'attendance_id', 'id');
+    }
 }
