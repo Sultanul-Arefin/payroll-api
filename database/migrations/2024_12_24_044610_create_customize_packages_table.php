@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('image')->nullable();
             $table->foreignId('created_from')
-                ->constrained('id', 'packages')
+                ->constrained('packages', 'id')
                 ->cascadeOnDelete();
             $table->string('original_price');
             $table->string('new_price');
