@@ -43,8 +43,21 @@ class AttendanceController extends Controller
             'meta' => [
                 'attendance_type_key' => auth()->user()->user_details?->attendance_type,
                 'attendance_type_value' => auth()->user()->user_details?->attendance_type == UserDetails::WEB_ATTENDANCE ? 'web' : 'machine',
+                'total_office_hours' => auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day,
+                'employee_type' => $this->get_employee_type()
             ],
         ]);
+    }
+
+    public function get_employee_type()
+    {
+        $type = auth()->user()->employee_type;
+        return match($type){
+            User::EMPLOYEE_TYPE_FULL_TIME => "full_time",
+            User::EMPLOYEE_TYPE_PART_TIME => "part_time",
+            User::EMPLOYEE_TYPE_FLEXI_TIME => "flexi_time",
+            User::EMPLOYEE_TYPE_CONTRACTUAL => "contractual"
+        };
     }
 
     public function store(Request $request)
