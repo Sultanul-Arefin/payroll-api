@@ -40,7 +40,8 @@ class AttendanceResourceForUser extends JsonResource
             'total_office_hours' => $this->user?->company?->working_hours_per_day + $this->user?->company?->lunch_and_others_per_day,
             'in_time' => $this->attendance_details[0]?->in_time, // have to recheck this value
             'out_time' => $this->attendance_details[0]?->out_time, // have to recheck this value,
-            'hours_worked' => $this->getHoursWorked($this->id)
+            'hours_worked' => $this->getHoursWorked($this->id),
+            'is_overtime' => $this->overtime ? 1 : 0
         ];
     }
 
