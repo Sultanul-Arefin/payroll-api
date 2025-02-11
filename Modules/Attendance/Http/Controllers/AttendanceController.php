@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Http\Controllers;
 
+use App\Models\Overtime;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
@@ -86,8 +87,26 @@ class AttendanceController extends Controller
             'office_type' => 'required'
         ]);
 
+        /**
+         * GET EMPLOYEE TYPE => FULL_TIME(1), PART_TIME(2), FLEXI_TIME(3), CONTRACTUAL(4)
+         * IF EMPLOYEE TYPE IS FULL_TIME, THEN CAN'T GIVE ATTENDANCE TWICE IN A DAY
+         */
+        $employee_type = auth()->user()->employee_type;
+
         // CHECK IF ATTENDANCE EXIST FOR THAT DAY
         $attendance = $this->attendanceService->checkIfAttendanceExist($request->dates);
+
+        // CHECK IF FULL TIME & HAS ALREADY ATTENDANCE, THEN GIVE WARNING
+        if($employee_type == User::EMPLOYEE_TYPE_FULL_TIME && $attendance){
+            return apiResponse(
+                data: [
+                    'message' => 'You can\'t give attendance twice in a day since you\'re a full time employee',
+                ],
+                message: 'You can\'t give attendance twice in a day since you\'re a full time employee',
+                status: 'error',
+                statusCode: 422
+            );
+        }
 
         if ($attendance) {
             $checkIfSameTimeRangeAttendanceExist = $this->attendanceService->attendanceIsPossible($attendance, $request->in_time, $request->out_time);
@@ -145,6 +164,15 @@ class AttendanceController extends Controller
                 'in_time' => $request->in_time,
                 'out_time' => $request->out_time,
             ]);
+
+            if(isset($request->is_overtime)){
+                $overtime = Overtime::create([
+                    'attendance_id' => $attendance->id,
+                    'is_overtime' => $request->is_overtime,
+                    'hour' => $request->hour,
+                    'given_by' => auth()->user()->id
+                ]);
+            }
 
             // ATTENDANCE CREATION NOTIFICATION
             $data = [
