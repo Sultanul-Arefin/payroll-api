@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('customize_packages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('admin_id')
-                    ->constrained('id', 'admins')
+                    ->constrained('admins', 'id')
                     ->cascadeOnDelete();
             $table->string('name');
             $table->string('image')->nullable();
