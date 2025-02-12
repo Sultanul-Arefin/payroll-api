@@ -22,7 +22,7 @@ class BonusController extends Controller
 
         return $this->apiResponse(
             data: $bonus,
-            message: 'Bonus Added Successfully'
+            message: 'Amount Added Successfully'
         );
     }
 
