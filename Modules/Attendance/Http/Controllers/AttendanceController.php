@@ -226,7 +226,7 @@ class AttendanceController extends Controller
                     'given_by' => auth()->user()->id
                 ]);
             }
-        } elseif(!isset($request->is_overtime) && $attendance_detail?->attendance?->overtime){
+        } elseif($request->is_overtime == "null" && $attendance_detail?->attendance?->overtime){
             $attendance_detail?->attendance?->overtime?->delete();
         }
         return apiResponse(
