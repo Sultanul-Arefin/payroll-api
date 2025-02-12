@@ -202,7 +202,6 @@ class AttendanceController extends Controller
 
     public function update_attendance_details(AttendanceDetail $attendance_detail, Request $request)
     {
-        return gettype($request->is_overtime);
         $request->validate([
             'in_time' => 'required',
             'out_time' => 'required',
@@ -211,7 +210,7 @@ class AttendanceController extends Controller
             'in_time' => $request->in_time,
             'out_time' => $request->out_time,
         ]);
-        if(isset($request->is_overtime) && $request->is_overtime != "null"){
+        if(isset($request->is_overtime)){
             if($attendance_detail?->attendance?->overtime){
                 $attendance_detail?->attendance?->overtime?->update([
                     'attendance_id' => $attendance_detail?->attendance->id,
@@ -227,7 +226,7 @@ class AttendanceController extends Controller
                     'given_by' => auth()->user()->id
                 ]);
             }
-        } elseif($request->is_overtime == "null" && $attendance_detail?->attendance?->overtime){
+        } elseif(!isset($request->is_overtime) && $attendance_detail?->attendance?->overtime){
             $attendance_detail?->attendance?->overtime?->delete();
         }
         return apiResponse(
