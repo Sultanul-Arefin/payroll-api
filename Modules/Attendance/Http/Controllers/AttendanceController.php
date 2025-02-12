@@ -202,6 +202,7 @@ class AttendanceController extends Controller
 
     public function update_attendance_details(AttendanceDetail $attendance_detail, Request $request)
     {
+        return gettype($request->is_overtime);
         $request->validate([
             'in_time' => 'required',
             'out_time' => 'required',
