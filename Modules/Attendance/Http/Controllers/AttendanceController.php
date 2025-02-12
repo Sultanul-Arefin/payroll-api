@@ -210,7 +210,7 @@ class AttendanceController extends Controller
             'in_time' => $request->in_time,
             'out_time' => $request->out_time,
         ]);
-        if(isset($request->is_overtime)){
+        if(isset($request->is_overtime) && $request->is_overtime != "null"){
             if($attendance_detail?->attendance?->overtime){
                 $attendance_detail?->attendance?->overtime?->update([
                     'attendance_id' => $attendance_detail?->attendance->id,
