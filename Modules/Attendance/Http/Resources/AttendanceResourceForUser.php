@@ -2,6 +2,7 @@
 
 namespace Modules\Attendance\Http\Resources;
 
+use App\Models\Overtime;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
@@ -41,8 +42,29 @@ class AttendanceResourceForUser extends JsonResource
             'in_time' => $this->attendance_details[0]?->in_time, // have to recheck this value
             'out_time' => $this->attendance_details[0]?->out_time, // have to recheck this value,
             'hours_worked' => $this->getHoursWorked($this->id),
-            'is_overtime' => $this->overtime ? 1 : 0
+            'is_overtime' => $this->overtime ? 1 : 0,
+            'overtime_value' => $this->getOvertime($this->overtime)
         ];
+    }
+
+    public function getOvertime($overtime){
+        if(!$overtime){
+            return null;
+        }
+        return [
+            'overtime_type' => $overtime->is_overtime,
+            'overtime_type_value' => $this->overtime_type_value($overtime->is_overtime),
+            'hour' => $overtime->hour
+        ];
+    }
+
+    public function overtime_type_value($type){
+        return match($type){
+            Overtime::OVERTIME => "overtime",
+            Overtime::DOUBLE_OVERTIME => "double_overtime",
+            Overtime::RECUPERATED => "recuperated",
+            Overtime::EARLY_DAY_DEPARTURE => "early_day_departure"
+        };
     }
 
     function getHoursWorked($attendance_id) {
