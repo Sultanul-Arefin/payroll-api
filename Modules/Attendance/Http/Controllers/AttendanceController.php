@@ -210,6 +210,23 @@ class AttendanceController extends Controller
             'in_time' => $request->in_time,
             'out_time' => $request->out_time,
         ]);
+        if(isset($request->is_overtime)){
+            if($attendance_detail?->attendance?->overtime){
+                $attendance_detail?->attendance?->overtime?->update([
+                    'attendance_id' => $attendance_detail?->attendance->id,
+                    'is_overtime' => $request->is_overtime,
+                    'hour' => $request->hour,
+                    'given_by' => auth()->user()->id
+                ]);
+            } else{
+                $overtime = Overtime::create([
+                    'attendance_id' => $attendance_detail?->attendance->id,
+                    'is_overtime' => $request->is_overtime,
+                    'hour' => $request->hour,
+                    'given_by' => auth()->user()->id
+                ]);
+            }
+        }
         return apiResponse(
             data: $attendance_detail,
         );
