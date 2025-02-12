@@ -57,7 +57,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'frontend_url' => env('FRONTEND_URL', 'https://payroll.omada-clasico.org'),
+    'frontend_url' => env('FRONTEND_URL', 'https://payroll.omada-clasico.com'),
 
     'asset_url' => env('ASSET_URL'),
 
