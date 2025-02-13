@@ -3,6 +3,7 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,9 +20,17 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        
+        $user = User::where('email', $request->email)->first();
+        if(!$user){
+            return apiResponse(
+                null,
+                'You Don\'t Have Any Account'
+            );
+        }
+
+
         $token = Str::random(64);
-        
+
         $check_if_already_exists = DB::table('password_reset_tokens')->where('email', $request->email)->first();
         // IF ALREADY EXISTS
         if($check_if_already_exists)
@@ -37,7 +46,7 @@ class PasswordResetLinkController extends Controller
                 $message->to($request->email);
                 $message->subject('Reset Password');
             });
-    
+
             return apiResponse(
                 [],
                 'We have emailed your password reset link!'
