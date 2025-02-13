@@ -24,7 +24,8 @@ class PasswordResetLinkController extends Controller
         if(!$user){
             return apiResponse(
                 null,
-                'You Don\'t Have Any Account'
+                'You Don\'t Have Any Account',
+                'error'
             );
         }
 
