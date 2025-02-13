@@ -185,4 +185,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Agenda::class, 'user_id', 'id');
     }
+
+    /**
+     * @return HasMany
+     */
+    public function bonus(): HasMany
+    {
+        return $this->hasMany(Bonus::class, 'employee_id', 'id');
+    }
 }
