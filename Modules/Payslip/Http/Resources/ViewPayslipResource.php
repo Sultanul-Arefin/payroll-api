@@ -416,7 +416,7 @@ class ViewPayslipResource extends JsonResource
                     'total_company_contribution' => $this->company_contribution,
                     // 'total_staff_cost' => $this->gross_pay_before_tax + $this->company_contribution,
                     'total_staff_cost' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $this->company_contribution, // sir told that: staff cost = total gross pay + company contribution
-                    'total_net_pay' => $this->net_pay,
+                    'total_net_pay' => $this->net_pay, // all the values need to be rechecked
                 ],
             ],
             'yearly' => [ // yearly one column will be updated
