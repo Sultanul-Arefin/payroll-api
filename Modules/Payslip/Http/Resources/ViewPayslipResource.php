@@ -414,7 +414,8 @@ class ViewPayslipResource extends JsonResource
                     'tax_amount' => $this->tax_value + $this->post_tax_value,
                     'total_staff_contribution' => $this->total_employee_deduction,
                     'total_company_contribution' => $this->company_contribution,
-                    'total_staff_cost' => $this->gross_pay_before_tax + $this->company_contribution,
+                    // 'total_staff_cost' => $this->gross_pay_before_tax + $this->company_contribution,
+                    'total_staff_cost' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $this->company_contribution, // sir told that: staff cost = total gross pay + company contribution
                     'total_net_pay' => $this->net_pay,
                 ],
             ],
@@ -502,7 +503,8 @@ class ViewPayslipResource extends JsonResource
                 $data["total_company_contribution"] += $value->company_contribution;
             }
             if($key == "total_staff_cost"){
-                $data["total_staff_cost"] += ($value->gross_pay_before_tax + $value->company_contribution);
+                // $data["total_staff_cost"] += ($value->gross_pay_before_tax + $value->company_contribution);
+                $data["total_staff_cost"] += (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $value->company_contribution;
             }
             if($key == "total_net_pay"){
                 $data["total_net_pay"] += $value->net_pay;
