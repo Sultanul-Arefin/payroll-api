@@ -162,7 +162,7 @@ class ReportController extends Controller
             $localFilePath = Storage::disk('public')->path($path); // Full path in local storage
 
             // FTP server details
-            $ftp_server = $request->ftp_host ?? "tellpe.com";
+            $ftp_server = $request->ftp_host ?? "omada-clasico.com";
             $ftp_username = $request->ftp_username ?? "payroll-ftp";
             $ftp_password = $request->ftp_password ?? "*4u3f1R4j";
 
