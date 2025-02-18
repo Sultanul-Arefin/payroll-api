@@ -76,63 +76,63 @@
 <body>
 <section class="content">
     <h2 class="title">Monthly Tax Report(Details)</h2>
-    <h4 class="title">BFIN SASU</h4>
+    <h4 class="title">{{ $others['company_name'] }}</h4>
     <table>
         <thead>
-        <tr>
-            <th>Item</th>
-            <th>Value</th>
-        </tr>
+            <tr>
+                <th>Item</th>
+                <th>Value</th>
+            </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>Month</td>
-            <td>June</td>
-        </tr>
-        <tr>
-            <td>Year</td>
-            <td>2024</td>
-        </tr>
-        <tr>
-            <td>Company name</td>
-            <td>BFIN SASU</td>
-        </tr>
-        <tr>
-            <td>Address</td>
-            <td>8, Rue, Dublin, French</td>
-        </tr>
-        <tr>
-            <td>Employer government no</td>
-            <td>805036</td>
-        </tr>
-        <tr>
-            <td>Email</td>
-            <td>helen@gmail.com</td>
-        </tr>
-        <tr>
-            <td>BIC/Swift code</td>
-            <td>123456</td>
-        </tr>
-        <tr>
-            <td>IBAN/account no</td>
-            <td>123456</td>
-        </tr>
-        <tr>
-            <td>Total wages</td>
-            <td>24000</td>
-        </tr>
-        <tr>
-            <td>Taxable value</td>
-            <td>4000</td>
-        </tr>
-        <tr>
-            <td>Total tax deducted</td>
-            <td>4000</td>
-        </tr>
-        <tr>
-            <td>Net Pay Value</td>
-            <td>254970</td>
-        </tr>
+            <tr>
+                <td>Month</td>
+                <td>{{ $others['month'] }}</td>
+            </tr>
+            <tr>
+                <td>Year</td>
+                <td>{{ $others['year'] }}</td>
+            </tr>
+            <tr>
+                <td>Company name</td>
+                <td>{{ $others['company_name'] }}</td>
+            </tr>
+            <tr>
+                <td>Address</td>
+                <td>{{ $others['company_address'] }}</td>
+            </tr>
+            <tr>
+                <td>Employer government no</td>
+                <td>{{ $others['company_government_no'] }}</td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td>{{ $others['company_email'] }}</td>
+            </tr>
+            <tr>
+                <td>BIC/Swift code</td>
+                <td>{{ $others['company_bank_bic_or_swift_code'] }}</td>
+            </tr>
+            <tr>
+                <td>IBAN/account no</td>
+                <td>{{ $others['company_bank_iban_or_account_no'] }}</td>
+            </tr>
+            <tr>
+                <td>Total wages</td>
+                <td>{{ $total['total_wages'] }}</td>
+            </tr>
+            <tr>
+                <td>Taxable value</td>
+                <td>{{ $total['total_taxable_value'] }}</td>
+            </tr>
+            <tr>
+                <td>Total tax deducted</td>
+                <td>{{ $total['total_tax_deducted'] }}</td>
+            </tr>
+            <tr>
+                <td>Net Pay Value</td>
+                <td>{{ $total['total_net_pay'] }}</td>
+            </tr>
         </tbody>
     </table>
     <table>
