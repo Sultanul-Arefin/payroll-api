@@ -119,19 +119,19 @@
         </tr>
         <tr>
             <td>Total wages</td>
-            <td>24000</td>
+            <td>{{ $total['total_wages'] }}</td>
         </tr>
         <tr>
             <td>Taxable value</td>
-            <td>4000</td>
+            <td>{{ $total['total_taxable_value'] }}</td>
         </tr>
         <tr>
             <td>Total tax deducted</td>
-            <td>4000</td>
+            <td>{{ $total['total_tax_deducted'] }}</td>
         </tr>
         <tr>
             <td>Net Pay Value</td>
-            <td>254970</td>
+            <td>{{ $total['total_net_pay'] }}</td>
         </tr>
         </tbody>
     </table>
