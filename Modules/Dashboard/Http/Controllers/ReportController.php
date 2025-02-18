@@ -156,9 +156,22 @@ class ReportController extends Controller
             $total['total_tax_deducted'] += $value->tax_value;
             $total['total_net_pay'] += $value->net_pay;
         }
+
+        $others = [
+            'company_name' => auth()->user()->company?->company_name,
+            'month' => $request->month,
+            'year' => $request->year,
+            'company_address' => auth()->user()->company?->company_address,
+            'company_government_no' => auth()->user()->company?->government_employee_no,
+            'company_email' => auth()->user()->company?->company_email,
+            'company_bank_bic_or_swift_code' => auth()->user()->company?->bank_bic_or_swift_code,
+            'company_bank_iban_or_account_no' => auth()->user()->company?->bank_iban_or_account_no,
+        ];
+
         $data = [
             'data' => $reports,
-            'total' => $total
+            'total' => $total,
+            'others' => $others
         ];
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
@@ -313,8 +326,33 @@ class ReportController extends Controller
             ->whereYear('first_date', $request->year)
             ->with('employee', 'employee.user_details')
             ->get();
+        $total['total_wages'] = 0;
+        $total['total_taxable_value'] = 0;
+        $total['total_tax_deducted'] = 0;
+        $total['total_net_pay'] = 0;
+
+        foreach($reports as $value){
+            $total['total_wages'] += $value->wages;
+            $total['total_taxable_value'] += $value->taxable_allowance;
+            $total['total_tax_deducted'] += $value->tax_value;
+            $total['total_net_pay'] += $value->net_pay;
+        }
+
+        $others = [
+            'company_name' => auth()->user()->company?->company_name,
+            'month' => $request->month,
+            'year' => $request->year,
+            'company_address' => auth()->user()->company?->company_address,
+            'company_government_no' => auth()->user()->company?->government_employee_no,
+            'company_email' => auth()->user()->company?->company_email,
+            'company_bank_bic_or_swift_code' => auth()->user()->company?->bank_bic_or_swift_code,
+            'company_bank_iban_or_account_no' => auth()->user()->company?->bank_iban_or_account_no,
+        ];
+
         $data = [
-            'data' => $reports
+            'data' => $reports,
+            'total' => $total,
+            'others' => $others
         ];
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
