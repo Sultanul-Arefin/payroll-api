@@ -127,8 +127,8 @@ trait UserTrait
             array_push($payslip_report, [
                 'payment_date' => $payslip->payment_date,
                 'month' => $payslip->month,
-                'gross_pay' => $payslip->wages,
-                'fixed_pay' => $payslip->net_pay
+                'gross_pay' => $payslip->net_pay,
+                'fixed_pay' => $payslip->wages
             ]);
         }
 
@@ -138,8 +138,8 @@ trait UserTrait
         {
             array_push($other_report, [
                 'month' => $payslip->payment_date,
-                'gross_pay' => $payslip->wages,
-                'fixed_pay' => $payslip->net_pay,
+                'gross_pay' => $payslip->net_pay,
+                'fixed_pay' => $payslip->wages,
                 'allowance' => $payslip->non_taxable_allowance,
                 'ordinary_time' => $payslip->hours_worked,
                 'recuperated_hour' => 0,
