@@ -20,6 +20,7 @@ class UserDetails extends Model
     public const USA_PAYSLIP = 4;
     public const INDIAN_PAYSLIP = 5;
     public const AFRICAN_PAYSLIP = 6;
+    public const GERMAN_PAYSLIP = 7;
 
     public const WEB_ATTENDANCE = 1;
 
@@ -58,6 +59,8 @@ class UserDetails extends Model
         'esi_no',
         'national_insurance_number',
         'ni_category',
+        'religion',
+        
     ];
 
     protected static function newFactory()
