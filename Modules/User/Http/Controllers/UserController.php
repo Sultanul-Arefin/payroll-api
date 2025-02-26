@@ -190,6 +190,7 @@ class UserController extends Controller
                     'esi_no'    =>$request->esi_no ?? $request->esi_no,
                     'national_insurance_number' => $request->national_insurance_number ?? $request->national_insurance_number,
                     'ni_category'    =>$request->ni_category ?? $request->ni_category,
+                    'religion' => $request->religion ?? $request->religion,
 
                 ]);
 
@@ -575,6 +576,7 @@ class UserController extends Controller
                 'esi_no'    =>$request->esi_no ?? $request->esi_no,
                 'national_insurance_number'=>$request->national_insurance_number ? $request->national_insurance_number : $user->user_details?->national_insurance_number,
                 'ni_category'    =>$request->ni_category ?? $request->ni_category,
+                'religion' => $request->religion ?? $user->user_details->religion,
             ]);
 
             $allFileArr = [];

@@ -51,6 +51,7 @@ return new class extends Migration
             $table->integer('attendance_type')->default(UserDetails::WEB_ATTENDANCE);
             $table->string('state')->nullable();
             $table->string('region')->nullable();
+            $table->string('religion')->nullable();
             $table->timestamps();
             
         });
