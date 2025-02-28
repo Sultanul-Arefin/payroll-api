@@ -32,7 +32,7 @@ class CheckIfCompanyCreated
             return apiResponse(
                 data: [],
                 message: 'Please, Create Company First!',
-                status: 'error',
+                status: "error",
                 statusCode: 403
             );
         }
