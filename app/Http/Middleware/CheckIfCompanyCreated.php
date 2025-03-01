@@ -17,7 +17,7 @@ class CheckIfCompanyCreated
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check() && ! is_null(Auth::user()->company_id) && Auth::user()->active_company) {
-            if(Auth::user()->company->no_of_working_days_per_week){
+            if(Auth::user()->company->no_of_working_days_per_week){ // show error response
                 return $next($request);
             }
             else{
