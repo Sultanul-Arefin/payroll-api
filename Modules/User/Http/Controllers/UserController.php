@@ -144,7 +144,7 @@ class UserController extends Controller
                 ]);
             }
 
-            
+
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
@@ -630,7 +630,8 @@ class UserController extends Controller
             }
 
             // update salary items
-            if(isset($request->ordinary_time_rate) && $request->ordinary_time_rate != "null"){
+            // if(isset($request->ordinary_time_rate) && $request->ordinary_time_rate != "null"){
+            if(isset($request->ordinary_time_rate) || $request->ordinary_time_rate == "null"){
                 $this->update_salary_items($request->all(), $user->id);
             }
 
