@@ -630,8 +630,7 @@ class UserController extends Controller
             }
 
             // update salary items
-            // if(isset($request->ordinary_time_rate) && $request->ordinary_time_rate != "null"){
-            if(isset($request->ordinary_time_rate) || $request->ordinary_time_rate == "null"){
+            if(isset($request->ordinary_time_rate) && $request->ordinary_time_rate != "null"){
                 $this->update_salary_items($request->all(), $user->id);
             }
 
