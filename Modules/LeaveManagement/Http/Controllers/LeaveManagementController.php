@@ -39,13 +39,6 @@ class LeaveManagementController extends Controller
 
     public function leave_store(LeaveStoreRequest $request)
     {
-        return apiResponse(
-            data: [
-                'date' => gettype($request->dates),
-                'leave_type' => gettype($request->leave_type),
-                'leave_message' => gettype($request->leave_message),
-            ]
-        );
         $request['user_id'] = $request->user_id ?? auth()->user()->id;
         $taken_leave = UserLeaveDetail::query()
                     ->whereHas(
