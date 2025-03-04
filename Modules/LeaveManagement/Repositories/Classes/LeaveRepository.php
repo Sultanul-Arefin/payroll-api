@@ -45,10 +45,20 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
         }));
         $userLeave = DB::transaction(function () use ($request, $sortDates) {
 
+            $image_path = null;
+            if($request->file('files')){
+                $file = $request->file('files');
+                if($file){
+                    $image_name = rand(10000, 50000).'_'.time().'.'.$file->extension();
+                    $file->storeAs("uploads/leave_files/", $image_name, 'public');
+                    $image_path = "storage/uploads/leave_files/".$image_name;
+                }
+            }
             $userLeave = UserLeave::create([
                 'leave_type' => $request->leave_type,
                 'user_id' => $request->user_id,
                 'leave_message' => $request->leave_message,
+                'files' => $image_path,
                 'action_by' => 1,
             ]);
 

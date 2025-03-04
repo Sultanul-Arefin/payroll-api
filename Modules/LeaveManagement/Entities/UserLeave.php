@@ -17,7 +17,7 @@ class UserLeave extends Model
 
     public const DENIED = 3;
 
-    protected $fillable = ['leave_type', 'user_id', 'status', 'leave_message', 'action_message', 'action_by'];
+    protected $fillable = ['leave_type', 'user_id', 'status', 'leave_message', 'files', 'action_message', 'action_by'];
 
     public function user()
     {
