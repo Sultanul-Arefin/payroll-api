@@ -59,7 +59,7 @@ class LeaveRepository extends BaseRepository implements LeaveRepositoryInterface
                 'user_id' => $request->user_id,
                 'leave_message' => $request->leave_message,
                 'files' => $image_path,
-                'action_by' => 1,
+                'action_by' => auth()->user()->id,
             ]);
 
             foreach ($sortDates as $date) {
