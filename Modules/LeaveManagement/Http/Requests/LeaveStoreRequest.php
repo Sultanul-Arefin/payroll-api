@@ -16,6 +16,7 @@ class LeaveStoreRequest extends FormRequest
         return [
             'leave_type' => 'required',
             'dates.*' => 'required',
+            'files' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048'
             // 'dates.*' => 'required|unique:user_leave_details,dates',
         ];
     }
