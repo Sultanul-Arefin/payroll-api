@@ -4,6 +4,9 @@ namespace Modules\Dashboard\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
+use Illuminate\Support\Facades\View;
 use PDF;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
@@ -319,7 +322,8 @@ class ReportController extends Controller
             'is_mailable' => 'required|in:0,1',
             'ftp_host' => 'required_if:is_mailable,0',
             'ftp_username' => 'required_if:is_mailable,0',
-            'ftp_password' => 'required_if:is_mailable,0'
+            'ftp_password' => 'required_if:is_mailable,0',
+            'report_type' => 'required|in:pdf,docx,txt'
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
@@ -354,6 +358,8 @@ class ReportController extends Controller
             'total' => $total,
             'others' => $others
         ];
+
+        // GENERATE PDF
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
         $options->set('defaultPaperSize', 'A4');
@@ -418,12 +424,60 @@ class ReportController extends Controller
             );
         }
 
-       // return $pdf->download('digital_tax_report.pdf');
-        Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
-            $message->to($request->email)
-                ->subject('Digital Tax Report')
-                ->attachData($pdf->output(), "digital_tax_report.pdf");
-        });
+        // return $pdf->download('digital_tax_report.pdf');
+        if($request->report_type == "pdf"){
+            Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attachData($pdf->output(), "digital_tax_report.pdf");
+            });
+        } elseif($request->report_type == "docx"){
+            // Generate DOCX
+            $phpWord = new PhpWord();
+            $section = $phpWord->addSection();
+
+            // Render Blade view to HTML
+            $html = View::make('reports.digital_tax_report_for_docx', $data)->render();
+
+            // Sanitize HTML (Remove unnecessary tags and attributes)
+            $cleanHtml = strip_tags($html, '<p><h1><h2><h3><h4><h5><h6><strong><em><ul><ol><li><table><tr><td><th><br>');
+
+            // Convert HTML to Word-friendly format
+            \PhpOffice\PhpWord\Shared\Html::addHtml($section, $cleanHtml, false, false);
+
+            // Save DOCX
+            $docxFileName = 'digital_tax_report_for_docx.docx';
+            $docxPath = storage_path('app/public/' . $docxFileName);
+            $wordWriter = IOFactory::createWriter($phpWord, 'Word2007');
+            $wordWriter->save($docxPath);
+
+            // Send Email with both PDF and DOCX attachments
+            Mail::send('reports.digital_tax_report_for_docx', $data, function ($message) use ($docxPath, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attach($docxPath);
+            });
+
+            // Optional: Delete the DOCX file after sending
+            unlink($docxPath);
+        } elseif($request->report_type == "txt"){
+            // Generate TXT
+            $txtContent = strip_tags(View::make('reports.digital_tax_report', $data)->render()); // Remove HTML tags
+            $txtFileName = 'digital_tax_report.txt';
+            $txtPath = storage_path('app/public/' . $txtFileName);
+            file_put_contents($txtPath, $txtContent); // Save as .txt file
+
+            // Send Email with PDF, DOCX, and TXT attachments
+            Mail::send('reports.digital_tax_report', $data, function ($message) use ($pdf, $txtPath, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attachData($pdf->output(), "digital_tax_report.pdf")
+                    ->attach($txtPath);
+            });
+
+            // Optional: Delete TXT file after sending
+            unlink($txtPath);
+        }
         return apiResponse(
             data: null,
             message: 'Email send successfully!'
