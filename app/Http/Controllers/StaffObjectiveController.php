@@ -34,7 +34,8 @@ class StaffObjectiveController extends Controller
                         ->with('user', 'reviewBy')
                         ->get();
         } else{
-            $staffObjective = StaffObjective::query()
+            $staffObjectives = StaffObjective::query()
+                        ->where('user_id', auth()->user()->id)
                         ->with('user', 'reviewBy')
                         ->get();
         }
