@@ -468,10 +468,9 @@ class ReportController extends Controller
             file_put_contents($txtPath, $txtContent); // Save as .txt file
 
             // Send Email with PDF, DOCX, and TXT attachments
-            Mail::send('reports.digital_tax_report', $data, function ($message) use ($pdf, $txtPath, $request) {
+            Mail::send('reports.digital_tax_report', $data, function ($message) use ($txtPath, $request) {
                 $message->to($request->email)
                     ->subject('Digital Tax Report')
-                    ->attachData($pdf->output(), "digital_tax_report.pdf")
                     ->attach($txtPath);
             });
 
