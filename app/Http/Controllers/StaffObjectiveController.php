@@ -9,8 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Resources\StaffObjectiveResource;
 use App\Http\Requests\StaffObjectiveRequest;
-
-
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class StaffObjectiveController extends Controller
 {
@@ -20,7 +20,24 @@ class StaffObjectiveController extends Controller
      */
     public function index() : JsonResponse
     {
-        $staffObjectives = StaffObjective::with('user', 'reviewBy')->get();
+        if(auth()->user()->role_id == User::ADMIN){
+            $staffObjectives = StaffObjective::query()
+                        ->whereHas(
+                            'user', function(Builder $builder){
+                                $builder->whereRelation(
+                                    'company',
+                                    'id',
+                                    auth()->user()->company_id
+                                );
+                            }
+                        )
+                        ->with('user', 'reviewBy')
+                        ->get();
+        } else{
+            $staffObjective = StaffObjective::query()
+                        ->with('user', 'reviewBy')
+                        ->get();
+        }
         $data = StaffObjectiveResource::collection($staffObjectives);
         return apiResponse($data, 'success', 200);
     }
