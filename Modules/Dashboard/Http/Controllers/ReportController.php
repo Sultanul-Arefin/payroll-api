@@ -102,10 +102,13 @@ class ReportController extends Controller
             'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            'is_mailable' => 'required|in:0,1',
+            'is_mailable' => 'required|in:0,1,2', /* mail=>1, ftp=>0, dsn=>2 */
             'ftp_host' => 'required_if:is_mailable,0',
             'ftp_username' => 'required_if:is_mailable,0',
-            'ftp_password' => 'required_if:is_mailable,0'
+            'ftp_password' => 'required_if:is_mailable,0',
+            'dsn_link' => 'required_if:is_mailable,2',
+            'dsn_username' => 'required_if:is_mailable,2',
+            'dsn_password' => 'required_if:is_mailable,2'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
            ->where('month', $request->month)
@@ -119,10 +122,15 @@ class ReportController extends Controller
                 'year' => $request->year,
                 'email' => $request->email,
                 'is_mailable' => $request->is_mailable,
-                'ftp_data' => $request->ftp_host ? [
+                'ftp_data' => $request->is_mailable == 0 ? [
                     'ftp_host' => $request->ftp_host,
                     'ftp_username' => $request->ftp_username,
                     'ftp_password' => $request->ftp_password
+                ] : null,
+                'dsn_data' => $request->is_mailable == 2 ? [
+                    'dsn_link' => $request->dsn_link,
+                    'dsn_username' => $request->dsn_username,
+                    'dsn_password' => $request->dsn_password
                 ] : null
             ]
         ];
@@ -137,10 +145,14 @@ class ReportController extends Controller
             'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            'is_mailable' => 'required|in:0,1',
+            'report_type' => 'required|in:pdf,docx,txt,xml',
+            'is_mailable' => 'required|in:0,1,2',
             'ftp_host' => 'required_if:is_mailable,0',
             'ftp_username' => 'required_if:is_mailable,0',
-            'ftp_password' => 'required_if:is_mailable,0'
+            'ftp_password' => 'required_if:is_mailable,0',
+            'dsn_link' => 'required_if: is_mailable, 2',
+            'dsn_username' => 'required_if: is_mailable, 2',
+            'dsn_password' => 'required_if: is_mailable, 2'
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
@@ -176,12 +188,17 @@ class ReportController extends Controller
             'total' => $total,
             'others' => $others
         ];
+        $xml = view('reports.digital_tax_report_xml', $data)->render();
+        return response($xml)->withHeaders([
+            'Content-Type' => 'text/xml'
+        ]);
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
         $options->set('defaultPaperSize', 'A4');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
 
+        // FTP
         if($request->is_mailable == 0){
             // Save the PDF to storage (e.g., storage/app/reports)
             $path = 'reports/digital_tax_report_' . time() . '.pdf'; // Generate a unique name for the file
@@ -240,6 +257,14 @@ class ReportController extends Controller
             );
         }
 
+        // DSN
+        if($request->is_mailable == 2){
+            $xml = view('reports.digital_tax_report_xml', $data)->render();
+            return response($xml)->withHeaders([
+                'Content-Type' => 'text/xml'
+            ]);
+        }
+
        // return $pdf->download('digital_tax_report.pdf');
         Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
             $message->to($request->email)
@@ -284,10 +309,13 @@ class ReportController extends Controller
             'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
             'year' => 'required',
-            'is_mailable' => 'required|in:0,1',
+            'is_mailable' => 'required|in:0,1,2', /* 1=>mail, 0=>ftp, 2=>dsn */
             'ftp_host' => 'required_if:is_mailable,0',
             'ftp_username' => 'required_if:is_mailable,0',
-            'ftp_password' => 'required_if:is_mailable,0'
+            'ftp_password' => 'required_if:is_mailable,0',
+            'dsn_link' => 'required_if:is_mailable,2',
+            'dsn_username' => 'required_if:is_mailable,2',
+            'dsn_password' => 'required_if:is_mailable,2'
         ]);
        $reports = Payslip::where('company_id', auth()->user()->company->id)
            ->where('month', $request->month)
@@ -301,10 +329,15 @@ class ReportController extends Controller
                 'year' => $request->year,
                 'email' => $request->email,
                 'is_mailable' => $request->is_mailable,
-                'ftp_data' => $request->ftp_host ? [
+                'ftp_data' => $request->is_mailable == 0 ? [
                     'ftp_host' => $request->ftp_host,
                     'ftp_username' => $request->ftp_username,
                     'ftp_password' => $request->ftp_password
+                ] : null,
+                'dsn_data' => $request->is_mailable == 2 ? [
+                    'dsn_link' => $request->dsn_link,
+                    'dsn_username' => $request->dsn_username,
+                    'dsn_password' => $request->dsn_password
                 ] : null
             ]
         ];
@@ -318,12 +351,15 @@ class ReportController extends Controller
         $request->validate([
             'email' => 'required_if:is_mailable,1|email',
             'month' => 'required',
+            'report_type' => 'required|in:pdf,docx,txt,xml',
             'year' => 'required',
-            'is_mailable' => 'required|in:0,1',
+            'is_mailable' => 'required|in:0,1,2',
             'ftp_host' => 'required_if:is_mailable,0',
             'ftp_username' => 'required_if:is_mailable,0',
             'ftp_password' => 'required_if:is_mailable,0',
-            'report_type' => 'required|in:pdf,docx,txt'
+            'dsn_link' => 'required_if:is_mailable,2',
+            'dsn_username' => 'required_if:is_mailable,2',
+            'dsn_password' => 'required_if:is_mailable,2',
         ]);
         $reports = Payslip::where('company_id', auth()->user()->company->id)
             ->where('month', $request->month)
