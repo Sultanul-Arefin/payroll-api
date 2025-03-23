@@ -144,7 +144,7 @@ class UserController extends Controller
                 ]);
             }
 
-            
+
             $allFile = []; // all file name store into array
             $message = DB::transaction(function () use ($request, $allFile) {
                 $user = $this->user_repo->create([
