@@ -28,6 +28,7 @@ use Modules\Payslip\Http\Resources\ViewAfricanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewGermanPayslipResource;
 use Modules\Payslip\Http\Resources\ViewGermanyPayslipResource;
 use Modules\Payslip\Http\Resources\ViewIndianPayslipResource;
+use Modules\Payslip\Http\Resources\ViewSouth_AfricanPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
@@ -669,7 +670,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -684,6 +685,37 @@ class PayslipController extends Controller
                 ),
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewGermanPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
+            ]
+        );
+    }
+    public function preview_south_african_payslip(Payslip $payslip)
+    {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' => 'CONTRACTUAL'
+        ];
+        return apiResponse(
+            data: [
+                'user_info' => array_merge(
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion']),
+                    [
+                        'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
+                    ],
+                    [
+                        'month' => $payslip?->month,
+                        'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
+                    ],
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name,
+                    ]
+                ),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
+                'payslip_info' => new ViewSouth_AfricanPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
             ]
         );
     }
