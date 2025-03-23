@@ -38,6 +38,8 @@ class ViewGermanPayslipResource extends JsonResource
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
+            'tax_allow_monthly' => $this->tax_value + $this->post_tax_value,
+            'tax_allow_annual' => $this->get_yearly_data("tax_amount")['tax_amount'],
             'non_taxable_allowance' => $this->non_taxable_allowance,
            // 'total_gross_pay' => $this->pay_due_before_deduction,
             //'taxable_gross_pay' => $this->gross_pay_before_tax,
@@ -829,5 +831,78 @@ public function getYearToDateCalculations()
             ],
             'total_net_pay' => $this->net_pay,
         ];
+    }
+
+    public function get_yearly_data($key)
+    {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_month = date('m', strtotime($this->first_date));
+        $payslip_data = Payslip::query()
+                                    ->whereBetween('first_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-$payslip_month-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("$payslip_year-1-1"), // Start of the year
+                                        date("$payslip_year-$payslip_month-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $this->employee->id)
+                                    ->orderBy('created_at', 'ASC')
+                                    ->get();
+        $data['hours'] = 0;
+        $data['overtime_hours'] = 0;
+        $data['total_fixed_pay'] = 0;
+        $data['taxable_allowances'] = 0;
+        $data['non_taxable_allowances'] = 0;
+        $data['total_gross_pay'] = 0;
+        $data['taxable_gross_pay'] = 0;
+        $data['ytd_tax_paid'] = 0;
+        $data['tax_amount'] = 0;
+        $data['total_staff_contribution'] = 0;
+        $data['total_company_contribution'] = 0;
+        $data['total_staff_cost'] = 0;
+        $data['total_net_pay'] = 0;
+        foreach($payslip_data as $value)
+        {
+            if($key == "hours"){
+                $data['hours'] += $value->hours_worked;
+            }
+            if($key == "total_fixed_pay"){
+                $data["total_fixed_pay"] += ($value->wages + $value->additional_pay) - $value->leave_deduction;
+            }
+            if($key == "taxable_allowances"){
+                $data["taxable_allowances"] += $value->taxable_allowance;
+            }
+            if($key == "non_taxable_allowances"){
+                $data["non_taxable_allowances"] += $value->non_taxable_allowance;
+            }
+            if($key == "total_gross_pay"){
+                $data["total_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance;
+            }
+            if($key == "taxable_gross_pay"){
+                $data["taxable_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance - $value->non_taxable_allowance;
+            }
+            if($key == "ytd_tax_paid"){
+                $data["ytd_tax_paid"] += $value->tax_value + $value->post_tax_value;
+            }
+            if($key == "tax_amount"){
+                $data["tax_amount"] += $value->tax_value + $value->post_tax_value;
+            }
+            if($key == "total_staff_contribution"){
+                $data["total_staff_contribution"] += $value->total_employee_deduction;
+            }
+            if($key == "total_company_contribution"){
+                $data["total_company_contribution"] += $value->company_contribution;
+            }
+            if($key == "total_staff_cost"){
+                // $data["total_staff_cost"] += ($value->gross_pay_before_tax + $value->company_contribution);
+                $data["total_staff_cost"] += (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $value->company_contribution;
+            }
+            if($key == "total_net_pay"){
+                $data["total_net_pay"] += $value->net_pay;
+            }
+        }
+        return $data;
     }
 }

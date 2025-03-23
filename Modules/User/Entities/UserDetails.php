@@ -60,6 +60,7 @@ class UserDetails extends Model
         'national_insurance_number',
         'ni_category',
         'religion',
+        'health_insurance',
         
     ];
 
