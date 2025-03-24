@@ -374,7 +374,7 @@ class ViewUSAPayslipResource extends JsonResource
                 ];
             }
 
-            public function calculateDeductionsAndTax()
+        public function calculateDeductionsAndTax()
                 {
                     $deductionDetails = $this->get_total_company_deduction();
                     $incomeTaxDetails = $this->getIncomeTaxAndCategoryDetails($this->payslip_details);
@@ -386,7 +386,7 @@ class ViewUSAPayslipResource extends JsonResource
                             ($deductionDetails['total_employee_amount'] ?? 0) +
                             ($incomeTaxDetails['total_amount'] ?? 0),
                     ];
-                }
+        }
 
 
 

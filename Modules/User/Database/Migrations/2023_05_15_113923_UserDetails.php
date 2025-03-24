@@ -52,6 +52,7 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('region')->nullable();
             $table->string('religion')->nullable();
+            $table->string('health_insurance')->nullable();
             $table->timestamps();
             
         });
