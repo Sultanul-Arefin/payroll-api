@@ -18,7 +18,7 @@ trait TasksTrait
                         'name' => $user->user_info->name,
                         'email' => $user->user_info->email,
                         'id' => $user->user_info->id,
-                        'image' => $user?->user_info?->user_details?->user_image ? env('APP_URL') . '/storage/' . $user?->user_info?->user_details?->user_image : null
+                        'image' => $user?->user_info?->user_details?->changed_user_image
                     ]);
                 }
             }
