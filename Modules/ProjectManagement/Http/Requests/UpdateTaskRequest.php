@@ -19,7 +19,7 @@ class UpdateTaskRequest extends FormRequest
             'estimation_hour' => 'required',
             'start_date_time' => 'required',
             'end_date_time' => 'required',
-            'assigned_employees' => 'required|array|exists:users,id',
+            'assigned_employees' => 'nullable|array|exists:users,id',
         ];
     }
 
