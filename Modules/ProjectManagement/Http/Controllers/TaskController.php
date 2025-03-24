@@ -190,7 +190,7 @@ class TaskController extends Controller
                 if(count($task_associate_employees) > 0){
                     foreach($request->assigned_employees as $assigned_employee_id){
                         foreach($task_associate_employees as $already_associated_employee){
-                            if($assigned_employee_id != $already_associated_employee->user_id){
+                            if((int)$assigned_employee_id != (int)$already_associated_employee->user_id){
                                 TaskAssociatedEmployee::create([
                                     'task_id' => $task->id,
                                     'user_id' => $assigned_employee_id,
