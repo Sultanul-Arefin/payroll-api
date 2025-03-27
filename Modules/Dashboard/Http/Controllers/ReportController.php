@@ -18,6 +18,7 @@ use Modules\Payslip\Http\Resources\PayslipResource;
 use App\Http\Traits\Attachment;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Modules\Dashboard\app\Transformers\DigitalSocialReportResource;
 
@@ -188,10 +189,29 @@ class ReportController extends Controller
             'total' => $total,
             'others' => $others
         ];
-        $xml = view('reports.digital_tax_report_xml', $data)->render();
-        return response($xml)->withHeaders([
-            'Content-Type' => 'text/xml'
-        ]);
+        // $xml = view('reports.digital_tax_report_xml', $data)->render();
+        // return response($xml)->withHeaders([
+        //     'Content-Type' => 'text/xml'
+        // ]);
+
+        // DSN
+        if($request->is_mailable == 2){
+            // Render the XML file using Blade
+            $xmlContent = view('reports.digital_tax_report_xml', $data)->render();
+            
+            // Define filename and path
+            $fileName = 'digital_tax_report_' . time() . '.xml';
+            $filePath = 'xml_reports/' . $fileName;
+
+            // Save XML file to storage
+            Storage::disk('public')->put($filePath, $xmlContent);
+            $localFilePath = Storage::disk('public')->path($filePath);
+
+            // Send XML file to DSN
+            return $this->sendXmlFileToDsn($localFilePath, $request);
+        }
+
+        // GENERATE PDF
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
         $options->set('defaultPaperSize', 'A4');
@@ -257,24 +277,87 @@ class ReportController extends Controller
             );
         }
 
-        // DSN
-        if($request->is_mailable == 2){
-            $xml = view('reports.digital_tax_report_xml', $data)->render();
-            return response($xml)->withHeaders([
-                'Content-Type' => 'text/xml'
-            ]);
-        }
+        // return $pdf->download('digital_tax_report.pdf');
+        if($request->report_type == "pdf"){
+            Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attachData($pdf->output(), "digital_tax_report.pdf");
+            });
+        } elseif($request->report_type == "docx"){
+            // Generate DOCX
+            $phpWord = new PhpWord();
+            $section = $phpWord->addSection();
 
-       // return $pdf->download('digital_tax_report.pdf');
-        Mail::send('reports.digital_tax_report', $data, function($message) use($pdf, $request) {
-            $message->to($request->email)
-                ->subject('Digital Tax Report')
-                ->attachData($pdf->output(), "digital_tax_report.pdf");
-        });
+            // Render Blade view to HTML
+            $html = View::make('reports.digital_tax_report_for_docx', $data)->render();
+
+            // Sanitize HTML (Remove unnecessary tags and attributes)
+            $cleanHtml = strip_tags($html, '<p><h1><h2><h3><h4><h5><h6><strong><em><ul><ol><li><table><tr><td><th><br>');
+
+            // Convert HTML to Word-friendly format
+            \PhpOffice\PhpWord\Shared\Html::addHtml($section, $cleanHtml, false, false);
+
+            // Save DOCX
+            $docxFileName = 'digital_tax_report_for_docx.docx';
+            $docxPath = storage_path('app/public/' . $docxFileName);
+            $wordWriter = IOFactory::createWriter($phpWord, 'Word2007');
+            $wordWriter->save($docxPath);
+
+            // Send Email with both PDF and DOCX attachments
+            Mail::send('reports.digital_tax_report_for_docx', $data, function ($message) use ($docxPath, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attach($docxPath);
+            });
+
+            // Optional: Delete the DOCX file after sending
+            unlink($docxPath);
+        } elseif($request->report_type == "txt"){
+            // Generate TXT from Blade
+            $txtContent = html_entity_decode(strip_tags(View::make('reports.digital_tax_report_txt', $data)->render()));
+
+            // Define filename and path
+            $txtFileName = 'digital_tax_report.txt';
+            $txtPath = storage_path('app/public/' . $txtFileName);
+
+            // Save TXT file
+            file_put_contents($txtPath, $txtContent);
+
+            // Send Email
+            Mail::send([], [], function ($message) use ($txtPath, $request) {
+                $message->to($request->email)
+                    ->subject('Digital Tax Report')
+                    ->attach($txtPath, [
+                        'as' => 'Digital_Tax_Report.txt',
+                        'mime' => 'text/plain',
+                    ]);
+            });
+
+            // Optional: Delete TXT file after sending
+            unlink($txtPath);
+        }
         return apiResponse(
             data: null,
             message: 'Email send successfully!'
         );
+    }
+
+    private function sendXmlFileToDsn($filePath, Request $request)
+    {
+        $dsn_link = $request->dsn_link;
+        $username = $request->dsn_username;
+        $password = $request->dsn_password;
+
+        $response = Http::withBasicAuth($username, $password)
+            ->attach('file', file_get_contents($filePath), basename($filePath))
+            ->post($dsn_link);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'XML file successfully sent to DSN server.']);
+        } else {
+            return response()->json(['message' => 'Failed to send XML file.', 'error' => $response->body()], 500);
+        }
     }
 
     public function upload_dedicated_digital_tax_report(Request $request)
@@ -395,6 +478,23 @@ class ReportController extends Controller
             'others' => $others
         ];
 
+        // DSN
+        if($request->is_mailable == 2){
+            // Render the XML file using Blade
+            $xmlContent = view('reports.digital_tax_report_xml', $data)->render();
+            
+            // Define filename and path
+            $fileName = 'digital_tax_report_' . time() . '.xml';
+            $filePath = 'xml_reports/' . $fileName;
+
+            // Save XML file to storage
+            Storage::disk('public')->put($filePath, $xmlContent);
+            $localFilePath = Storage::disk('public')->path($filePath);
+
+            // Send XML file to DSN
+            return $this->sendXmlFileToDsn($localFilePath, $request);
+        }
+
         // GENERATE PDF
         $pdf = PDF::loadView('reports.digital_tax_report', $data);
         $options = $pdf->getOptions();
@@ -497,17 +597,24 @@ class ReportController extends Controller
             // Optional: Delete the DOCX file after sending
             unlink($docxPath);
         } elseif($request->report_type == "txt"){
-            // Generate TXT
-            $txtContent = strip_tags(View::make('reports.digital_tax_report', $data)->render()); // Remove HTML tags
+            // Generate TXT from Blade
+            $txtContent = html_entity_decode(strip_tags(View::make('reports.digital_tax_report_txt', $data)->render()));
+
+            // Define filename and path
             $txtFileName = 'digital_tax_report.txt';
             $txtPath = storage_path('app/public/' . $txtFileName);
-            file_put_contents($txtPath, $txtContent); // Save as .txt file
 
-            // Send Email with PDF, DOCX, and TXT attachments
-            Mail::send('reports.digital_tax_report', $data, function ($message) use ($txtPath, $request) {
+            // Save TXT file
+            file_put_contents($txtPath, $txtContent);
+
+            // Send Email
+            Mail::send([], [], function ($message) use ($txtPath, $request) {
                 $message->to($request->email)
                     ->subject('Digital Tax Report')
-                    ->attach($txtPath);
+                    ->attach($txtPath, [
+                        'as' => 'Digital_Tax_Report.txt',
+                        'mime' => 'text/plain',
+                    ]);
             });
 
             // Optional: Delete TXT file after sending

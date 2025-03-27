@@ -38,13 +38,16 @@ class TaskController extends Controller
             $rows = (int) request('rows');
         }
 
+        DB::enableQueryLog();
+        $tasks = $this->taskRepo->allWithSearch(
+            $id,
+            ['*'],
+            [],
+            $rows
+        );
+        // return DB::getQueryLog();
         return ProjectAssociatedResource::collection(
-            $this->taskRepo->allWithSearch(
-                $id,
-                ['*'],
-                [],
-                $rows
-            )
+            $tasks
         );
     }
 
