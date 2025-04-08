@@ -31,7 +31,11 @@ class ProjectController extends Controller
                     );
                 })
                 ->where('company_id', auth()->user()->company_id)
-                ->with([])
+                ->with([
+                    'manager',
+                    'project_associated_columns',
+                    'tasks'
+                ])
                 ->where('id', $project->id)
                 ->first();
         return new ProjectOverviewResource($data);
