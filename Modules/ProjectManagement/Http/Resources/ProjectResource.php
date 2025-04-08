@@ -140,31 +140,31 @@ class ProjectResource extends JsonResource
     public function getAssignedEmployees($project_id)
     {
         $employees = [];
-        // $tasks = Task::where('project_id', $project_id)->get();
-        // if ($tasks) {
-        //     foreach ($tasks as $value) {
-        //         $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->get();
-        //         if ($task_associated_employees) {
-        //             $unique_employees = [];
-        //             foreach ($task_associated_employees as $value) {
-        //                 $user = User::where('id', $value->user_id)->first();
-        //                 array_push($unique_employees, $user);
-        //             }
-        //             if($unique_employees){
-        //                 $unique_employees = collect($unique_employees)->unique('id')->values();
-        //                 foreach($unique_employees as $uv)
-        //                 {
-        //                     array_push(
-        //                         $employees, [
-        //                             'user_name' => $uv?->name,
-        //                             'user_image' => $uv?->user_details?->changed_user_image,
-        //                         ]
-        //                     );
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        $tasks = Task::where('project_id', $project_id)->get();
+        if ($tasks) {
+            foreach ($tasks as $value) {
+                $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->get();
+                if ($task_associated_employees) {
+                    $unique_employees = [];
+                    foreach ($task_associated_employees as $value) {
+                        $user = User::where('id', $value->user_id)->first();
+                        array_push($unique_employees, $user);
+                    }
+                    if($unique_employees){
+                        $unique_employees = collect($unique_employees)->unique('id')->values();
+                        foreach($unique_employees as $uv)
+                        {
+                            array_push(
+                                $employees, [
+                                    'user_name' => $uv?->name,
+                                    'user_image' => $uv?->user_details?->changed_user_image,
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+        }
 
         return $employees;
     }
