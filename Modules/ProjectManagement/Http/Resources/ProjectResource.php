@@ -151,8 +151,8 @@ class ProjectResource extends JsonResource
                         array_push($unique_employees, $user);
                     }
                     if($unique_employees){
-                        $unique_employees = collect($unique_employees)->unique('id')->values();
-                        foreach($unique_employees as $uv)
+                        $updated_unique_employees = collect($unique_employees)->unique('id')->values();
+                        foreach($updated_unique_employees as $uv)
                         {
                             array_push(
                                 $employees, [
@@ -161,6 +161,7 @@ class ProjectResource extends JsonResource
                                 ]
                             );
                         }
+                        return $employees;
                     }
                 }
             }
