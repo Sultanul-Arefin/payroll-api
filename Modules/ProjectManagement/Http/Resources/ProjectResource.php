@@ -143,7 +143,7 @@ class ProjectResource extends JsonResource
         $tasks = Task::where('project_id', $project_id)->get();
         if ($tasks) {
             foreach ($tasks as $value) {
-                $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->get();
+                $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->groupBy('user_id')->get();
                 if ($task_associated_employees) {
                     foreach ($task_associated_employees as $value) {
                         $user = User::where('id', $value->user_id)->first();
