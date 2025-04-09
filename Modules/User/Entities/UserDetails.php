@@ -62,6 +62,7 @@ class UserDetails extends Model
         'religion',
         'health_insurance',
         'pension_administrator',
+        "pension_pin",
         
     ];
 

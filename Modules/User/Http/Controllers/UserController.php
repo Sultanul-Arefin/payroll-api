@@ -193,6 +193,7 @@ class UserController extends Controller
                     'religion' => $request->religion ?? $request->religion,
                     'health_insurance' => $request->health_insurance ?? $request->health_insurance,
                     'pension_administrator' => $request->pension_administrator ?? $request->pension_administrator,
+                    'pension_pin' => $request->pension_pin ?? $request->pension_pin,
 
                 ]);
 
@@ -581,6 +582,7 @@ class UserController extends Controller
                 'religion' => $request->religion ?? $user->user_details->religion,
                 'health_insurance' => $request->health_insurance ?? $user->user_details->health_insurance,
                 'pension_administrator' => $request->pension_administrator ?? $request->pension_administrator,
+                'pension_pin' => $request->pension_pin ?? $request->pension_pin,
             ]);
 
             $allFileArr = [];
