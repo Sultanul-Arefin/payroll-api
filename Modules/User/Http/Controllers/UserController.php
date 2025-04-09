@@ -507,7 +507,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        return gettype($request['wages']);
+
         // if ($request->country_id == '232') {
         //     $request->validate([
         //         'state' => 'required|string|max:255',
