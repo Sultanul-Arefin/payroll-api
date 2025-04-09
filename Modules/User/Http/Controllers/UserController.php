@@ -419,7 +419,7 @@ class UserController extends Controller
     // update salary items
     public function update_salary_items($salary_items, $employee_id)
     {
-        if ($salary_items['wages'] == null) {
+        if ($salary_items['wages'] == null || $salary_items['wages'] == "null") {
             $item_id = $this->check_salary_items_for_update('Wages');
             $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
