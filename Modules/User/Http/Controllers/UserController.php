@@ -420,7 +420,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Wages');
             $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
-        if ($salary_items['wages']) {
+        elseif ($salary_items['wages'] && $salary_items['wages'] != "null") {
             $item_id = $this->check_salary_items_for_update('Wages');
             $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
