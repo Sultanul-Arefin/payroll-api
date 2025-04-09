@@ -386,6 +386,8 @@ class ViewUKPayslipResource extends JsonResource
                 $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
                 $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
 
+                $total_company_amount = number_format($total_company_amount, 2, '.', '');
+                $total_employee_amount = number_format($total_employee_amount, 2, '.', '');
                 return [
                     'total_company_amount' => $total_company_amount,
                     'total_employee_amount' => $total_employee_amount,
