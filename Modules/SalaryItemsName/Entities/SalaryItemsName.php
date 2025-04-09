@@ -50,4 +50,8 @@ class SalaryItemsName extends Model
     {
         return $this->belongsTo(Country::class, 'country_id', 'id');
     }
+    public function salaryItemsName()
+    {
+        return $this->belongsTo(SalaryItemsName::class, 'salary_item_id');
+    }
 }
