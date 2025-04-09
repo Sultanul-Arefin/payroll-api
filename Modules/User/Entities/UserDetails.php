@@ -61,6 +61,7 @@ class UserDetails extends Model
         'ni_category',
         'religion',
         'health_insurance',
+        'pension_administrator',
         
     ];
 
