@@ -54,6 +54,7 @@ return new class extends Migration
             $table->string('religion')->nullable();
             $table->string('health_insurance')->nullable();
             $table->string('pension_administrator')->nullable();
+            $table->string('pension_pin')->nullable();
             $table->timestamps();
             
         });
