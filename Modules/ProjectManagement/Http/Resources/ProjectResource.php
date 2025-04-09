@@ -145,14 +145,23 @@ class ProjectResource extends JsonResource
             foreach ($tasks as $value) {
                 $task_associated_employees = TaskAssociatedEmployee::where('task_id', $value->id)->get();
                 if ($task_associated_employees) {
+                    $unique_employees = [];
                     foreach ($task_associated_employees as $value) {
                         $user = User::where('id', $value->user_id)->first();
-                        array_push(
-                            $employees, [
-                                'user_name' => $user?->name,
-                                'user_image' => $user?->user_details?->changed_user_image,
-                            ]
-                        );
+                        array_push($unique_employees, $user);
+                    }
+                    if($unique_employees){
+                        $updated_unique_employees = collect($unique_employees)->unique('id')->values();
+                        foreach($updated_unique_employees as $uv)
+                        {
+                            array_push(
+                                $employees, [
+                                    'user_name' => $uv?->name,
+                                    'user_image' => $uv?->user_details?->changed_user_image,
+                                ]
+                            );
+                        }
+                        return $employees;
                     }
                 }
             }
