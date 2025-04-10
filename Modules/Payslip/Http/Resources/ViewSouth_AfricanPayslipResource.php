@@ -197,56 +197,69 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
     
 
     public function get_other_deduction()
-    {
-        $deduction_details = PayslipDetailsForDeduction::query()
-            ->whereHas('salary_item_name', function (Builder $builder) {
-                $builder->where('salary_items_category_id', 8);
-            })
-            ->where('payslip_id', $this->id)
-            ->get();
+{
+    $deduction_details = PayslipDetailsForDeduction::query()
+        ->whereHas('salary_item_name', function (Builder $builder) {
+            $builder->where('salary_items_category_id', 8);
+        })
+        ->where('payslip_id', $this->id)
+        ->get();
 
-        $response = [];
-        $total_company_amount = 0;
-        $total_employee_amount = 0;
-        $yearly_total_company_amount = 0;
-        $yearly_total_employee_amount = 0;
+    $response = [];
+    $total_company_amount = 0;
+    $total_employee_amount = 0;
+    $yearly_total_company_amount = 0;
+    $yearly_total_employee_amount = 0;
 
-    
-        $current_month = date('m', strtotime(now()));
+    $current_month = date('m', strtotime(now()));
 
-        $yearly_payslip_data = $this->get_yearly_Other_deductions($this->employee_id, $current_month);
+    $yearly_payslip_data = $this->get_yearly_Other_deductions($this->employee_id, $current_month);
 
-        foreach ($deduction_details as $value) {
-            $title = $value?->salary_item_name?->name ?? 'N/A';
+    foreach ($deduction_details as $value) {
+        $title = $value?->salary_item_name?->name ?? 'N/A';
 
-            // Yearly Total = jonuary to current total
-            $yearly_total = $yearly_payslip_data[$title] ?? ['employee' => 0, 'company' => 0];
+        // Yearly Total = January to current month total
+        $yearly_total = $yearly_payslip_data[$title] ?? ['employee' => 0, 'company' => 0];
 
-            $total_company_amount += $value->government_or_company_amount;
-            $total_employee_amount += $value->employee_amount;
-            $yearly_total_company_amount += $yearly_total['company'];
-            $yearly_total_employee_amount += $yearly_total['employee'];
+        // Cast amounts to float for calculation and formatting
+        $employee_amount = (float) $value->employee_amount;
+        $company_amount = (float) $value->government_or_company_amount;
+        $yearly_employee_total = (float) $yearly_total['employee'];
+        $yearly_company_total = (float) $yearly_total['company'];
 
-            array_push($response, [
-                'title' => $title,
-                'base' => $this->gross_pay_before_tax,
-                'employee_rate' => $value->employee_amount_rate,
-                'employee_amount' => $value->employee_amount,
-                'company_rate' => $value->government_or_company_amount_rate,
-                'company_amount' => $value->government_or_company_amount,
-                'yearly_total_employee_amount' => $yearly_total['employee'],
-                'yearly_total_company_amount' => $yearly_total['company'],
-            ]);
-        }
+        // Update total amounts
+        $total_company_amount += $company_amount;
+        $total_employee_amount += $employee_amount;
+        $yearly_total_company_amount += $yearly_company_total;
+        $yearly_total_employee_amount += $yearly_employee_total;
 
-        return [
-            'deductions' => $response,
-            'total_company_amount' => $total_company_amount,
-            'total_employee_amount' => $total_employee_amount,
-            'yearly_total_company_amount' => $yearly_total_company_amount,
-            'yearly_total_employee_amount' => $yearly_total_employee_amount,
-        ];
+        array_push($response, [
+            'title' => $title,
+            'base' => $this->gross_pay_before_tax,
+            'employee_rate' => $value->employee_amount_rate,
+            'employee_amount' => number_format($employee_amount, 2, '.', ''),
+            'company_rate' => $value->government_or_company_amount_rate,
+            'company_amount' => number_format($company_amount, 2, '.', ''),
+            'yearly_total_employee_amount' => number_format($yearly_employee_total, 2, '.', ''),
+            'yearly_total_company_amount' => number_format($yearly_company_total, 2, '.', ''),
+        ]);
     }
+
+    // After the loop, format the totals
+    $total_company_amount = number_format($total_company_amount, 2, '.', '');
+    $total_employee_amount = number_format($total_employee_amount, 2, '.', '');
+    $yearly_total_company_amount = number_format($yearly_total_company_amount, 2, '.', '');
+    $yearly_total_employee_amount = number_format($yearly_total_employee_amount, 2, '.', '');
+
+    // Final response with formatted totals
+    return [
+        'deductions' => $response,
+        'total_company_amount' => $total_company_amount,
+        'total_employee_amount' => $total_employee_amount,
+        'yearly_total_company_amount' => $yearly_total_company_amount,
+        'yearly_total_employee_amount' => $yearly_total_employee_amount,
+    ];
+}
 
     public function get_yearly_Other_deductions($employee_id, $current_month)
     {
@@ -306,26 +319,41 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
 
         foreach ($deduction_details as $value) {
             $title = $value?->salary_item_name?->name ?? 'N/A';
-
+        
             $yearly_total = $yearly_payslip_data[$title] ?? ['employee' => 0, 'company' => 0];
-
-            $total_company_amount += $value->government_or_company_amount;
-            $total_employee_amount += $value->employee_amount;
-            $yearly_total_company_amount += $yearly_total['company'];
-            $yearly_total_employee_amount += $yearly_total['employee'];
-
+        
+            // Ensure these values are properly initialized as floats
+            $employee_amount = (float) $value->employee_amount; 
+            $company_amount = (float) $value->government_or_company_amount;
+            $yearly_employee_total = (float) $yearly_total['employee'];
+            $yearly_company_total = (float) $yearly_total['company'];
+        
+            // Update total amounts
+            $total_company_amount += $company_amount;
+            $total_employee_amount += $employee_amount;
+            $yearly_total_company_amount += $yearly_company_total;
+            $yearly_total_employee_amount += $yearly_employee_total;
+        
+            // Add formatted response data
             array_push($response, [
                 'title' => $title,
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
-                'employee_amount' => $value->employee_amount,
+                'employee_amount' => number_format($employee_amount, 2, '.', ''),
                 'company_rate' => $value->government_or_company_amount_rate,
-                'company_amount' => $value->government_or_company_amount,
-                'yearly_total_employee_amount' => $yearly_total['employee'],
-                'yearly_total_company_amount' => $yearly_total['company'],
+                'company_amount' => number_format($company_amount, 2, '.', ''),
+                'yearly_total_employee_amount' => number_format($yearly_employee_total, 2, '.', ''),
+                'yearly_total_company_amount' => number_format($yearly_company_total, 2, '.', ''),
             ]);
         }
-
+        
+        // After the loop, format the totals
+        $total_company_amount = number_format($total_company_amount, 2, '.', '');
+        $total_employee_amount = number_format($total_employee_amount, 2, '.', '');
+        $yearly_total_company_amount = number_format($yearly_total_company_amount, 2, '.', '');
+        $yearly_total_employee_amount = number_format($yearly_total_employee_amount, 2, '.', '');
+        
+        // Final response with formatted totals
         return [
             'deductions' => $response,
             'total_company_amount' => $total_company_amount,

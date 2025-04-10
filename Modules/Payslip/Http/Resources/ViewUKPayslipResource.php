@@ -598,6 +598,8 @@ public function getYearToDateCalculations()
         return $payslip->tax_value + $payslip->post_tax_value;
     });
 
+   $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
+
     return [
         'gross_pay' => $yearToDateGrossPay,
         'taxable_gross' => $yearToDateTaxableGross,
