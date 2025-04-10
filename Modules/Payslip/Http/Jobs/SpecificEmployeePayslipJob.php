@@ -60,7 +60,7 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                 'to_date' => $this->to_date,
                 'payment_date' => $this->payment_date,
                 'company_id' => $this->auth_user->company_id,
-                'working_hours' => $this->get_hours_worked($user->id, request('from_date'), request('to_date')),
+                'working_hours' => $this->get_hours_worked($user->id, request('from_date') ?? $this->from_date, request('to_date') ?? $this->to_date),
                 'maternity_leave' => $this->getLeaveData($user->id, "maternity_leave"),
                 'annual_leave' => $this->getLeaveData($user->id, "annual_leave"),
                 'sick_leave' => $this->getLeaveData($user->id, "sick_leave"),
@@ -108,8 +108,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                             $builder->whereBetween(
                                 'dates',
                                 [
-                                    request('from_date'),
-                                    request('to_date')
+                                    request('from_date') ?? $this->from_date,
+                                    request('to_date')  ?? $this->to_date
                                 ]
                             );
                         }
@@ -152,8 +152,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                             $builder->whereBetween(
                                 'dates',
                                 [
-                                    request('from_date'),
-                                    request('to_date')
+                                    request('from_date') ?? $this->from_date,
+                                    request('to_date')  ?? $this->to_date
                                 ]
                             );
                         }
@@ -196,8 +196,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                             $builder->whereBetween(
                                 'dates',
                                 [
-                                    request('from_date'),
-                                    request('to_date')
+                                    request('from_date') ?? $this->from_date,
+                                    request('to_date')  ?? $this->to_date
                                 ]
                             );
                         }
@@ -239,8 +239,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                             $builder->whereBetween(
                                 'dates',
                                 [
-                                    request('from_date'),
-                                    request('to_date')
+                                    request('from_date') ?? $this->from_date,
+                                    request('to_date')  ?? $this->to_date
                                 ]
                             );
                         }
@@ -266,8 +266,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            request('from_date') ?? $this->from_date,
+                            request('to_date')  ?? $this->to_date
                         ]
                     )
                     ->get();
@@ -288,8 +288,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            request('from_date') ?? $this->from_date,
+                            request('to_date')  ?? $this->to_date
                         ]
                     )
                     ->get();
@@ -310,8 +310,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            request('from_date') ?? $this->from_date,
+                            request('to_date')  ?? $this->to_date
                         ]
                     )
                     ->get();
@@ -332,8 +332,8 @@ class SpecificEmployeePayslipJob implements ShouldQueue
                     ->whereBetween(
                         'date',
                         [
-                            request('from_date'),
-                            request('to_date')
+                            request('from_date') ?? $this->from_date,
+                            request('to_date')  ?? $this->to_date
                         ]
                     )
                     ->get();
