@@ -27,7 +27,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
     {
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
-            'total-cash-deduction' => $this->calculateDeductionsAndTax(),
+            'total_cash_deduction' => $this->calculateDeductionsAndTax(),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
             'additional_pay' => $this->additional_pay, // additional pay goes here
@@ -53,7 +53,8 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             //'total_deduction' => $this->total_employee_deduction,
             'total_company_deduction' => $this->get_total_company_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
-            'overall_calculation' => $this->overall_calculation(),            
+            'overall_calculation' => $this->overall_calculation(),   
+            'year_to_date' => $this->getYearToDateCalculations(),         
         ];
     }
 
@@ -63,7 +64,11 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             'annual_leave_quota' => $this->getAnnualLeaveQuota(),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
             // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id),
+            'sick_leave_quota' => $this->getSickLeaveQuota(),
+            'sick_leave_taken' => $this->getSickLeaveTaken($this->employee->id),
+            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+            'remaining_sick_leave' => $this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id),
         ];
     }
 
@@ -75,12 +80,12 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                             'payslip', function(Builder $builder) use($user_id, $payslip_year){
                                 $builder
                                     ->whereBetween('first_date', [
-                                        date("$payslip_year-1-1"), // Start of the year
-                                        date("$payslip_year-12-31"), // End of the year
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
                                     ])
                                     ->whereBetween('last_date', [
-                                        date("$payslip_year-1-1"), // Start of the year
-                                        date("$payslip_year-12-31"), // End of the year
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
                                     ])
                                     ->where('employee_id', $user_id)
                                     ->orderBy('created_at', 'ASC');
@@ -147,33 +152,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
         }
         return ceil($total_annual_leave / $working_hours_per_day);
-        // $annual_leave_data = LeaveSalaryItems::query()
-        //     ->whereHas(
-        //         'salary_items_name', function(Builder $builder){
-        //             $builder
-        //             ->where(
-        //                 'name',
-        //                 'Annual Leave'
-        //             )->where(
-        //                 'company_id',
-        //                 auth()->user()->company_id
-        //             );
-        //         }
-        //     )
-        //     ->first();
-        // $data = UserLeave::query()
-        //         ->where('user_id', $user_id)
-        //         ->where('leave_type', $annual_leave_data->salary_items_id)
-        //         ->where('status', UserLeave::APPROVED)
-        //         ->get();
-        // $count = 0;
-        // foreach($data as $value){
-        //     $details = UserLeaveDetail::query()
-        //         ->where('user_leaves_id', $value->id)
-        //         ->count();
-        //     $count += $details;
-        // }
-        // return $count;
+
     }
 
     function getAnnualLeaveQuota(): int {
@@ -193,6 +172,109 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             ->first();
         return $data->no_of_days;
     }
+
+    function getTotalSickLeaveTaken($user_id): mixed {
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_year = date('Y', strtotime($this->first_date));
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder) use($user_id, $payslip_year){
+                                $builder
+                                    ->whereBetween('first_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->whereBetween('last_date', [
+                                        date("${payslip_year}-1-1"), // Start of the year
+                                        date("${payslip_year}-12-31"), // End of the year
+                                    ])
+                                    ->where('employee_id', $user_id)
+                                    ->orderBy('created_at', 'ASC');
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Paid Sick Leave Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_sick_leave = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_sick_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_sick_leave / $working_hours_per_day);
+    }
+
+    function getSickLeaveTaken($user_id): mixed {
+        // $payslip_details = $this->payslip_details;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder){
+                                $builder->where('id', $this->id);
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Paid Sick Leave Rate' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_sick_leave = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_sick_leave += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_sick_leave / $working_hours_per_day);
+
+    }
+
+    function getSickLeaveQuota(): int {
+        $data = LeaveSalaryItems::query()
+            ->whereHas(
+                'salary_items_name', function(Builder $builder){
+                    $builder
+                    ->where(
+                        'name',
+                        'Sick Leave'
+                    )->where(
+                        'company_id',
+                        auth()->user()->company_id
+                    );
+                }
+            )
+            ->first();
+        return $data->no_of_days;
+    }
+
+
 
     
 
@@ -395,7 +477,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                 'total-deductions' =>
                     ($deductionDetails['total_employee_amount'] ?? 0) +
                     ($incomeTaxDetails['total_amount'] ?? 0),
-                'cumulative ' =>
+                'cumulative' =>
                     ($deductionDetails['yearly_total_employee_amount'] ?? 0) +
                     ($incomeTaxDetails['yearly_total'] ?? 0),
                         
@@ -403,51 +485,107 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
     }
 
 
-    private function getIncomeTaxAndCategoryDetails($payslipDetails)
-    {
-        $filteredDetails = [];
-        $totalAmount = 0;
+    // private function getIncomeTaxAndCategoryDetails($payslipDetails)
+    // {
+    //     $filteredDetails = [];
+    //     $totalAmount = 0;
 
         
-        if (empty($payslipDetails)) {
-            return [
-                'filtered_details' => [],
-                'total_amount' => 0,
-                'total_deductions_tax' => $this->total_employee_deduction,
-            ];
-        }
+    //     if (empty($payslipDetails)) {
+    //         return [
+    //             'filtered_details' => [],
+    //             'total_amount' => 0,
+    //             'total_deductions_tax' => $this->total_employee_deduction,
+    //         ];
+    //     }
 
    
-        $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
+    //     $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
 
-         $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
+    //      $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
 
-        foreach ($payslipDetails as $detail) {
-                if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
-                 $pay_detail_name = $detail['pay_details'] ?? 'N/A';
+    //     foreach ($payslipDetails as $detail) {
+    //             if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
+    //              $pay_detail_name = $detail['pay_details'] ?? 'N/A';
 
-                 $yearly_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
+    //              $yearly_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
 
-                $filteredDetails[] = [
-                    'pay_details' => $pay_detail_name,
-                    'base_amount_or_hours' => $detail['base_amount_or_hours'],
-                    'rate' => $detail['rate'],
-                    'amount' => $detail['amount'],
-                    'yearly_total' => $yearly_total, 
-                ];
+    //             $filteredDetails[] = [
+    //                 'pay_details' => $pay_detail_name,
+    //                 'base_amount_or_hours' => $detail['base_amount_or_hours'],
+    //                 'rate' => $detail['rate'],
+    //                 'amount' => $detail['amount'],
+    //                 'yearly_total' => $yearly_total, 
+    //             ];
 
-                $totalAmount += $detail['amount']; // Accumulate the total amount
-            }
-        }
+    //             $totalAmount += $detail['amount']; // Accumulate the total amount
+    //         }
+    //     }
 
+    //     return [
+    //         'filtered_details' => $filteredDetails,
+    //         'total_amount' => $totalAmount,
+    //         'total_deductions_tax' => $totalAmount + $this->total_employee_deduction,
+    //     ];
+    // }
+
+
+    private function getIncomeTaxAndCategoryDetails($payslipDetails)
+{
+    $filteredDetails = [];
+    $totalAmount = 0;
+
+    if (empty($payslipDetails)) {
         return [
-            'filtered_details' => $filteredDetails,
-            'total_amount' => $totalAmount,
-            'total_deductions_tax' => $totalAmount + $this->total_employee_deduction,
+            'filtered_details' => [],
+            'total_amount' => 0,
+            'total_deductions_tax' => $this->total_employee_deduction,
         ];
     }
 
+    $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
 
+    $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
+
+    foreach ($payslipDetails as $detail) {
+        if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
+            $pay_detail_name = $detail['pay_details'] ?? 'N/A';
+
+            // Check for "Threshold" category specifically
+            if (strpos($pay_detail_name, 'Threshold') !== false) {
+                // If the category is 'Threshold', we need to calculate the yearly total
+                // Apply custom logic for Threshold if you have a rule for it
+                // For example, multiply the amount by a factor to estimate yearly total
+                $yearly_total = $detail['amount'] * 12; // Example: Assume monthly value and multiply by 12 for yearly total
+            } else {
+                // Get yearly total from the data if available
+                $yearly_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
+            }
+
+            // If yearly_total is still 0 and it's a Threshold, apply custom logic
+            if ($yearly_total === 0 && strpos($pay_detail_name, 'Threshold') !== false) {
+                // Set a custom value for Threshold if you want
+                $yearly_total = 1000; // Replace with your own logic
+            }
+
+            $filteredDetails[] = [
+                'pay_details' => $pay_detail_name,
+                'base_amount_or_hours' => $detail['base_amount_or_hours'],
+                'rate' => $detail['rate'],
+                'amount' => $detail['amount'],
+                'yearly_total' => $yearly_total, 
+            ];
+
+            $totalAmount += $detail['amount']; // Accumulate the total amount
+        }
+    }
+
+    return [
+        'filtered_details' => $filteredDetails,
+        'total_amount' => $totalAmount,
+        'total_deductions_tax' => $totalAmount + $this->total_employee_deduction,
+    ];
+}
     public function get_total_other_deduction()
     {
         $deduction_details = PayslipDetailsForDeduction::query()
@@ -627,6 +765,66 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
     /**
      * Get yearly total for each salary item from January to previous month.
      */
+
+     public function getYearToDateCalculations()
+{
+    // payment_date starting year
+    $paymentDate = Carbon::parse($this->payment_date);
+    $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
+
+    // // Devaging
+    // \Log::info('Start of Year: ' . $startOfYear);
+    // \Log::info('Payment Date: ' . $paymentDate->toDateString());
+    // \Log::info('Employee ID: ' . $this->employee->id);
+
+    // payslip Filter
+    $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
+        ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
+        ->get();
+
+    if ($yearToDatePayslips->isEmpty()) {
+        \Log::warning('No Payslips found in range.', [
+            'employee_id' => $this->employee->id,
+            'start_of_year' => $startOfYear,
+            'payment_date' => $paymentDate->toDateString(),
+        ]);
+        return [
+            'gross_pay' => 0,
+            'taxable_gross' => 0,
+            'tax' => 0,
+        ];
+    }
+
+    // Yearly Gross Pay
+    $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
+        return (
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+            + $payslip->taxable_allowance
+            + $payslip->non_taxable_allowance
+        );
+    });
+
+    // Yearly Taxable Gross Pay
+    $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
+        return (
+            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+            + $payslip->taxable_allowance
+        );
+    });
+
+    // Yearly Net Pay
+    $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
+        return $payslip->tax_value + $payslip->post_tax_value;
+    });
+
+   $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
+
+    return [
+        'gross_pay' => $yearToDateGrossPay,
+        'taxable_gross' => $yearToDateTaxableGross,
+        'tax' => $yearToDateTaxPay,
+    ];
+}
     public function get_yearly_payslip_totals($employee_id, $current_month)
         {
             $current_year = date('Y');
@@ -760,19 +958,19 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                 ],
                 'yearly' => [ // yearly one column will be updated
                     [
-                        'hours' => $this->get_yearly_data("hours")['hours'],
-                        'overtime_hours' => $this->getTotalOvertimeHours($this->payslip_details),
-                        'total_fixed_pay' => $this->get_yearly_data("total_fixed_pay")['total_fixed_pay'],
-                        'taxable_allowances' => $this->get_yearly_data("taxable_allowances")['taxable_allowances'],
-                        'non_taxable_allowances' => $this->get_yearly_data("non_taxable_allowances")['non_taxable_allowances'],
-                        'total_gross_pay' => $this->get_yearly_data("total_gross_pay")['total_gross_pay'],
-                        'taxable_gross_pay' => $this->get_yearly_data("taxable_gross_pay")['taxable_gross_pay'],
-                        'ytd_tax_paid' => $this->get_yearly_data("ytd_tax_paid")['ytd_tax_paid'],
-                        'tax_amount' => $this->get_yearly_data("tax_amount")['tax_amount'],
-                        'total_staff_contribution' => $this->get_yearly_data("total_staff_contribution")['total_staff_contribution'],
-                        'total_company_contribution' => $this->get_yearly_data("total_company_contribution")['total_company_contribution'],
-                        'total_staff_cost' => $this->get_yearly_data("total_staff_cost")['total_staff_cost'],
-                        'total_net_pay' => $this->get_yearly_data("total_net_pay")['total_net_pay'],
+                        'hours' => number_format($this->get_yearly_data("hours")['hours'], 2),
+                        'overtime_hours' => number_format($this->getTotalOvertimeHours($this->payslip_details), 2),
+                        'total_fixed_pay' => number_format($this->get_yearly_data("total_fixed_pay")['total_fixed_pay'], 2),
+                        'taxable_allowances' => number_format($this->get_yearly_data("taxable_allowances")['taxable_allowances'], 2),
+                        'non_taxable_allowances' => number_format($this->get_yearly_data("non_taxable_allowances")['non_taxable_allowances'], 2),
+                        'total_gross_pay' => number_format($this->get_yearly_data("total_gross_pay")['total_gross_pay'], 2),
+                        'taxable_gross_pay' => number_format($this->get_yearly_data("taxable_gross_pay")['taxable_gross_pay'], 2),
+                        'ytd_tax_paid' => number_format($this->get_yearly_data("ytd_tax_paid")['ytd_tax_paid'], 2),
+                        'tax_amount' => number_format($this->get_yearly_data("tax_amount")['tax_amount'], 2),
+                        'total_staff_contribution' => number_format($this->get_yearly_data("total_staff_contribution")['total_staff_contribution'], 2),
+                        'total_company_contribution' => number_format($this->get_yearly_data("total_company_contribution")['total_company_contribution'], 2),
+                        'total_staff_cost' => number_format($this->get_yearly_data("total_staff_cost")['total_staff_cost'], 2),
+                        'total_net_pay' => number_format($this->get_yearly_data("total_net_pay")['total_net_pay'], 2),
                     ],
                 ],
                 'total_net_pay' => $this->net_pay,
