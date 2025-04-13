@@ -401,6 +401,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
 
         // Yearly total to current_month 
         $yearly_payslip_data = $this->get_yearly_deduction_details($this->employee_id, $current_month);
+        
 
         foreach ($deduction_details as $value) {
             $title = $value?->salary_item_name?->name ?? 'N/A';
@@ -448,7 +449,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
         ];
     }
 
-    public function get_yearly_deduction_details($employee_id, $category_id = 7)
+    public function get_yearly_deduction_details($employee_id, $current_month, $category_id = 7)
     {
         // First, get the payslip's actual year and month using $this->first_date
         $current_year = date('Y', strtotime($this->first_date));
