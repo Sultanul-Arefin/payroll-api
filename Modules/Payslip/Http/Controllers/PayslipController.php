@@ -479,7 +479,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','tin_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -503,7 +503,7 @@ class PayslipController extends Controller
         return apiResponse(
             data: [
                 'user_info' => array_merge(
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','tin_number']),
                     $payslip?->employee->toArray(),
                     [
                         'department' => $payslip?->employee?->department?->department_name,
@@ -529,7 +529,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','tin_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],
@@ -566,7 +566,7 @@ class PayslipController extends Controller
             data: [
                 'user_info'=> array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','tin_number']),
                     [
                         'employee_type'=> $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown',
                     ],
@@ -602,7 +602,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','tax_number','social_security_number','pension_number','visa_number','work_permit_number','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','bank_bic_or_swift_code','state','region', 'user_phone', 'joining_date','bank_name','bank_iban_or_account_no', 'esi_no', 'pf_no','uan_no']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','tax_number','social_security_number','pension_number','visa_number','work_permit_number','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','bank_bic_or_swift_code','state','region', 'user_phone', 'joining_date','bank_name','bank_iban_or_account_no', 'esi_no', 'pf_no','uan_no','tin_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -638,7 +638,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','tin_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -670,7 +670,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','health_insurance']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','health_insurance','tin_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
@@ -701,7 +701,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','pension_administrator','pension_pin']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','pension_administrator','pension_pin','tin_number']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],

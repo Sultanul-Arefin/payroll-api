@@ -63,6 +63,7 @@ class UserDetails extends Model
         'health_insurance',
         'pension_administrator',
         "pension_pin",
+        "tin_number"
         
     ];
 
