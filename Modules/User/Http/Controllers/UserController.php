@@ -339,15 +339,15 @@ class UserController extends Controller
             $item_id = $this->check_salary_items('Wages');
             $this->add_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
-        if ($salary_items['ordinary_time_rate']) {
+        if (isset($salary_items['ordinary_time_rate'])) {
             $item_id = $this->check_salary_items('Ordinary Time Rate');
             $this->add_items_with_employee($item_id, $salary_items['ordinary_time_rate'], $employee_id);
         }
-        if ($salary_items['maternity_time_rate']) {
+        if (isset($salary_items['maternity_time_rate'])) {
             $item_id = $this->check_salary_items('Maternity Time Rate');
             $this->add_items_with_employee($item_id, $salary_items['maternity_time_rate'], $employee_id);
         }
-        if ($salary_items['paid_sick_leave_rate']) {
+        if (isset($salary_items['paid_sick_leave_rate'])) {
             $item_id = $this->check_salary_items('Paid Sick Leave Rate');
             $this->add_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
 
@@ -355,7 +355,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items('Sick Leave');
             $this->add_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
         }
-        if ($salary_items['unpaid_sick_leave_rate']) {
+        if (isset($salary_items['unpaid_sick_leave_rate'])) {
             $item_id = $this->check_salary_items('Unpaid Sick Leave Rate');
             $this->add_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
 
@@ -363,7 +363,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items('Unpaid Sick Leave');
             $this->add_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
         }
-        if ($salary_items['holiday_rate']) {
+        if (isset($salary_items['holiday_rate'])) {
             $item_id = $this->check_salary_items('Holiday Rate');
             $this->add_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
 
@@ -371,7 +371,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items('Annual Leave');
             $this->add_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
         }
-        if ($salary_items['absent']) {
+        if (isset($salary_items['absent'])) {
             $item_id = $this->check_salary_items('Absent Rate');
             $this->add_items_with_employee($item_id, $salary_items['absent'], $employee_id);
 
@@ -379,19 +379,19 @@ class UserController extends Controller
             $item_id = $this->check_salary_items('Absent');
             $this->add_items_with_employee($item_id, $salary_items['absent'], $employee_id);
         }
-        if ($salary_items['bonus']) {
+        if (isset($salary_items['bonus'])) {
             $item_id = $this->check_salary_items('Bonus');
             $this->add_items_with_employee($item_id, $salary_items['bonus'], $employee_id);
         }
-        if ($salary_items['overtime_rate']) {
+        if (isset($salary_items['overtime_rate'])) {
             $item_id = $this->check_salary_items('Overtime Rate');
             $this->add_items_with_employee($item_id, $salary_items['overtime_rate'], $employee_id);
         }
-        if ($salary_items['double_overtime_rate']) {
+        if (isset($salary_items['double_overtime_rate'])) {
             $item_id = $this->check_salary_items('Double Overtime Rate');
             $this->add_items_with_employee($item_id, $salary_items['double_overtime_rate'], $employee_id);
         }
-        if ($salary_items['recuperated_hour']) {
+        if (isset($salary_items['recuperated_hour'])) {
             $item_id = $this->check_salary_items('Recuperated Hour');
             $this->add_items_with_employee($item_id, $salary_items['recuperated_hour'], $employee_id);
         }
@@ -428,15 +428,15 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Wages');
             $this->update_items_with_employee($item_id, $salary_items['wages'], $employee_id);
         }
-        if ($salary_items['ordinary_time_rate']) {
+        if (isset($salary_items['ordinary_time_rate'])) {
             $item_id = $this->check_salary_items_for_update('Ordinary Time Rate');
             $this->update_items_with_employee($item_id, $salary_items['ordinary_time_rate'], $employee_id);
         }
-        if ($salary_items['maternity_time_rate']) {
+        if (isset($salary_items['maternity_time_rate'])) {
             $item_id = $this->check_salary_items_for_update('Maternity Time Rate');
             $this->update_items_with_employee($item_id, $salary_items['maternity_time_rate'], $employee_id);
         }
-        if ($salary_items['paid_sick_leave_rate']) {
+        if (isset($salary_items['paid_sick_leave_rate'])) {
             $item_id = $this->check_salary_items_for_update('Paid Sick Leave Rate');
             $this->update_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
 
@@ -444,7 +444,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Sick Leave');
             $this->update_items_with_employee($item_id, $salary_items['paid_sick_leave_rate'], $employee_id);
         }
-        if ($salary_items['unpaid_sick_leave_rate']) {
+        if (isset($salary_items['unpaid_sick_leave_rate'])) {
             $item_id = $this->check_salary_items_for_update('Unpaid Sick Leave Rate');
             $this->update_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
 
@@ -452,7 +452,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Unpaid Sick Leave');
             $this->update_items_with_employee($item_id, $salary_items['unpaid_sick_leave_rate'], $employee_id);
         }
-        if ($salary_items['holiday_rate']) {
+        if (isset($salary_items['holiday_rate'])) {
             $item_id = $this->check_salary_items_for_update('Holiday Rate');
             $this->update_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
 
@@ -460,7 +460,7 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Annual Leave');
             $this->update_items_with_employee($item_id, $salary_items['holiday_rate'], $employee_id);
         }
-        if ($salary_items['absent']) {
+        if (isset($salary_items['absent'])) {
             $item_id = $this->check_salary_items_for_update('Absent Rate');
             $this->update_items_with_employee($item_id, $salary_items['absent'], $employee_id);
 
@@ -468,19 +468,19 @@ class UserController extends Controller
             $item_id = $this->check_salary_items_for_update('Absent');
             $this->update_items_with_employee($item_id, $salary_items['absent'], $employee_id);
         }
-        if ($salary_items['bonus']) {
+        if (isset($salary_items['bonus'])) {
             $item_id = $this->check_salary_items_for_update('Bonus');
             $this->update_items_with_employee($item_id, $salary_items['bonus'], $employee_id);
         }
-        if ($salary_items['overtime_rate']) {
+        if (isset($salary_items['overtime_rate'])) {
             $item_id = $this->check_salary_items_for_update('Overtime Rate');
             $this->update_items_with_employee($item_id, $salary_items['overtime_rate'], $employee_id);
         }
-        if ($salary_items['double_overtime_rate']) {
+        if (isset($salary_items['double_overtime_rate'])) {
             $item_id = $this->check_salary_items_for_update('Double Overtime Rate');
             $this->update_items_with_employee($item_id, $salary_items['double_overtime_rate'], $employee_id);
         }
-        if ($salary_items['recuperated_hour']) {
+        if (isset($salary_items['recuperated_hour'])) {
             $item_id = $this->check_salary_items_for_update('Recuperated Hour');
             $this->update_items_with_employee($item_id, $salary_items['recuperated_hour'], $employee_id);
         }

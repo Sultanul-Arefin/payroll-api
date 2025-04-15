@@ -31,7 +31,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->integer('is_percentage')->default(EmployeeSalaryItem::IS_AMOUNT);
             $table->integer('is_general')->default(EmployeeSalaryItem::IS_NOT_GENERAL);
-            $table->integer('amount')->nullable();
+            // $table->integer('amount')->nullable();
+            $table->float('amount', 6, 2)->nullable();
             $table->timestamps();
         });
     }
