@@ -38,9 +38,10 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
             // 'total_gross_pay' => $this->gross_pay_before_tax,
             // 'taxable_gross_pay' => $this->gross_pay_before_tax, // this is added due to question from Nabila. Have to check the calculation again
-            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance
+            'taxable_gross_pay' =>round(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance,2), // this is accurate // total_gross_pay - non_taxable_allowance
             // 'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            //'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'tax_amount' => round($this->tax_value + $this->post_tax_value, 2),
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
@@ -625,7 +626,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
 
     return [
         'filtered_details' => $filteredDetails,
-        'total_amount' => $totalAmount,
+        'total_amount' => round(floatval($totalAmount), 2),
         'total_amount_yearly' => $total_amount_yearly,
     ];
 }
