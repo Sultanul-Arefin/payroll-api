@@ -373,9 +373,9 @@ class ViewGermanPayslipResource extends JsonResource
                 'title' => $value?->salary_item_name?->name,
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
-                'employee_amount' => round(floatval($value->employee_amount),2),
+                'employee_amount' => $value->employee_amount,
                 'company_rate' => $value->government_or_company_amount_rate,
-                'company_amount' => round(floatval($value->government_or_company_amount),2)
+                'company_amount' => $value->government_or_company_amount
             ]);
         }
         return [
@@ -415,9 +415,9 @@ class ViewGermanPayslipResource extends JsonResource
                         'title' => $value?->salary_item_name?->name,
                         'base' => $this->gross_pay_before_tax,
                         'employee_rate' => $value->employee_amount_rate,
-                        'employee_amount' => round(floatval($value->employee_amount),2),
+                        'employee_amount' => $value->employee_amount,
                         'company_rate' => $value->government_or_company_amount_rate,
-                        'company_amount' => round(floatval($value->government_or_company_amount),2)
+                        'company_amount' => $value->government_or_company_amount
                     ]);
                 }
                 return [
