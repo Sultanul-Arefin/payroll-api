@@ -16,7 +16,7 @@ class TimeManagementResource extends JsonResource
         return [
             'year' => date('Y'),
             'name' => $this->name,
-            'employee_id' => 'EMP-ID',
+            'employee_id' => $this->customer_id,
             'department' => $this?->department?->department_name,
             'annual_leave_quota' => $this->getAnnualLeaveQuota($this->company),
             'annual_leave_taken' => $this->getAnnualLeaveTaken($this->id, Carbon::now()->year),
