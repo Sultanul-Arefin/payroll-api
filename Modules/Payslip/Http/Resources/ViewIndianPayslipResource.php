@@ -22,7 +22,7 @@ class ViewIndianPayslipResource extends JsonResource
     {
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
-            'total_earnings' => $this->pay_due_before_deduction,
+            'total_earnings' => round(floatval($this->pay_due_before_deduction),2),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
             'fixed_pay_details' => $this->wages,
             'additional_pay' =>$this->additional_pay, // additional pay goes here
@@ -37,7 +37,7 @@ class ViewIndianPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
-            'total_net_pay' => $this->net_pay,
+            'total_net_pay' => round(floatval($this->net_pay),2),
             'social_decution' => $this->get_social_deduction(),
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
@@ -48,7 +48,7 @@ class ViewIndianPayslipResource extends JsonResource
             //     $this->start_date,
             //     $this->end_date
             // ),
-            'net_salary' => $this->net_pay,
+            'net_salary' => round(floatval($this->net_pay),2),
            // 'overall_calculation' => $this->overall_calculation(),
            'attendance'=>$this->getTotalWorkingDaysAttribute(),
         ];
@@ -476,8 +476,8 @@ class ViewIndianPayslipResource extends JsonResource
                 $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
 
                 return [
-                    'total_company_amount' => $total_company_amount,
-                    'total_employee_amount' => $total_employee_amount,
+                    'total_company_amount' => round(floatval($total_company_amount),2),
+                    'total_employee_amount' => round(floatval($total_employee_amount),2),
                 ];
             }
 
