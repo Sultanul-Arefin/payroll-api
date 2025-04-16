@@ -21,7 +21,11 @@ class TimeManagementController extends Controller
             'department_id' => 'required|integer',
             'year' => 'required'
         ]);
-        $users = User::where('company_id', auth()->user()->company_id)->where('status', User::USER_ACTIVE)->get();
+        $users = User::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->where('department_id', $request->department_id)
+                ->where('status', User::USER_ACTIVE)
+                ->get();
         $response = TimeManagementResource::collection(
             $users
         );
