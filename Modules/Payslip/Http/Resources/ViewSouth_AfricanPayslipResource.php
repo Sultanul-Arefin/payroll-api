@@ -29,13 +29,13 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'total_cash_deduction' => $this->calculateDeductionsAndTax(),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
-            'fixed_pay_details' => $this->wages,
+            'fixed_pay_details' => round(floatval($this->wages),2),
             'additional_pay' => $this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
             'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate
+            'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate
             // 'total_gross_pay' => $this->gross_pay_before_tax,
             // 'taxable_gross_pay' => $this->gross_pay_before_tax, // this is added due to question from Nabila. Have to check the calculation again
             'taxable_gross_pay' =>round(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance,2), // this is accurate // total_gross_pay - non_taxable_allowance
@@ -45,7 +45,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
-            'total_net_pay' => $this->net_pay,
+            'total_net_pay' => round(floatval($this->net_pay),2),
             'income_tax' => $this->getIncomeTaxAndCategoryDetails($this->payslip_details),
             'other_deduction_summary' => $this->get_other_deduction(),
             'deduction_details' => $this->get_deduction_details(),
@@ -325,7 +325,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                 'company_amount' => round(floatval($company_amount), 2),
                 'yearly_total_employee_amount' => round(floatval($yearly_employee_total), 2),
                 'yearly_total_company_amount' => round(floatval($yearly_company_total), 2),
-                            ]);
+            ]);
         }
 
         // After the loop, format the totals

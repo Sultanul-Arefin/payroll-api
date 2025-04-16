@@ -43,8 +43,8 @@ class ViewGermanPayslipResource extends JsonResource
             'non_taxable_allowance' => $this->non_taxable_allowance,
            // 'total_gross_pay' => $this->pay_due_before_deduction,
             //'taxable_gross_pay' => $this->gross_pay_before_tax,
-            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
-            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
+            'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'taxable_gross_pay' =>round(floatval(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance),2), // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
             //'staff_social_charges' => 0.00,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'other_deduction_summary' => $this->get_other_deduction(),
@@ -54,7 +54,7 @@ class ViewGermanPayslipResource extends JsonResource
             'total_company_deduction' => $this->get_total_company_deduction(),
             //'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
             //'overall_calculation' => $this->overall_calculation(),
-            'total_net_pay' => $this->net_pay,
+            'total_net_pay' =>round(floatval($this->net_pay),2),
             'summary' => [
                 'year_to_date' => $this->getYearToDateCalculations(),
             ],
@@ -373,15 +373,15 @@ class ViewGermanPayslipResource extends JsonResource
                 'title' => $value?->salary_item_name?->name,
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
-                'employee_amount' => $value->employee_amount,
+                'employee_amount' => round(floatval($value->employee_amount),2),
                 'company_rate' => $value->government_or_company_amount_rate,
-                'company_amount' => $value->government_or_company_amount
+                'company_amount' => round(floatval($value->government_or_company_amount),2)
             ]);
         }
         return [
             'deductions' => $response,
-            'total_company_amount' => $total_company_amount,
-            'total_employee_amount' => $total_employee_amount,
+            'total_company_amount' => round(floatval($total_company_amount),2),
+            'total_employee_amount' => round(floatval($total_employee_amount),2),
 
         ];
 
@@ -415,15 +415,15 @@ class ViewGermanPayslipResource extends JsonResource
                         'title' => $value?->salary_item_name?->name,
                         'base' => $this->gross_pay_before_tax,
                         'employee_rate' => $value->employee_amount_rate,
-                        'employee_amount' => $value->employee_amount,
+                        'employee_amount' => round(floatval($value->employee_amount),2),
                         'company_rate' => $value->government_or_company_amount_rate,
-                        'company_amount' => $value->government_or_company_amount
+                        'company_amount' => round(floatval($value->government_or_company_amount),2)
                     ]);
                 }
                 return [
                     'deductions' => $response,
-                    'total_company_amount' => $total_company_amount,
-                    'total_employee_amount' => $total_employee_amount,
+                    'total_company_amount' => round(floatval($total_company_amount),2),
+                    'total_employee_amount' => round(floatval($total_employee_amount),2),
                 ];
 
         }
@@ -436,8 +436,8 @@ class ViewGermanPayslipResource extends JsonResource
                 $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
                 $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
 
-                $total_company_amount = number_format($total_company_amount, 2, '.', '');
-                $total_employee_amount = number_format($total_employee_amount, 2, '.', '');
+                $total_company_amount = round(floatval($total_company_amount), 2);
+                $total_employee_amount = round(floatval($total_employee_amount), 2);
                 return [
                     'total_company_amount' => $total_company_amount,
                     'total_employee_amount' => $total_employee_amount,
@@ -453,8 +453,8 @@ class ViewGermanPayslipResource extends JsonResource
                         'total_deductions' => $deductionDetails['total_employee_amount'] ?? 0,
                         'total_income_tax' => $incomeTaxDetails['total_amount'] ?? 0,
                         'combined_total' =>
-                            ($deductionDetails['total_employee_amount'] ?? 0) +
-                            ($incomeTaxDetails['total_amount'] ?? 0),
+                            round(floatval(($deductionDetails['total_employee_amount'] ?? 0) +
+                            ($incomeTaxDetails['total_amount'] ?? 0)),2),
                     ];
                 }
 
@@ -485,7 +485,7 @@ class ViewGermanPayslipResource extends JsonResource
                         $totalAmount += $detail['amount']; // Accumulate the total rate
                     }
                 }
-                $totalAmount = number_format($totalAmount, 2, '.', '');
+                $totalAmount = round(floatval($totalAmount), 2);
 
                 return [
                     'filtered_details' => $filteredDetails,
@@ -787,9 +787,9 @@ public function getYearToDateCalculations()
     });
 
     return [
-        'gross_pay' => $yearToDateGrossPay,
-        'taxable_gross' => $yearToDateTaxableGross,
-        'net_pay' => $yearToDateNetPay,
+        'gross_pay' => round(floatval($yearToDateGrossPay),2),
+        'taxable_gross' => round(floatval($yearToDateTaxableGross),2),
+        'net_pay' => round(floatval(($yearToDateNetPay)),2),
     ];
 }
 
