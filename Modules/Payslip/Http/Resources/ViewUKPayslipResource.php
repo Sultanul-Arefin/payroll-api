@@ -39,10 +39,10 @@ class ViewUKPayslipResource extends JsonResource
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
             //'total_gross_pay' => $this->gross_pay_before_tax,
-            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
-            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
+            'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'taxable_gross_pay' => round(floatval(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance),2), // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
             //'staff_social_charges' => 0.00,
-            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'tax_amount' =>round(floatval($this->tax_value + $this->post_tax_value),2),
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'social_deduction' => $this->get_social_deduction(),
@@ -335,8 +335,8 @@ class ViewUKPayslipResource extends JsonResource
         }
         return [
             'deductions' => $response,
-            'total_company_amount' => $total_company_amount,
-            'total_employee_amount' => $total_employee_amount,
+            'total_company_amount' => round(floatval($total_company_amount),2),
+            'total_employee_amount' =>round(floatval($total_employee_amount),2),
 
         ];
     }
@@ -373,8 +373,8 @@ class ViewUKPayslipResource extends JsonResource
                 }
                 return [
                     'deductions' => $response,
-                    'total_company_amount' => $total_company_amount,
-                    'total_employee_amount' => $total_employee_amount,
+                    'total_company_amount' => round(floatval($total_company_amount),2),
+                    'total_employee_amount' =>round(floatval($total_employee_amount),2),
                 ];
     }
 
@@ -386,8 +386,8 @@ class ViewUKPayslipResource extends JsonResource
                 $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
                 $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
 
-                $total_company_amount = number_format($total_company_amount, 2, '.', '');
-                $total_employee_amount = number_format($total_employee_amount, 2, '.', '');
+                $total_company_amount = round(floatval($total_company_amount),2);
+                $total_employee_amount = round(floatval($total_employee_amount),2);
                 return [
                     'total_company_amount' => $total_company_amount,
                     'total_employee_amount' => $total_employee_amount,
@@ -598,11 +598,11 @@ public function getYearToDateCalculations()
         return $payslip->tax_value + $payslip->post_tax_value;
     });
 
-   $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
+   $yearToDateTaxPay = round(floatval($yearToDateTaxPay),2);
 
     return [
-        'gross_pay' => $yearToDateGrossPay,
-        'taxable_gross' => $yearToDateTaxableGross,
+        'gross_pay' => round(floatval($yearToDateGrossPay),2),
+        'taxable_gross' => round(floatval($yearToDateTaxableGross),2),
         'tax' => $yearToDateTaxPay,
     ];
 }
