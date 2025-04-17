@@ -263,7 +263,7 @@ class ViewPayslipResource extends JsonResource
             //     'company_amount' => $value->government_or_company_amount
             // ]);
         }
-        return $total;
+        return round(floatval($total),2);
     }
 
     public function get_total_social_deduction()
@@ -289,14 +289,15 @@ class ViewPayslipResource extends JsonResource
             //     'company_amount' => $value->government_or_company_amount
             // ]);
         }
-        return $total;
+        return round(floatval($total),2);
     }
 
     public function get_staff_social_charges()
     {
-        return PayslipDetailsForDeduction::query()
+        return round(floatval(
+             PayslipDetailsForDeduction::query()
                 ->where('payslip_id', $this->id)
-                ->sum('employee_amount');
+                ->sum('employee_amount')),2);
     }
 
     public function get_payslip_details($payslip_details){
