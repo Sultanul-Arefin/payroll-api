@@ -44,7 +44,7 @@ class ViewUKPayslipResource extends JsonResource
             //'staff_social_charges' => 0.00,
             'tax_amount' =>round(floatval($this->tax_value + $this->post_tax_value),2),
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
-            'pay_due_before_deduction' => rand(floatval($this->pay_due_before_deduction),2),
+            'pay_due_before_deduction' => round(floatval($this->pay_due_before_deduction),2),
             'social_deduction' => $this->get_social_deduction(),
             'other_deduction' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
