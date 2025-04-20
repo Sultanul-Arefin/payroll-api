@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\ProjectManagement\Entities\Project;
+use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
 use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Entities\TaskFile;
 use Modules\ProjectManagement\Entities\TaskAssociatedEmployee;
@@ -164,11 +165,12 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Task $task)
     {
+        
         $task_update = DB::transaction(function () use ($request, $task) {
             $task->update([
                 'task_title' => $request->task_title,
                 'task_description' => $request->task_description,
-                'estimation_hour' => $request->estimation_hour,
+                'estimation_hour' =>(float) $request->estimation_hour,
                 'start_date_time' => $request->start_date_time,
                 'end_date_time' => $request->end_date_time,
             ]);
@@ -314,4 +316,18 @@ class TaskController extends Controller
             status: 'success'
         );
     }
+
+    public function removeTask(Task $task)
+    { 
+            
+        // Delete the Task
+        $task->delete();
+
+        return apiResponse(
+            data:  $task,
+            message: 'Project Task Delete Successfully',
+            status: 'success'
+        );
+    }
+
 }
