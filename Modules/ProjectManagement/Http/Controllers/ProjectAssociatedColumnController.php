@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\ProjectManagement\Entities\Project;
 use Modules\ProjectManagement\Entities\ProjectAssociatedColumn;
+use Modules\ProjectManagement\Entities\Task;
 use Modules\ProjectManagement\Notifications\ProjectManagementNotification;
 
 class ProjectAssociatedColumnController extends Controller
@@ -147,4 +148,17 @@ class ProjectAssociatedColumnController extends Controller
             message: 'Column Name Updated Successfully'
         );
     }
+
+    public function destroy(ProjectAssociatedColumn $column)
+        { 
+            
+            // Delete the column
+            $column->delete();
+
+            return apiResponse(
+                data: $column,
+                message: 'Project Column Delete Successfully',
+                status: 'success'
+            );
+        }
 }

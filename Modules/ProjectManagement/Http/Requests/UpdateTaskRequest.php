@@ -16,7 +16,7 @@ class UpdateTaskRequest extends FormRequest
         return [
             'task_title' => 'required',
             'task_description' => 'required',
-            'estimation_hour' => 'required',
+            'estimation_hour' => 'required|numeric|min:0',
             'start_date_time' => 'required',
             'end_date_time' => 'required',
             'assigned_employees' => 'nullable|array|exists:users,id',
