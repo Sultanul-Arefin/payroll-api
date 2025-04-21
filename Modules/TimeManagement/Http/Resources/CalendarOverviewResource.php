@@ -2,6 +2,7 @@
 
 namespace Modules\TimeManagement\Http\Resources;
 
+use App\Models\Overtime;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Attendance\Entities\Attendance;
@@ -20,12 +21,34 @@ class CalendarOverviewResource extends JsonResource
             'hours_worked' => $this->getHoursWorked($this->id),
             'lunch_and_other_hour' => $this->getLunchAndOtherHour($this->id),
             'description' => $this->getDescription($this->id),
-            'overtime' => $this->getOvertime(),
+            'overtime' => $this->getOvertimes(),
             'double_overtime' => $this->getDoubleOvertime(),
             'recuperated' => $this->getRecuperated(),
             'early_day_departure' => $this->getEarlyDayDeparture(),
-            'status' => $this->getStatus($this->status)
+            'status' => $this->getStatus($this->status),
+            'is_overtime' => $this->overtime ? 1 : 0,
+            'overtime_value' => $this->getOvertime($this->overtime)
         ];
+    }
+
+    public function getOvertime($overtime){
+        if(!$overtime){
+            return null;
+        }
+        return [
+            'overtime_type' => $overtime->is_overtime,
+            'overtime_type_value' => $this->overtime_type_value($overtime->is_overtime),
+            'hour' => $overtime->hour
+        ];
+    }
+
+    public function overtime_type_value($type){
+        return match($type){
+            Overtime::OVERTIME => "overtime",
+            Overtime::DOUBLE_OVERTIME => "double_overtime",
+            Overtime::RECUPERATED => "recuperated",
+            Overtime::EARLY_DAY_DEPARTURE => "early_day_departure"
+        };
     }
 
     function getEntryTime($attendance_id) {
@@ -94,7 +117,7 @@ class CalendarOverviewResource extends JsonResource
         return "Office";
     }
 
-    function getOvertime() {
+    function getOvertimes() {
         return 0;
     }
 
