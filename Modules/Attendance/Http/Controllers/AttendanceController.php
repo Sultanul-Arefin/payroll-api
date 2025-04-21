@@ -322,6 +322,15 @@ class AttendanceController extends Controller
                 'out_time' => $request->out_time,
             ]);
 
+            if(isset($request->is_overtime)){
+                $overtime = Overtime::create([
+                    'attendance_id' => $attendance->id,
+                    'is_overtime' => $request->is_overtime,
+                    'hour' => $request->hour,
+                    'given_by' => auth()->user()->id
+                ]);
+            }
+
             // ATTENDANCE CREATION NOTIFICATION
             $data = [
                 'title' => 'New Attendance Given',
@@ -346,6 +355,33 @@ class AttendanceController extends Controller
             message: 'Attendance Successfully Added',
             status: 'success'
         );
+    }
+
+    public function get_user_data_for_manual_attendance(Request $request)
+    {
+        $request->validate([
+            "user_id" => "required"
+        ]);
+        $user = User::where('id', $request->user_id)->first();
+        return apiResponse(
+            data: [
+                'attendance_type_key' => $user->user_details?->attendance_type,
+                'attendance_type_value' => $user->user_details?->attendance_type == UserDetails::WEB_ATTENDANCE ? 'web' : 'machine',
+                'total_office_hours' => $user->company?->working_hours_per_day + $user->company?->lunch_and_others_per_day,
+                'employee_type' => $this->get_employee_type_for_manual_attendance($user)
+            ]
+        );
+    }
+
+    public function get_employee_type_for_manual_attendance($user)
+    {
+        $type = $user->employee_type;
+        return match($type){
+            User::EMPLOYEE_TYPE_FULL_TIME => "full_time",
+            User::EMPLOYEE_TYPE_PART_TIME => "part_time",
+            User::EMPLOYEE_TYPE_FLEXI_TIME => "flexi_time",
+            User::EMPLOYEE_TYPE_CONTRACTUAL => "contractual"
+        };
     }
 
     public function requested_attendance()
