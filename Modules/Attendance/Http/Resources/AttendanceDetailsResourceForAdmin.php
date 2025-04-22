@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use JsonSerializable;
+use Modules\Attendance\Entities\Attendance;
 use Modules\Attendance\Entities\AttendanceDetail;
 
 class AttendanceDetailsResourceForAdmin extends JsonResource
@@ -25,6 +26,8 @@ class AttendanceDetailsResourceForAdmin extends JsonResource
             'date' => $this->dates,
             'attendance_details' => $this->getAttendanceDetails($this->attendance_details),
             'created_at' => $this->created_at?->format('H:i:s'),
+            'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
+            'is_editable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_overtime' => $this->overtime ? 1 : 0,
             'overtime_value' => $this->getOvertime($this->overtime)
             
@@ -57,5 +60,17 @@ class AttendanceDetailsResourceForAdmin extends JsonResource
             $detail->office_type = $detail->office_type == AttendanceDetail::FROM_OFFICE ? "OFFICE" : "HOME";
         });
         return $attendance_details;
+    }
+
+    public function getStatus($status): ?string
+    {
+        if ($status == Attendance::ABSENT) {
+            return 'absent';
+        } elseif ($status == Attendance::PENDING) {
+            return 'pending';
+        } elseif ($status == Attendance::RESTRICTED) {
+            return 'restricted';
+        }
+        return 'approved';
     }
 }
