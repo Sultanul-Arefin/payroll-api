@@ -16,6 +16,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Agenda\Entities\Agenda;
+use Modules\Attendance\Entities\Attendance;
 use Modules\Company\Entities\Company;
 use Modules\Department\Entities\Department;
 use Modules\Designation\Entities\Designation;
@@ -193,4 +194,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Bonus::class, 'employee_id', 'id');
     }
+   
 }

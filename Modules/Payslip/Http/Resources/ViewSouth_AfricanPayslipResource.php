@@ -930,7 +930,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
 
     public function getTotalOvertimeHours($payslip_details)
         {
-            $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+            $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
             $payslip_year = date('Y', strtotime($this->first_date));
 
             $user_id = $this->employee_id;
