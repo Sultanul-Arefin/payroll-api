@@ -49,7 +49,7 @@ class AttendanceReportResource extends JsonResource
     public function getOvertimes($user_id)
     {
         // Get working hours per day including lunch/others
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
 
         if (!$working_hours_per_day) {
             return 0; // avoid division by zero
@@ -78,7 +78,7 @@ class AttendanceReportResource extends JsonResource
     public function getDoubleOvertime($user_id)
     {
         // Get working hours per day including lunch/others
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
 
         if (!$working_hours_per_day) {
             return 0; // avoid division by zero
@@ -105,7 +105,7 @@ class AttendanceReportResource extends JsonResource
     public function getEarlyDeparture($user_id)
     {
         // Get working hours per day including lunch/others
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
 
         if (!$working_hours_per_day) {
             return 0; // avoid division by zero
@@ -226,7 +226,7 @@ class AttendanceReportResource extends JsonResource
     public function getRecuperatedHour($user_id)
     {
         // Get working hours per day including lunch/others
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
 
         if (!$working_hours_per_day) {
             return 0; // avoid division by zero
