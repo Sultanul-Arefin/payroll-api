@@ -453,7 +453,7 @@ class ViewUKPayslipResource extends JsonResource
     }
 
     public function get_base_amount_or_hours($get_base_amount_or_hours){
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
         if (preg_match('/(\d+(\.\d+)?)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
             $numericValue = (float)$matches[1]; // Convert to float to keep decimals
             $result = $numericValue / $working_hours_per_day;
@@ -498,7 +498,7 @@ class ViewUKPayslipResource extends JsonResource
 
     public function getTotalOvertimeHours($payslip_details)
     {
-        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day + auth()->user()->company?->lunch_and_others_per_day;
         $payslip_year = date('Y', strtotime($this->first_date));
 
         $user_id = $this->employee_id;
