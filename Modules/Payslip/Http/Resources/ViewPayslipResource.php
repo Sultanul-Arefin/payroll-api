@@ -55,7 +55,7 @@ class ViewPayslipResource extends JsonResource
     }
     public function get_netPay($wages,$hours_worked,$net_pay){
         if ($wages<=0 && $hours_worked<=0 ){
-            return 0;
+            return 0 . "(Payslip Zero as no attendance given process attendance to auto run or run Payslip manual)";
         }else {
             return round(floatval($net_pay),2);
         }
