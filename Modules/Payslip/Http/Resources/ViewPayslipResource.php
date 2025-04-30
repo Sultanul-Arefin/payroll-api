@@ -435,7 +435,7 @@ class ViewPayslipResource extends JsonResource
                         (($this->wages + $this->additional_pay) - $this->leave_deduction) +
                         $this->taxable_allowance + $this->non_taxable_allowance + $this->company_contribution
                     ), 2),
-                    'total_net_pay' => round(floatval($this->net_pay), 2),
+                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ],
             ],
             'yearly' => [ // yearly one column will be updated
