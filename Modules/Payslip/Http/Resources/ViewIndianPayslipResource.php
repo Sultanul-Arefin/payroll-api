@@ -37,7 +37,8 @@ class ViewIndianPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
-            'total_net_pay' => round(floatval($this->net_pay),2),
+           // 'total_net_pay' => round(floatval($this->net_pay),2),
+           'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
             'social_decution' => $this->get_social_deduction(),
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
@@ -52,6 +53,14 @@ class ViewIndianPayslipResource extends JsonResource
            // 'overall_calculation' => $this->overall_calculation(),
            'attendance'=>$this->getTotalWorkingDaysAttribute(),
         ];
+    }
+
+    public function get_netPay($wages,$hours_worked,$net_pay){
+        if ($wages<=0 && $hours_worked<=0 ){
+            return 0;
+        }else {
+            return round(floatval($net_pay),2);
+        }
     }
 
     // public function getTotalWorkingDaysAttribute()
@@ -634,7 +643,7 @@ class ViewIndianPayslipResource extends JsonResource
                     'total_staff_contribution' => $this->total_employee_deduction,
                     'total_company_contribution' => $this->company_contribution,
                     'total_staff_cost' => $this->net_pay,
-                    'total_net_pay' => $this->net_pay,
+                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ],
             ],
             'yearly' => [

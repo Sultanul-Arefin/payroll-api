@@ -45,7 +45,7 @@ class ViewAustralianPayslipResource extends JsonResource
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
             'pay_due_before_deduction' => $this->pay_due_before_deduction,
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
-            'total_net_pay' => round(floatval($this->net_pay),2),
+            'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
             'income_tax' => $this->getIncomeTaxAndCategoryDetails($this->payslip_details),
             'other_deduction_summary' => $this->get_other_deduction(),
             'deduction_details' => $this->get_deduction_details(),
@@ -57,6 +57,14 @@ class ViewAustralianPayslipResource extends JsonResource
             'overall_calculation' => $this->overall_calculation(),   
             'year_to_date' => $this->getYearToDateCalculations(),         
         ];
+    }
+
+    public function get_netPay($wages,$hours_worked,$net_pay){
+        if ($wages<=0 && $hours_worked<=0 ){
+            return 0;
+        }else {
+            return round(floatval($net_pay),2);
+        }
     }
 
     public function get_annual_leave_calculation($employee)
@@ -997,7 +1005,7 @@ class ViewAustralianPayslipResource extends JsonResource
                         'total_staff_contribution' => round($this->total_employee_deduction, 2),
                         'total_company_contribution' => round($this->company_contribution, 2),
                         'total_staff_cost' => round((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $this->company_contribution, 2),
-                        'total_net_pay' => round($this->net_pay, 2),
+                        'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                         'total_deductions' => round($this->tax_value + $this->post_tax_value + $this->total_employee_deduction, 2),
                     ],
                 ],
