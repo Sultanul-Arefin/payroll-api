@@ -41,7 +41,8 @@ class ViewFrenchPayslipResource extends JsonResource
             'pay_due_before_deduction' => round(floatval(($this->pay_due_before_deduction)),2),
             'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
             'company_social_charges' => $this->get_company_social_charges(), // company social charge goes here
-            'total_net_pay' => round(floatval($this->net_pay),2),
+            //'total_net_pay' => round(floatval($this->net_pay),2),
+            'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
             'overall_calculation' => $this->overall_calculation(),
             'social_deduction' => $this->get_social_deduction(),
             'other_deduction' => $this->get_other_deduction(),
@@ -49,6 +50,14 @@ class ViewFrenchPayslipResource extends JsonResource
             'total_other_deduction' => $this->get_total_other_deduction(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee)
         ];
+    }
+
+    public function get_netPay($wages,$hours_worked,$net_pay){
+        if ($wages<=0 && $hours_worked<=0 ){
+            return 0;
+        }else {
+            return round(floatval($net_pay),2);
+        }
     }
 
     public function get_annual_leave_calculation($employee)
@@ -391,7 +400,8 @@ class ViewFrenchPayslipResource extends JsonResource
                     'total_staff_contribution' => round(floatval($this->total_employee_deduction), 2),
                     'total_company_contribution' => round(floatval($this->company_contribution), 2),
                     'total_staff_cost' => round(floatval($this->net_pay), 2), 
-                    'total_net_pay' => round(floatval($this->net_pay), 2),
+                    //'total_net_pay' => round(floatval($this->net_pay), 2),
+                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ]
             ],
             'yearly' => [

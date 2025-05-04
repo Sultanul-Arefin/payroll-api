@@ -54,7 +54,8 @@ class ViewGermanPayslipResource extends JsonResource
             'total_company_deduction' => $this->get_total_company_deduction(),
             //'taxable_gross_pay' => $this->calculate_taxable_gross_pay(),
             //'overall_calculation' => $this->overall_calculation(),
-            'total_net_pay' =>round(floatval($this->net_pay),2),
+            //'total_net_pay' =>round(floatval($this->net_pay),2),
+            'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
             'summary' => [
                 'year_to_date' => $this->getYearToDateCalculations(),
             ],
@@ -63,6 +64,13 @@ class ViewGermanPayslipResource extends JsonResource
         ];
     }
 
+    public function get_netPay($wages,$hours_worked,$net_pay){
+        if ($wages<=0 && $hours_worked<=0 ){
+            return 0;
+        }else {
+            return round(floatval($net_pay),2);
+        }
+    }
 
 
     public function get_annual_leave_calculation($employee)
@@ -812,7 +820,7 @@ public function getYearToDateCalculations()
                     'total_staff_contribution' => $this->total_employee_deduction,
                     'total_company_contribution' => $this->company_contribution,
                     'total_staff_cost' =>  $this->gross_pay_before_tax,
-                    'total_net_pay' => $this->net_pay,
+                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ],
             ],
             'yearly' => [

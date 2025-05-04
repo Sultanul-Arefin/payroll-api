@@ -50,12 +50,21 @@ class ViewUKPayslipResource extends JsonResource
             'total_deductions' => $this->total_employee_deduction,
             'total_deductions_all' => $this->get_total_company_deduction(),
             'staff_social_charges' => 0.00,
-            'total_net_pay' => round(floatval($this->net_pay),2),
-           // 'overall_calculation' => $this->overall_calculation(),
+            'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
+            // 'overall_calculation' => $this->overall_calculation(),
             'year_to_date' => $this->getYearToDateCalculations(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
 
         ];
+    }
+
+    
+    public function get_netPay($wages,$hours_worked,$net_pay){
+        if ($wages<=0 && $hours_worked<=0 ){
+            return 0;
+        }else {
+            return round(floatval($net_pay),2);
+        }
     }
 
     public function get_annual_leave_calculation($employee)
@@ -624,7 +633,7 @@ public function getYearToDateCalculations()
                     'total_staff_contribution' => 0,
                     'total_company_contribution' => 0,
                     'total_staff_cost' => 30000,
-                    'total_net_pay' => 30000,
+                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ],
             ],
             'yearly' => [
