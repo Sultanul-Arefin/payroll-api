@@ -59,6 +59,7 @@ class ViewAustralianPayslipResource extends JsonResource
         ];
     }
 
+   
     public function get_netPay($wages,$hours_worked,$net_pay){
         if ($wages<=0 && $hours_worked<=0 ){
             return 0;
