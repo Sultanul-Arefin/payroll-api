@@ -21,6 +21,7 @@ class UserDetails extends Model
     public const INDIAN_PAYSLIP = 5;
     public const AFRICAN_PAYSLIP = 6;
     public const GERMAN_PAYSLIP = 7;
+    public const AUSTRALIAN_PAYSLIP = 8;
 
     public const WEB_ATTENDANCE = 1;
 
@@ -63,7 +64,8 @@ class UserDetails extends Model
         'health_insurance',
         'pension_administrator',
         "pension_pin",
-        "tin_number"
+        "tin_number",
+        "abn_number"
         
     ];
 
