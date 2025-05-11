@@ -28,6 +28,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         ->name('preview-german-payslip');
         Route::get('preview-australian-payslip/{payslip}', [PayslipController::class, 'preview_australian_payslip'])
         ->name('preview-australian-payslip');
+        Route::get('preview-portuguese-payslip/{payslip}', [PayslipController::class, 'preview_portuguese_payslip'])
+        ->name('preview-portuguese-payslip');
         Route::get('payslips', [PayslipController::class, 'payslips'])
             ->name('payslips');
         Route::get('payslips/{payslip}', [PayslipController::class, 'show'])

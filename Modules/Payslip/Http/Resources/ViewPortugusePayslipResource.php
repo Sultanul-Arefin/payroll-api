@@ -15,14 +15,16 @@ use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
-class ViewSouth_AfricanPayslipResource extends JsonResource
+class ViewPortuguesePayslipResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
-     * @param  Request  $request
-     * @return array|Arrayable|JsonSerializable
      */
+    public function toArray(Request $request): array
+    {
+        return parent::toArray($request);
+    }
+
     public function toArray($request)
     {
         return [
@@ -330,7 +332,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => round(floatval($employee_amount), 2),
-                'company_rate' => $value->government_or_company_amount_rate,
+                'company_rate' => round(floatval($value->government_or_company_amount_rate), 2),
                 'company_amount' => round(floatval($company_amount), 2),
                 'yearly_total_employee_amount' => round(floatval($yearly_employee_total), 2),
                 'yearly_total_company_amount' => round(floatval($yearly_company_total), 2),
@@ -436,7 +438,7 @@ class ViewSouth_AfricanPayslipResource extends JsonResource
                 'base' => $this->gross_pay_before_tax,
                 'employee_rate' => $value->employee_amount_rate,
                 'employee_amount' => round(floatval($employee_amount), 2),
-                'company_rate' => $value->government_or_company_amount_rate,
+                'company_rate' => round(floatval($value->government_or_company_amount_rate), 2),
                 'company_amount' => round(floatval($company_amount), 2),
                 'yearly_total_employee_amount' => round(floatval($yearly_employee_total), 2),
                 'yearly_total_company_amount' => round(floatval($yearly_company_total), 2),
