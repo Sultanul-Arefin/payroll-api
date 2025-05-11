@@ -33,6 +33,7 @@ class AttendanceRepository extends BaseRepository implements AttendanceRepositor
         return $this->model::query()
                 ->where('user_id', auth()->user()->id)
                 ->whereMonth('dates', Carbon::now()->month)
+                ->whereYear('dates', Carbon::now()->year)
                 ->with($relations)
                 ->latest('dates');
     }
