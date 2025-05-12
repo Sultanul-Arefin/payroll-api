@@ -63,12 +63,28 @@ class ViewAustralianPayslipResource extends JsonResource
         ];
     }
 
-   public function get_hourly_rate()
-    {
-         $detail = $this->payslip_details->firstWhere('pay_details', 'Wages');
-         return $detail ? '$' . $detail->rate : 0;
+//    public function get_hourly_rate()
+//     {
+//          $detail = $this->payslip_details->firstWhere('pay_details', 'Wages');
+//          return $detail ? '$' . $detail->rate : 0;
         
+//     }
+
+    public function get_hourly_rate()
+    {
+        $detail = $this->payslip_details->firstWhere('pay_details', 'Wages');
+
+            if (
+                !$detail ||
+                strtolower($detail->base_amount_or_hours) === '1 month' ||
+                $detail->rate <= 0
+            ) {
+                return null;
+            }
+
+            return '$' . round(floatval($detail->rate), 2);
     }
+
     public function get_netPay($wages,$hours_worked,$net_pay){
         if ($wages<=0 && $hours_worked<=0 ){
             return 0;
