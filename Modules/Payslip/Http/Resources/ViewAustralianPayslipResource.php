@@ -81,8 +81,7 @@ class ViewAustralianPayslipResource extends JsonResource
             ) {
                 return null;
             }
-
-            return '$' . round(floatval($detail->rate), 2). 'Hours';
+            return '$' . round(floatval($detail->rate), 2);
     }
 
     public function get_netPay($wages,$hours_worked,$net_pay){
