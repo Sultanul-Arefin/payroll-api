@@ -81,7 +81,6 @@ class ViewAustralianPayslipResource extends JsonResource
             ) {
                 return null;
             }
-
             return '$' . round(floatval($detail->rate), 2);
     }
 
