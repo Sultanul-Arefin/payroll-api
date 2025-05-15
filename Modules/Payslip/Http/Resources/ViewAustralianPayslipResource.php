@@ -82,7 +82,7 @@ class ViewAustralianPayslipResource extends JsonResource
                 return null;
             }
 
-            return '$' . round(floatval($detail->rate), 2);
+            return '$' . round(floatval($detail->rate), 2). 'Hours';
     }
 
     public function get_netPay($wages,$hours_worked,$net_pay){
@@ -96,16 +96,14 @@ class ViewAustralianPayslipResource extends JsonResource
     public function get_annual_leave_calculation($employee)
     {
         return [
-            'annual_leave_quota' => $this->getAnnualLeaveQuota()*$this->company->working_hours_per_day,
-            'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id)*$this->company->working_hours_per_day,
-            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-            'annual_leave_balance' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id),
-            'total_annual_leave_balance_hourly'=>($this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id))*$this->company->working_hours_per_day,
-            'sick_leave_quota' => $this->getSickLeaveQuota()*$this->company->working_hours_per_day,
-            'sick_leave_taken' => $this->getSickLeaveTaken($this->employee->id)*$this->company->working_hours_per_day,
-            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
-            'sick_leave_balance' => $this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id),
-            'total_sick_leave_balance_hourly'=>($this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id))*$this->company->working_hours_per_day,
+            'annual_leave_quota' => ($this->getAnnualLeaveQuota() * $this->company->working_hours_per_day) . ' Hours',
+            'annual_leave_taken' => ($this->getAnnualLeaveTaken($this->employee->id) * $this->company->working_hours_per_day) . ' Hours',
+            'annual_leave_balance' => ($this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)) . ' days',
+            'total_annual_leave_balance_hourly' => (($this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)) * $this->company->working_hours_per_day) . ' Hours',
+            'sick_leave_quota' => ($this->getSickLeaveQuota() * $this->company->working_hours_per_day) . ' hours',
+            'sick_leave_taken' => ($this->getSickLeaveTaken($this->employee->id) * $this->company->working_hours_per_day) . ' Hours',
+            'sick_leave_balance' => ($this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id)) . ' days',
+            'total_sick_leave_balance_hourly' => (($this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id)) * $this->company->working_hours_per_day) . ' Hours',
         ];
     }
 
