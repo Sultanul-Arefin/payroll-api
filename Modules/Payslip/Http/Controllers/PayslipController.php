@@ -767,7 +767,7 @@ class PayslipController extends Controller
             data: [
                 'user_info' => array_merge(
                     $payslip?->employee?->only(['name', 'email', 'customer_id']),
-                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','pension_administrator','pension_pin','tin_number','abn_number']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','gender','pension_number','visa_number','work_permit_number','uan_no','pf_no','esi_no','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','date_of_birth','bank_name','bank_bic_or_swift_code','bank_iban_or_account_no', 'state','region', 'user_phone', 'joining_date', 'social_security_number', 'tax_number','religion','pension_administrator','pension_pin','tin_number','abn_number','health_insurance']),
                     [
                         'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
                     ],
