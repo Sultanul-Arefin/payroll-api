@@ -22,6 +22,7 @@ class UserDetails extends Model
     public const AFRICAN_PAYSLIP = 6;
     public const GERMAN_PAYSLIP = 7;
     public const AUSTRALIAN_PAYSLIP = 8;
+    public const PORTUGUESE_PAYSLIP = 9;
 
     public const WEB_ATTENDANCE = 1;
 
