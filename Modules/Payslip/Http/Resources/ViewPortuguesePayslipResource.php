@@ -545,7 +545,6 @@ class ViewPortuguesePayslipResource extends JsonResource
                     'total_staff_contribution' => round(floatval($this->total_employee_deduction), 2),
                     'total_company_contribution' => round(floatval($this->company_contribution), 2),
                     'total_staff_cost' => round(floatval($this->net_pay), 2), 
-                    //'total_net_pay' => round(floatval($this->net_pay), 2),
                     'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                 ]
             ],
