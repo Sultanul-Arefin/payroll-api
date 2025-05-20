@@ -52,6 +52,12 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::patch('rota_location/{rota_location}', [RotaManagementController::class, 'update_rota_location'])->name('rota.location.update');
         Route::delete('rota_location/{rota_location}', [RotaManagementController::class, 'destroy_rota_location'])->name('rota.location.destroy');
 
+        Route::get('shifts', [RotaManagementController::class, 'shifts'])->name('rota.shift.index');
+        Route::post('shift', [RotaManagementController::class, 'store_shift'])->name('rota.shift.store');
+        Route::get('shift/{rota_shift}', [RotaManagementController::class, 'edit_shift'])->name('rota.shift.edit');
+        Route::patch('shift/{rota_shift}', [RotaManagementController::class, 'update_shift'])->name('rota.shift.update');
+        Route::delete('shift/{rota_shift}', [RotaManagementController::class, 'destroy_shift'])->name('rota.shift.destroy');
+
     });
 
     // THIS ROUTE IS FOR PREVIOUS BUY NOW PAGE WHERE WE'LL HIT THIS ROUTE WHEN BUYING

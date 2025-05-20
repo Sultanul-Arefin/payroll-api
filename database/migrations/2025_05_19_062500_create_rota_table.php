@@ -47,9 +47,10 @@ return new class extends Migration
             $table->foreignId('employee_id')
                     ->constrained('users', 'id')
                     ->cascadeOnDelete();
+            $table->date('date');
             $table->string('start_time');
             $table->string('end_time');
-            $table->string('break'); // break in minutes
+            $table->string('break')->nullable(); // break in minutes
             $table->text('notes')->nullable();
             $table->boolean('published')->default(false);
             $table->boolean('sent_notification')->default(false);

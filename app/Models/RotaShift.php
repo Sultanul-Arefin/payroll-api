@@ -11,6 +11,7 @@ class RotaShift extends Model
 
     protected $fillable = [
         'employee_id',
+        'date',
         'start_time',
         'end_time',
         'break',
