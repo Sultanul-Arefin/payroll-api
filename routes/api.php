@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\HelpArticleController;
+use App\Http\Controllers\RotaManagementController;
 use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\RegisteredUserController;
@@ -43,6 +44,19 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
         // BONUS SECTION OF TIME MANAGEMENTS
         Route::post('add_bonuses', [BonusController::class, 'store']);
+
+        // ROTA SOFTWARE MANAGEMENTS
+        Route::get('rota_locations', [RotaManagementController::class, 'rota_locations'])->name('rota.location.index');
+        Route::post('rota_location', [RotaManagementController::class, 'store_rota_location'])->name('rota.location.store');
+        Route::get('rota_location/{rota_location}', [RotaManagementController::class, 'edit_rota_location'])->name('rota.location.edit');
+        Route::patch('rota_location/{rota_location}', [RotaManagementController::class, 'update_rota_location'])->name('rota.location.update');
+        Route::delete('rota_location/{rota_location}', [RotaManagementController::class, 'destroy_rota_location'])->name('rota.location.destroy');
+
+        Route::get('shifts', [RotaManagementController::class, 'shifts'])->name('rota.shift.index');
+        Route::post('shift', [RotaManagementController::class, 'store_shift'])->name('rota.shift.store');
+        Route::get('shift/{rota_shift}', [RotaManagementController::class, 'edit_shift'])->name('rota.shift.edit');
+        Route::patch('shift/{rota_shift}', [RotaManagementController::class, 'update_shift'])->name('rota.shift.update');
+        Route::delete('shift/{rota_shift}', [RotaManagementController::class, 'destroy_shift'])->name('rota.shift.destroy');
 
     });
 
