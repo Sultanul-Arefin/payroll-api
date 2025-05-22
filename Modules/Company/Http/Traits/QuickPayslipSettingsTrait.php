@@ -33,8 +33,16 @@ trait QuickPayslipSettingsTrait
             'working_hours_per_week' => $request->working_hours_per_week
         ]);
 
+        $company_info = [
+            'company_id' => auth()->user()->company?->id,
+            'company_logo' => auth()->user()->company->changed_company_logo,
+            'company_name' => auth()->user()->company->company_name,
+            'no_of_working_days_per_week' => auth()->user()->company->no_of_working_days_per_week,
+            'working_hours_per_day' => auth()->user()->company->working_hours_per_day
+        ];
+
         return apiResponse(
-            data: $update,
+            data: $company_info,
             message: 'Payslip Settings Updated Successfully'
         );
     }
