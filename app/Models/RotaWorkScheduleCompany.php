@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RotaWorkSchedule extends Model
+class RotaWorkScheduleCompany extends Model
 {
     use HasFactory;
 
+    protected $table = "rota_work_schedules_companies";
+
     protected $fillable = [
-        'employee_id',
+        'company_id',
         'saturday_off',
         'sunday_off',
         'monday_off',

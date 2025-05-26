@@ -45,12 +45,21 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         // BONUS SECTION OF TIME MANAGEMENTS
         Route::post('add_bonuses', [BonusController::class, 'store']);
 
-        // ROTA SOFTWARE MANAGEMENTS
+        /**
+         * ROTA SOFTWARE MANAGEMENTS
+         */
         Route::get('rota_locations', [RotaManagementController::class, 'rota_locations'])->name('rota.location.index');
         Route::post('rota_location', [RotaManagementController::class, 'store_rota_location'])->name('rota.location.store');
         Route::get('rota_location/{rota_location}', [RotaManagementController::class, 'edit_rota_location'])->name('rota.location.edit');
         Route::patch('rota_location/{rota_location}', [RotaManagementController::class, 'update_rota_location'])->name('rota.location.update');
         Route::delete('rota_location/{rota_location}', [RotaManagementController::class, 'destroy_rota_location'])->name('rota.location.destroy');
+
+        // SCHEDULE
+        Route::get('employee_schedule/{employee_id}', [RotaManagementController::class, 'employee_schedule'])->name('rota.schedule.show');
+        Route::patch('employee_schedule/{employee_id}', [RotaManagementController::class, 'update_employee_schedule'])->name('rota.schedule.update');
+
+        Route::get('company_schedule/{company_id}', [RotaManagementController::class, 'company_schedule'])->name('rota.schedule.company.show');
+        Route::patch('company_schedule/{company_id}', [RotaManagementController::class, 'update_company_schedule'])->name('rota.schedule.company.update');
 
         Route::get('shifts', [RotaManagementController::class, 'shifts'])->name('rota.shift.index');
         Route::post('shift', [RotaManagementController::class, 'store_shift'])->name('rota.shift.store');

@@ -37,8 +37,28 @@ return new class extends Migration
             $table->foreignId('employee_id')
                     ->constrained('users', 'id')
                     ->cascadeOnDelete();
-            $table->string('day'); // Saturday to Friday
-            $table->integer('work_status'); // 1 => working, 0 => day_off
+            $table->boolean('saturday_off');
+            $table->boolean('sunday_off');
+            $table->boolean('monday_off');
+            $table->boolean('tuesday_off');
+            $table->boolean('wednesday_off');
+            $table->boolean('thursday_off');
+            $table->boolean('friday_off');
+            $table->timestamps();
+        });
+
+        Schema::create('rota_work_schedules_companies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')
+                    ->constrained('companies', 'id')
+                    ->cascadeOnDelete();
+            $table->boolean('saturday_off');
+            $table->boolean('sunday_off');
+            $table->boolean('monday_off');
+            $table->boolean('tuesday_off');
+            $table->boolean('wednesday_off');
+            $table->boolean('thursday_off');
+            $table->boolean('friday_off');
             $table->timestamps();
         });
 
@@ -66,6 +86,7 @@ return new class extends Migration
         Schema::dropIfExists('rota_locations');
         Schema::dropIfExists('rota_assigned_locations');
         Schema::dropIfExists('rota_work_schedules');
+        Schema::dropIfExists('rota_work_schedules_companies');
         Schema::dropIfExists('rota_shifts');
     }
 };
