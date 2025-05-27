@@ -196,6 +196,7 @@ class UserController extends Controller
                     'pension_pin' => $request->pension_pin ?? $request->pension_pin,
                     'tin_number' => $request->tin_number ?? $request->tin_number,
                     "abn_number" =>$request->abn_number ?? $request->abn_number,
+                    "dependent" =>$request->dependent ?? $request->dependent,
 
                 ]);
 
@@ -587,6 +588,7 @@ class UserController extends Controller
                 'pension_pin' => $request->pension_pin ?? $request->pension_pin,
                 'tin_number' => $request->tin_number ?? $request->tin_number,
                 "abn_number" =>$request->abn_number ?? $request->abn_number,
+                "dependent" =>$request->dependent ?? $request->dependent,
             ]);
 
             $allFileArr = [];
