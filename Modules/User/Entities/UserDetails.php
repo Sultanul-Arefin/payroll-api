@@ -67,7 +67,8 @@ class UserDetails extends Model
         'pension_administrator',
         "pension_pin",
         "tin_number",
-        "abn_number"
+        "abn_number",
+        "dependent",
         
     ];
 

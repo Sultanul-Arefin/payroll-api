@@ -55,7 +55,9 @@ class ViewJapanesePayslipResource extends JsonResource
             'total_deduction' =>round(floatval($this->tax_value + $this->post_tax_value  + $this->total_employee_deduction),2),
             "total_contribution" =>round(floatval($this->company_contribution),2),
             //'total_deduction' => $this->total_employee_deduction,
+            "total_contribution" =>round(floatval($this->company_contribution),2),
             'total_company_deduction' => $this->get_total_company_deduction(),
+            'attendance'=>$this->getTotalWorkingDaysAttribute(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
             'overall_calculation' => $this->overall_calculation(),   
             'year_to_date' => $this->getYearToDateCalculations(),
@@ -95,14 +97,13 @@ class ViewJapanesePayslipResource extends JsonResource
     public function get_annual_leave_calculation($employee)
     {
         return [
-            'annual_leave_quota' => ($this->getAnnualLeaveQuota() * $this->company->working_hours_per_day) . ' Hours',
-            'annual_leave_taken' => ($this->getAnnualLeaveTaken($this->employee->id) * $this->company->working_hours_per_day) . ' Hours',
-            'annual_leave_balance' => ($this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)) . ' days',
-            'total_annual_leave_balance_hourly' => (($this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id)) * $this->company->working_hours_per_day) . ' Hours',
-            'sick_leave_quota' => ($this->getSickLeaveQuota() * $this->company->working_hours_per_day) . ' hours',
-            'sick_leave_taken' => ($this->getSickLeaveTaken($this->employee->id) * $this->company->working_hours_per_day) . ' Hours',
-            'sick_leave_balance' => ($this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id)) . ' days',
-            'total_sick_leave_balance_hourly' => (($this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id)) * $this->company->working_hours_per_day) . ' Hours',
+            'annual_leave_quota' => $this->getAnnualLeaveQuota(),
+            'annual_leave_taken' => $this->getAnnualLeaveTaken($this->employee->id),
+            // 'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getAnnualLeaveTaken($this->employee->id)
+            'remaining_annual_leave' => $this->getAnnualLeaveQuota() - $this->getTotalAnnualLeaveTaken($this->employee->id),
+             'remaining_sick_leave' => $this->getSickLeaveQuota() - $this->getTotalSickLeaveTaken($this->employee->id),
+            'sick_leave_quota' => $this->getSickLeaveQuota(),
+            'sick_leave_taken' => $this->getSickLeaveTaken($this->employee->id),
         ];
     }
 
@@ -289,6 +290,42 @@ class ViewJapanesePayslipResource extends JsonResource
         return ceil($total_sick_leave / $working_hours_per_day);
 
     }
+    function getAbsentTaken($user_id): mixed {
+        // $payslip_details = $this->payslip_details;
+        $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+        $payslip_details = PayslipDetail::query()
+                        ->whereHas(
+                            'payslip', function(Builder $builder){
+                                $builder->where('id', $this->id);
+                            }
+                        )
+                        ->whereHas(
+                            'employee_salary_item', function(Builder $builder){
+                                $builder->whereHas(
+                                    'salaryItemsName', function(Builder $builder){
+                                        $builder->where('name', 'like', '%' . 'Absent' . '%');
+                                    }
+                                );
+                            }
+                        )
+                        ->get();
+        $total_lop_day = 0;
+        foreach($payslip_details as $value)
+        {
+            // Get "base_amount_or_hours" and remove "hours"
+            $baseAmount = str_replace(' hours', '', $value->base_amount_or_hours);
+
+            // Convert to numeric value
+            $numericBaseAmount = (float)$baseAmount;
+
+            $total_lop_day += $numericBaseAmount;
+
+            // Calculate the value (base * rate)
+            // $calculatedValue = $numericBaseAmount * (float)$leave['rate'];
+        }
+        return ceil($total_lop_day / $working_hours_per_day);
+
+    }
 
     function getSickLeaveQuota(): int {
         $data = LeaveSalaryItems::query()
@@ -306,6 +343,28 @@ class ViewJapanesePayslipResource extends JsonResource
             )
             ->first();
         return $data->no_of_days;
+    }
+
+     public function getTotalWorkingDaysAttribute()
+    {
+
+                    if (!$this->hours_worked || !$this->company || !$this->company->working_hours_per_day) {
+                        $total_working_days = 0;
+                    } else {
+                        $total_working_days = round($this->hours_worked / ($this->company->working_hours_per_day+$this->company->lunch_and_others_per_day), 2);
+                    }
+                     $total_weekly_working_hour = $this->company->working_hours_per_week;
+                    $lop_days = $this->getAbsentTaken($this->employee->id);
+                    $total_leave_taken = $this->getAnnualLeaveTaken($this->employee->id) + $this->getSickLeaveTaken($this->employee->id);
+                    $paid_days = $total_leave_taken + $total_working_days;
+
+                    return [
+                        'total_working_days' => $total_working_days,
+                        'weekly_hour' =>$total_weekly_working_hour,
+                        "absent"=>$lop_days,
+                        'leaves_taken' => $total_leave_taken,
+                        'paid_days' => $paid_days,
+                    ];
     }
 
 
