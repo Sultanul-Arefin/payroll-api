@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\RotaShift;
 use App\Models\Support;
+use Carbon\CarbonPeriod;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,31 +25,33 @@ class ShiftResource extends JsonResource
             $this->merge(
                 Arr::only(parent::toArray($request), [
                     'id',
+                    'name'
                 ])
             ),
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'dates' => [
-                [
-                    '18-05-25' => [
-                        [
-                            'shift_time' => 1,
-                            'published' => 1
-                        ],
-                        [
-                            'shift_time' => 2,
-                            'published' => 2
-                        ]
-                    ],
-                    '19-05-25' => [
-                        [
-                            'shift_time' => 1,
-                            'published' => 1
-                        ]
-                    ]
-                ]
-            ]
+            'dates' => $this->getShiftData(),
         ];
     }
-    
 
+    public function getShiftData()
+    {
+        $period = CarbonPeriod::create(request('start_date'), request('end_date'));
+        $dates = [];
+        foreach($period as $date)
+        {
+            $key = $date->format('Y-m-d');
+
+            // Query shifts for that day
+            $shifts = RotaShift::query()
+                ->whereDate('date', $key)
+                ->where('employee_id', $this->id)
+                ->select('start_time', 'end_time', 'break', 'notes', 'sent_notification', 'published')
+                ->get()
+                ->toArray();
+            
+            $dates[] = [
+                $key => $shifts
+            ];
+        }
+        return $dates;
+    }
 }
