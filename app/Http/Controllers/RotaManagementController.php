@@ -54,7 +54,7 @@ class RotaManagementController extends Controller
 
         return apiResponse(
             data: $shift,
-            message: 'Shift Stored Successfullys'
+            message: 'Shift Stored Successfully'
         );
     }
 
