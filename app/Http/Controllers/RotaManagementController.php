@@ -30,6 +30,24 @@ class RotaManagementController extends Controller
         );
     }
 
+    public function change_shift(Request $request)
+    {
+        $request->validate([
+            'shift_id' => 'required|exists:rota_shifts,id',
+            'date' => 'required',
+            'employee_id' => 'required|exists:users,id'
+        ]);
+        $update_shift = RotaShift::where('id', $request->shift_id)->update([
+            'date' => $request->date,
+            'employee_id' => $request->employee_id
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: "Shift Successfully Updated"
+        );
+    }
+
     public function store_shift(Request $request)
     {
         $request->validate([

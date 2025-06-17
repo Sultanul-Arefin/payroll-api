@@ -81,7 +81,7 @@ class ShiftResource extends JsonResource
             $shifts = RotaShift::query()
                 ->whereDate('date', $key)
                 ->where('employee_id', $this->id)
-                ->select('start_time', 'end_time', 'break', 'notes', 'sent_notification', 'published')
+                ->select('id', 'start_time', 'end_time', 'break', 'notes', 'sent_notification', 'published')
                 ->get()
                 ->toArray();
     
