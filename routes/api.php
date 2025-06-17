@@ -62,6 +62,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::patch('company_schedule/{company_id}', [RotaManagementController::class, 'update_company_schedule'])->name('rota.schedule.company.update');
 
         Route::get('shifts', [RotaManagementController::class, 'shifts'])->name('rota.shift.index');
+        Route::get('shift-summary', [RotaManagementController::class, 'shift_summary'])->name('rota.shift.summary');
         Route::post('change-shift', [RotaManagementController::class, 'change_shift'])->name('rota.shift.change_shift');
         Route::post('shift', [RotaManagementController::class, 'store_shift'])->name('rota.shift.store');
         Route::get('shift/{rota_shift}', [RotaManagementController::class, 'edit_shift'])->name('rota.shift.edit');
