@@ -56,11 +56,11 @@ class RotaManagementController extends Controller
         $request->validate([
             'shift_id' => 'required|exists:rota_shifts,id',
             'date' => 'required|date|date_format:Y-m-d',
-            'employee_id' => 'required|exists:users,id'
+            'employee_id' => 'nullable|exists:users,id'
         ]);
         $update_shift = RotaShift::where('id', $request->shift_id)->update([
             'date' => $request->date,
-            'employee_id' => $request->employee_id
+            'employee_id' => $request->employee_id ? $request->employee_id : null
         ]);
 
         return apiResponse(
