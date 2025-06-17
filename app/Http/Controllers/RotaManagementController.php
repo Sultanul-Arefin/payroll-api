@@ -2,102 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ShiftResource;
 use App\Http\Traits\RotaLocation;
 use App\Http\Traits\RotaWorkSchedule;
 use App\Models\RotaShift;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RotaManagementController extends Controller
 {
     use RotaLocation, RotaWorkSchedule;
 
-    public function shifts()
+    public function shifts(Request $request)
     {
-        // $shifts = RotaShift::query()
-        //         ->where()
-        //         ->get();
-        $shifts = [
-            [
-                "name" => "nashed",
-                'dates' => [
-                    [
-                        '18-05-25' => [
-                            [
-                                'shift_time' => '09:00-17:00',
-                                'published' => true,
-                                // other properties can be added here
-                            ],
-                            [
-                                'shift_time' => '13:00-21:00',
-                                'published' => false,
-                            ]
-                        ],
-                    ],
-                    [
-                        '19-05-25' => [
-                            [
-                                'shift_time' => '08:00-16:00',
-                                'published' => true,
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            [
-                "name" => "shoriful",
-                'dates' => [
-                    [
-                        '18-05-25' => [
-                            [
-                                'shift_time' => '09:00-17:00',
-                                'published' => true,
-                                // other properties can be added here
-                            ],
-                            [
-                                'shift_time' => '13:00-21:00',
-                                'published' => false,
-                            ]
-                        ],
-                    ],
-                    [
-                        '19-05-25' => [
-                            [
-                                'shift_time' => '08:00-16:00',
-                                'published' => true,
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            [
-                "name" => "sultanul",
-                'dates' => [
-                    [
-                        '18-05-25' => [
-                            [
-                                'shift_time' => '09:00-17:00',
-                                'published' => true,
-                                // other properties can be added here
-                            ],
-                            [
-                                'shift_time' => '13:00-21:00',
-                                'published' => false,
-                            ]
-                        ],
-                    ],
-                    [
-                        '19-05-25' => [
-                            [
-                                'shift_time' => '08:00-16:00',
-                                'published' => true,
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
+        $request->validate([
+            'start_date'    => 'required|date|date_format:Y-m-d',
+            'end_date'      => 'required|date|date_format:Y-m-d'
+        ]);
+        $user = User::query()
+            ->where('company_id', auth()->user()->company_id)
+            ->where('status', User::USER_ACTIVE)
+            ->get();
         return apiResponse(
-            data: $shifts
+            data: ShiftResource::collection(
+                $user
+            )
         );
     }
 
