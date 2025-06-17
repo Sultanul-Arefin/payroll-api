@@ -194,5 +194,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(Bonus::class, 'employee_id', 'id');
     }
+
+    /**
+     * @return HasONe
+     */
+    public function rota_work_schedule(): HasOne
+    {
+        return $this->hasOne(RotaWorkSchedule::class, 'employee_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function rota_shifts(): HasMany
+    {
+        return $this->hasMany(RotaShift::class, 'employee_id', 'id');
+    }
    
 }
