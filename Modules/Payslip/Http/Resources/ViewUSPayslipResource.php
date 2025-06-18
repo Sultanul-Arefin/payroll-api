@@ -412,6 +412,7 @@ class ViewUSPayslipResource extends JsonResource
         // Yearly total to current_month 
         $yearly_payslip_data = $this->get_yearly_deduction_details($this->employee_id, $current_month);
         
+        
 
         foreach ($deduction_details as $value) {
             $title = $value?->salary_item_name?->name ?? 'N/A';
@@ -648,69 +649,100 @@ class ViewUSPayslipResource extends JsonResource
 //     ];
 // }
 
-private function getIncomeTaxAndCategoryDetails($payslipDetails)
-{
-    $filteredDetails = [];
-    $totalAmount = 0;
-    $total_amount_yearly = 0;
+    private function getIncomeTaxAndCategoryDetails($payslipDetails)
+    {
+        $filteredDetails = [];
+        $totalAmount = 0;
+        $total_amount_yearly = 0;
 
-    if (empty($payslipDetails)) {
-        return [
-            'filtered_details' => [],
-            'total_amount' => 0,
-            'total_amount_yearly' => 0,
-        ];
-    }
-
-    $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
-    $yearly_payslip_data = $this->get_yearly_payslip_totals_tax($this->employee_id, $current_month);
-
-    foreach ($payslipDetails as $detail) {
-        // Only process tax-related categories (5 and 6)
-        if (!in_array($detail['category_id'], [5, 6])) {
-            continue;
+        if (empty($payslipDetails)) {
+            return [
+                'filtered_details' => [],
+                'total_amount' => 0,
+                'total_amount_yearly' => 0,
+            ];
         }
 
-        $pay_detail_name = trim(preg_replace('/\s+/', ' ', $detail['pay_details'] ?? 'N/A'));
+        // Use first_date of the payslip as reference
+        $reference_date = $payslipDetails->pluck('payslip.payment_date')->min() ?? now()->format('Y-m-d');
+        
+        $yearly_payslip_data = $this->get_yearly_payslip_totals_tax($this->employee_id, $reference_date);
 
-        // Default yearly_total = 0
-        $yearly_total = 0;
+        foreach ($payslipDetails as $detail) {
+            // Only process tax-related categories (5 and 6)
+            if (!in_array($detail['category_id'], [5, 6])) {
+                continue;
+            }
 
-        // Check for exact match first
-        if (isset($yearly_payslip_data[$pay_detail_name])) {
-            $yearly_total = $yearly_payslip_data[$pay_detail_name];
-        } else {
-            // Try partial/loose match
-            foreach ($yearly_payslip_data as $key => $value) {
-                $normalized_key = strtolower(trim($key));
-                $normalized_name = strtolower(trim($pay_detail_name));
+            $pay_detail_name = trim(preg_replace('/\s+/', ' ', $detail['pay_details'] ?? 'N/A'));
 
-                if (str_contains($normalized_key, $normalized_name) || str_contains($normalized_name, $normalized_key)) {
-                    $yearly_total = $value;
-                    break;
+            // Default yearly_total = 0
+            $yearly_total = 0;
+
+            // Check for exact match first
+            if (isset($yearly_payslip_data[$pay_detail_name])) {
+                $yearly_total = $yearly_payslip_data[$pay_detail_name];
+            } else {
+                // Try partial/loose match
+                foreach ($yearly_payslip_data as $key => $value) {
+                    $normalized_key = strtolower(trim($key));
+                    $normalized_name = strtolower(trim($pay_detail_name));
+
+                    if (str_contains($normalized_key, $normalized_name) || str_contains($normalized_name, $normalized_key)) {
+                        $yearly_total = $value;
+                        break;
+                    }
                 }
             }
+
+            // Prepare filtered detail
+            $filteredDetails[] = [
+                'pay_details' => $pay_detail_name,
+                'base_amount_or_hours' => $detail['base_amount_or_hours'],
+                'rate' => $detail['rate'],
+                'amount' => round(floatval($detail['amount']), 2),
+                'yearly_total' => round(floatval($yearly_total), 2),
+            ];
+
+            $totalAmount += floatval($detail['amount']);
+            $total_amount_yearly += floatval($yearly_total);
         }
 
-        // Prepare filtered detail
-        $filteredDetails[] = [
-            'pay_details' => $pay_detail_name,
-            'base_amount_or_hours' => $detail['base_amount_or_hours'],
-            'rate' => $detail['rate'],
-            'amount' => round(floatval($detail['amount']), 2),
-            'yearly_total' => round(floatval($yearly_total), 2),
+        return [
+            'filtered_details' => $filteredDetails,
+            'total_amount' => round($totalAmount, 2),
+            'total_amount_yearly' => round($total_amount_yearly, 2),
         ];
-
-        $totalAmount += floatval($detail['amount']);
-        $total_amount_yearly += floatval($yearly_total);
     }
 
-    return [
-        'filtered_details' => $filteredDetails,
-        'total_amount' => round($totalAmount, 2),
-        'total_amount_yearly' => round($total_amount_yearly, 2),
-    ];
-}
+    public function get_yearly_payslip_totals_tax($employee_id, $reference_date)
+    {
+        $year = date('Y', strtotime($reference_date));
+        $start_date = "$year-01-01";
+        $end_date = $reference_date; // 
+
+        $yearly_payslips = PayslipDetail::query()
+            ->whereHas('payslip', function ($query) use ($employee_id, $start_date, $end_date) {
+                $query->where('employee_id', $employee_id)
+                    ->whereBetween('payment_date', [$start_date, $end_date]);
+            })
+            ->get();
+
+        $yearly_totals = [];
+
+        foreach ($yearly_payslips as $payslipDetail) {
+            $pay_detail_name = $payslipDetail->salary_item->name ?? 'N/A';
+            $amount = (float) $payslipDetail->amount;
+
+            if (!isset($yearly_totals[$pay_detail_name])) {
+                $yearly_totals[$pay_detail_name] = 0;
+            }
+
+            $yearly_totals[$pay_detail_name] += $amount;
+        }
+
+        return $yearly_totals;
+    }
 
 
     public function get_total_other_deduction()
@@ -894,64 +926,64 @@ private function getIncomeTaxAndCategoryDetails($payslipDetails)
      */
 
      public function getYearToDateCalculations()
-{
-    // payment_date starting year
-    $paymentDate = Carbon::parse($this->payment_date);
-    $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
+    {
+        // payment_date starting year
+        $paymentDate = Carbon::parse($this->payment_date);
+        $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
 
-    // // Devaging
-    // \Log::info('Start of Year: ' . $startOfYear);
-    // \Log::info('Payment Date: ' . $paymentDate->toDateString());
-    // \Log::info('Employee ID: ' . $this->employee->id);
+        // // Devaging
+        // \Log::info('Start of Year: ' . $startOfYear);
+        // \Log::info('Payment Date: ' . $paymentDate->toDateString());
+        // \Log::info('Employee ID: ' . $this->employee->id);
 
-    // payslip Filter
-    $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
-        ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
-        ->get();
+        // payslip Filter
+        $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
+            ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
+            ->get();
 
-    if ($yearToDatePayslips->isEmpty()) {
-        \Log::warning('No Payslips found in range.', [
-            'employee_id' => $this->employee->id,
-            'start_of_year' => $startOfYear,
-            'payment_date' => $paymentDate->toDateString(),
-        ]);
+        if ($yearToDatePayslips->isEmpty()) {
+            \Log::warning('No Payslips found in range.', [
+                'employee_id' => $this->employee->id,
+                'start_of_year' => $startOfYear,
+                'payment_date' => $paymentDate->toDateString(),
+            ]);
+            return [
+                'gross_pay' => 0,
+                'taxable_gross' => 0,
+                'tax' => 0,
+            ];
+        }
+
+        // Yearly Gross Pay
+        $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
+            return (
+                ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+                + $payslip->taxable_allowance
+                + $payslip->non_taxable_allowance
+            );
+        });
+
+        // Yearly Taxable Gross Pay
+        $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
+            return (
+                ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+                + $payslip->taxable_allowance
+            );
+        });
+
+        // Yearly Net Pay
+        $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
+            return $payslip->tax_value + $payslip->post_tax_value;
+        });
+
+    $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
+
         return [
-            'gross_pay' => 0,
-            'taxable_gross' => 0,
-            'tax' => 0,
+            'gross_pay' => $yearToDateGrossPay,
+            'taxable_gross' => $yearToDateTaxableGross,
+            'tax' => $yearToDateTaxPay,
         ];
     }
-
-    // Yearly Gross Pay
-    $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
-        return (
-            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
-            + $payslip->taxable_allowance
-            + $payslip->non_taxable_allowance
-        );
-    });
-
-    // Yearly Taxable Gross Pay
-    $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
-        return (
-            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
-            + $payslip->taxable_allowance
-        );
-    });
-
-    // Yearly Net Pay
-    $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
-        return $payslip->tax_value + $payslip->post_tax_value;
-    });
-
-   $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
-
-    return [
-        'gross_pay' => $yearToDateGrossPay,
-        'taxable_gross' => $yearToDateTaxableGross,
-        'tax' => $yearToDateTaxPay,
-    ];
-}
     public function get_yearly_payslip_totals($employee_id, $current_month)
         {
             $current_year = date('Y');
@@ -988,36 +1020,8 @@ private function getIncomeTaxAndCategoryDetails($payslipDetails)
 
 
 
-public function get_yearly_payslip_totals_tax($employee_id, $current_month)
-{
-    $current_year = date('Y');
-
-    $yearly_payslips = PayslipDetail::query()
-        ->whereHas('payslip', function ($query) use ($employee_id, $current_year, $current_month) {
-            $query->where('employee_id', $employee_id)
-                  ->whereYear('first_date', $current_year)
-                  ->whereMonth('first_date', '<=', $current_month); 
-        })
-        ->get();
-
-    $yearly_totals = [];
-
-    foreach ($yearly_payslips as $payslip) {
-        $pay_detail_name = $payslip->salary_item->name;
-        $amount = (float) $payslip->amount;
-
-        if (!isset($yearly_totals[$pay_detail_name])) {
-            $yearly_totals[$pay_detail_name] = 0;
-        }
-
-        $yearly_totals[$pay_detail_name] += $amount;
-    }
-
-    return $yearly_totals;
-}
-
-
     
+
 
     public function get_base_amount_or_hours($get_base_amount_or_hours)
         {
