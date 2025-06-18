@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ShiftResource;
+use App\Http\Resources\ShiftSummaryResource;
 use App\Http\Traits\RotaLocation;
 use App\Http\Traits\RotaWorkSchedule;
 use App\Models\RotaShift;
@@ -30,11 +31,49 @@ class RotaManagementController extends Controller
         );
     }
 
+    public function shift_summary(Request $request)
+    {
+        $request->validate([
+            'start_date'    => 'required|date|date_format:Y-m-d',
+            'end_date'      => 'required|date|date_format:Y-m-d'
+        ]);
+        $shifts = RotaShift::query()
+                ->whereBetween('date', [$request->start_date, $request->end_date])
+                ->groupBy('date')
+                ->get();
+        return ShiftSummaryResource::collection(
+            $shifts
+        )->additional([
+            'meta' => [
+                'total_hour' => 123,
+                'total_amount' => 34532
+            ]
+        ]);
+    }
+
+    public function change_shift(Request $request)
+    {
+        $request->validate([
+            'shift_id' => 'required|exists:rota_shifts,id',
+            'date' => 'required|date|date_format:Y-m-d',
+            'employee_id' => 'nullable|exists:users,id'
+        ]);
+        $update_shift = RotaShift::where('id', $request->shift_id)->update([
+            'date' => $request->date,
+            'employee_id' => $request->employee_id ? $request->employee_id : null
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: "Shift Successfully Updated"
+        );
+    }
+
     public function store_shift(Request $request)
     {
         $request->validate([
             'employee_id' => 'required|exists:users,id',
-            'date' => 'required',
+            'date' => 'required|date|date_format:Y-m-d',
             'start_time' => 'required',
             'end_time' => 'required',
             'published' => 'required',
@@ -69,7 +108,7 @@ class RotaManagementController extends Controller
     {
         $request->validate([
             'employee_id' => 'required',
-            'date' => 'required',
+            'date' => 'required|date|date_format:Y-m-d',
             'start_time' => 'required',
             'end_time' => 'required',
             'published' => 'required',
