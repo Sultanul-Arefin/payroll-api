@@ -163,9 +163,9 @@
         </div>
       </div>
       <div class="invoice-footer">
-        <p>Thank You For Registration With Us!</p>
+        <p>Thank You For Registering With Us!</p>
         <p>This is your login credential</p>
-        <p>URL: https://payroll.omada-clasico.com/</p>
+        <p>URL: <a href="https://payroll.omada-clasico.com/">https://payroll.omada-clasico.com/</a></p>
         <p>Email: {{ $email }}</p>
         <p>Password: password </p>
       </div>
