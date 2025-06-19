@@ -4,12 +4,14 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Mail\RegistrationFromAPI;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Modules\Auth\Http\Services\UserServices;
 use Modules\Company\Entities\Company;
 use Modules\Package\Entities\Package;
@@ -131,6 +133,8 @@ class RegisteredUserController extends Controller
                 $this->userServices->leave_salary_items($company->id);
                 $this->userServices->department_seeder($company->id);
                 $this->userServices->designation_seeder($company->id);
+
+                Mail::to($request->email)->send(new RegistrationFromAPI($request->name, $request->email));
 
                 return $user;
             });
