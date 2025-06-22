@@ -8,7 +8,11 @@ use App\Http\Traits\RotaLocation;
 use App\Http\Traits\RotaWorkSchedule;
 use App\Models\RotaShift;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class RotaManagementController extends Controller
 {
@@ -21,6 +25,12 @@ class RotaManagementController extends Controller
             'end_date'      => 'required|date|date_format:Y-m-d'
         ]);
         $user = User::query()
+            ->when(
+                !is_null(request('department_id')),
+                fn (Builder $builder) => $builder->where(function ($query) use($request){
+                    $query->where('department_id', $request->department_id);
+                })
+            )
             ->where('company_id', auth()->user()->company_id)
             ->where('status', User::USER_ACTIVE)
             ->get();
@@ -31,24 +41,99 @@ class RotaManagementController extends Controller
         );
     }
 
+    protected function calculateTotalHour(Collection $shifts)
+    {
+        $totalMinutes = 0;
+
+        foreach ($shifts as $shift) {
+            $start = Carbon::parse($shift->start_time);
+            $end = Carbon::parse($shift->end_time);
+            $totalMinutes += $start->diffInMinutes($end); // adding durations
+        }
+
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+
+        return "{$hours}Hours {$minutes}Minutes";
+    }
+
+    protected function calculateTotalAmount(Collection $shifts)
+    {
+        return $shifts->sum('amount'); // or your logic
+    }
+
+    protected function extractHour($hourText)
+    {
+        preg_match('/(\d+)Hours/', $hourText, $matches);
+        return isset($matches[1]) ? (int) $matches[1] : 0;
+    }
+
     public function shift_summary(Request $request)
     {
-        $request->validate([
-            'start_date'    => 'required|date|date_format:Y-m-d',
-            'end_date'      => 'required|date|date_format:Y-m-d'
-        ]);
+        $start = Carbon::parse($request->start_date);
+        $end = Carbon::parse($request->end_date);
+
+        // Generate all dates between start and end
+        $allDates = collect();
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $allDates->push($date->toDateString());
+        }
+
+        // Fetch existing shifts from DB
         $shifts = RotaShift::query()
-                ->whereBetween('date', [$request->start_date, $request->end_date])
-                ->groupBy('date')
-                ->get();
-        return ShiftSummaryResource::collection(
-            $shifts
-        )->additional([
+            ->when(
+                !is_null($request->department_id),
+                fn (Builder $builder) => $builder->where(function ($query) use ($request) {
+                    $query->whereHas('employee', function (Builder $builder) use ($request) {
+                        $builder->where('department_id', $request->department_id);
+                    });
+                })
+            )
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->groupBy('date');
+
+        // Build final collection with all dates, even missing ones
+        $summary = $allDates->map(function ($date) use ($shifts) {
+            $shiftItems = $shifts[$date] ?? collect();
+
+            return [
+                'date' => $date,
+                'total_hour' => $this->calculateTotalHour($shiftItems),
+                'total_amount' => $this->calculateTotalAmount($shiftItems),
+            ];
+        });
+
+        return response()->json([
+            'data' => $summary,
             'meta' => [
-                'total_hour' => 123,
-                'total_amount' => 34532
+                'total_hour' => $summary->sum(fn ($d) => $this->extractHour($d['total_hour'])), // optional
+                'total_amount' => $summary->sum('total_amount'),
             ]
         ]);
+        // $shifts = RotaShift::query()
+        //         ->when(
+        //             !is_null(request('department_id')),
+        //             fn (Builder $builder) => $builder->where(function ($query) use($request){
+        //                 $query->whereHas(
+        //                     'employee', function (Builder $builder) use($request){
+        //                         $builder
+        //                             ->where('department_id', $request->department_id);
+        //                     }
+        //                 );
+        //             })
+        //         )
+        //         ->whereBetween('date', [$request->start_date, $request->end_date])
+        //         ->groupBy('date')
+        //         ->get();
+        // return ShiftSummaryResource::collection(
+        //     $shifts
+        // )->additional([
+        //     'meta' => [
+        //         'total_hour' => 123,
+        //         'total_amount' => 34532
+        //     ]
+        // ]);
     }
 
     public function change_shift(Request $request)
