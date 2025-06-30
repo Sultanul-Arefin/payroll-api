@@ -513,7 +513,7 @@ class ViewUSPayslipResource extends JsonResource
                 'total_company_amount' => $total_company_amount,
                 'total_employee_amount' => $total_employee_amount,
                 'yearly_total_company_amount' => round(floatval($yearly_total_company_amount),2),
-                'yearly_total_employee_amount' => $yearly_total_employee_amount,
+                'yearly_total_employee_amount' => round(floatval($yearly_total_employee_amount),2),
             ];
     }
 
