@@ -29,6 +29,7 @@ class ViewUSPayslipResource extends JsonResource
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'total_cash_deduction' => $this->calculateDeductionsAndTax(),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
+            'total_working_hour' =>round(floatval($this->hours_worked),2),
             'fixed_pay_details' => round(floatval($this->wages),2),
             'additional_pay' => $this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
@@ -511,7 +512,7 @@ class ViewUSPayslipResource extends JsonResource
             return [
                 'total_company_amount' => $total_company_amount,
                 'total_employee_amount' => $total_employee_amount,
-                'yearly_total_company_amount' => $yearly_total_company_amount,
+                'yearly_total_company_amount' => round(floatval($yearly_total_company_amount),2),
                 'yearly_total_employee_amount' => $yearly_total_employee_amount,
             ];
     }
