@@ -540,7 +540,7 @@ class PayslipController extends Controller
                     ],
                     [
                         'month' =>$payslip?->month,
-                        'pay_period'=>$payslip?->first_date . 'to' . $payslip->last_date
+                        'pay_period'=>$payslip?->first_date . ' to ' . $payslip->last_date
                     ],
                     [
                         'department' => $payslip?->employee?->department?->department_name,
@@ -577,7 +577,7 @@ class PayslipController extends Controller
                     ],
                     [
                         'month' =>$payslip?->month,
-                        'pay_period'=>$payslip?->first_date . 'to' . $payslip->last_date
+                        'pay_period'=>$payslip?->first_date . ' to ' . $payslip->last_date
                     ],
                     [
                         'department' => $payslip?->employee?->department?->department_name,
@@ -614,7 +614,7 @@ class PayslipController extends Controller
                     ],
                     [
                         'month' =>$payslip?->month,
-                        'pay_period'=>$payslip?->first_date . 'to' . $payslip->last_date
+                        'pay_period'=>$payslip?->first_date . ' to ' . $payslip->last_date
                     ],
                     [
                         'department' => $payslip?->employee?->department?->department_name,
@@ -879,7 +879,7 @@ class PayslipController extends Controller
                     ],
                     [
                         'month' =>$payslip?->month,
-                        'pay_period'=>$payslip?->first_date . 'to' . $payslip->last_date
+                        'pay_period'=>$payslip?->first_date . ' to ' . $payslip->last_date
                     ],
                     [
                         'department' => $payslip?->employee?->department?->department_name,
