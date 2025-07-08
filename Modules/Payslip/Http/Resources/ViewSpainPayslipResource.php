@@ -485,60 +485,6 @@ class ViewSpainPayslipResource extends JsonResource
             ];
         }
 
-        // public function get_payslip_details($payslip_details)
-        //     {
-        //         // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
-        //         $filtered_details = $payslip_details->reject(function ($payslip_detail) {
-        //             return in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
-        //         });
-
-        //         $total_payslip_value = 0;
-
-        //         $filtered_details = $filtered_details->reject(function ($payslip_detail) {
-        //             if (in_array(optional($payslip_detail->salary_item->salaryItemsCategory)->id, [5, 6])) {
-        //                 return true;
-        //             }
-        //             return false;
-        //         });
-
-        //         $filtered_details->transform(function ($payslip_detail) use (&$total_payslip_value) {
-        //             $payslip_detail->pay_details = $payslip_detail->salary_item->name ?? 'N/A';
-        //             $payslip_detail->base_amount_or_hours = $payslip_detail->base_amount_or_hours ?? 0;
-        //             $payslip_detail->rate = $payslip_detail->rate ?? 0;
-        //             $payslip_detail->amount = $payslip_detail->amount ?? 0;
-
-        //             if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
-        //                 $payslip_detail->category_id = optional($payslip_detail->salary_item->salaryItemsCategory)->id . "_additional";
-        //             } else {
-        //                 $payslip_detail->category_id = optional($payslip_detail->salary_item->salaryItemsCategory)->id;
-        //             }
-
-
-        //             // Accumulate total payslip value
-        //             $total_payslip_value += $payslip_detail->amount;
-
-        //             // Unset unnecessary keys
-        //             unset(
-        //                 $payslip_detail->salary_item,
-        //                 $payslip_detail->id,
-        //                 $payslip_detail->created_at,
-        //                 $payslip_detail->updated_at,
-        //                 $payslip_detail->payslip_id,
-        //                 $payslip_detail->salary_item_id
-        //             );
-
-        //             return $payslip_detail;
-        //         });
-
-        //         return [
-        //             'payslip_details' => $filtered_details->values(),
-        //             'total_payslip_value_employee' => $total_payslip_value,
-        //         ];
-        //     }
-
-
-
-
         public function get_base_amount_or_hours($get_base_amount_or_hours){
             $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
             if (preg_match('/(\d+(\.\d+)?)\s*hours?/i', $get_base_amount_or_hours, $matches)) {
