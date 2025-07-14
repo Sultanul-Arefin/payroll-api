@@ -15,7 +15,7 @@ use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 
-class ViewSpainPayslipResource extends JsonResource
+class ViewSwedishPayslipResource extends JsonResource
 {
         /**
          * Transform the resource into an array.
