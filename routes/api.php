@@ -65,6 +65,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('shift-summary', [RotaManagementController::class, 'shift_summary'])->name('rota.shift.summary');
         Route::post('change-shift', [RotaManagementController::class, 'change_shift'])->name('rota.shift.change_shift');
         Route::post('shift', [RotaManagementController::class, 'store_shift'])->name('rota.shift.store');
+        Route::post('department-wise-shift', [RotaManagementController::class, 'store_department_wise_shift'])->name('rota.shift.store_department_wise_shift');
         Route::get('shift/{rota_shift}', [RotaManagementController::class, 'edit_shift'])->name('rota.shift.edit');
         Route::patch('shift/{rota_shift}', [RotaManagementController::class, 'update_shift'])->name('rota.shift.update');
         Route::delete('shift/{rota_shift}', [RotaManagementController::class, 'destroy_shift'])->name('rota.shift.destroy');

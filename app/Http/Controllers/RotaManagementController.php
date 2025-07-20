@@ -182,6 +182,78 @@ class RotaManagementController extends Controller
         );
     }
 
+    public function store_department_wise_shift(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'nullable|exists:departments,id',
+            'date' => 'required|date|date_format:Y-m-d',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'published' => 'required',
+            'sent_notification' => 'required',
+        ]);
+
+        if($request->department_id)
+        {
+            $employees = User::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->where('status', User::USER_ACTIVE)
+                ->where('department_id', $request->department_id)
+                ->get();
+            $remove_shift = RotaShift::query()
+                        ->whereHas(
+                            'employee', function (Builder $builder) use($request){
+                                $builder->where('company_id', auth()->user()->company_id)
+                                        ->where('department_id', $request->department_id);
+                            }
+                        )
+                        ->delete();
+            foreach($employees as $employee)
+            {
+                $shift = RotaShift::create([
+                    'employee_id' => $employee->id,
+                    'date' => $request->date,
+                    'start_time' => $request->start_time,
+                    'end_time' => $request->end_time,
+                    'break' => $request->break ?? $request->break,
+                    'notes' => $request->notes ?? $request->notes,
+                    'published' => $request->published,
+                    'sent_notification' => $request->sent_notification
+                ]);
+            }
+        } else{
+            $employees = User::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->where('status', User::USER_ACTIVE)
+                ->get();
+            $remove_shift = RotaShift::query()
+                        ->whereHas(
+                            'employee', function (Builder $builder) use($request){
+                                $builder->where('company_id', auth()->user()->company_id);
+                            }
+                        )
+                        ->delete();
+            foreach($employees as $employee)
+            {
+                $shift = RotaShift::create([
+                    'employee_id' => $employee->id,
+                    'date' => $request->date,
+                    'start_time' => $request->start_time,
+                    'end_time' => $request->end_time,
+                    'break' => $request->break ?? $request->break,
+                    'notes' => $request->notes ?? $request->notes,
+                    'published' => $request->published,
+                    'sent_notification' => $request->sent_notification
+                ]);
+            }
+        }
+
+        return apiResponse(
+            data: null,
+            message: 'Shift Stored Successfully'
+        );
+    }
+
     public function edit_shift(RotaShift $rota_shift)
     {
         return apiResponse(
