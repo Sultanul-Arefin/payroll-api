@@ -20,5 +20,6 @@
     "TimeManagement": true,
     "Report": true,
     "S": true,
-    "StaffObjective": true
+    "StaffObjective": true,
+    "IRS": true
 }

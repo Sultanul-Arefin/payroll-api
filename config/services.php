@@ -31,4 +31,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+'taxbandits' => [
+    'auth_url' => env('TAXBANDITS_AUTH_URL'),
+    'api_url' => env('TAXBANDITS_API_URL'),  // Add this line
+    'client_id' => env('TAXBANDITS_CLIENT_ID'),
+    'client_secret' => env('TAXBANDITS_CLIENT_SECRET'),
+    'user_token' => env('TAXBANDITS_USER_TOKEN'),
+    'business_id' => env('TAXBANDITS_BUSINESS_ID'),
+],
+
+   
 ];

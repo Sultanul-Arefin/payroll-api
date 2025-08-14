@@ -71,6 +71,12 @@ class UserDetails extends Model
         "tin_number",
         "abn_number",
         "dependent",
+         // ** IRS / W-4  **
+        // 'w4_filing_status',
+        // 'w4_dependents',
+        // 'additional_withholding',
+        // 'is_fica_exempt',
+        // 'is_federal_tax_exempt',
         
     ];
 

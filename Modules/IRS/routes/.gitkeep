@@ -1,0 +1,398 @@
+<?php
+
+namespace Modules\IRS\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Modules\Company\Entities\Company;
+use Modules\User\Entities\UserDetails;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
+use Modules\Payslip\Http\Services\PayslipService;
+use App\Models\User;
+use Carbon\Carbon;
+use Modules\Payslip\Entities\Payslip;
+use Illuminate\Database\Eloquent\Builder;
+use App\Helpers\XmlValidator;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Modules\IRS\Entities\IrsTransmission;
+use Modules\IRS\Entities\TaxbanditsPdfWebhook;
+use Modules\LeaveManagement\Entities\UserLeaveDetail;
+use setasign\Fpdi\Fpdi;
+use Illuminate\Support\Facades\DB;
+use Modules\IRS\Http\Traits\UserInformation;
+
+class IrsController extends Controller
+{
+    use UserInformation;
+
+    protected $payslipService;
+
+    public function __construct(PayslipService $payslipService)
+    {
+        $this->payslipService = $payslipService;
+    }
+
+  
+
+    private function getQuarterDateRange($year, $quarter)
+    {
+        switch ($quarter) {
+            case 'Q1':
+                return [
+                    Carbon::create($year, 1, 1)->startOfDay(),
+                    Carbon::create($year, 3, 31)->endOfDay(),
+                ];
+            case 'Q2':
+                return [
+                    Carbon::create($year, 4, 1)->startOfDay(),
+                    Carbon::create($year, 6, 30)->endOfDay(),
+                ];
+            case 'Q3':
+                return [
+                    Carbon::create($year, 7, 1)->startOfDay(),
+                    Carbon::create($year, 9, 30)->endOfDay(),
+                ];
+            case 'Q4':
+                return [
+                    Carbon::create($year, 10, 1)->startOfDay(),
+                    Carbon::create($year, 12, 31)->endOfDay(),
+                ];
+            default:
+                throw new \InvalidArgumentException("Invalid quarter: $quarter");
+        }
+    }
+
+    public function submitForm941JsonToTaxBandits(Request $request)
+    {
+        $data = $request->all(); // JSON body
+
+        $companyId = $data['company_id'] ?? null;
+        $year = $data['Form941Records'][0]['ReturnHeader']['TaxYr'] ?? now()->year;
+        $quarter = $data['Form941Records'][0]['ReturnHeader']['Qtr'] ?? 'Q2';
+
+        $company = $this->getCompany($companyId);
+        if (!$company) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Company not found with the given ID.',
+                ],
+                404,
+            );
+        }
+
+        // Quarter date range 
+    [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+
+
+    $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+    $salaryData = $salaryResource->toArray(request());
+
+    $grossPay        = $salaryData['gross_pay'] ?? 0;
+    $incomeTax       = $salaryData['income_tax'] ?? 0;
+   // Additional taxes
+    $additionalTaxes = $salaryData['additional_taxes'] ?? [];
+    $federalIncomeTaxWithheld = floatval($additionalTaxes['Additional Federal Income Tax'] ?? 0);
+    $socialSecurityTaxAmt = floatval($additionalTaxes['State Tax'] ?? 0);
+    $medicareWagesTipsAmt = floatval($additionalTaxes['State Tax'] ?? 0);
+
+   // Government deductions
+    $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
+    $socialSecurityTaxCon = floatval($governmentDeductions['Government Deductions 2'] ?? 0);
+    $medicareWagesTipsCom = floatval($governmentDeductions['ESI'] ?? 0);
+
+    $totalEmployees  = $salaryData['total_employee'] ?? 0;
+    $companyName     = $salaryData['company_name'] ?? $company->name;
+    $ein             = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
+    $companyEmail     = $salaryData['company_email'] ?? $company->company_email;
+    $companyPhone     = $salaryData['company_phone'] ?? $company->company_phone;
+    
+
+        // Load credentials
+        $clientId = config('services.taxbandits.client_id');
+        $clientSecret = config('services.taxbandits.client_secret');
+        $userToken = config('services.taxbandits.user_token');
+        $authUrl = config('services.taxbandits.auth_url');
+        $apiUrl = config('services.taxbandits.api_url');
+
+        if (empty($userToken) || empty($clientId) || empty($clientSecret)) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Missing TaxBandits credentials.',
+                ],
+                400,
+            );
+        }
+
+        // Step 1: Generate JWT token
+        try {
+            $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Failed to generate JWT token: ' . $e->getMessage(),
+                ],
+                500,
+            );
+        }
+
+        // Step 2: Get Access Token
+        $authResponse = Http::withHeaders([
+            'Authentication' => $jwtToken,
+        ])->get($authUrl);
+
+        if ($authResponse->failed()) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Authentication failed.',
+                    'details' => $authResponse->json(),
+                ],
+                401,
+            );
+        }
+
+        $accessToken = $authResponse['AccessToken'] ?? null;
+        if (!$accessToken) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'Access token not received.',
+                    'auth_response' => $authResponse->json(),
+                ],
+                401,
+            );
+        }
+
+        // Step 3: Prepare tax values with safety checks
+        $form941Record = $data['Form941Records'][0] ?? [];
+
+        $returnData = $form941Record['ReturnData']['Form941'] ?? [];
+
+        $federalIncomeTaxWithheld = $federalIncomeTaxWithheld ?? 0;
+        $socialSecurityTax = ($socialSecurityTaxAmt + $socialSecurityTaxCon) ?? 0;
+        $medicareTax = ($medicareWagesTipsAmt + $medicareWagesTipsCom) ?? 0;
+        $totalTaxBeforeAdjustmentAmt = floatval($returnData['TotalTaxBeforeAdjustmentAmt'] ?? $federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax);
+
+        $payrollTaxCreditAmt = floatval($returnData['PayrollTaxCreditAmt'] ?? 0);
+
+        // TotalTaxAfterAdjustmentAmt must equal sum of Lines 6,7,8,9; if not provided, calculate
+        $totalTaxAfterAdjustmentAmt = floatval($returnData['TotalTaxAfterAdjustmentAmt'] ?? $totalTaxBeforeAdjustmentAmt);
+
+        $totTaxAfterAdjustmentAndNonRfdCr = floatval($returnData['TotTaxAfterAdjustmentAndNonRfdCr'] ?? $totalTaxAfterAdjustmentAmt);
+
+        $totTaxDepositAmt = floatval($returnData['TotTaxDepositAmt'] ?? 0);
+
+        $balanceDueAmt = $totTaxAfterAdjustmentAndNonRfdCr - $totTaxDepositAmt;
+
+        // Deposit Schedule setup
+        // Deposit Schedule setup
+        $depositSchedule = $form941Record['ReturnData']['DepositScheduleType'] ?? [];
+
+        
+        $depositorType = $data['Form941Records'][0]['ReturnData']['DepositScheduleType']['DepositorType']
+            ?? $depositSchedule['DepositorType']
+            ?? 'NONE';
+
+
+        $totalQuarterTaxLiabilityAmt = round($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax, 2);
+
+        if (empty($depositorType) || strtoupper($depositorType) === 'NONE') {
+            if ($totalQuarterTaxLiabilityAmt < 2500) {
+                $depositorType = 'NONE';
+                $monthlyDepositor = null;
+            } else {
+                $depositorType = 'MONTHLY';
+                $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
+                $monthlyDepositor = [
+                    'TaxLiabilityMonth1' => $perMonth,
+                    'TaxLiabilityMonth2' => $perMonth,
+                    'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
+                ];
+            }
+        } else {
+            
+            if (strtoupper($depositorType) === 'MONTHLY') {
+                $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
+            $monthlyDepositor = [
+                    'TaxLiabilityMonth1' => $perMonth,
+                    'TaxLiabilityMonth2' => $perMonth,
+                    'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
+                ];
+            } else {
+                $monthlyDepositor = null;
+            }
+        }
+
+
+        // Build JSON payload for TaxBandits API
+        $requestPayload = [
+            'Form941Records' => [
+                [
+                    'SequenceId' => $form941Record['SequenceId'] ?? '001',
+                    'ReturnHeader' => [
+                        'ReturnType' => $form941Record['ReturnHeader']['ReturnType'] ?? 'FORM941',
+                        'TaxYr' => $form941Record['ReturnHeader']['TaxYr'] ?? '2025',
+                        'Qtr' => $form941Record['ReturnHeader']['Qtr'] ?? 'Q1',
+                        'Business' => [
+                            'BusinessId' => $form941Record['ReturnHeader']['Business']['BusinessId'] ?? null,
+                            'BusinessNm' => $companyName ?? null,
+                            'TradeNm' => $form941Record['ReturnHeader']['Business']['TradeNm'] ?? null,
+                            'PayerRef' => $form941Record['ReturnHeader']['Business']['PayerRef'] ?? 'PayerRef004',
+                            'IsEIN' => true,
+                            'EINorSSN' => $ein ?? '127496789',
+                            'Email' => $companyEmail ?? 'test@example.com',
+                            'ContactNm' => $company->contact_name ?? 'John Doe',
+                            'Phone' => $companyPhone  ?? '1234567890',
+                            'PhoneExtn' => $form941Record['ReturnHeader']['Business']['PhoneExtn'] ?? '',
+                            'Fax' => $form941Record['ReturnHeader']['Business']['Fax'] ?? null,
+                            'BusinessType' => $form941Record['ReturnHeader']['Business']['BusinessType'] ?? 'CORP',
+                            'SigningAuthority' => [
+                                'Name' => $company->contact_name ?? 'John Doe',
+                                'Phone' => preg_replace('/[^0-9]/', '', $company->phone ?? '1234567890'),
+                                'BusinessMemberType' => 'TAXOFFICER',
+                            ],
+                            'KindOfEmployer' => $form941Record['ReturnHeader']['KindOfEmployer'] ?? null,
+                            'KindOfPayer' => $form941Record['ReturnHeader']['KindOfPayer'] ?? null,
+                            'IsBusinessTerminated' => $form941Record['ReturnHeader']['IsBusinessTerminated'] ?? false,
+                            'IsForeign' => $form941Record['ReturnHeader']['IsForeign'] ?? false,
+                            'USAddress' => $form941Record['ReturnHeader']['Business']['USAddress'] ?? null,
+                            'ForeignAddress' => $form941Record['ReturnHeader']['Business']['ForeignAddress'] ?? null,
+                        ],
+                        'IsThirdPartyDesignee' => $form941Record['ReturnHeader']['IsThirdPartyDesignee'] ?? false,
+                        'ThirdPartyDesignee' => $form941Record['ReturnHeader']['ThirdPartyDesignee'] ?? [
+                            'Name' => null,
+                            'Phone' => null,
+                            'PIN' => null,
+                        ],
+                        'SignatureDetails' => $form941Record['ReturnHeader']['SignatureDetails'] ?? [
+                            'SignatureType' => 'FORM_8453_EMP',
+                            'OnlineSignaturePIN' => ['PIN' => null],
+                            'ReportingAgentPIN' => ['PIN' => null],
+                            'taxPayerPIN' => ['PIN' => null],
+                            'Form8453EMP' => null,
+                        ],
+                        'BusinessStatusDetails' => $form941Record['ReturnHeader']['BusinessStatusDetails'] ?? [
+                            'IsBusinessClosed' => false,
+                            'BusinessClosedDetails' => null,
+                            'IsBusinessTransferred' => false,
+                            'BusinessTransferredDetails' => null,
+                            'IsSeasonalEmployer' => false,
+                        ],
+                    ],
+                    'ReturnData' => [
+                        'Form941' => [
+                            'EmployeeCnt' => intval($totalEmployees ?? 0),
+                            'WagesAmt' => floatval($grossPay ?? 0),
+                            'FedIncomeTaxWHAmt' => $federalIncomeTaxWithheld,
+                            'WagesNotSubjToSSMedcrTaxInd' => $returnData['WagesNotSubjToSSMedcrTaxInd'] ?? false,
+                            'SocialSecurityTaxCashWagesAmt_Col1' => floatval($returnData['SocialSecurityTaxCashWagesAmt_Col1'] ?? 0),
+                            'TaxableSocSecTipsAmt_Col1' => floatval($returnData['TaxableSocSecTipsAmt_Col1'] ?? 0),
+                            'TaxableMedicareWagesTipsAmt_Col1' => floatval($returnData['TaxableMedicareWagesTipsAmt_Col1'] ?? 0),
+                            'TxblWageTipsSubjAddnlMedcrAmt_Col1' => floatval($returnData['TxblWageTipsSubjAddnlMedcrAmt_Col1'] ?? 0),
+                            'SocialSecurityTaxAmt_Col2' => $socialSecurityTax,
+                            'TaxOnSocialSecurityTipsAmt_Col2' => floatval($returnData['TaxOnSocialSecurityTipsAmt_Col2'] ?? 0),
+                            'TaxOnMedicareWagesTipsAmt_Col2' => $medicareTax,
+                            'TaxOnWageTipsSubjAddnlMedcrAmt_Col2' => floatval($returnData['TaxOnWageTipsSubjAddnlMedcrAmt_Col2'] ?? 0),
+                            'TotSSMdcrTaxAmt' => $socialSecurityTax + $medicareTax,
+                            'TaxOnUnreportedTips3121qAmt' => floatval($returnData['TaxOnUnreportedTips3121qAmt'] ?? 0),
+                            'TotalTaxBeforeAdjustmentAmt' => $totalTaxBeforeAdjustmentAmt,
+                            'CurrentQtrFractionsCentsAmt' => floatval($returnData['CurrentQtrFractionsCentsAmt'] ?? 0),
+                            'CurrentQuarterSickPaymentAmt' => floatval($returnData['CurrentQuarterSickPaymentAmt'] ?? 0),
+                            'CurrQtrTipGrpTermLifeInsAdjAmt' => floatval($returnData['CurrQtrTipGrpTermLifeInsAdjAmt'] ?? 0),
+                            'TotalTaxAfterAdjustmentAmt' => $totalTaxAfterAdjustmentAmt,
+                            'PayrollTaxCreditAmt' => $payrollTaxCreditAmt,
+                            'IsPayrollTaxCredit' => $returnData['IsPayrollTaxCredit'] ?? false,
+                            'Form8974' => $returnData['Form8974'] ?? null,
+                            'TotTaxAfterAdjustmentAndNonRfdCr' => $totTaxAfterAdjustmentAndNonRfdCr,
+                            'TotTaxDepositAmt' => $totTaxDepositAmt,
+                            'BalanceDueAmt' => $balanceDueAmt,
+                            'OverpaidAmt' => floatval($returnData['OverpaidAmt'] ?? 0),
+                            'OverPaymentRecoveryType' => $returnData['OverPaymentRecoveryType'] ?? null,
+                        ],
+                        'IRSPaymentType' => $form941Record['ReturnData']['IRSPaymentType'] ?? 'EFTPS',
+                        'IRSPayment' => $form941Record['ReturnData']['IRSPayment'] ?? [
+                            'BankRoutingNum' => null,
+                            'AccountType' => null,
+                            'BankAccountNum' => null,
+                            'Phone' => null,
+                        ],
+                        'DepositScheduleType' => [
+                            'DepositorType' => $depositorType,
+                            'MonthlyDepositor' => $monthlyDepositor,
+                            'SemiWeeklyDepositor' => null,
+                            'TotalQuarterTaxLiabilityAmt' => $totalQuarterTaxLiabilityAmt,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        // Step 5: Submit JSON payload to TaxBandits API
+        $endpoint = $apiUrl . '/Form941/Create';
+
+        $transmitResponse = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post($endpoint, $requestPayload);
+
+        if ($transmitResponse->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Form 941 JSON submitted successfully.',
+                'response' => $transmitResponse->json(),
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to submit JSON to TaxBandits.',
+                'http_status' => $transmitResponse->status(),
+                'raw_body' => $transmitResponse->body(),
+            ]);
+        }
+    }
+
+
+    private function generateTaxBanditsJWT($clientId, $clientSecret, $userToken)
+    {
+        // JWT Header
+        $header = [
+            'alg' => 'HS256',
+            'typ' => 'JWT',
+        ];
+
+        // JWT Payload
+        $payload = [
+            'iss' => $clientId, // Issuer: Client ID
+            'sub' => $clientId, // Subject: Client ID
+            'aud' => $userToken, // Audience: User Token
+            'iat' => time(),
+            'exp' => time() + 300, // Issued at: Current timestamp
+        ];
+
+        // Encode header and payload
+        $headerEncoded = $this->base64UrlEncode(json_encode($header));
+        $payloadEncoded = $this->base64UrlEncode(json_encode($payload));
+
+        // Create signature
+        $signature = hash_hmac('sha256', $headerEncoded . '.' . $payloadEncoded, $clientSecret, true);
+        $signatureEncoded = $this->base64UrlEncode($signature);
+
+        // Return complete JWT
+        return $headerEncoded . '.' . $payloadEncoded . '.' . $signatureEncoded;
+    }
+
+    /**
+     * Base64 URL encode (without padding)
+     */
+    private function base64UrlEncode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+}

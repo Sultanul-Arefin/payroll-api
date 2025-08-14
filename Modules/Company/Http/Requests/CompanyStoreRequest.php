@@ -30,6 +30,11 @@ class CompanyStoreRequest extends FormRequest
             'contact_person_name' => 'nullable',
             'contact_person_email' => 'nullable',
             'contact_person_phone' => 'nullable',
+            'employer_identification_number' => 'nullable|string|max:20',
+            'irs_efile_pin' => 'nullable|string|max:10',
+            'is_reporting_agent' => 'nullable|boolean',
+            'eftps_enrollment_status' => 'nullable|string|in:pending,completed',
+            'eftps_payment_method' => 'nullable|string|in:ACH Debit,Manual Entry',
         ];
     }
 

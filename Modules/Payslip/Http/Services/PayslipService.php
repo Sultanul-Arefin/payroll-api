@@ -2023,4 +2023,5 @@ class PayslipService
         }
         return $amount;
     }
+
 }

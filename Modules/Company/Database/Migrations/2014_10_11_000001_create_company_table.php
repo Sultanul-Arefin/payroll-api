@@ -38,6 +38,8 @@ return new class extends Migration
             $table->decimal('lunch_and_others_per_day', 4, 2)->nullable();
             $table->decimal('working_hours_per_week', 4, 2)->nullable();
             $table->integer('subscription_duration')->nullable();
+             // 🔰 IRS & EFTPS related
+            $table->string('employer_identification_number')->nullable(); // EIN
             $table
                 ->foreignId('white_label_id')
                 ->constrained('admins', 'id')
