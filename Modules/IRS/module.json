@@ -1,0 +1,11 @@
+{
+    "name": "IRS",
+    "alias": "irs",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\IRS\\Providers\\IRSServiceProvider"
+    ],
+    "files": []
+}

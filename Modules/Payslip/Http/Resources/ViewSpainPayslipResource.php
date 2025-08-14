@@ -40,7 +40,7 @@ class ViewSpainPayslipResource extends JsonResource
             // 'total_gross_pay' => $this->pay_due_before_deduction,
                 //'taxable_gross_pay' => $this->gross_pay_before_tax,
                 'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
-                'taxable_gross_pay' => round(floatval(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance),2), // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
+                
                 //'staff_social_charges' => 0.00,
                 'staff_social_charges' => $this->get_staff_social_charges(), // staff social charge goes here
                 'other_deduction_summary' => $this->get_other_deduction(),

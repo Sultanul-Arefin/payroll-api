@@ -17,6 +17,8 @@
         "phpoffice/phpword": "^1.3",
         "predis/predis": "^2.2",
         "rap2hpoutre/laravel-log-viewer": "^2.4",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.6",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-permission": "^6.4"
     },

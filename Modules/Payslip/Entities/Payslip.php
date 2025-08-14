@@ -89,4 +89,9 @@ class Payslip extends Model
     {
         return $this->hasMany(PayslipDetail::class, 'payslip_id', 'id');
     }
+     public function social_deductions(): HasMany
+    {
+        return $this->hasMany(PayslipDetailsForDeduction::class, 'payslip_id', 'id');
+    }
+    
 }

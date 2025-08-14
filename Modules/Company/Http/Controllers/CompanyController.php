@@ -76,6 +76,12 @@ class CompanyController extends Controller
                 'contact_person_name' => $request->contact_person_name,
                 'contact_person_email' => $request->contact_person_email,
                 'contact_person_phone' => $request->contact_person_phone,
+                // IRS + EFTPS Fields
+                'employer_identification_number' => $request->employer_identification_number,
+                'irs_efile_pin' => $request->irs_efile_pin,
+                'is_reporting_agent' => $request->is_reporting_agent ?? false,
+                'eftps_enrollment_status' => $request->eftps_enrollment_status,
+                'eftps_payment_method' => $request->eftps_payment_method,
             ]);
 
             auth()->user()->update([
@@ -126,6 +132,12 @@ class CompanyController extends Controller
                 'contact_person_name' => $request->contact_person_name,
                 'contact_person_email' => $request->contact_person_email,
                 'contact_person_phone' => $request->contact_person_phone,
+                // ✅ IRS + EFTPS new fields
+                'employer_identification_number' => $request->employer_identification_number,
+                'irs_efile_pin' => $request->irs_efile_pin,
+                'is_reporting_agent' => $request->is_reporting_agent ?? false,
+                'eftps_enrollment_status' => $request->eftps_enrollment_status,
+                'eftps_payment_method' => $request->eftps_payment_method,
             ]);
 
             return $company;

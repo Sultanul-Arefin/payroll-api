@@ -44,7 +44,14 @@ class Company extends Model
         'working_hours_per_day',
         'lunch_and_others_per_day',
         'working_hours_per_week',
-        'white_label_id'
+        'white_label_id',
+         // IRS + EFTPS fields
+        'employer_identification_number',
+        // 'irs_efile_pin',
+        // 'is_reporting_agent',
+        // 'eftps_enrollment_status',
+        // 'eftps_payment_method',
+        
     ];
 
     public function getChangedCompanyLogoAttribute()
