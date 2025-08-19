@@ -178,7 +178,7 @@ class Form940Controller extends Controller
         foreach ($payslips as $payslip) {
             $items = $this->getSocialDeduction($payslip);
             foreach ($items as $item) {
-                // শুধুমাত্র FederalUnemploymentTax নামক আইটেম নেয়া হবে
+                
                 if (stripos($item['title'], 'FederalUnemploymentTax') === false) {
                     continue;
                 }
