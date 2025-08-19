@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('taxbandits_pdf_webhooks', function (Blueprint $table) {
             $table->id();
+            $table->enum('form_type', ['940', '941'])->nullable()->index();
             $table->uuid('submission_id')->nullable();
             $table->uuid('record_id')->nullable();
             $table->string('pdf_url')->nullable();

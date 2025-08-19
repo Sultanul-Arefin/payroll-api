@@ -29,6 +29,7 @@ class GetSalaryResource extends JsonResource
         $employeeData       = $this->get_employees($companyId, $this->startDate, $this->endDate);
         $TotalAdditionalTaxes = $this->irs_additional_taxes($companyId, $this->startDate, $this->endDate);
         $totalGovernmentDeductions = $this->irs_government_deductions($companyId, $this->startDate, $this->endDate);
+        $employee_wise_taxable_gross = $this->get_employee_wise_taxable_gross($companyId, $this->startDate, $this->endDate);
 
         return [
             'company_name'                   => $this->company_name,
@@ -40,6 +41,7 @@ class GetSalaryResource extends JsonResource
             'income_tax'                     => $employeeData['income_tax'], 
             'additional_taxes'               => $TotalAdditionalTaxes,
             'government_deductions_yearly'   => $totalGovernmentDeductions,
+            'employee_wise_taxable_gross'    => $employee_wise_taxable_gross,
         ];
     }
 
@@ -80,9 +82,9 @@ class GetSalaryResource extends JsonResource
 
         $allowedItems = [
             'State Tax',
-            'Additional Federal Income Tax',
-            'Additional Taxes (Tax TopUp) 1',
-            'Additional Taxes (Tax TopUp) 2',
+            'Federal Income Tax',
+            'Social Security',
+            'Medicare',
         ];
 
         $items = EntitiesEmployeeSalaryItem::with('salaryItemsName')
@@ -105,9 +107,9 @@ class GetSalaryResource extends JsonResource
     {
         $allowedItems = [
             'ESI',
-            'state tex',
+            'Social Security',
             'Government Deductions 2',
-            'TDS',
+            'Medicare',
         ];
 
         $items = PayslipDetailsForDeduction::with('salary_item_name')
@@ -125,4 +127,33 @@ class GetSalaryResource extends JsonResource
         return $items->groupBy(fn($item) => $item->salary_item_name->name ?? 'Unknown Item')
                      ->mapWithKeys(fn($groupedItems, $itemName) => [$itemName => $groupedItems->sum('government_or_company_amount')]);
     }
+
+    public function get_employee_wise_taxable_gross($companyId, $startDate, $endDate)
+{
+    $employees = User::query()
+        ->where('company_id', $companyId)
+        ->where('role_id', '!=', User::ADMIN)
+        ->get();
+
+    $employeeWiseData = [];
+
+    foreach ($employees as $employee) {
+        $payslips = Payslip::query()
+            ->where('employee_id', $employee->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        $empGrossPay  = $payslips->sum('gross_pay_before_tax'); // yearly taxable gross pay
+        $empIncomeTax = $payslips->sum('income_tax');
+
+        $employeeWiseData[] = [
+            'employee_id'       => $employee->id,
+            'employee_name'     => $employee->name,
+            'taxable_gross_pay' => $empGrossPay,
+            'income_tax'        => $empIncomeTax,
+        ];
+    }
+
+    return $employeeWiseData;
+}
 }
