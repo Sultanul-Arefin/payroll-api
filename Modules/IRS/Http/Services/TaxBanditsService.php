@@ -1,5 +1,4 @@
 <?php
-
 namespace Modules\IRS\Http\Services;
 
 use Illuminate\Support\Facades\Http;
@@ -7,51 +6,68 @@ use Illuminate\Support\Facades\Log;
 
 class TaxBanditsService
 {
-    public function submitForm941(array $payload)
-    {
-        $baseUrl = config('services.taxbandits.base_url');
-        $apiKey = config('services.taxbandits.api_key');
-        $secretKey = config('services.taxbandits.secret_key');
+    protected $apiUrl;
+    protected $clientId;
+    protected $clientSecret;
+    protected $userToken;
 
-        $endpoint = rtrim($baseUrl, '/') . '/Form941/RequestSubmission';
+    public function __construct()
+    {
+        $this->apiUrl = config('services.taxbandits.api_url'); 
+        $this->clientId = config('services.taxbandits.client_id');
+        $this->clientSecret = config('services.taxbandits.client_secret');
+        $this->userToken = config('services.taxbandits.user_token');
+    }
+
+    private function generateJWT()
+    {
+        $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+        $payload = [
+            'iss' => $this->clientId,
+            'sub' => $this->clientId,
+            'aud' => $this->userToken,
+            'iat' => time(),
+            'exp' => time() + 300,
+        ];
+
+        $headerEncoded = $this->base64UrlEncode(json_encode($header));
+        $payloadEncoded = $this->base64UrlEncode(json_encode($payload));
+        $signature = hash_hmac('sha256', $headerEncoded . '.' . $payloadEncoded, $this->clientSecret, true);
+        $signatureEncoded = $this->base64UrlEncode($signature);
+
+        return $headerEncoded . '.' . $payloadEncoded . '.' . $signatureEncoded;
+    }
+
+    private function base64UrlEncode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    public function createEftpsPayment($companyId, $taxType, $amount, $period)
+    {
+        $token = $this->generateJWT();
 
         try {
             $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($endpoint, [
-                'UserAuthInfo' => [
-                    'UserName'   => $apiKey,
-                    'Password'   => $secretKey,
-                ],
-                'Form941Records' => [$payload], // NOTE: Must be array of records
+                'Authorization' => 'Bearer ' . $token,
+                'Accept' => 'application/json',
+            ])->post("{$this->apiUrl}/eftps/payment", [
+                'CompanyId' => $companyId,
+                'TaxType'   => $taxType,
+                'Amount'    => $amount,
+                'Period'    => $period,
             ]);
 
-            $status = $response->status();
-            $body = $response->json();
+            Log::info('EFTPS Raw Response:', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
 
-            if ($response->successful()) {
-                return [
-                    'status' => 'success',
-                    'message' => 'Form 941 submitted to TaxBandits successfully',
-                    'http_status' => $status,
-                    'response' => $body,
-                ];
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => $body['message'] ?? 'Unknown error occurred',
-                    'http_status' => $status,
-                    'response' => $body,
-                ];
-            }
+            return $response->json();
+
         } catch (\Exception $e) {
-            Log::error('TaxBandits API Exception: ' . $e->getMessage());
-
-            return [
-                'status' => 'error',
-                'message' => 'Exception occurred: ' . $e->getMessage(),
-                'response' => [],
-            ];
+            Log::error('EFTPS Payment Error: ' . $e->getMessage());
+            return ['Status' => 'Error', 'Message' => $e->getMessage()];
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\IRS\Http\Controllers\EftpsPaymentController;
 use Modules\IRS\Http\Controllers\Form940Controller;
 use Modules\IRS\Http\Controllers\IrsController;
 
@@ -37,6 +38,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     //For IRS Form940
     Route::post('/irs/form940/create', [Form940Controller::class, 'submitForm940JsonToTaxBandits']);
     Route::put('/irs/form940/update', [Form940Controller::class, 'updateForm940']);
+    Route::get('/irs/form940/validate', [Form940Controller::class, 'validateForm940']);
     Route::post('/irs/form940/validateForm', [Form940Controller::class, 'validateForm940JsonToTaxBandits']);
     Route::get('/irs/form940/status', [Form940Controller::class, 'getForm940Status']);
     Route::delete('/irs/form940/delete', [Form940Controller::class, 'deleteForm940']);
@@ -57,6 +59,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         abort(404);
     })->name('irs.download.file');
+
+
+  
+    Route::post('/eftps/manual-pay', [EftpsPaymentController::class, 'manualPay']);
+    Route::get('/eftps/history', [EftpsPaymentController::class, 'history']);
+
 
 
 });

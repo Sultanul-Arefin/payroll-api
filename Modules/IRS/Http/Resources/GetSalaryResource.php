@@ -81,7 +81,8 @@ class GetSalaryResource extends JsonResource
             ->toArray();
 
         $allowedItems = [
-            'State Tax',
+            'Additional Taxes(Tax TopUp) 1',
+            'Medicare Tax',
             'Federal Income Tax',
             'Social Security',
             'Medicare',
@@ -107,6 +108,7 @@ class GetSalaryResource extends JsonResource
     {
         $allowedItems = [
             'ESI',
+            'Futa',
             'Social Security',
             'Government Deductions 2',
             'Medicare',
