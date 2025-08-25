@@ -662,30 +662,30 @@ class IrsController extends Controller
         }
 
         // Quarter date range 
-    [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+        [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
 
 
-    $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
-    $salaryData = $salaryResource->toArray(request());
+        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+        $salaryData = $salaryResource->toArray(request());
 
-    $grossPay        = $salaryData['gross_pay'] ?? 0;
-    $incomeTax       = $salaryData['income_tax'] ?? 0;
-   // Additional taxes
-    $additionalTaxes = $salaryData['additional_taxes'] ?? [];
-    $federalIncomeTaxWithheld = floatval($additionalTaxes['Federal Income Tax'] ?? 0);
-    $socialSecurityTaxAmt = floatval($additionalTaxes['Social Security'] ?? 0);
-    $medicareWagesTipsAmt = floatval($additionalTaxes['Medicare'] ?? 0);
-   // Government deductions
-    $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
-    $socialSecurityTaxCon = floatval($governmentDeductions['Social Security'] ?? 0);
-    $medicareWagesTipsCom = floatval($governmentDeductions['Medicare'] ?? 0);
+        $grossPay        = $salaryData['gross_pay'] ?? 0;
+        $incomeTax       = $salaryData['income_tax'] ?? 0;
+        // Additional taxes
+        $additionalTaxes = $salaryData['additional_taxes'] ?? [];
+        $federalIncomeTaxWithheld = floatval($additionalTaxes['Federal Income Tax'] ?? 0);
+        $socialSecurityTaxAmt = floatval($additionalTaxes['Social Security'] ?? 0);
+        $medicareWagesTipsAmt = floatval($additionalTaxes['Medicare'] ?? 0);
+        // Government deductions
+        $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
+        $socialSecurityTaxCon = floatval($governmentDeductions['Social Security'] ?? 0);
+        $medicareWagesTipsCom = floatval($governmentDeductions['Medicare'] ?? 0);
 
 
-    $totalEmployees  = $salaryData['total_employee'] ?? 0;
-    $companyName     = $salaryData['company_name'] ?? $company->name;
-    $ein             = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
-    $companyEmail     = $salaryData['company_email'] ?? $company->company_email;
-    $companyPhone     = $salaryData['company_phone'] ?? $company->company_phone;
+        $totalEmployees  = $salaryData['total_employee'] ?? 0;
+        $companyName     = $salaryData['company_name'] ?? $company->name;
+        $ein             = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
+        $companyEmail     = $salaryData['company_email'] ?? $company->company_email;
+        $companyPhone     = $salaryData['company_phone'] ?? $company->company_phone;
     
 
         // Load credentials
@@ -810,8 +810,12 @@ class IrsController extends Controller
             } else {
                 $monthlyDepositor = null;
             }
-        }
 
+            
+        }
+        
+
+        $payerRef = "IRS-" ."941-" . $companyId . "-" . now()->year . $quarter . "-" . uniqid();
 
         // Build JSON payload for TaxBandits API
         $requestPayload = [
@@ -826,12 +830,13 @@ class IrsController extends Controller
                             'BusinessId' => $form941Record['ReturnHeader']['Business']['BusinessId'] ?? null,
                             'BusinessNm' => $companyName ?? null,
                             'TradeNm' => $form941Record['ReturnHeader']['Business']['TradeNm'] ?? null,
-                            'PayerRef' => $form941Record['ReturnHeader']['Business']['PayerRef'] ?? 'PayerRef004',
+                            'PayerRef' => $payerRef,
                             'IsEIN' => true,
                             'EINorSSN' => $ein ?? '127496789',
                             'Email' => $companyEmail ?? 'test@example.com',
                             'ContactNm' => $company->contact_name ?? 'John Doe',
-                            'Phone' => $companyPhone  ?? '1234567890',
+                            //'Phone' => $companyPhone  ?? '1234567890',
+                            'Phone' => $form941Record['ReturnHeader']['Business']['Phone'] ?? '',
                             'PhoneExtn' => $form941Record['ReturnHeader']['Business']['PhoneExtn'] ?? '',
                             'Fax' => $form941Record['ReturnHeader']['Business']['Fax'] ?? null,
                             'BusinessType' => $form941Record['ReturnHeader']['Business']['BusinessType'] ?? 'CORP',
@@ -840,10 +845,10 @@ class IrsController extends Controller
                                 'Phone' => preg_replace('/[^0-9]/', '', $company->phone ?? '1234567890'),
                                 'BusinessMemberType' => 'TAXOFFICER',
                             ],
-                            'KindOfEmployer' => $form941Record['ReturnHeader']['KindOfEmployer'] ?? null,
-                            'KindOfPayer' => $form941Record['ReturnHeader']['KindOfPayer'] ?? null,
-                            'IsBusinessTerminated' => $form941Record['ReturnHeader']['IsBusinessTerminated'] ?? false,
-                            'IsForeign' => $form941Record['ReturnHeader']['IsForeign'] ?? false,
+                            'KindOfEmployer' => $form941Record['ReturnHeader']['Business']['KindOfEmployer'] ?? null,
+                            'KindOfPayer' => $form941Record['ReturnHeader']['Business']['KindOfPayer'] ?? null,
+                            'IsBusinessTerminated' => $form941Record['ReturnHeader']['Business']['IsBusinessTerminated'] ?? false,
+                            'IsForeign' => $form941Record['ReturnHeader']['Business']['IsForeign'] ?? false,
                             'USAddress' => $form941Record['ReturnHeader']['Business']['USAddress'] ?? null,
                             'ForeignAddress' => $form941Record['ReturnHeader']['Business']['ForeignAddress'] ?? null,
                         ],
@@ -911,6 +916,7 @@ class IrsController extends Controller
                             'SemiWeeklyDepositor' => null,
                             'TotalQuarterTaxLiabilityAmt' => $totalQuarterTaxLiabilityAmt,
                         ],
+                        
                     ],
                 ],
             ],
@@ -1095,7 +1101,8 @@ class IrsController extends Controller
         $form941Record = $data['Form941Records'][0] ?? [];
         $recordId = $form941Record['record_id'] ?? null;
         
-        $companyId = $data['company_id'] ?? null;
+        // $companyId = $data['company_id'] ?? null;
+         $companyId = auth()->user()->company_id;
         $year = $form941Record['ReturnHeader']['TaxYr'] ?? now()->year;
         $quarter = $form941Record['ReturnHeader']['Qtr'] ?? 'Q2';
 
