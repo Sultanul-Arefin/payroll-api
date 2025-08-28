@@ -198,13 +198,6 @@ class UserController extends Controller
                     "abn_number" =>$request->abn_number ?? $request->abn_number,
                     "dependent" =>$request->dependent ?? $request->dependent,
 
-                    // 👉 IRS/W-4 new add:
-                    'w4_filing_status' => $request->w4_filing_status,
-                    'w4_dependents' => $request->w4_dependents,
-                    'additional_withholding' => $request->additional_withholding,
-                    'is_fica_exempt' => $request->has('is_fica_exempt') ? (bool) $request->is_fica_exempt : false,
-                    'is_federal_tax_exempt' => $request->has('is_federal_tax_exempt') ? (bool) $request->is_federal_tax_exempt : false,
-
 
                 ]);
 
@@ -597,12 +590,7 @@ class UserController extends Controller
                 'tin_number' => $request->tin_number ?? $request->tin_number,
                 "abn_number" =>$request->abn_number ?? $request->abn_number,
                 "dependent" =>$request->dependent ?? $request->dependent,
-                // IRS/W-4 New Add:
-                'w4_filing_status' => $request->w4_filing_status ?? $user->user_details->w4_filing_status,
-                'w4_dependents' => $request->w4_dependents ?? $user->user_details->w4_dependents,
-                'additional_withholding' => $request->additional_withholding ?? $user->user_details->additional_withholding,
-                'is_fica_exempt' => $request->has('is_fica_exempt') ? (bool)$request->is_fica_exempt : $user->user_details->is_fica_exempt,
-                'is_federal_tax_exempt' => $request->has('is_federal_tax_exempt') ? (bool)$request->is_federal_tax_exempt : $user->user_details->is_federal_tax_exempt,
+                
             ]);
 
             $allFileArr = [];

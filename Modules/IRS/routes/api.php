@@ -40,10 +40,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::put('/irs/form940/update', [Form940Controller::class, 'updateForm940']);
     Route::get('/irs/form940/validate', [Form940Controller::class, 'validateForm940']);
     Route::post('/irs/form940/validateForm', [Form940Controller::class, 'validateForm940JsonToTaxBandits']);
+    Route::post('/irs/transmit/form940', [Form940Controller::class, 'transmitForm940']);
     Route::get('/irs/form940/status', [Form940Controller::class, 'getForm940Status']);
     Route::delete('/irs/form940/delete', [Form940Controller::class, 'deleteForm940']);
     Route::get('/irs/form940/list', [Form940Controller::class, 'listForm940']);
     Route::get('/irs/form940/get', [Form940Controller::class, 'getForm940']);
+    Route::post('/irs/form940/upload-8453emp', [Form940Controller::class, 'uploadForm8453EMPForm940']);
     
   
     
@@ -76,6 +78,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('/irs/form941/DownloadForm8879EMP', [IrsController::class, 'downloadForm8879EMP']);
     Route::get('/irs/form941/download', [IrsController::class, 'downloadForm941Pdf']);
     Route::get('/irs/form940/request-pdf', [Form940Controller::class, 'getForm940Pdf']);
+    Route::get('/irs/form940/DownloadForm8879EMP', [Form940Controller::class, 'form940DownloadForm8879EMP']);
 
 
 });

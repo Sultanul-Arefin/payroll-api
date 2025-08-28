@@ -48,11 +48,6 @@ class UserStoreRequest extends FormRequest
             'other_docs_3' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
             'other_docs_4' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
             'other_docs_5' => 'nullable|mimes:jpg,jpeg,png,pdf,docx|max:2048',
-            'w4_filing_status' => 'nullable|string|in:Single,Married,Head of Household', 
-            'w4_dependents' => 'nullable|integer|min:0',
-            'additional_withholding' => 'nullable|numeric|min:0',
-            'is_fica_exempt' => 'nullable|boolean',
-            'is_federal_tax_exempt' => 'nullable|boolean',
         ];
     }
 

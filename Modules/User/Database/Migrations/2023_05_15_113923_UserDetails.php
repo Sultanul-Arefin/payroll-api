@@ -57,11 +57,6 @@ return new class extends Migration
             $table->string('dependent')->nullable();
             $table->string('pension_pin')->nullable();
             $table->string('tin_number')->nullable();
-            // $table->string('w4_filing_status')->nullable(); // e.g. Single, Married
-            // $table->integer('w4_dependents')->nullable(); // total dependents
-            // $table->decimal('additional_withholding', 10, 2)->nullable(); // W4 additional tax
-            // $table->boolean('is_fica_exempt')->default(false); // Optional FICA exemption
-            // $table->boolean('is_federal_tax_exempt')->default(false); // Optional
             $table->timestamps();
             
         });
