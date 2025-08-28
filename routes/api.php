@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\BonusController;
-use App\Http\Controllers\HelpArticleController;
-use App\Http\Controllers\RotaManagementController;
-use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
-use Modules\Auth\Http\Controllers\RegisteredUserController;
-use App\Http\Controllers\StaffObjectiveController;
+use App\Http\Controllers\BonusController;
+use App\Http\Controllers\TestPostController;
+use App\Http\Controllers\HelpArticleController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\YoutubeVideoController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\RotaManagementController;
+use App\Http\Controllers\StaffObjectiveController;
 use Modules\Dashboard\Http\Controllers\ReportController;
+use Modules\Auth\Http\Controllers\RegisteredUserController;
 
 Route::middleware(['json.response'])->prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -81,3 +82,5 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
     // YOUTUBE VIDEOS
     Route::get('youtube-videos', [YoutubeVideoController::class, 'index']);
 });
+
+Route::apiResource('test-posts', TestPostController::class);
