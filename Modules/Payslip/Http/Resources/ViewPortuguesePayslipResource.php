@@ -14,6 +14,8 @@ use Modules\Payslip\Entities\Payslip;
 use Modules\Payslip\Entities\PayslipDetail;
 use Modules\Payslip\Entities\PayslipDetailsForDeduction;
 use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
+use Modules\Attendance\Entities\Attendance;
+use Modules\Payslip\Http\Resources\AttendanceReport;
 
 class ViewPortuguesePayslipResource extends JsonResource
 {
@@ -23,7 +25,7 @@ class ViewPortuguesePayslipResource extends JsonResource
     
 
     public function toArray($request)
-    {
+    {  
         return [
             'items_details' => $this->get_payslip_details($this->payslip_details),
             'payment_date' => $this->payment_date, //date('Y-m-d H:i:s')
@@ -54,10 +56,24 @@ class ViewPortuguesePayslipResource extends JsonResource
             'total_other_deduction' => $this->get_total_other_deduction(),
             'total_deduction' =>round(floatval($this->tax_value + $this->post_tax_value  + $this->total_employee_deduction),2),
             'attendance'=>$this->getTotalWorkingDaysAttribute(),
-            'annual_leave' => $this->get_annual_leave_calculation($this->employee)
+            'annual_leave' => $this->get_annual_leave_calculation($this->employee),
+            'attendance_list' => $this->getAttendanceList(
+                $this->employee->id,
+                $this->first_date,
+                $this->last_date
+            ),
         ];
     }
 
+    public function getAttendanceList($employeeId, $fromDate, $toDate)
+    {
+        $attendance = Attendance::query()
+            ->where('user_id', $employeeId)
+            ->whereBetween('dates', [$fromDate, $toDate])
+            ->get();
+
+        return AttendanceReport::collection($attendance);
+    }
     public function get_hourly_rate()
     {
         $detail = $this->payslip_details->firstWhere('pay_details', 'Wages');
