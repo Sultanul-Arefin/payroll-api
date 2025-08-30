@@ -141,6 +141,18 @@ class RegisteredUserController extends Controller
                     'country_id' => 1,
                 ]);
 
+                // ROTA WORK SCHEDULES COMPANIES TABLE DATA
+                RotaWorkScheduleCompany::create([
+                    'company_id' => $company->id,
+                    'saturday_off' => false,
+                    'sunday_off' => false,
+                    'monday_off' => false,
+                    'tuesday_off' => false,
+                    'wednesday_off' => false,
+                    'thursday_off' => false,
+                    'friday_off' => false,
+                ]);
+
                 // seeding the database
                 $this->userServices->salary_items_name_seeder($company->id);
                 $this->userServices->leave_salary_items($company->id);
