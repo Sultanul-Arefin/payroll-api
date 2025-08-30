@@ -193,7 +193,7 @@ class RotaManagementController extends Controller
             'sent_notification' => 'required',
         ]);
 
-        if($request->department_id)
+        if(isset($request->department_id))
         {
             $employees = User::query()
                 ->where('company_id', auth()->user()->company_id)
