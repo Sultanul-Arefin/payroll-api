@@ -228,6 +228,7 @@ class RotaManagementController extends Controller
                 ->where('status', User::USER_ACTIVE)
                 ->get();
             $remove_shift = RotaShift::query()
+                        ->whereDate('date', $request->date)
                         ->whereHas(
                             'employee', function (Builder $builder) use($request){
                                 $builder->where('company_id', auth()->user()->company_id);
