@@ -3,6 +3,7 @@
 namespace Modules\Company\Http\Controllers;
 
 use App\Http\Traits\ImageUploads;
+use App\Models\RotaWorkScheduleCompany;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -82,6 +83,18 @@ class CompanyController extends Controller
 
             auth()->user()->update([
                 'company_id' => $company->id,
+            ]);
+
+            // INSERT ROTA WORK SCHEDULES COMPANIES TABLE DATA
+            RotaWorkScheduleCompany::create([
+                'company_id' => $company->id,
+                'saturday_off' => false,
+                'sunday_off' => false,
+                'monday_off' => false,
+                'tuesday_off' => false,
+                'wednesday_off' => false,
+                'thursday_off' => false,
+                'friday_off' => false,
             ]);
 
             return $company;

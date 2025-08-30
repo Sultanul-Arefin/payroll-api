@@ -2,20 +2,21 @@
 
 namespace Modules\Auth\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
-use App\Mail\RegistrationFromAPI;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Mail\RegistrationFromAPI;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Modules\Auth\Http\Services\UserServices;
 use Modules\Company\Entities\Company;
 use Modules\Package\Entities\Package;
+use App\Http\Requests\RegisterRequest;
 use Modules\User\Entities\UserDetails;
+use App\Models\RotaWorkScheduleCompany;
+use Modules\Auth\Http\Services\UserServices;
 
 class RegisteredUserController extends Controller
 {
@@ -62,6 +63,18 @@ class RegisteredUserController extends Controller
             ]);
             // $user->assignRole('super-admin');
 
+            // ROTA WORK SCHEDULES COMPANIES TABLE DATA
+            RotaWorkScheduleCompany::create([
+                'company_id' => $company->id,
+                'saturday_off' => false,
+                'sunday_off' => false,
+                'monday_off' => false,
+                'tuesday_off' => false,
+                'wednesday_off' => false,
+                'thursday_off' => false,
+                'friday_off' => false,
+            ]);
+            
             // seeding the database
             $this->userServices->salary_items_name_seeder($company->id);
             $this->userServices->leave_salary_items($company->id);
