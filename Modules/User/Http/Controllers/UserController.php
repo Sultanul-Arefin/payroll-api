@@ -2,35 +2,36 @@
 
 namespace Modules\User\Http\Controllers;
 
-use App\Exceptions\CustomException;
-use App\Http\Traits\Attachment;
-use App\Http\Traits\ImageUploads;
-use App\Models\User;
-use App\Notifications\UserCreateMailFailedNotification;
 use Exception;
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Traits\Attachment;
+use App\Models\RotaWorkSchedule;
+use App\Http\Traits\ImageUploads;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Modules\Department\Entities\Department;
-use Modules\Designation\Entities\Designation;
-use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
-use Modules\SalaryItemsName\Entities\SalaryItemsName;
-use Modules\User\Entities\UserAttachment;
+use App\Exceptions\CustomException;
 use Modules\User\Entities\UserDetails;
-use Modules\User\Http\Requests\UserStoreRequest;
-use Modules\User\Http\Requests\UserUpdateRequest;
-use Modules\User\Http\Resources\UserBasicSalaryResource;
-use Modules\User\Http\Resources\UserResource;
-use Modules\User\Http\Traits\CountryTrait;
 use Modules\User\Http\Traits\UserTrait;
 use Modules\User\Jobs\UserCreateMailJob;
-use Modules\User\Notifications\UserCreatedNotificationToAdmin;
-use Modules\User\Notifications\UserCreatedNotificationToUser;
-use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Modules\User\Entities\UserAttachment;
+use Modules\User\Http\Traits\CountryTrait;
 use Spatie\Activitylog\Contracts\Activity;
+use Modules\Department\Entities\Department;
+use Illuminate\Contracts\Support\Renderable;
+use Modules\Designation\Entities\Designation;
+use Modules\User\Http\Resources\UserResource;
+use Modules\User\Http\Requests\UserStoreRequest;
+use Modules\User\Http\Requests\UserUpdateRequest;
+use Modules\SalaryItemsName\Entities\SalaryItemsName;
+use App\Notifications\UserCreateMailFailedNotification;
+use Modules\User\Http\Resources\UserBasicSalaryResource;
+use Modules\EmployeeSalaryItems\Entities\EmployeeSalaryItem;
+use Modules\User\Notifications\UserCreatedNotificationToUser;
+use Modules\User\Notifications\UserCreatedNotificationToAdmin;
+use Modules\User\Repositories\Interfaces\UserRepositoryInterface;
 
 class UserController extends Controller
 {
@@ -263,6 +264,18 @@ class UserController extends Controller
                     $allFileName = $this->user_repo->userDocument($request->other_docs_5, 'others', 'other_docs_5', $user->id);
                     array_push($allFile, $allFileName);
                 }
+
+                // INSERT ROTA WORK SCHEDULES TABLE DATA
+                RotaWorkSchedule::create([
+                    'employee_id' => $user->id,
+                    'saturday_off' => false,
+                    'sunday_off' => false,
+                    'monday_off' => false,
+                    'tuesday_off' => false,
+                    'wednesday_off' => false,
+                    'thursday_off' => false,
+                    'friday_off' => false,
+                ]);
 
                 // add salary items
                 $this->add_salary_items($request->all(), $user->id);

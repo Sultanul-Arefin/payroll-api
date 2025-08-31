@@ -193,7 +193,7 @@ class RotaManagementController extends Controller
             'sent_notification' => 'required',
         ]);
 
-        if($request->department_id)
+        if(isset($request->department_id))
         {
             $employees = User::query()
                 ->where('company_id', auth()->user()->company_id)
@@ -201,6 +201,7 @@ class RotaManagementController extends Controller
                 ->where('department_id', $request->department_id)
                 ->get();
             $remove_shift = RotaShift::query()
+                        ->whereDate('date', $request->date)
                         ->whereHas(
                             'employee', function (Builder $builder) use($request){
                                 $builder->where('company_id', auth()->user()->company_id)
@@ -227,6 +228,7 @@ class RotaManagementController extends Controller
                 ->where('status', User::USER_ACTIVE)
                 ->get();
             $remove_shift = RotaShift::query()
+                        ->whereDate('date', $request->date)
                         ->whereHas(
                             'employee', function (Builder $builder) use($request){
                                 $builder->where('company_id', auth()->user()->company_id);

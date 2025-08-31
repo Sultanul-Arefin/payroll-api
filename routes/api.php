@@ -47,7 +47,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('add_bonuses', [BonusController::class, 'store']);
 
         /**
-         * ROTA SOFTWARE MANAGEMENTS
+         * ROTA SOFTWARE MANAGEMENTS STARTS HERE
          */
         Route::get('rota_locations', [RotaManagementController::class, 'rota_locations'])->name('rota.location.index');
         Route::post('rota_location', [RotaManagementController::class, 'store_rota_location'])->name('rota.location.store');
@@ -70,6 +70,10 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::get('shift/{rota_shift}', [RotaManagementController::class, 'edit_shift'])->name('rota.shift.edit');
         Route::patch('shift/{rota_shift}', [RotaManagementController::class, 'update_shift'])->name('rota.shift.update');
         Route::delete('shift/{rota_shift}', [RotaManagementController::class, 'destroy_shift'])->name('rota.shift.destroy');
+
+        /**
+         * ROTA SOFTWARE MANAGEMENTS ENDS HERE
+         */
 
     });
 
