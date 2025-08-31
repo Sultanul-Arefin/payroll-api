@@ -18,7 +18,7 @@ class AttendanceReport extends JsonResource
             'exit_time' => $this->getExitTime($this->id),
             'details' => $this->getDetails($this->id),
             'total_office_hours' => $this->getTotalOfficeHours(),
-            'hours_worked' => $this->getHoursWorked($this->id),
+            'hours_worked' => round($this->getHoursWorked($this->id),2),
             'lunch_and_other_hour' => $this->getLunchAndOtherHour($this->id),
             'description' => $this->getDescription($this->id),
             'overtime' => $this->getOvertimes(),
