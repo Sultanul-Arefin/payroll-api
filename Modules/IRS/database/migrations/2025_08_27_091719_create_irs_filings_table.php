@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status')->default('Draft'); // Draft, Validated, Transmitted
             $table->string('submission_id')->nullable();
             $table->string('record_id')->nullable();
+            $table->string('form_data')->nullable();
             $table->json('api_response')->nullable();
             $table->timestamps();
         

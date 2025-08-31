@@ -670,7 +670,7 @@ class IrsController extends Controller
         $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
         $salaryData = $salaryResource->toArray(request());
 
-        $grossPay        = $salaryData['gross_pay'] ?? 0;
+       // $grossPay        = $salaryData['gross_pay'] ?? 0;
         $incomeTax       = $salaryData['income_tax'] ?? 0;
         // Additional taxes
         $additionalTaxes = $salaryData['additional_taxes'] ?? [];
@@ -948,6 +948,7 @@ class IrsController extends Controller
                 'status'        => 'Draft', 
                 'submission_id' => $submissionId,
                 'record_id'     => $recordId,
+                'form_data'     => json_encode($requestPayload),
                 'api_response'  => json_encode($responseJson), // better to store as JSON string
             ]);
 
@@ -1113,460 +1114,321 @@ class IrsController extends Controller
     }
 
 
-    public function updateForm941JsonToTaxBandits(Request $request)
+    public function updateForm941(Request $request)
     {
-        $data = $request->all(); // JSON body
+        $request->validate([
+            'updates' => 'required|array', 
+        ]);
+    
+        $filingId = $request->query('id');
 
-        // Extract basic information from JSON request
-        $submissionId = $data['submission_id'] ?? null;
-        $form941Record = $data['Form941Records'][0] ?? [];
-        $recordId = $form941Record['record_id'] ?? null;
+        try {
+            $irsFiling = Filing::find($filingId);
+            if (!$irsFiling) {
+                return response()->json(['status' => 'error', 'message' => 'IRS Filing not found'], 404);
+            }
+
+            // Current form data from database
+            $formData = json_decode($irsFiling->form_data, true) ?? [];
+            $updates = $request->input('updates');
+            
+            // DEBUG: Log what we have
+            \Log::info('Original form_data:', $formData);
+            \Log::info('Updates received:', $updates);
+            
+            
+            if (isset($formData['Form941Records'][0])) {
+                // ReturnHeader merge
+                if (isset($updates['ReturnHeader'])) {
+                    $formData['Form941Records'][0]['ReturnHeader'] = 
+                        $this->deepMerge(
+                            $formData['Form941Records'][0]['ReturnHeader'] ?? [],
+                            $updates['ReturnHeader']
+                        );
+                }
+                
+                // ReturnData merge  
+                if (isset($updates['ReturnData'])) {
+                    $formData['Form941Records'][0]['ReturnData'] = 
+                        $this->deepMerge(
+                            $formData['Form941Records'][0]['ReturnData'] ?? [],
+                            $updates['ReturnData']
+                        );
+                }
+            }
+            
+            \Log::info('After merge form_data:', $formData);
+
+           
+            $payload = [
+                "SubmissionId" => $irsFiling->submission_id,
+                "Form941Records" => [
+                    [
+                        "RecordId" => $irsFiling->record_id,
+                        "SequenceId" => $formData['Form941Records'][0]['SequenceId'] ?? '001',
+                        "ReturnHeader" => $formData['Form941Records'][0]['ReturnHeader'] ?? [],
+                        "ReturnData" => $formData['Form941Records'][0]['ReturnData'] ?? [],
+                    ]
+                ]
+            ];
+
+            \Log::info('Final API Payload:', $payload);
+
+           
+            $clientId = config('services.taxbandits.client_id');
+            $clientSecret = config('services.taxbandits.client_secret');
+            $userToken = config('services.taxbandits.user_token');
+            $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
+
+            $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+
+            $client = new \GuzzleHttp\Client();
+            $response = $client->put($apiUrl . '/Form941/Update', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $jwtToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
+
+            $result = json_decode($response->getBody(), true);
+
+            // Update database
+            $irsFiling->update([
+                'form_data' => json_encode($formData),
+                'status' => $result['StatusName'] ?? 'UPDATED',
+                'api_response' => json_encode($result),
+            ]);
+
+            // Log create
+            IrsFilingLog::create([
+                'filing_id' => $irsFiling->id,
+                'action' => 'update',
+                'request_data' => json_encode($payload),
+                'response_data' => json_encode($result),
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Form 941 updated successfully',
+                'data' => $result,
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Update Error:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error during update: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Proper deep merge function
+     */
+    private function deepMerge(array $array1, array $array2): array
+    {
+        $merged = $array1;
         
-        // $companyId = $data['company_id'] ?? null;
-         $companyId = auth()->user()->company_id;
-        $year = $form941Record['ReturnHeader']['TaxYr'] ?? now()->year;
-        $quarter = $form941Record['ReturnHeader']['Qtr'] ?? 'Q2';
-
-        // Validate required fields
-        if (!$submissionId) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Submission ID is required for updating Form 941.',
-            ], 400);
+        foreach ($array2 as $key => $value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = $this->deepMerge($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
         }
+        
+        return $merged;
+    }
 
-        if (!$recordId) {
+    // public function updateForm941JsonToTaxBandits(Request $request)
+    // {
+    //     // Step 1: Validate request
+    //     $request->validate([
+    //         'submission_id'   => 'required|string',
+    //         'Form941Records'  => 'required|array',
+    //         'Form941Records.0.record_id' => 'required|string',
+    //     ]);
+
+    //     $submissionId = $request->submission_id;
+    //     $form941Record = $request->Form941Records[0];
+    //     $recordId = $form941Record['record_id'];
+
+    //     // Step 2: Company Info
+    //     $companyId = auth()->user()->company_id;
+    //     $company = $this->getCompany($companyId);
+    //     if (!$company) {
+    //         return response()->json(['status' => 'error', 'message' => 'Company not found.'], 404);
+    //     }
+
+    //     // Step 3: Quarter & Salary Data
+    //     $year = $form941Record['ReturnHeader']['TaxYr'] ?? now()->year;
+    //     $quarter = $form941Record['ReturnHeader']['Qtr'] ?? 'Q1';
+    //     [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+
+    //     $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+    //     $salaryData = $salaryResource->toArray(request());
+
+    //     // Step 4: Prepare Return Data
+    //     $returnData = $form941Record['ReturnData']['Form941'] ?? [];
+    //     $businessInfo = $form941Record['ReturnHeader']['Business'] ?? [];
+
+    //     $totalEmployees = $returnData['EmployeeCnt'] ?? ($salaryData['total_employee'] ?? 0);
+    //     $grossPay = $returnData['WagesAmt'] ?? ($salaryData['gross_pay'] ?? 0);
+
+    //     $federalIncomeTaxWithheld = $returnData['FedIncomeTaxWHAmt'] ?? 0;
+    //     $socialSecurityTax = $returnData['SocialSecurityTaxAmt_Col2'] ?? 0;
+    //     $medicareTax = $returnData['TaxOnMedicareWagesTipsAmt_Col2'] ?? 0;
+
+    //     // If missing → calculate fallback
+    //     if (!$socialSecurityTax || !$medicareTax) {
+    //         $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
+    //         $socialSecurityTax = $socialSecurityTax ?: floatval($governmentDeductions['SocialSecurityTax'] ?? 0);
+    //         $medicareTax = $medicareTax ?: floatval($governmentDeductions['MedicareTax'] ?? 0);
+    //     }
+
+    //     // Step 5: Auth
+    //     $clientId = config('services.taxbandits.client_id');
+    //     $clientSecret = config('services.taxbandits.client_secret');
+    //     $userToken = config('services.taxbandits.user_token');
+    //     $authUrl = config('services.taxbandits.auth_url');
+    //     $apiUrl = config('services.taxbandits.api_url');
+
+    //     $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+    //     $authResponse = Http::withHeaders(['Authentication' => $jwtToken])->get($authUrl);
+    //     $accessToken = $authResponse['AccessToken'] ?? null;
+
+    //     if (!$accessToken) {
+    //         return response()->json(['status' => 'error', 'message' => 'Auth failed'], 401);
+    //     }
+
+    //     // Step 6: Payload (simplified, only valid fields)
+    //     $requestPayload = [
+    //         "SubmissionId" => $submissionId,
+    //         "Form941Records" => [
+    //             [
+    //                 "RecordId" => $recordId,
+    //                 "SequenceId" => $form941Record['SequenceId'] ?? "001",
+    //                 "ReturnHeader" => [
+    //                     "ReturnType" => "FORM941",
+    //                     "TaxYr" => $year,
+    //                     "Qtr" => $quarter,
+    //                     "Business" => [
+    //                         "BusinessNm" => $businessInfo['BusinessNm'] ?? $company->name,
+    //                         "EINorSSN" => $businessInfo['EINorSSN'] ?? $company->employer_identification_number,
+    //                         "Email" => $businessInfo['Email'] ?? $company->company_email,
+    //                         "Phone" => preg_replace('/\D/', '', $businessInfo['Phone'] ?? $company->company_phone),
+    //                     ],
+    //                 ],
+    //                 "ReturnData" => [
+    //                     "Form941" => [
+    //                         "EmployeeCnt" => intval($totalEmployees),
+    //                         "WagesAmt" => round($grossPay, 2),
+    //                         "FedIncomeTaxWHAmt" => round($federalIncomeTaxWithheld, 2),
+    //                         "SocialSecurityTaxAmt_Col2" => round($socialSecurityTax, 2),
+    //                         "TaxOnMedicareWagesTipsAmt_Col2" => round($medicareTax, 2),
+    //                         "TotalTaxBeforeAdjustmentAmt" => round($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax, 2),
+    //                     ],
+    //                 ],
+    //             ],
+    //         ],
+    //     ];
+
+    //     // Step 7: Call API
+    //     $endpoint = $apiUrl . '/Form941/Update';
+    //     $updateResponse = Http::withHeaders([
+    //         'Authorization' => 'Bearer ' . $accessToken,
+    //         'Content-Type' => 'application/json',
+    //     ])->put($endpoint, $requestPayload);
+
+    //     // Step 8: Log request/response
+    //     IrsFilingLog::create([
+    //         'filing_id' => $recordId,
+    //         'action' => 'update',
+    //         'request_data' => $requestPayload,
+    //         'response_data' => $updateResponse->json(),
+    //     ]);
+
+    //     if ($updateResponse->successful()) {
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Form 941 updated successfully.',
+    //             'response' => $updateResponse->json(),
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'error',
+    //         'message' => 'Failed to update Form 941',
+    //         'http_status' => $updateResponse->status(),
+    //         'details' => $updateResponse->json(),
+    //     ], $updateResponse->status());
+    // }
+
+        
+    public function getForm941($id)
+    {
+        $filing = Filing::find($id);
+
+        if (!$filing || !$filing->submission_id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Record ID is required for updating Form 941.',
-            ], 400);
-        }
-
-        // Get company information
-        $company = $this->getCompany($companyId);
-        if (!$company) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Company not found with the given ID.',
+                'message' => 'Filing record not found or missing Submission ID.',
             ], 404);
         }
 
-        // Quarter date range 
-        [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+        $submissionId = $filing->submission_id;
 
-        // Get salary data from resource
-        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
-        $salaryData = $salaryResource->toArray(request());
-
-        // Extract data from JSON request and salary resource
-        $returnData = $form941Record['ReturnData']['Form941'] ?? [];
-        $businessInfo = $form941Record['ReturnHeader']['Business'] ?? [];
-        
-        // Use JSON data first, then fallback to salary resource
-        $totalEmployees = $returnData['EmployeeCnt'] ?? ($salaryData['total_employee'] ?? 0);
-        $grossPay = $returnData['WagesAmt'] ?? ($salaryData['gross_pay'] ?? 0);
-        $companyName = $businessInfo['BusinessNm'] ?? ($salaryData['company_name'] ?? $company->name);
-        $ein = $businessInfo['EINorSSN'] ?? ($salaryData['employer_identification_number'] ?? $company->employer_identification_number);
-        $companyEmail = $businessInfo['Email'] ?? ($salaryData['company_email'] ?? $company->company_email);
-        $companyPhone = $businessInfo['Phone'] ?? ($salaryData['company_phone'] ?? $company->company_phone);
-
-        // Tax calculations - prioritize JSON data
-        $federalIncomeTaxWithheld = $returnData['FedIncomeTaxWHAmt'] ?? 0;
-        $socialSecurityTax = $returnData['SocialSecurityTaxAmt_Col2'] ?? 0;
-        $medicareTax = $returnData['TaxOnMedicareWagesTipsAmt_Col2'] ?? 0;
-        
-        // If tax amounts are not in JSON, calculate from salary data
-        if ($socialSecurityTax == 0 || $medicareTax == 0) {
-            $additionalTaxes = $salaryData['additional_taxes'] ?? [];
-            $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
-            
-            $socialSecurityTaxAmt = floatval($additionalTaxes['State Tax'] ?? 0);
-            $medicareWagesTipsAmt = floatval($additionalTaxes['Additional Federal Income Tax'] ?? 0);
-            $socialSecurityTaxCon = floatval($governmentDeductions['Government Deductions 2'] ?? 0);
-            $medicareWagesTipsCom = floatval($governmentDeductions['ESI'] ?? 0);
-            
-            $socialSecurityTax = $socialSecurityTax ?: round($socialSecurityTaxCon + $socialSecurityTaxAmt);
-            $medicareTax = $medicareTax ?: round($medicareWagesTipsCom + $medicareWagesTipsAmt);
-            $federalIncomeTaxWithheld = $federalIncomeTaxWithheld ?: floatval($additionalTaxes['Additional Federal Income Tax'] ?? 0);
-        }
-
-        // Load TaxBandits credentials
         $clientId = config('services.taxbandits.client_id');
         $clientSecret = config('services.taxbandits.client_secret');
         $userToken = config('services.taxbandits.user_token');
-        $authUrl = config('services.taxbandits.auth_url');
-        $apiUrl = config('services.taxbandits.api_url');
+        $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
 
-        if (empty($userToken) || empty($clientId) || empty($clientSecret)) {
+        if (!$clientId || !$clientSecret || !$userToken) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Missing TaxBandits credentials.',
             ], 400);
         }
 
-        // Step 1: Generate JWT token
         try {
             $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to generate JWT token: ' . $e->getMessage(),
-            ], 500);
-        }
 
-        // Step 2: Get Access Token
-        $authResponse = Http::withHeaders([
-            'Authentication' => $jwtToken,
-        ])->get($authUrl);
+            $queryParams = ['SubmissionId' => $submissionId];
+            $url = $apiUrl . '/Form941/Get?' . http_build_query($queryParams);
 
-        if ($authResponse->failed()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Authentication failed.',
-                'details' => $authResponse->json(),
-            ], 401);
-        }
-
-        $accessToken = $authResponse['AccessToken'] ?? null;
-        if (!$accessToken) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Access token not received.',
-                'auth_response' => $authResponse->json(),
-            ], 401);
-        }
-
-        // Step 3: Calculate tax values with proper fallbacks
-        $totalTaxBeforeAdjustmentAmt = $returnData['TotalTaxBeforeAdjustmentAmt'] ?? 
-            ($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax);
-        
-        $payrollTaxCreditAmt = floatval($returnData['PayrollTaxCreditAmt'] ?? 0);
-        $totalTaxAfterAdjustmentAmt = $returnData['TotalTaxAfterAdjustmentAmt'] ?? 
-            ($totalTaxBeforeAdjustmentAmt - $payrollTaxCreditAmt);
-        
-        $totTaxAfterAdjustmentAndNonRfdCr = $returnData['TotTaxAfterAdjustmentAndNonRfdCr'] ?? 
-            $totalTaxAfterAdjustmentAmt;
-        
-        $totTaxDepositAmt = floatval($returnData['TotTaxDepositAmt'] ?? 0);
-        $balanceDueAmt = $returnData['BalanceDueAmt'] ?? 
-            ($totTaxAfterAdjustmentAndNonRfdCr - $totTaxDepositAmt);
-
-        // Deposit Schedule setup with proper logic
-        $depositSchedule = $form941Record['ReturnData']['DepositScheduleType'] ?? [];
-        $depositorType = $depositSchedule['DepositorType'] ?? 'NONE';
-        
-        $totalQuarterTaxLiabilityAmt = round($totalTaxAfterAdjustmentAmt, 2);
-        $monthlyDepositor = null;
-
-        // Determine depositor type based on tax liability
-        if (strtoupper($depositorType) === 'NONE' || empty($depositorType)) {
-            if ($totalQuarterTaxLiabilityAmt >= 2500) {
-                $depositorType = 'MONTHLY';
-            } else {
-                $depositorType = 'NONE';
-            }
-        }
-
-        // Calculate monthly deposits if needed
-        if (strtoupper($depositorType) === 'MONTHLY') {
-            $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
-            $monthlyDepositor = [
-                'TaxLiabilityMonth1' => $perMonth,
-                'TaxLiabilityMonth2' => $perMonth,
-                'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - (2 * $perMonth), 2),
-            ];
-        }
-
-        // Extract address information
-        $usAddress = $businessInfo['USAddress'] ?? null;
-        $foreignAddress = $businessInfo['ForeignAddress'] ?? null;
-
-        // Signature details
-        $signatureDetails = $form941Record['ReturnHeader']['SignatureDetails'] ?? [];
-        $signatureType = $signatureDetails['SignatureType'] ?? "FORM_8453_EMP";
-        $onlinePin = $signatureDetails['OnlineSignaturePIN']['PIN'] ?? null;
-
-        // Third party designee
-        $isThirdPartyDesignee = $form941Record['ReturnHeader']['IsThirdPartyDesignee'] ?? false;
-        $thirdPartyDesignee = $form941Record['ReturnHeader']['ThirdPartyDesignee'] ?? [];
-
-        // Build complete payload with all JSON data properly mapped
-        $requestPayload = [
-            "SubmissionId" => $submissionId,
-            "Form941Records" => [
-                [
-                    "RecordId" => $recordId,
-                    "SequenceId" => $form941Record['SequenceId'] ?? "001",
-                    "ReturnHeader" => [
-                        "ReturnType" => $form941Record['ReturnHeader']['ReturnType'] ?? "FORM941",
-                        "TaxYr" => $form941Record['ReturnHeader']['TaxYr'] ?? $year,
-                        "Qtr" => $form941Record['ReturnHeader']['Qtr'] ?? $quarter,
-
-                        "Business" => [
-                            "BusinessId" => $businessInfo['BusinessId'] ?? null,
-                            "BusinessNm" => $companyName,
-                            "TradeNm" => $businessInfo['TradeNm'] ?? null,
-                            "PayerRef" => $businessInfo['PayerRef'] ?? "PayerRef00",
-                            "IsEIN" => $businessInfo['IsEIN'] ?? true,
-                            "EINorSSN" => $ein,
-                            "Email" => $companyEmail,
-                            "ContactNm" => $businessInfo['ContactNm'] ?? ($company->contact_name ?? "John Doe"),
-                            "Phone" => preg_replace('/[^0-9]/', "", $companyPhone),
-                            "PhoneExtn" => $businessInfo['PhoneExtn'] ?? "",
-                            "Fax" => $businessInfo['Fax'] ?? null,
-                            "BusinessType" => $businessInfo['BusinessType'] ?? "CORP",
-
-                            "SigningAuthority" => [
-                                "Name" => $businessInfo['SigningAuthority']['Name'] ?? 
-                                        ($company->contact_name ?? "John Doe"),
-                                "Phone" => preg_replace('/[^0-9]/', "", 
-                                        $businessInfo['SigningAuthority']['Phone'] ?? 
-                                        ($company->phone ?? $companyPhone)),
-                                "BusinessMemberType" => $businessInfo['SigningAuthority']['BusinessMemberType'] ?? 
-                                                    "TAXOFFICER",
-                            ],
-
-                            "KindOfEmployer" => $businessInfo['KindOfEmployer'] ?? null,
-                            "KindOfPayer" => $businessInfo['KindOfPayer'] ?? null,
-                            "IsBusinessTerminated" => $businessInfo['IsBusinessTerminated'] ?? false,
-                            "IsForeign" => $businessInfo['IsForeign'] ?? false,
-                            "USAddress" => $usAddress,
-                            "ForeignAddress" => $foreignAddress,
-                        ],
-
-                        "IsThirdPartyDesignee" => $isThirdPartyDesignee,
-                        "ThirdPartyDesignee" => [
-                            "Name" => $thirdPartyDesignee['Name'] ?? null,
-                            "Phone" => $thirdPartyDesignee['Phone'] ?? null,
-                            "PIN" => $thirdPartyDesignee['PIN'] ?? null,
-                        ],
-
-                        "SignatureDetails" => [
-                            "SignatureType" => $signatureType,
-                            "OnlineSignaturePIN" => ["PIN" => $onlinePin],
-                            "ReportingAgentPIN" => ["PIN" => $signatureDetails['ReportingAgentPIN']['PIN'] ?? null],
-                            "taxPayerPIN" => ["PIN" => $signatureDetails['taxPayerPIN']['PIN'] ?? null],
-                            "Form8453EMP" => $signatureDetails['Form8453EMP'] ?? null,
-                        ],
-
-                        "BusinessStatusDetails" => [
-                            "IsBusinessClosed" => $businessInfo['IsBusinessClosed'] ?? false,
-                            "BusinessClosedDetails" => $businessInfo['BusinessClosedDetails'] ?? null,
-                            "IsBusinessTransferred" => $businessInfo['IsBusinessTransferred'] ?? false,
-                            "BusinessTransferredDetails" => $businessInfo['BusinessTransferredDetails'] ?? null,
-                            "IsSeasonalEmployer" => $businessInfo['IsSeasonalEmployer'] ?? false,
-                        ],
-                    ],
-
-                    "ReturnData" => [
-                        "Form941" => [
-                            "EmployeeCnt" => intval($totalEmployees),
-                            "WagesAmt" => floatval($grossPay),
-                            "FedIncomeTaxWHAmt" => round($federalIncomeTaxWithheld, 2),
-                            "WagesNotSubjToSSMedcrTaxInd" => $returnData['WagesNotSubjToSSMedcrTaxInd'] ?? false,
-
-                            "SocialSecurityTaxCashWagesAmt_Col1" => $returnData['SocialSecurityTaxCashWagesAmt_Col1'] ?? 
-                                                                floatval($grossPay),
-                            "TaxableSocSecTipsAmt_Col1" => floatval($returnData['TaxableSocSecTipsAmt_Col1'] ?? 0),
-                            "TaxableMedicareWagesTipsAmt_Col1" => $returnData['TaxableMedicareWagesTipsAmt_Col1'] ?? 
-                                                                floatval($grossPay),
-                            "TxblWageTipsSubjAddnlMedcrAmt_Col1" => floatval($returnData['TxblWageTipsSubjAddnlMedcrAmt_Col1'] ?? 0),
-
-                            "SocialSecurityTaxAmt_Col2" => round($socialSecurityTax, 2),
-                            "TaxOnSocialSecurityTipsAmt_Col2" => floatval($returnData['TaxOnSocialSecurityTipsAmt_Col2'] ?? 0),
-                            "TaxOnMedicareWagesTipsAmt_Col2" => round($medicareTax, 2),
-                            "TaxOnWageTipsSubjAddnlMedcrAmt_Col2" => floatval($returnData['TaxOnWageTipsSubjAddnlMedcrAmt_Col2'] ?? 0),
-
-                            "TotSSMdcrTaxAmt" => round($socialSecurityTax + $medicareTax, 2),
-                            "TaxOnUnreportedTips3121qAmt" => floatval($returnData['TaxOnUnreportedTips3121qAmt'] ?? 0),
-
-                            "TotalTaxBeforeAdjustmentAmt" => round($totalTaxBeforeAdjustmentAmt, 2),
-                            "CurrentQtrFractionsCentsAmt" => floatval($returnData['CurrentQtrFractionsCentsAmt'] ?? 0),
-                            "CurrentQuarterSickPaymentAmt" => floatval($returnData['CurrentQuarterSickPaymentAmt'] ?? 0),
-                            "CurrQtrTipGrpTermLifeInsAdjAmt" => floatval($returnData['CurrQtrTipGrpTermLifeInsAdjAmt'] ?? 0),
-
-                            "TotalTaxAfterAdjustmentAmt" => round($totalTaxAfterAdjustmentAmt, 2),
-                            "PayrollTaxCreditAmt" => round($payrollTaxCreditAmt, 2),
-                            "IsPayrollTaxCredit" => $returnData['IsPayrollTaxCredit'] ?? false,
-                            "Form8974" => $returnData['Form8974'] ?? null,
-
-                            "TotTaxAfterAdjustmentAndNonRfdCr" => round($totTaxAfterAdjustmentAndNonRfdCr, 2),
-                            "TotTaxDepositAmt" => round($totTaxDepositAmt, 2),
-                            "BalanceDueAmt" => round($balanceDueAmt, 2),
-                            "OverpaidAmt" => floatval($returnData['OverpaidAmt'] ?? 0),
-                            "OverPaymentRecoveryType" => $returnData['OverPaymentRecoveryType'] ?? null,
-                        ],
-
-                        "IRSPaymentType" => $form941Record['ReturnData']['IRSPaymentType'] ?? "EFTPS",
-                        "IRSPayment" => [
-                            "BankRoutingNum" => $form941Record['ReturnData']['IRSPayment']['BankRoutingNum'] ?? null,
-                            "AccountType" => $form941Record['ReturnData']['IRSPayment']['AccountType'] ?? null,
-                            "BankAccountNum" => $form941Record['ReturnData']['IRSPayment']['BankAccountNum'] ?? null,
-                            "Phone" => $form941Record['ReturnData']['IRSPayment']['Phone'] ?? null,
-                        ],
-
-                        "DepositScheduleType" => [
-                            "DepositorType" => $depositorType,
-                            "MonthlyDepositor" => $monthlyDepositor,
-                            "SemiWeeklyDepositor" => $depositSchedule['SemiWeeklyDepositor'] ?? null,
-                            "TotalQuarterTaxLiabilityAmt" => $totalQuarterTaxLiabilityAmt,
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-    
-        $endpoint = $apiUrl . '/Form941/Update';
-
-        $updateResponse = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-        ])->put($endpoint, $requestPayload);
-
-        if ($updateResponse->successful()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Form 941 updated successfully.',
-                'response' => $updateResponse->json(),
-                'payload_sent' => $requestPayload, // Include for debugging
-            ]);
-        } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to update Form 941 in TaxBandits.',
-                'http_status' => $updateResponse->status(),
-                'raw_body' => $updateResponse->body(),
-                'payload_sent' => $requestPayload, // Include for debugging
-                'error_details' => $updateResponse->json(),
-            ], $updateResponse->status());
-        }
-    }
-        
-    public function getForm941(Request $request)
-    {
-        // Load credentials
-        $clientId = config('services.taxbandits.client_id');
-        $clientSecret = config('services.taxbandits.client_secret');
-        $userToken = config('services.taxbandits.user_token');
-        $authUrl = config('services.taxbandits.auth_url');
-        $apiUrl = config('services.taxbandits.api_url');
-
-        if (empty($userToken) || empty($clientId) || empty($clientSecret)) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'Missing TaxBandits credentials.',
-                ],
-                400,
-            );
-        }
-
-        // Validate required parameters
-        $submissionId = $request->get('SubmissionId');
-        if (empty($submissionId)) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'SubmissionId parameter is required.',
-                ],
-                400,
-            );
-        }
-
-        // Step 1: Generate JWT token
-        try {
-            $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
-        } catch (\Exception $e) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'Failed to generate JWT token: ' . $e->getMessage(),
-                ],
-                500,
-            );
-        }
-
-        // Step 2: Get Access Token
-        $authResponse = Http::withHeaders([
-            'Authentication' => $jwtToken,
-        ])->get($authUrl);
-
-        if ($authResponse->failed()) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'Authentication failed.',
-                    'details' => $authResponse->json(),
-                ],
-                401,
-            );
-        }
-
-        $accessToken = $authResponse['AccessToken'] ?? null;
-        if (!$accessToken) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'Access token not received.',
-                    'auth_response' => $authResponse->json(),
-                ],
-                401,
-            );
-        }
-
-        // Step 3: Build query parameters
-        $queryParams = [
-            'SubmissionId' => $submissionId,
-        ];
-
-        // Optional RecordIds parameter (can be comma-separated list)
-        if ($request->has('RecordIds') && !empty($request->get('RecordIds'))) {
-            $queryParams['RecordIds'] = $request->get('RecordIds');
-        }
-
-        // Step 4: Make API request to get Form 941 information
-        $endpoint = $apiUrl . '/Form941/Get';
-
-        // Build the full URL with query parameters
-        $url = $endpoint . '?' . http_build_query($queryParams);
-
-        try {
             $getResponse = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
+                'Authorization' => 'Bearer ' . $jwtToken,
                 'Accept' => 'application/json',
             ])->get($url);
 
-            if ($getResponse->successful()) {
-                $responseData = $getResponse->json();
+            IrsFilingLog::create([
+                'filing_id' => $filing->id,
+                'action' => 'GetForm941',
+                'request_data' => $queryParams,
+                'response_data' => $getResponse->json(),
+            ]);
 
+            if ($getResponse->successful()) {
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Form 941 information retrieved successfully.',
-                    'data' => $responseData,
-                    'query_params' => $queryParams, // For debugging
+                    'data' => $getResponse->json(),
                 ]);
-            } else {
-                return response()->json(
-                    [
-                        'status' => 'error',
-                        'message' => 'Failed to retrieve Form 941 information from TaxBandits.',
-                        'http_status' => $getResponse->status(),
-                        'error_response' => $getResponse->json(),
-                        'query_params' => $queryParams, // For debugging
-                    ],
-                    $getResponse->status(),
-                );
             }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve Form 941 information from TaxBandits.',
+                'http_status' => $getResponse->status(),
+                'error_response' => $getResponse->json(),
+            ], $getResponse->status());
+
         } catch (\Exception $e) {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'Exception occurred while retrieving Form 941 information: ' . $e->getMessage(),
-                ],
-                500,
-            );
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Exception occurred while retrieving Form 941 information: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -1920,29 +1782,129 @@ class IrsController extends Controller
     //     }
     // }
 
+    // public function validateSubmittedForm941(Request $request)
+    // {
+    //     $submissionId = $request->input('submission_id');
+    //     $recordId     = $request->input('record_id');
+
+    //     if (!$submissionId || !$recordId) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'SubmissionId and RecordId are required.',
+    //         ], 400);
+    //     }
+
+    //     // Find the filing record
+    //     $filing = Filing::where('submission_id', $submissionId)
+    //                     ->where('record_id', $recordId)
+    //                     ->first();
+
+    //     if (!$filing) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Filing record not found.',
+    //         ], 404);
+    //     }
+
+    //     // Load TaxBandits credentials
+    //     $clientId     = config('services.taxbandits.client_id');
+    //     $clientSecret = config('services.taxbandits.client_secret');
+    //     $userToken    = config('services.taxbandits.user_token');
+    //     $authUrl      = config('services.taxbandits.auth_url');
+    //     $apiUrl       = config('services.taxbandits.api_url');
+
+    //     // Generate JWT token
+    //     try {
+    //         $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Failed to generate JWT token: ' . $e->getMessage(),
+    //         ], 500);
+    //     }
+
+    //     // Authenticate to get Access Token
+    //     $authResponse = Http::withHeaders([
+    //         'Authentication' => $jwtToken,
+    //     ])->get($authUrl);
+
+    //     if ($authResponse->failed()) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Authentication failed.',
+    //             'details' => $authResponse->json(),
+    //         ], 401);
+    //     }
+
+    //     $accessToken = $authResponse['AccessToken'] ?? null;
+    //     if (!$accessToken) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Access token not received.',
+    //             'auth_response' => $authResponse->json(),
+    //         ], 401);
+    //     }
+
+    //     // Build Validate API endpoint with query parameters
+    //     $endpoint = $apiUrl . '/Form941/Validate';
+    //     $queryParams = [
+    //         'submissionId' => $submissionId,
+    //         'recordIds'    => $recordId,
+    //     ];
+
+    //     // Call the Validate API
+    //     $response = Http::withHeaders([
+    //         'Authorization' => 'Bearer ' . $accessToken,
+    //         'Accept'        => 'application/json',
+    //     ])->get($endpoint, $queryParams);
+
+    //     // Save log and return response
+    //     $responseData = $response->successful() ? $response->json() : $response->body();
+    //     IrsFilingLog::create([
+    //         'filing_id'     => $filing->id,
+    //         'action'        => $response->successful() ? 'validate' : 'validate_failed',
+    //         'request_data'  => $queryParams,
+    //         'response_data' => $responseData,
+    //     ]);
+
+    //     if ($response->successful()) {
+    //         return response()->json([
+    //             'status'  => 'success',
+    //             'message' => 'Validation data retrieved successfully.',
+    //             'data'    => $responseData,
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'status'      => 'error',
+    //             'message'     => 'Failed to get validation data from TaxBandits.',
+    //             'http_status' => $response->status(),
+    //             'raw_body'    => $responseData,
+    //         ]);
+    //     }
+    // }
     public function validateSubmittedForm941(Request $request)
     {
-        $submissionId = $request->input('submission_id');
-        $recordId     = $request->input('record_id');
+        $filingId = $request->input('id');
 
-        if (!$submissionId || !$recordId) {
+        if (!$filingId) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'SubmissionId and RecordId are required.',
+                'message' => 'filing_id is required.',
             ], 400);
         }
 
-        // Find the filing record
-        $filing = Filing::where('submission_id', $submissionId)
-                        ->where('record_id', $recordId)
-                        ->first();
+        // Find the filing record from DB
+        $filing = Filing::find($filingId);
 
-        if (!$filing) {
+        if (!$filing || !$filing->submission_id || !$filing->record_id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Filing record not found.',
+                'message' => 'Filing record not found or missing Submission/Record ID.',
             ], 404);
         }
+
+        $submissionId = $filing->submission_id;
+        $recordId     = $filing->record_id;
 
         // Load TaxBandits credentials
         $clientId     = config('services.taxbandits.client_id');
@@ -1962,9 +1924,10 @@ class IrsController extends Controller
         }
 
         // Authenticate to get Access Token
-        $authResponse = Http::withHeaders([
-            'Authentication' => $jwtToken,
-        ])->get($authUrl);
+            $authResponse = Http::withHeaders([
+                'Authentication' => $jwtToken,
+            ])->get($authUrl);
+
 
         if ($authResponse->failed()) {
             return response()->json([
@@ -1986,11 +1949,11 @@ class IrsController extends Controller
         // Build Validate API endpoint with query parameters
         $endpoint = $apiUrl . '/Form941/Validate';
         $queryParams = [
-            'submissionId' => $submissionId,
-            'recordIds'    => $recordId,
+            'SubmissionId' => $submissionId,
+            'RecordIds'    => $recordId,
         ];
 
-        // Call the Validate API
+        // Call the Validate API (GET call)
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Accept'        => 'application/json',
@@ -1998,11 +1961,12 @@ class IrsController extends Controller
 
         // Save log and return response
         $responseData = $response->successful() ? $response->json() : $response->body();
+
         IrsFilingLog::create([
             'filing_id'     => $filing->id,
             'action'        => $response->successful() ? 'validate' : 'validate_failed',
-            'request_data'  => $queryParams,
-            'response_data' => $responseData,
+            'request_data'  => json_encode($queryParams),
+            'response_data' => json_encode($responseData),
         ]);
 
         if ($response->successful()) {
@@ -2022,10 +1986,19 @@ class IrsController extends Controller
     }
 
 
-    public function getForm941Pdf(Request $request)
+    public function getForm941Pdf($id)
     {
-        $submissionId = $request->get('submission_id');
-        $recordId = $request->get('record_id');
+        $filing = Filing::find($id);
+
+        if (!$filing || !$filing->submission_id || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+
+        $submissionId = $filing->submission_id;
+        $recordId = $filing->record_id;
 
         if (!$submissionId || !$recordId) {
             return response()->json(
@@ -2074,6 +2047,13 @@ class IrsController extends Controller
             'Authorization' => 'Bearer ' . $accessToken,
             'Accept' => 'application/json',
         ])->get($endpoint, $params);
+
+         IrsFilingLog::create([
+            'filing_id'     => $filing->id,
+            'action'        => 'PDF Generate',
+            'request_data'  => json_encode(['endpoint' => $endpoint]),
+            'response_data' => json_encode($params),
+        ]);
 
         if ($pdfResponse->successful()) {
             return response()->json([
@@ -2207,86 +2187,171 @@ class IrsController extends Controller
         }
     }
 
+    // public function transmitForm941(Request $request)
+    // {
+    //     $request->validate([
+    //         'submission_id' => 'required|uuid',
+    //         'record_id' => 'required|array',
+    //         'record_id.*' => 'uuid',
+    //     ]);
+
+    //     $submissionId = $request->input('submission_id');
+    //     $recordIds = $request->input('record_id');
+
+    //     $clientId = config('services.taxbandits.client_id');
+    //     $clientSecret = config('services.taxbandits.client_secret');
+    //     $userToken = config('services.taxbandits.user_token');
+    //     $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
+
+    //     $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+
+    //     $responses = [];
+
+    //     foreach ($recordIds as $recordId) {
+    //         try {
+    //             $payload = [
+    //                 'SubmissionId' => $submissionId,
+    //                 'RecordIds' => [$recordId],
+    //             ];
+
+    //             $response = Http::withHeaders([
+    //                 'Authorization' => 'Bearer ' . $jwt,
+    //                 'ClientId' => $clientId,
+    //             ])->post($apiUrl . '/Form941/Transmit', $payload);
+
+    //             $resBody = $response->json();
+
+    //             $existingAttempts = IrsTransmission::where('submission_id', $submissionId)->where('record_id', $recordId)->value('attempts') ?? 0;
+
+    //             $transmission = IrsTransmission::updateOrCreate(
+    //                 [
+    //                     'submission_id' => $submissionId,
+    //                     'record_id' => $recordId,
+    //                 ],
+    //                 [
+    //                     'status' => $response->successful() ? 'success' : 'failed',
+    //                     'transmitted_at' => $response->successful() ? now() : null,
+    //                     'error_message' => $response->successful() ? null : json_encode($resBody['ErrorMessage'] ?? $resBody),
+    //                     'response' => $resBody,
+    //                     'attempts' => $existingAttempts + 1,
+    //                 ],
+    //             );
+
+    //             $responses[] = [
+    //                 'record_id' => $recordId,
+    //                 'status' => $transmission->status,
+    //                 'response' => $resBody,
+    //             ];
+    //         } catch (\Exception $e) {
+    //             $transmission = IrsTransmission::firstOrNew([
+    //                 'submission_id' => $submissionId,
+    //                 'record_id' => $recordId,
+    //             ]);
+
+    //             $transmission->status = 'failed';
+    //             $transmission->error_message = $e->getMessage();
+    //             $transmission->response = null;
+    //             $transmission->attempts = ($transmission->attempts ?? 0) + 1;
+    //             $transmission->save();
+
+    //             $responses[] = [
+    //                 'record_id' => $recordId,
+    //                 'status' => 'failed',
+    //                 'error' => $e->getMessage(),
+    //             ];
+    //         }
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Transmission attempt complete',
+    //         'results' => $responses,
+    //     ]);
+    // }
+
     public function transmitForm941(Request $request)
-    {
-        $request->validate([
-            'submission_id' => 'required|uuid',
-            'record_id' => 'required|array',
-            'record_id.*' => 'uuid',
-        ]);
+{
+    $request->validate([
+        'filing_id' => 'required|integer|exists:irs_filings,id',
+    ]);
 
-        $submissionId = $request->input('submission_id');
-        $recordIds = $request->input('record_id');
+    $filing = Filing::findOrFail($request->filing_id);
 
-        $clientId = config('services.taxbandits.client_id');
-        $clientSecret = config('services.taxbandits.client_secret');
-        $userToken = config('services.taxbandits.user_token');
-        $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
-
-        $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
-
-        $responses = [];
-
-        foreach ($recordIds as $recordId) {
-            try {
-                $payload = [
-                    'SubmissionId' => $submissionId,
-                    'RecordIds' => [$recordId],
-                ];
-
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $jwt,
-                    'ClientId' => $clientId,
-                ])->post($apiUrl . '/Form941/Transmit', $payload);
-
-                $resBody = $response->json();
-
-                $existingAttempts = IrsTransmission::where('submission_id', $submissionId)->where('record_id', $recordId)->value('attempts') ?? 0;
-
-                $transmission = IrsTransmission::updateOrCreate(
-                    [
-                        'submission_id' => $submissionId,
-                        'record_id' => $recordId,
-                    ],
-                    [
-                        'status' => $response->successful() ? 'success' : 'failed',
-                        'transmitted_at' => $response->successful() ? now() : null,
-                        'error_message' => $response->successful() ? null : json_encode($resBody['ErrorMessage'] ?? $resBody),
-                        'response' => $resBody,
-                        'attempts' => $existingAttempts + 1,
-                    ],
-                );
-
-                $responses[] = [
-                    'record_id' => $recordId,
-                    'status' => $transmission->status,
-                    'response' => $resBody,
-                ];
-            } catch (\Exception $e) {
-                $transmission = IrsTransmission::firstOrNew([
-                    'submission_id' => $submissionId,
-                    'record_id' => $recordId,
-                ]);
-
-                $transmission->status = 'failed';
-                $transmission->error_message = $e->getMessage();
-                $transmission->response = null;
-                $transmission->attempts = ($transmission->attempts ?? 0) + 1;
-                $transmission->save();
-
-                $responses[] = [
-                    'record_id' => $recordId,
-                    'status' => 'failed',
-                    'error' => $e->getMessage(),
-                ];
-            }
-        }
-
+    if (!$filing->submission_id || !$filing->record_id) {
         return response()->json([
-            'message' => 'Transmission attempt complete',
-            'results' => $responses,
-        ]);
+            'message' => 'Filing does not have submission_id or record_id',
+        ], 422);
     }
+
+    $submissionId = $filing->submission_id;
+    $recordIds = is_array($filing->record_id) ? $filing->record_id : [$filing->record_id];
+
+    $clientId = config('services.taxbandits.client_id');
+    $clientSecret = config('services.taxbandits.client_secret');
+    $userToken = config('services.taxbandits.user_token');
+    $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
+
+    $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+
+    $responses = [];
+
+    foreach ($recordIds as $recordId) {
+        try {
+            $payload = [
+                'SubmissionId' => $submissionId,
+                'RecordIds' => [$recordId],
+            ];
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $jwt,
+                'ClientId' => $clientId,
+                'Content-Type' => 'application/json',
+            ])->post($apiUrl . '/Form941/Transmit', $payload);
+
+            $resBody = $response->json();
+
+            // Update filings table
+            if ($response->successful()) {
+                $filing->status = 'Transmitted';
+                $filing->api_response = $resBody; // full API response save
+                $filing->save();
+            }
+
+            // Save in logs
+            IrsFilingLog::create([
+                'filing_id' => $filing->id,
+                'action' => 'Transmit',
+                'request_data' => $payload,
+                'response_data' => $resBody,
+            ]);
+
+            $responses[] = [
+                'record_id' => $recordId,
+                'status' => $response->successful() ? 'success' : 'failed',
+                'response' => $resBody,
+            ];
+        } catch (\Exception $e) {
+            // Save error log
+            IrsFilingLog::create([
+                'filing_id' => $filing->id,
+                'action' => 'TransmitFailed',
+                'request_data' => ['SubmissionId' => $submissionId, 'RecordId' => $recordId],
+                'response_data' => ['error' => $e->getMessage()],
+            ]);
+
+            $responses[] = [
+                'record_id' => $recordId,
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    return response()->json([
+        'message' => 'Transmission attempt complete',
+        'filing_id' => $filing->id,
+        'results' => $responses,
+    ]);
+}
 
     public function uploadForm8453EMP(Request $request)
     {
@@ -2370,12 +2435,19 @@ class IrsController extends Controller
         ]);
     }
 
-    public function downloadForm8453EMP(Request $request)
+    public function downloadForm8453EMP($id)
     {
-        $request->validate([
-            'record_id' => 'required|uuid',
-        ]);
-        $recordId = $request->record_id;
+       $filing = Filing::find($id);
+
+        if (!$filing || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+
+        $recordId = $filing->record_id;
+
 
         $clientId = config('services.taxbandits.client_id');
         $clientSecret = config('services.taxbandits.client_secret');
@@ -2411,14 +2483,25 @@ class IrsController extends Controller
         }
 
         $accessToken = $authResponse['AccessToken'];
+        // API Endpoint
+        $endpoint = "{$apiUrl}/Form941/DownloadForm8453EMP";
+        $params   = ['RecordId' => $recordId];
 
+            // API Call
         $response = Http::withToken($accessToken)
             ->acceptJson()
-            ->get("{$apiUrl}/Form941/DownloadForm8453EMP", [
-                'RecordId' => $recordId,
-            ]);
+            ->get($endpoint, $params);
 
         $responseData = $response->json();
+
+        // ✅ Save logs (Request + Response)
+        IrsFilingLog::create([
+            'filing_id'     => $filing->id,
+            'action'        => 'PDF Dawnload',
+            'request_data'  => json_encode(['endpoint' => $endpoint, 'params' => $params]),
+            'response_data' => json_encode($responseData),
+        ]);
+
 
         if ($response->failed() || empty($responseData)) {
             return response()->json(
@@ -2867,15 +2950,22 @@ class IrsController extends Controller
     //         ], 500);
     //     }
     // }
-    public function deleteForm941(Request $request)
+    public function deleteForm941($id)
     {
-        $request->validate([
-            'submission_id' => 'required|uuid',
-            'record_id' => 'nullable|uuid',
-        ]);
+        $filing = Filing::find($id);
 
-        $submissionId = $request->submission_id;
-        $recordId = $request->record_id;
+        if (!$filing || !$filing->submission_id || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+
+        $submissionId = $filing->submission_id;
+        $recordId = $filing->record_id;
+
+
+        
 
         // TaxBandits Credentials
         $clientId = config('services.taxbandits.client_id');
@@ -2899,6 +2989,12 @@ class IrsController extends Controller
         ])->delete($endpoint);
 
         $responseBody = $response->json();
+        IrsFilingLog::create([
+            'filing_id'     => $filing->id,
+            'action'        => 'Check Form941 Status',
+            'request_data'  => json_encode(['endpoint' => $endpoint]),
+            'response_data' => json_encode($responseBody),
+        ]);
 
         // Final API Response format
         $apiResponse = [
@@ -2911,10 +3007,19 @@ class IrsController extends Controller
         return response()->json($apiResponse, $response->status());
     }
 
-    public function downloadForm941Pdf(Request $request)
+    public function downloadForm941Pdf($id)
     {
-        $submissionId = $request->get('submission_id');
-        $recordId = $request->get('record_id'); // optional
+        $filing = Filing::find($id);
+
+        if (!$filing || !$filing->submission_id || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+
+        $submissionId = $filing->submission_id;
+        $recordId = $filing->record_id;
 
         if (!$submissionId) {
             return response()->json([
@@ -2945,15 +3050,19 @@ class IrsController extends Controller
             ], 200);
     }
 
-    public function getForm941Status(Request $request)
+    public function getForm941Status($id)
     {
-        $request->validate([
-            'submission_id' => 'required|uuid',
-            'record_id' => 'nullable|uuid',
-        ]);
+        $filing = Filing::find($id);
 
-        $submissionId = $request->submission_id;
-        $recordId = $request->record_id;
+        if (!$filing || !$filing->submission_id || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+
+        $submissionId = $filing->submission_id;
+        $recordId = $filing->record_id;
 
         $clientId = config('services.taxbandits.client_id');
         $clientSecret = config('services.taxbandits.client_secret');
@@ -2980,6 +3089,13 @@ class IrsController extends Controller
         $statusName = $data['Form941Records']['SuccessRecords'][0]['RecordStatus'] ?? null;
         $isPending = in_array(strtolower($statusName), ['created', 'inprogress']);
 
+        IrsFilingLog::create([
+            'filing_id'     => $filing->id,
+            'action'        => 'Check Form941 Status',
+            'request_data'  => json_encode(['endpoint' => $endpoint]),
+            'response_data' => json_encode($data),
+        ]);
+
         return response()->json([
             'status' => $response->successful() ? 'success' : 'error',
             'status_code' => $statusCode,
@@ -2989,6 +3105,21 @@ class IrsController extends Controller
             'http_status' => $response->status(),
         ], $response->status());
     }
+
+    public function getFiling(Request $request)
+    {
+        $filings = Filing::select('id', 'form_type', 'quarter', 'created_date', 'status', 'submission_id')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $filings
+        ]);
+    }
+
+
+    
 
 
 }
