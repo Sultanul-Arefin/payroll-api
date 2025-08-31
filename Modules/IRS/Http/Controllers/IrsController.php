@@ -670,8 +670,9 @@ class IrsController extends Controller
         $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
         $salaryData = $salaryResource->toArray(request());
 
-       // $grossPay        = $salaryData['gross_pay'] ?? 0;
-        $incomeTax       = $salaryData['income_tax'] ?? 0;
+        $grossPay         = $salaryData['gross_pay'] ?? 0;
+        
+
         // Additional taxes
         $additionalTaxes = $salaryData['additional_taxes'] ?? [];
         $federalIncomeTaxWithheld = floatval($additionalTaxes['Federal Income Tax'] ?? 0);
@@ -3116,10 +3117,7 @@ class IrsController extends Controller
             'status' => 'success',
             'data'   => $filings
         ]);
-    }
-
-
-    
+    }    
 
 
 }
