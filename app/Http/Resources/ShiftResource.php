@@ -105,9 +105,7 @@ class ShiftResource extends JsonResource
             })
             ->first();
         if($leave) {
-            return [
-                'leave_type' => $leave->salary_item?->name,
-            ];
+            return $leave->salary_item?->name;
         }
         return false;
     }
