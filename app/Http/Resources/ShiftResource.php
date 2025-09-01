@@ -2,15 +2,16 @@
 
 namespace App\Http\Resources;
 
-use App\Models\RotaShift;
-use App\Models\Support;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Arr;
 use JsonSerializable;
+use App\Models\Support;
+use Carbon\CarbonPeriod;
+use App\Models\RotaShift;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use Illuminate\Contracts\Support\Arrayable;
+use Modules\LeaveManagement\Entities\UserLeave;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ShiftResource extends JsonResource
 {
@@ -89,11 +90,24 @@ class ShiftResource extends JsonResource
                 $key => [
                     'shifts' => $shifts,
                     'is_holiday' => $this->checkIfHoliday($key),
-                    'is_leave' => 0
+                    'is_leave' => $this->checkIfLeave($key, $this->id),
                 ]
             ];
         }
         return $dates;
+    }
+
+    public function checkIfLeave($date, $employee_id)
+    {
+        $leave = UserLeave::where('user_id', $employee_id)
+            ->whereHas('leave_details', function ($query) use ($date) {
+                $query->whereDate('dates', $date);
+            })
+            ->first();
+        if($leave) {
+            return $leave->salary_item?->name;
+        }
+        return false;
     }
 
     public function checkIfHoliday($date)
