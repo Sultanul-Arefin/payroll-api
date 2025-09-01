@@ -129,10 +129,11 @@ class EftpsPaymentController extends Controller
         return response()->json(['status'=>'success','payments'=>$payments]);
     }
 
-    public function companyReport($company_id)
+    public function companyReport()
     {
+         $company_id = auth()->user()->company_id;
         $payments = EftpsPayment::where('company_id', $company_id)
-            ->orderBy('payment_date', 'desc')
+            ->orderBy('period', 'desc')
             ->get();
 
         $summary = EftpsPayment::selectRaw('tax_type, SUM(amount) as total_amount, COUNT(*) as total_payments')

@@ -18,12 +18,13 @@ use Modules\IRS\Http\Controllers\IrsController;
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::post('/irs/form941/generate', [IrsController::class, 'generateForm941XML']);
     //Route::get('/irs/validate/xml', [IrsController::class, 'validateXml']);
-    Route::post('/irs/form940/generate', [Form940Controller::class, 'generateForm940XML']);
+    //Route::post('/irs/form940/generate', [Form940Controller::class, 'generateForm940XML']);
     Route::post('/irs/form941/create', [IrsController::class, 'submitForm941JsonToTaxBandits']);
     Route::put('/irs/form941/update', [IrsController::class, 'updateForm941']);
     Route::post('/irs/form941/validateForm', [IrsController::class, 'validateForm941JsonToTaxBandits']);
     Route::get('/irs/form941/validate', [IrsController::class, 'validateSubmittedForm941']);
-    Route::post('/irs/transmit/form941', [IRSController::class, 'transmitForm941']);
+    Route::post('/irs/transmit/form941/{id}', [IRSController::class, 'transmitForm941']);
+    Route::get('/irs/taxbandits/form8453emp/download/{id}', [IRSController::class, 'downloadForm8453EMP']);
     Route::post('/irs/taxbandits/upload-8453emp', [IRSController::class, 'uploadForm8453EMP']);
     Route::get('/irs/form941/list', [IrsController::class, 'listForm941']);
     Route::get('/irs/form941/get/{id}', [IrsController::class, 'getForm941']);
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('/irs/form941/status/{id}', [IrsController::class, 'getForm941Status']);
     Route::get('/irs/mainData', [IrsController::class, 'getMainData']);
     Route::get('irs/filings', [IrsController::class, 'getFiling']);
+    Route::get('irs/filings/{id}', [IrsController::class, 'viewFiling']);
 
     Route::post('form941/draft/store', [IrsController::class, 'validateForm941']);
 
@@ -39,14 +41,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     //For IRS Form940
     Route::post('/irs/form940/create', [Form940Controller::class, 'submitForm940JsonToTaxBandits']);
     Route::put('/irs/form940/update', [Form940Controller::class, 'updateForm940']);
-    Route::get('/irs/form940/validate', [Form940Controller::class, 'validateForm940']);
+    Route::get('/irs/form940/validate/{id}', [Form940Controller::class, 'validateForm940']);
     Route::post('/irs/form940/validateForm', [Form940Controller::class, 'validateForm940JsonToTaxBandits']);
-    Route::post('/irs/transmit/form940', [Form940Controller::class, 'transmitForm940']);
-    Route::get('/irs/form940/status', [Form940Controller::class, 'getForm940Status']);
-    Route::delete('/irs/form940/delete', [Form940Controller::class, 'deleteForm940']);
+    Route::post('/irs/transmit/form940/{id}', [Form940Controller::class, 'transmitForm940']);
+    Route::get('/irs/form940/status/{id}', [Form940Controller::class, 'getForm940Status']);
+    Route::delete('/irs/form940/delete/{id}', [Form940Controller::class, 'deleteForm940']);
     Route::get('/irs/form940/list', [Form940Controller::class, 'listForm940']);
-    Route::get('/irs/form940/get', [Form940Controller::class, 'getForm940']);
+    Route::get('/irs/form940/get/{id}', [Form940Controller::class, 'getForm940']);
     Route::post('/irs/form940/upload-8453emp', [Form940Controller::class, 'uploadForm8453EMPForm940']);
+    Route::get('irs/filings940', [Form940Controller::class, 'getFiling']);
+     Route::get('/irs/taxbandits/form8453empFor940/download/{id}', [Form940Controller::class, 'downloadForm8453EMPfor940']);
     
   
     
@@ -67,7 +71,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
   
     Route::post('/eftps/manual-pay', [EftpsPaymentController::class, 'manualPay']);
     Route::get('/eftps/history', [EftpsPaymentController::class, 'history']);
-    Route::get('/eftps/report/company/{company_id}', [EftpsPaymentController::class, 'companyReport']);
+    Route::get('/eftps/report/company', [EftpsPaymentController::class, 'companyReport']);
 
 
 
@@ -77,11 +81,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
  Route::prefix('api/v1')->group(function () {
     Route::get('/irs/form941/request-pdf/{id}', [IrsController::class, 'getForm941PDF']);
     Route::post('/taxbandits/webhook/pdf', [IrsController::class, 'handlePdfWebhook']);
-    Route::get('/irs/taxbandits/form8453emp/download/{id}', [IRSController::class, 'downloadForm8453EMP']);
+    
     Route::get('/irs/form941/DownloadForm8879EMP', [IrsController::class, 'downloadForm8879EMP']);
-    Route::get('/irs/form941/download', [IrsController::class, 'downloadForm941Pdf']);
-    Route::get('/irs/form940/request-pdf', [Form940Controller::class, 'getForm940Pdf']);
+    Route::get('/irs/form941/download/{id}', [IrsController::class, 'downloadForm941Pdf']);
+    Route::get('/irs/form940/request-pdf/{id}', [Form940Controller::class, 'getForm940Pdf']);
     Route::get('/irs/form940/DownloadForm8879EMP', [Form940Controller::class, 'form940DownloadForm8879EMP']);
+    Route::get('/irs/form940/download/{id}', [Form940Controller::class, 'downloadForm940Pdf']);
 
 
 });

@@ -835,7 +835,7 @@ class IrsController extends Controller
                             'TradeNm' => $form941Record['ReturnHeader']['Business']['TradeNm'] ?? null,
                             'PayerRef' => $payerRef,
                             'IsEIN' => true,
-                            'EINorSSN' => $ein ?? '127496789',
+                            'EINorSSN' => $ein ?? '127496780',
                             'Email' => $companyEmail ?? 'test@example.com',
                             'ContactNm' => $company->contact_name ?? 'John Doe',
                             //'Phone' => $companyPhone  ?? '1234567890',
@@ -943,7 +943,7 @@ class IrsController extends Controller
 
             // Save filing record
             $filing = Filing::create([
-                'form_type'     => '941',
+                'form_type'     => 'FORM941',
                 'quarter'       => $quarter,
                 'created_date'  => now(),
                 'status'        => 'Draft', 
@@ -1197,7 +1197,7 @@ class IrsController extends Controller
             // Update database
             $irsFiling->update([
                 'form_data' => json_encode($formData),
-                'status' => $result['StatusName'] ?? 'UPDATED',
+                'status' => 'UPDATED',
                 'api_response' => json_encode($result),
             ]);
 
@@ -1242,129 +1242,115 @@ class IrsController extends Controller
         return $merged;
     }
 
-    // public function updateForm941JsonToTaxBandits(Request $request)
+    // public function updateForm941(Request $request)
     // {
-    //     // Step 1: Validate request
-    //     $request->validate([
-    //         'submission_id'   => 'required|string',
-    //         'Form941Records'  => 'required|array',
-    //         'Form941Records.0.record_id' => 'required|string',
-    //     ]);
 
-    //     $submissionId = $request->submission_id;
-    //     $form941Record = $request->Form941Records[0];
-    //     $recordId = $form941Record['record_id'];
+    //     $filingId = $request->query('id');
 
-    //     // Step 2: Company Info
-    //     $companyId = auth()->user()->company_id;
-    //     $company = $this->getCompany($companyId);
-    //     if (!$company) {
-    //         return response()->json(['status' => 'error', 'message' => 'Company not found.'], 404);
-    //     }
+    //     try {
+    //         $irsFiling = Filing::find($filingId);
+    //         if (!$irsFiling) {
+    //             return response()->json(['status' => 'error', 'message' => 'IRS Filing not found'], 404);
+    //         }
 
-    //     // Step 3: Quarter & Salary Data
-    //     $year = $form941Record['ReturnHeader']['TaxYr'] ?? now()->year;
-    //     $quarter = $form941Record['ReturnHeader']['Qtr'] ?? 'Q1';
-    //     [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+    //         $formData = json_decode($irsFiling->form_data, true) ?? [];
 
-    //     $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
-    //     $salaryData = $salaryResource->toArray(request());
+    //         // 1️⃣ Flat form-data from frontend
+    //         $flatFields = $request->all();
 
-    //     // Step 4: Prepare Return Data
-    //     $returnData = $form941Record['ReturnData']['Form941'] ?? [];
-    //     $businessInfo = $form941Record['ReturnHeader']['Business'] ?? [];
+    //         // 2️⃣ Map flat fields to nested structure dynamically
+    //         $updates = [];
 
-    //     $totalEmployees = $returnData['EmployeeCnt'] ?? ($salaryData['total_employee'] ?? 0);
-    //     $grossPay = $returnData['WagesAmt'] ?? ($salaryData['gross_pay'] ?? 0);
+    //         foreach ($flatFields as $key => $value) {
+    //             // Example rules: dynamic mapping
+    //             if (str_starts_with($key, 'Business')) {
+    //                 $updates['ReturnHeader']['Business'][$key] = $value;
+    //             } else {
+    //                 $updates['ReturnData']['Form941'][$key] = $value;
+    //             }
+    //         }
 
-    //     $federalIncomeTaxWithheld = $returnData['FedIncomeTaxWHAmt'] ?? 0;
-    //     $socialSecurityTax = $returnData['SocialSecurityTaxAmt_Col2'] ?? 0;
-    //     $medicareTax = $returnData['TaxOnMedicareWagesTipsAmt_Col2'] ?? 0;
+    //         \Log::info('Dynamic Updates:', $updates);
 
-    //     // If missing → calculate fallback
-    //     if (!$socialSecurityTax || !$medicareTax) {
-    //         $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
-    //         $socialSecurityTax = $socialSecurityTax ?: floatval($governmentDeductions['SocialSecurityTax'] ?? 0);
-    //         $medicareTax = $medicareTax ?: floatval($governmentDeductions['MedicareTax'] ?? 0);
-    //     }
+    //         // 3️⃣ Merge updates with existing form_data
+    //         if (isset($formData['Form941Records'][0])) {
+    //             if (isset($updates['ReturnHeader'])) {
+    //                 $formData['Form941Records'][0]['ReturnHeader'] = $this->deepMerge(
+    //                     $formData['Form941Records'][0]['ReturnHeader'] ?? [],
+    //                     $updates['ReturnHeader']
+    //                 );
+    //             }
+    //             if (isset($updates['ReturnData'])) {
+    //                 $formData['Form941Records'][0]['ReturnData'] = $this->deepMerge(
+    //                     $formData['Form941Records'][0]['ReturnData'] ?? [],
+    //                     $updates['ReturnData']
+    //                 );
+    //             }
+    //         }
 
-    //     // Step 5: Auth
-    //     $clientId = config('services.taxbandits.client_id');
-    //     $clientSecret = config('services.taxbandits.client_secret');
-    //     $userToken = config('services.taxbandits.user_token');
-    //     $authUrl = config('services.taxbandits.auth_url');
-    //     $apiUrl = config('services.taxbandits.api_url');
+    //         \Log::info('After merge form_data:', $formData);
 
-    //     $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
-    //     $authResponse = Http::withHeaders(['Authentication' => $jwtToken])->get($authUrl);
-    //     $accessToken = $authResponse['AccessToken'] ?? null;
+    //         // 4️⃣ Build payload for TaxBandits
+    //         $payload = [
+    //             "SubmissionId" => $irsFiling->submission_id,
+    //             "Form941Records" => [
+    //                 [
+    //                     "RecordId" => $irsFiling->record_id,
+    //                     "SequenceId" => $formData['Form941Records'][0]['SequenceId'] ?? '001',
+    //                     "ReturnHeader" => $formData['Form941Records'][0]['ReturnHeader'] ?? [],
+    //                     "ReturnData" => $formData['Form941Records'][0]['ReturnData'] ?? [],
+    //                 ]
+    //             ]
+    //         ];
+    //     return $payload;
+    //             // 5️⃣ Call TaxBandits API
+    //             $jwtToken = $this->generateTaxBanditsJWT(
+    //                 config('services.taxbandits.client_id'),
+    //                 config('services.taxbandits.client_secret'),
+    //                 config('services.taxbandits.user_token')
+    //             );
 
-    //     if (!$accessToken) {
-    //         return response()->json(['status' => 'error', 'message' => 'Auth failed'], 401);
-    //     }
-
-    //     // Step 6: Payload (simplified, only valid fields)
-    //     $requestPayload = [
-    //         "SubmissionId" => $submissionId,
-    //         "Form941Records" => [
-    //             [
-    //                 "RecordId" => $recordId,
-    //                 "SequenceId" => $form941Record['SequenceId'] ?? "001",
-    //                 "ReturnHeader" => [
-    //                     "ReturnType" => "FORM941",
-    //                     "TaxYr" => $year,
-    //                     "Qtr" => $quarter,
-    //                     "Business" => [
-    //                         "BusinessNm" => $businessInfo['BusinessNm'] ?? $company->name,
-    //                         "EINorSSN" => $businessInfo['EINorSSN'] ?? $company->employer_identification_number,
-    //                         "Email" => $businessInfo['Email'] ?? $company->company_email,
-    //                         "Phone" => preg_replace('/\D/', '', $businessInfo['Phone'] ?? $company->company_phone),
-    //                     ],
+    //             $client = new \GuzzleHttp\Client();
+    //             $response = $client->put(rtrim(config('services.taxbandits.api_url'), '/') . '/Form941/Update', [
+    //                 'headers' => [
+    //                     'Authorization' => 'Bearer ' . $jwtToken,
+    //                     'Content-Type' => 'application/json',
     //                 ],
-    //                 "ReturnData" => [
-    //                     "Form941" => [
-    //                         "EmployeeCnt" => intval($totalEmployees),
-    //                         "WagesAmt" => round($grossPay, 2),
-    //                         "FedIncomeTaxWHAmt" => round($federalIncomeTaxWithheld, 2),
-    //                         "SocialSecurityTaxAmt_Col2" => round($socialSecurityTax, 2),
-    //                         "TaxOnMedicareWagesTipsAmt_Col2" => round($medicareTax, 2),
-    //                         "TotalTaxBeforeAdjustmentAmt" => round($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax, 2),
-    //                     ],
-    //                 ],
-    //             ],
-    //         ],
-    //     ];
+    //                 'json' => $payload,
+    //             ]);
 
-    //     // Step 7: Call API
-    //     $endpoint = $apiUrl . '/Form941/Update';
-    //     $updateResponse = Http::withHeaders([
-    //         'Authorization' => 'Bearer ' . $accessToken,
-    //         'Content-Type' => 'application/json',
-    //     ])->put($endpoint, $requestPayload);
+    //             $result = json_decode($response->getBody(), true);
 
-    //     // Step 8: Log request/response
-    //     IrsFilingLog::create([
-    //         'filing_id' => $recordId,
-    //         'action' => 'update',
-    //         'request_data' => $requestPayload,
-    //         'response_data' => $updateResponse->json(),
-    //     ]);
+    //             // 6️⃣ Update DB & log
+    //             $irsFiling->update([
+    //                 'form_data' => json_encode($formData),
+    //                 'status' => $result['StatusName'] ?? 'UPDATED',
+    //                 'api_response' => json_encode($result),
+    //             ]);
 
-    //     if ($updateResponse->successful()) {
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'message' => 'Form 941 updated successfully.',
-    //             'response' => $updateResponse->json(),
-    //         ]);
-    //     }
+    //             IrsFilingLog::create([
+    //                 'filing_id' => $irsFiling->id,
+    //                 'action' => 'update',
+    //                 'request_data' => json_encode($payload),
+    //                 'response_data' => json_encode($result),
+    //             ]);
 
-    //     return response()->json([
-    //         'status' => 'error',
-    //         'message' => 'Failed to update Form 941',
-    //         'http_status' => $updateResponse->status(),
-    //         'details' => $updateResponse->json(),
-    //     ], $updateResponse->status());
+    //             return response()->json([
+    //                 'status' => 'success',
+    //                 'message' => 'Form 941 updated successfully',
+    //                 'data' => $result,
+    //             ], 200);
+
+    //         } catch (\Exception $e) {
+    //             \Log::error('Update Error:', ['error' => $e->getMessage()]);
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'Error during update: ' . $e->getMessage(),
+    //             ], 500);
+    //         }
     // }
+
+
 
         
     public function getForm941($id)
@@ -1962,6 +1948,7 @@ class IrsController extends Controller
 
         // Save log and return response
         $responseData = $response->successful() ? $response->json() : $response->body();
+        
 
         IrsFilingLog::create([
             'filing_id'     => $filing->id,
@@ -1971,6 +1958,8 @@ class IrsController extends Controller
         ]);
 
         if ($response->successful()) {
+            $filing->status = 'Validated'; 
+            $filing->save();
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Validation data retrieved successfully.',
@@ -2269,93 +2258,108 @@ class IrsController extends Controller
     //     ]);
     // }
 
-    public function transmitForm941(Request $request)
-{
-    $request->validate([
-        'filing_id' => 'required|integer|exists:irs_filings,id',
-    ]);
+    public function transmitForm941($id)
+    {
+        // $request->validate([
+        //     'filing_id' => 'required|integer|exists:irs_filings,id',
+        // ]);
 
-    $filing = Filing::findOrFail($request->filing_id);
+        // $filing = Filing::findOrFail($request->filing_id);
+        $filing = Filing::findOrFail($id);
+        $companyId = auth()->user()->company_id;
 
-    if (!$filing->submission_id || !$filing->record_id) {
-        return response()->json([
-            'message' => 'Filing does not have submission_id or record_id',
-        ], 422);
-    }
 
-    $submissionId = $filing->submission_id;
-    $recordIds = is_array($filing->record_id) ? $filing->record_id : [$filing->record_id];
-
-    $clientId = config('services.taxbandits.client_id');
-    $clientSecret = config('services.taxbandits.client_secret');
-    $userToken = config('services.taxbandits.user_token');
-    $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
-
-    $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
-
-    $responses = [];
-
-    foreach ($recordIds as $recordId) {
-        try {
-            $payload = [
-                'SubmissionId' => $submissionId,
-                'RecordIds' => [$recordId],
-            ];
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $jwt,
-                'ClientId' => $clientId,
-                'Content-Type' => 'application/json',
-            ])->post($apiUrl . '/Form941/Transmit', $payload);
-
-            $resBody = $response->json();
-
-            // Update filings table
-            if ($response->successful()) {
-                $filing->status = 'Transmitted';
-                $filing->api_response = $resBody; // full API response save
-                $filing->save();
-            }
-
-            // Save in logs
-            IrsFilingLog::create([
-                'filing_id' => $filing->id,
-                'action' => 'Transmit',
-                'request_data' => $payload,
-                'response_data' => $resBody,
-            ]);
-
-            $responses[] = [
-                'record_id' => $recordId,
-                'status' => $response->successful() ? 'success' : 'failed',
-                'response' => $resBody,
-            ];
-        } catch (\Exception $e) {
-            // Save error log
-            IrsFilingLog::create([
-                'filing_id' => $filing->id,
-                'action' => 'TransmitFailed',
-                'request_data' => ['SubmissionId' => $submissionId, 'RecordId' => $recordId],
-                'response_data' => ['error' => $e->getMessage()],
-            ]);
-
-            $responses[] = [
-                'record_id' => $recordId,
-                'status' => 'failed',
-                'error' => $e->getMessage(),
-            ];
+        if (!$filing->submission_id || !$filing->record_id) {
+            return response()->json([
+                'message' => 'Filing does not have submission_id or record_id',
+            ], 422);
         }
-    }
 
-    return response()->json([
-        'message' => 'Transmission attempt complete',
-        'filing_id' => $filing->id,
-        'results' => $responses,
-    ]);
-}
+        $submissionId = $filing->submission_id;
+        $recordIds = is_array($filing->record_id) ? $filing->record_id : [$filing->record_id];
+
+        $clientId = config('services.taxbandits.client_id');
+        $clientSecret = config('services.taxbandits.client_secret');
+        $userToken = config('services.taxbandits.user_token');
+        $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
+
+        $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+
+        $responses = [];
+
+        foreach ($recordIds as $recordId) {
+            try {
+                $payload = [
+                    'SubmissionId' => $submissionId,
+                    'RecordIds' => [$recordId],
+                ];
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $jwt,
+                    'ClientId' => $clientId,
+                    'Content-Type' => 'application/json',
+                ])->post($apiUrl . '/Form941/Transmit', $payload);
+
+                $resBody = $response->json();
+
+                // Update filings table
+                if ($response->successful()) {
+                    $filing->status = 'Transmitted';
+                    $filing->api_response = $resBody; // full API response save
+                    $filing->save();
+                }
+
+                // Save in logs
+                IrsFilingLog::create([
+                    'filing_id' => $filing->id,
+                    'action' => 'Transmit',
+                    'request_data' => $payload,
+                    'response_data' => $resBody,
+                ]);
+
+                $responses[] = [
+                    'record_id' => $recordId,
+                    'status' => $response->successful() ? 'success' : 'failed',
+                    'response' => $resBody,
+                ];
+            } catch (\Exception $e) {
+                // Save error log
+                IrsFilingLog::create([
+                    'filing_id' => $filing->id,
+                    'action' => 'TransmitFailed',
+                    'request_data' => ['SubmissionId' => $submissionId, 'RecordId' => $recordId],
+                    'response_data' => ['error' => $e->getMessage()],
+                ]);
+
+                $responses[] = [
+                    'record_id' => $recordId,
+                    'status' => 'failed',
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return response()->json([
+            'message' => 'Transmission attempt complete',
+            'filing_id' => $filing->id,
+            'results' => $responses,
+        ]);
+    }
 
     public function uploadForm8453EMP(Request $request)
     {
+        $id= $request->id;
+        
+         $filing = Filing::find($id);
+
+        if (!$filing || !$filing->record_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Filing record not found or missing Submission ID.',
+            ], 404);
+        }
+        $recordId = $filing-> record_id;
+        
         $clientId = config('services.taxbandits.client_id');
         $clientSecret = config('services.taxbandits.client_secret');
         $userToken = config('services.taxbandits.user_token');
@@ -2395,7 +2399,6 @@ class IrsController extends Controller
 
         // Step 3: Validate input
         $request->validate([
-            'record_id' => 'required|uuid',
             'pdf_file' => 'required|file|mimes:pdf|max:2048',
         ]);
 
@@ -2406,7 +2409,7 @@ class IrsController extends Controller
 
         // Step 5: Prepare payload exactly as per TaxBandits documentation
         $payload = [
-            'RecordId' => $request->record_id,
+            'RecordId' => $recordId,
             'Form8453EMPPdf' => $base64Pdf,
         ];
 
@@ -2962,11 +2965,8 @@ class IrsController extends Controller
             ], 404);
         }
 
-        $submissionId = $filing->submission_id;
+        $submissionId = "$filing->submission_id";
         $recordId = $filing->record_id;
-
-
-        
 
         // TaxBandits Credentials
         $clientId = config('services.taxbandits.client_id');
@@ -2986,27 +2986,50 @@ class IrsController extends Controller
         // DELETE Request
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$jwtToken}",
-            'Content-Type' => 'application/json',
+            'Content-Type'  => 'application/json',
         ])->delete($endpoint);
 
         $responseBody = $response->json();
+
+        // Log the API call
         IrsFilingLog::create([
             'filing_id'     => $filing->id,
-            'action'        => 'Check Form941 Status',
+            'action'        => 'Delete Form941',
             'request_data'  => json_encode(['endpoint' => $endpoint]),
             'response_data' => json_encode($responseBody),
         ]);
 
-        // Final API Response format
+        // Handle delete result
+        if ($response->successful()) {
+            // TaxBandits delete success → DB to delete
+            $filing->delete();
+            $status = 'success';
+            $message = 'Form 941 return(s) deleted successfully from TaxBandits and local database.';
+        } else {
+            
+            if (
+                isset($responseBody['StatusCode']) && $responseBody['StatusCode'] == 404 &&
+                isset($responseBody['Errors'][0]['Name']) && $responseBody['Errors'][0]['Name'] === 'SubmissionId'
+            ) {
+                $filing->delete();
+                $status = 'success';
+                $message = 'Form 941 return not found in TaxBandits, but deleted from local database.';
+            } else {
+                $status = 'error';
+                $message = 'Failed to delete Form 941 return(s) from TaxBandits.';
+            }
+        }
+
         $apiResponse = [
-            'status' => $response->successful() ? 'success' : 'error',
-            'message' => $response->successful() ? 'Form 941 return(s) deleted successfully from TaxBandits.' : 'Failed to delete Form 941 return(s) from TaxBandits.',
+            'status'      => $status,
+            'message'     => $message,
             'http_status' => $response->status(),
-            'api_response' => $responseBody,
+            'api_response'=> $responseBody,
         ];
 
         return response()->json($apiResponse, $response->status());
     }
+
 
     public function downloadForm941Pdf($id)
     {
@@ -3110,6 +3133,7 @@ class IrsController extends Controller
     public function getFiling(Request $request)
     {
         $filings = Filing::select('id', 'form_type', 'quarter', 'created_date', 'status', 'submission_id')
+            ->where('form_type', 'Form941')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -3117,7 +3141,16 @@ class IrsController extends Controller
             'status' => 'success',
             'data'   => $filings
         ]);
-    }    
+    }  
+    
+    public function viewFiling($id)
+    {
+        $filing = Filing::findOrFail($id);
+
+        return response()->json(
+            json_decode($filing->form_data, true) 
+        );
+    }
 
 
 }
