@@ -21,6 +21,8 @@ class EftpsPayment extends Model
         'record_id',
         'payment_date',
         'status',
+        'confirmation_number',
+        'payment_date',
     ];
      
 }

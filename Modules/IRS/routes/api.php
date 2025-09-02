@@ -69,9 +69,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 
   
+    Route::post('/eftps/auto', [EftpsPaymentController::class, 'autoPay']);
     Route::post('/eftps/manual-pay', [EftpsPaymentController::class, 'manualPay']);
     Route::get('/eftps/history', [EftpsPaymentController::class, 'history']);
-    Route::get('/eftps/report/company', [EftpsPaymentController::class, 'companyReport']);
+    Route::get('/irs/eftps/report', [EftpsPaymentController::class, 'companyReport']);
 
 
 

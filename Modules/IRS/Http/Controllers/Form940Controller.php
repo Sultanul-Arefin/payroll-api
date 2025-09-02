@@ -1447,196 +1447,196 @@ public function submitForm940JsonToTaxBandits(Request $request)
     // }
 
     public function updateForm940(Request $request)
-{
-    $request->validate([
-        'updates' => 'required|array',
-    ]);
+    {
+        $request->validate([
+            'updates' => 'required|array',
+        ]);
 
-    $filingId = $request->query('id');
+        $filingId = $request->query('id');
 
-    try {
-        $irsFiling = Filing::find($filingId);
-        if (!$irsFiling) {
-            return response()->json(['status' => 'error', 'message' => 'IRS Filing not found'], 404);
-        }
+        try {
+            $irsFiling = Filing::find($filingId);
+            if (!$irsFiling) {
+                return response()->json(['status' => 'error', 'message' => 'IRS Filing not found'], 404);
+            }
 
-        // Current form data from database
-        $formData = json_decode($irsFiling->form_data, true) ?? [];
-        $updates = $request->input('updates');
+            // Current form data from database
+            $formData = json_decode($irsFiling->form_data, true) ?? [];
+            $updates = $request->input('updates');
 
-        \Log::info('Original form_data from DB:', ['data' => $formData]);
-        \Log::info('Updates received:', ['updates' => $updates]);
+            \Log::info('Original form_data from DB:', ['data' => $formData]);
+            \Log::info('Updates received:', ['updates' => $updates]);
 
-        // Ensure Form940Records exists and has proper structure
-        if (!isset($formData['Form940Records']) || !is_array($formData['Form940Records'])) {
-            $formData['Form940Records'] = [];
-        }
-        
-        // Ensure at least one record exists
-        if (empty($formData['Form940Records'])) {
-            $formData['Form940Records'][0] = [
-                'ReturnHeader' => [],
-                'ReturnData' => new \stdClass()
-            ];
-        }
-
-        // Ensure the first record has proper structure
-        if (!isset($formData['Form940Records'][0]['ReturnHeader'])) {
-            $formData['Form940Records'][0]['ReturnHeader'] = [];
-        }
-        if (!isset($formData['Form940Records'][0]['ReturnData'])) {
-            $formData['Form940Records'][0]['ReturnData'] = new \stdClass();
-        }
-
-        // Merge updates with existing form_data
-        // 1. Merge ReturnHeader if provided
-        if (isset($updates['ReturnHeader']) && is_array($updates['ReturnHeader'])) {
-            $formData['Form940Records'][0]['ReturnHeader'] = 
-                $this->deepMerge(
-                    $formData['Form940Records'][0]['ReturnHeader'],
-                    $updates['ReturnHeader']
-                );
-        }
-
-        // 2. Merge ReturnData if provided
-        if (isset($updates['ReturnData'])) {
-            $existingReturnData = $formData['Form940Records'][0]['ReturnData'];
-            
-            // Convert to array if object
-            if (is_object($existingReturnData)) {
-                $existingReturnData = json_decode(json_encode($existingReturnData), true);
+            // Ensure Form940Records exists and has proper structure
+            if (!isset($formData['Form940Records']) || !is_array($formData['Form940Records'])) {
+                $formData['Form940Records'] = [];
             }
             
-            $returnDataUpdates = $updates['ReturnData'];
-            if (is_object($returnDataUpdates)) {
-                $returnDataUpdates = json_decode(json_encode($returnDataUpdates), true);
+            // Ensure at least one record exists
+            if (empty($formData['Form940Records'])) {
+                $formData['Form940Records'][0] = [
+                    'ReturnHeader' => [],
+                    'ReturnData' => new \stdClass()
+                ];
             }
-            if (!is_array($returnDataUpdates)) {
-                $returnDataUpdates = (array)$returnDataUpdates;
+
+            // Ensure the first record has proper structure
+            if (!isset($formData['Form940Records'][0]['ReturnHeader'])) {
+                $formData['Form940Records'][0]['ReturnHeader'] = [];
             }
-            
-            // Merge the data
-            $mergedReturnData = $this->deepMerge((array)$existingReturnData, $returnDataUpdates);
-            
-            // Convert back to object for API
-            $formData['Form940Records'][0]['ReturnData'] = (object) $mergedReturnData;
-        }
-
-        // 3. Merge any other top-level updates
-        foreach ($updates as $key => $value) {
-            if (!in_array($key, ['ReturnHeader', 'ReturnData'])) {
-                $formData[$key] = $value;
+            if (!isset($formData['Form940Records'][0]['ReturnData'])) {
+                $formData['Form940Records'][0]['ReturnData'] = new \stdClass();
             }
-        }
 
-        \Log::info('After merge form_data:', ['data' => $formData]);
+            // Merge updates with existing form_data
+            // 1. Merge ReturnHeader if provided
+            if (isset($updates['ReturnHeader']) && is_array($updates['ReturnHeader'])) {
+                $formData['Form940Records'][0]['ReturnHeader'] = 
+                    $this->deepMerge(
+                        $formData['Form940Records'][0]['ReturnHeader'],
+                        $updates['ReturnHeader']
+                    );
+            }
 
-        // Prepare payload for API
-        $payload = [
-            "SubmissionId" => $irsFiling->submission_id,
-            "Form940Records" => [
-                [
-                    "RecordId" => $irsFiling->record_id,
-                    "SequenceId" => $formData['Form940Records'][0]['SequenceId'] ?? '001',
-                    "ReturnHeader" => $formData['Form940Records'][0]['ReturnHeader'] ?? [],
-                    "ReturnData" => $formData['Form940Records'][0]['ReturnData'] ?? new \stdClass(),
+            // 2. Merge ReturnData if provided
+            if (isset($updates['ReturnData'])) {
+                $existingReturnData = $formData['Form940Records'][0]['ReturnData'];
+                
+                // Convert to array if object
+                if (is_object($existingReturnData)) {
+                    $existingReturnData = json_decode(json_encode($existingReturnData), true);
+                }
+                
+                $returnDataUpdates = $updates['ReturnData'];
+                if (is_object($returnDataUpdates)) {
+                    $returnDataUpdates = json_decode(json_encode($returnDataUpdates), true);
+                }
+                if (!is_array($returnDataUpdates)) {
+                    $returnDataUpdates = (array)$returnDataUpdates;
+                }
+                
+                // Merge the data
+                $mergedReturnData = $this->deepMerge((array)$existingReturnData, $returnDataUpdates);
+                
+                // Convert back to object for API
+                $formData['Form940Records'][0]['ReturnData'] = (object) $mergedReturnData;
+            }
+
+            // 3. Merge any other top-level updates
+            foreach ($updates as $key => $value) {
+                if (!in_array($key, ['ReturnHeader', 'ReturnData'])) {
+                    $formData[$key] = $value;
+                }
+            }
+
+            \Log::info('After merge form_data:', ['data' => $formData]);
+
+            // Prepare payload for API
+            $payload = [
+                "SubmissionId" => $irsFiling->submission_id,
+                "Form940Records" => [
+                    [
+                        "RecordId" => $irsFiling->record_id,
+                        "SequenceId" => $formData['Form940Records'][0]['SequenceId'] ?? '001',
+                        "ReturnHeader" => $formData['Form940Records'][0]['ReturnHeader'] ?? [],
+                        "ReturnData" => $formData['Form940Records'][0]['ReturnData'] ?? new \stdClass(),
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        \Log::info('Final API Payload:', ['payload' => $payload]);
+            \Log::info('Final API Payload:', ['payload' => $payload]);
 
-        // TaxBandits API Call
-        $clientId = config('services.taxbandits.client_id');
-        $clientSecret = config('services.taxbandits.client_secret');
-        $userToken = config('services.taxbandits.user_token');
-        $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
+            // TaxBandits API Call
+            $clientId = config('services.taxbandits.client_id');
+            $clientSecret = config('services.taxbandits.client_secret');
+            $userToken = config('services.taxbandits.user_token');
+            $apiUrl = rtrim(config('services.taxbandits.api_url'), '/');
 
-        $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+            $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
 
-        $client = new \GuzzleHttp\Client();
-        
-        $endpoint = $apiUrl . '/Form940/Update';
-        \Log::info('Calling endpoint:', ['endpoint' => $endpoint]);
-        
-        $response = $client->put($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $jwtToken,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-            'json' => $payload,
-            'http_errors' => false,
-        ]);
+            $client = new \GuzzleHttp\Client();
+            
+            $endpoint = $apiUrl . '/Form940/Update';
+            \Log::info('Calling endpoint:', ['endpoint' => $endpoint]);
+            
+            $response = $client->put($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $jwtToken,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ],
+                'json' => $payload,
+                'http_errors' => false,
+            ]);
 
-        $statusCode = $response->getStatusCode();
-        $result = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+            $result = json_decode($response->getBody(), true);
 
-        \Log::info('API Response:', [
-            'status' => $statusCode,
-            'response' => $result
-        ]);
+            \Log::info('API Response:', [
+                'status' => $statusCode,
+                'response' => $result
+            ]);
 
-        if ($statusCode >= 400) {
+            if ($statusCode >= 400) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'API request failed',
+                    'api_response' => $result,
+                    'status_code' => $statusCode
+                ], 400);
+            }
+
+            // Update database with merged form_data
+            $irsFiling->update([
+                'form_data' => json_encode($formData),
+                'status' => 'UPDATED',
+                'api_response' => json_encode($result),
+            ]);
+
+            // Log update
+            IrsFilingLog::create([
+                'filing_id' => $irsFiling->id,
+                'action' => 'update',
+                'request_data' => json_encode($payload),
+                'response_data' => json_encode($result),
+                'status_code' => $statusCode
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Form 940 updated successfully',
+                'data' => $result,
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Update Error:', [
+                'error' => $e->getMessage(), 
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'status' => 'error',
-                'message' => 'API request failed',
-                'api_response' => $result,
-                'status_code' => $statusCode
-            ], 400);
+                'message' => 'Error during update: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Update database with merged form_data
-        $irsFiling->update([
-            'form_data' => json_encode($formData),
-            'status' => 'UPDATED',
-            'api_response' => json_encode($result),
-        ]);
-
-        // Log update
-        IrsFilingLog::create([
-            'filing_id' => $irsFiling->id,
-            'action' => 'update',
-            'request_data' => json_encode($payload),
-            'response_data' => json_encode($result),
-            'status_code' => $statusCode
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Form 940 updated successfully',
-            'data' => $result,
-        ], 200);
-
-    } catch (\Exception $e) {
-        \Log::error('Update Error:', [
-            'error' => $e->getMessage(), 
-            'trace' => $e->getTraceAsString()
-        ]);
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Error during update: ' . $e->getMessage(),
-        ], 500);
     }
-}
 
 /**
  * Deep merge arrays recursively
  */
-private function deepMerge(array $array1, array $array2): array
-{
-    $merged = $array1;
+    private function deepMerge(array $array1, array $array2): array
+    {
+        $merged = $array1;
 
-    foreach ($array2 as $key => $value) {
-        if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-            $merged[$key] = $this->deepMerge($merged[$key], $value);
-        } else {
-            $merged[$key] = $value;
+        foreach ($array2 as $key => $value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = $this->deepMerge($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
         }
-    }
 
-    return $merged;
-}
+        return $merged;
+    }
 
     public function validateForm940($id)
     {

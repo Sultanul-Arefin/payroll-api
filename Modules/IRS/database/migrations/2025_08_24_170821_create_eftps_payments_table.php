@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('eftps_payments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('company_id');
-            $table->string('tax_type'); // 941, 940 etc.
+            $table->string('tax_type'); 
             $table->decimal('amount', 10, 2);
-            $table->string('period'); // e.g. Q1-2025
+            $table->string('period'); 
             $table->uuid('submission_id')->nullable();
-            $table->string('status')->default('Pending'); // Pending, Submitted, Success, Failed
-            $table->enum('payment_mode', ['manual', 'auto'])->default('manual');
+            $table->string('status')->default('Completed'); 
+            $table->enum('payment_mode', ['manual', 'auto'])->default('Manual');
+            $table->string('confirmation_number')->nullable(); 
+            $table->date('payment_date')->nullable();
             $table->timestamps();
         });
     }

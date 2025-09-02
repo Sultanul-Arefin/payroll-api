@@ -57,8 +57,10 @@ class EftpsPaymentController extends Controller
             'tax_type' => 'required|string',
             'amount' => 'required|numeric|min:1',
             'period' => 'required|string',
-            'payment_mode' => 'nullable|in:manual,auto'
+            //'payment_mode' => 'nullable|in:manual,auto',
+            'confirmation_number' => 'required|string',
         ]);
+       
 
         $companyId = auth()->user()->company_id;
 
@@ -67,7 +69,8 @@ class EftpsPaymentController extends Controller
                 $companyId,
                 $request->tax_type,
                 $request->amount,
-                $request->period
+                $request->period,
+                $request->confirmation_number
             );
 
             $payment = EftpsPayment::create([
@@ -76,9 +79,10 @@ class EftpsPaymentController extends Controller
                 'amount'       => $request->amount,
                 'period'       => $request->period,
                 'submission_id'=> $response['SubmissionId'] ?? null,
-                'status'       => $response['Status'] ?? 'Pending',
-                'payment_mode' => $request->payment_mode ?? 'manual',
-                'confirmation_number' => $response['ConfirmationNumber'] ?? null,
+                'status'       => $response['Status'] ?? 'Completed',
+               // 'payment_mode'       => $response['payment_mode'] ?? 'Manual',
+                'payment_mode' => $request->payment_mode ?? 'Manual',
+                'confirmation_number' => $request->confirmation_number,
                 'payment_date' => now(),
             ]);
 
@@ -98,23 +102,47 @@ class EftpsPaymentController extends Controller
     }
 
     // Auto Pay (Finalized Payroll)
-    public function autoPay($companyId, $taxType, $amount, $period)
+    public function autoPay(Request $request)
     {
+        $request->validate([
+        'taxType' => 'required|string',
+        'amount'  => 'required|numeric|min:1',
+        'period'  => 'required|string',
+        ]);
+
+        $taxType = $request->taxType;
+        $amount  = $request->amount;
+        $period  = $request->period;
+        $companyId = auth()->user()->company_id;
+
         $response = $this->taxBandits->createEftpsPayment(
             $companyId, $taxType, $amount, $period
         );
-
+      
+        if (!$response || !isset($response['SubmissionId'])) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'EFTPS Payment failed',
+                    'api_response' => $response
+                ],404);
+            }
         $payment = EftpsPayment::create([
             'company_id' => $companyId,
             'tax_type' => $taxType,
             'amount' => $amount,
             'period' => $period,
-            'submission_id' => $response['SubmissionId'] ?? null,
-            'status' => $response['Status'] ?? 'Submitted',
-            'payment_mode' => 'EFTPS-Auto'
+            'submission_id' => $response['SubmissionId'],
+            'status' => $response['Status'],
+            'payment_mode' => 'EFTPS-Auto',
+            'confirmation_number' => $response['ConfirmationNumber'] ?? null,
+            'payment_date' => $response['PaymentDate'] ?? now(),
         ]);
 
-        return ['payment' => $payment, 'response' => $response];
+        return response()->json([
+            'status' => 'success',
+            'payment' => $payment,
+            'response' => $response
+        ],200);
     }
 
     // Payment History
