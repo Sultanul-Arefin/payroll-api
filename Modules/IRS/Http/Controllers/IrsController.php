@@ -967,7 +967,7 @@ class IrsController extends Controller
                     'message'     => 'Failed to submit JSON to TaxBandits.',
                     'http_status' => $transmitResponse->status(),
                     'raw_body'    => $transmitResponse->body(),
-                ]);
+                ],$transmitResponse->status());
             }
     }
 
@@ -1172,7 +1172,7 @@ class IrsController extends Controller
                     ]
                 ]
             ];
-
+return $payload;
             \Log::info('Final API Payload:', $payload);
 
            
@@ -2126,7 +2126,7 @@ class IrsController extends Controller
             ],
         );
 
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success'],200);
     }
 
     // public function handlePdfWebhook(Request $request)
@@ -2260,14 +2260,8 @@ class IrsController extends Controller
 
     public function transmitForm941($id)
     {
-        // $request->validate([
-        //     'filing_id' => 'required|integer|exists:irs_filings,id',
-        // ]);
-
-        // $filing = Filing::findOrFail($request->filing_id);
         $filing = Filing::findOrFail($id);
         $companyId = auth()->user()->company_id;
-
 
         if (!$filing->submission_id || !$filing->record_id) {
             return response()->json([
@@ -2286,6 +2280,7 @@ class IrsController extends Controller
         $jwt = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
 
         $responses = [];
+        $hasError = false;
 
         foreach ($recordIds as $recordId) {
             try {
@@ -2302,14 +2297,19 @@ class IrsController extends Controller
 
                 $resBody = $response->json();
 
-                // Update filings table
-                if ($response->successful()) {
+                // Check JSON StatusCode instead of HTTP status
+                if (isset($resBody['StatusCode']) && $resBody['StatusCode'] == 200) {
+                    $status = 'success';
                     $filing->status = 'Transmitted';
-                    $filing->api_response = $resBody; // full API response save
-                    $filing->save();
+                } else {
+                    $status = 'failed';
+                    $filing->status = 'Failed';
+                    $hasError = true;
                 }
 
-                // Save in logs
+                $filing->api_response = $resBody;
+                $filing->save();
+
                 IrsFilingLog::create([
                     'filing_id' => $filing->id,
                     'action' => 'Transmit',
@@ -2319,11 +2319,13 @@ class IrsController extends Controller
 
                 $responses[] = [
                     'record_id' => $recordId,
-                    'status' => $response->successful() ? 'success' : 'failed',
+                    'status' => $status,
                     'response' => $resBody,
                 ];
+
             } catch (\Exception $e) {
-                // Save error log
+                $hasError = true;
+
                 IrsFilingLog::create([
                     'filing_id' => $filing->id,
                     'action' => 'TransmitFailed',
@@ -2343,8 +2345,9 @@ class IrsController extends Controller
             'message' => 'Transmission attempt complete',
             'filing_id' => $filing->id,
             'results' => $responses,
-        ]);
+        ], $hasError ? 400 : 200);
     }
+
 
     public function uploadForm8453EMP(Request $request)
     {

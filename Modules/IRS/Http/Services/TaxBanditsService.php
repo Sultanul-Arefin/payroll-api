@@ -43,7 +43,7 @@ class TaxBanditsService
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
-    public function createEftpsPayment($companyId, $taxType, $amount, $period)
+    public function createEftpsPayment($companyId, $taxType, $amount, $period, $confirmation_number)
     {
         $token = $this->generateJWT();
 
@@ -51,11 +51,12 @@ class TaxBanditsService
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
                 'Accept' => 'application/json',
-            ])->post("{$this->apiUrl}/eftps/payment", [
+            ])->post("{$this->apiUrl}/EFTPS/payment", [
                 'CompanyId' => $companyId,
                 'TaxType'   => $taxType,
                 'Amount'    => $amount,
                 'Period'    => $period,
+                'confirmation_number'=> $confirmation_number
             ]);
 
             Log::info('EFTPS Raw Response:', [
