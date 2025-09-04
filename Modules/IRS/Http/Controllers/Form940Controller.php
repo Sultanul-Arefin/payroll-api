@@ -12,6 +12,7 @@ use Modules\Payslip\Http\Services\PayslipService;
 use Modules\Payslip\Entities\Payslip;
 use App\Helpers\XmlValidator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Modules\IRS\Entities\Filing;
 use Modules\IRS\Http\Traits\UserInformation;
@@ -445,10 +446,9 @@ class Form940Controller extends Controller
 //     return $states[strtoupper($stateAbbr)] ?? $stateAbbr;
 // }
 
-
-    
 public function submitForm940JsonToTaxBandits(Request $request)
 {
+    
     $data = $request->all();
     $companyId = auth()->user()->company_id;
     $record = $data['Form940Records'][0] ?? [];
@@ -470,13 +470,12 @@ public function submitForm940JsonToTaxBandits(Request $request)
         $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
         $salaryData = $salaryResource->toArray(request());
 
-        $totalEmployees  = $salaryData['total_employee'] ?? 2;
-        $companyName     = $salaryData['company_name'] ?? $company->name;
-        $ein             = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
+        $totalEmployees   = $salaryData['total_employee'] ?? 2;
+        $companyName      = $salaryData['company_name'] ?? $company->name;
+        $ein              = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
         $companyEmail     = $salaryData['company_email'] ?? $company->company_email;
         $companyPhone     = $salaryData['contact_person_email'] ?? $company->contact_person_phone;
         $ContactPersonName= $salaryData['contact_person_name'] ?? $company->contact_person_name;
-    
 
         // Payments flag
         $madePayments = filter_var($record['ReturnData']['Form940']['IsPymtsMadeToEmployees'] ?? true, FILTER_VALIDATE_BOOLEAN);
@@ -491,7 +490,6 @@ public function submitForm940JsonToTaxBandits(Request $request)
                     'employee_name' => $emp['employee_name'],
                     'gross_pay' => $gross,
                     'futa_taxable' => $taxable,
-                    'futa_tax' => round($taxable * 0.006, 2)
                 ];
             })->filter(fn($emp) => $emp['gross_pay'] > 0)
             ->values();
@@ -500,12 +498,26 @@ public function submitForm940JsonToTaxBandits(Request $request)
         $exemptWages = floatval($salaryData['exempt_wages'] ?? 0);
         $wagesOverLimit = $employeeFutaSummary->sum(fn($emp) => max(0, $emp['gross_pay'] - 7000));
         $totalExemptWages = $exemptWages + $wagesOverLimit;
+        
         $totalTaxableWages = $employeeFutaSummary->sum('futa_taxable');
-        $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
 
         // ------------------------------
-        // Credit Reduction (SUTA)
+        // FUTA with SUTA calculation
         // ------------------------------
+        $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
+        $stateUnemploymentTax = floatval($governmentDeductions['SUTA'] ?? 0);
+        $hasSuta = $stateUnemploymentTax > 0;
+
+        // FUTA base = 6% of taxable wages
+        $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
+
+        // Credit = 5.4% if SUTA paid
+        $maxCreditAmount = $hasSuta ? round($totalTaxableWages * 0.054, 2) : 0;
+
+        // FUTA adjustment (manual entry if needed)
+        $futaAdjustment = floatval($record['ReturnData']['Form940']['FUTAAdjAmt'] ?? 0);
+
+        // Credit Reduction (Schedule A)
         $creditReductionRates = ['CA' => 0.009, 'NY' => 0.009, 'VI' => 0.042];
         $scheduleAData = [];
         if (!empty($record['ReturnData']['ScheduleA'])) {
@@ -523,18 +535,17 @@ public function submitForm940JsonToTaxBandits(Request $request)
                 }
             }
         }
-
         $creditReductionAmount = array_sum(array_column($scheduleAData, 'TotCrdtRedAmt'));
-        $maxCreditAmount = floatval($record['ReturnData']['Form940']['MaxCreditAmt'] ?? 0.00);
-        $futaAdjustment = floatval($record['ReturnData']['Form940']['FUTAAdjAmt'] ?? 0);
 
-        // Official Form 940 calculation
-        $futaTaxAfterAdj = $futaTaxBeforeAdj + $maxCreditAmount + $futaAdjustment + $creditReductionAmount;
+        // Final FUTA after adjustment
+        $futaTaxAfterAdj = $futaTaxBeforeAdj - $maxCreditAmount + $futaAdjustment + $creditReductionAmount;
+
+        // Deposits, balance, overpaid
         $totalDeposits = floatval($record['ReturnData']['Form940']['TotDepositAmt'] ?? 0);
         $balanceDue = max(0, $futaTaxAfterAdj - $totalDeposits);
         $overpaid = max(0, $totalDeposits - $futaTaxAfterAdj);
 
-        // Quarterly
+        // Quarterly breakdown
         $quarterly = [0,0,0,0];
         if ($futaTaxAfterAdj > 500) {
             $perQuarter = round($futaTaxAfterAdj / 4, 2);
@@ -543,7 +554,6 @@ public function submitForm940JsonToTaxBandits(Request $request)
         } else {
             $quarterly[3] = $futaTaxAfterAdj;
         }
-
         $totalTaxLiability = $futaTaxAfterAdj;
 
         // IRS Payment
@@ -615,8 +625,7 @@ public function submitForm940JsonToTaxBandits(Request $request)
                     "Form940" => $form940,
                     "IRSPaymentType" => $IRSPaymentType,
                     "IRSPayment" => $IRSPayment
-                ],
-               // "EmployeeFUTA" => $employeeFutaSummary->toArray()
+                ]
             ]]
         ];
 
@@ -698,6 +707,260 @@ public function submitForm940JsonToTaxBandits(Request $request)
         ], 500);
     }
 }
+
+    
+// public function submitForm940JsonToTaxBandits(Request $request)
+// {
+//     $data = $request->all();
+//     $companyId = auth()->user()->company_id;
+//     $record = $data['Form940Records'][0] ?? [];
+//     $year = $record['ReturnHeader']['TaxYr'] ?? now()->year;
+
+//     // Company check
+//     $company = $this->getCompany($companyId);
+//     if (!$company) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Company not found',
+//             'code' => 404
+//         ], 404);
+//     }
+
+//     try {
+//         // Payroll calculations
+//         [$startDate, $endDate] = $this->getYearlyDateRange($year);
+//         $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+//         $salaryData = $salaryResource->toArray(request());
+        
+
+//         $totalEmployees  = $salaryData['total_employee'] ?? 2;
+//         $companyName     = $salaryData['company_name'] ?? $company->name;
+//         $ein             = $salaryData['employer_identification_number'] ?? $company->employer_identification_number;
+//         $companyEmail     = $salaryData['company_email'] ?? $company->company_email;
+//         $companyPhone     = $salaryData['contact_person_email'] ?? $company->contact_person_phone;
+//         $ContactPersonName= $salaryData['contact_person_name'] ?? $company->contact_person_name;
+    
+
+//         // Payments flag
+//         $madePayments = filter_var($record['ReturnData']['Form940']['IsPymtsMadeToEmployees'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+//         // Employee FUTA summary
+//         $employeeFutaSummary = collect($salaryData['employee_wise_taxable_gross'] ?? [])
+//             ->map(function($emp) {
+//                 $gross = floatval($emp['taxable_gross_pay'] ?? 0);
+//                 $taxable = min($gross, 7000);
+//                 return [
+//                     'employee_id' => $emp['employee_id'],
+//                     'employee_name' => $emp['employee_name'],
+//                     'gross_pay' => $gross,
+//                     'futa_taxable' => $taxable,
+//                     'futa_tax' => round($taxable * 0.006, 2)
+//                 ];
+//             })->filter(fn($emp) => $emp['gross_pay'] > 0)
+//             ->values();
+
+//         $totalWages = $employeeFutaSummary->sum('gross_pay');
+//         $exemptWages = floatval($salaryData['exempt_wages'] ?? 0);
+//         $wagesOverLimit = $employeeFutaSummary->sum(fn($emp) => max(0, $emp['gross_pay'] - 7000));
+//         $totalExemptWages = $exemptWages + $wagesOverLimit;
+//         $totalTaxableWages = $employeeFutaSummary->sum('futa_taxable');
+//         $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
+
+//         // ------------------------------
+//         // Credit Reduction (SUTA)
+//         // ------------------------------
+//         $creditReductionRates = ['CA' => 0.009, 'NY' => 0.009, 'VI' => 0.042];
+//         $scheduleAData = [];
+//         if (!empty($record['ReturnData']['ScheduleA'])) {
+//             foreach ($record['ReturnData']['ScheduleA'] as $state) {
+//                 $stateCode = $state['StateCd'] ?? null;
+//                 if ($stateCode && isset($creditReductionRates[$stateCode])) {
+//                     $stateTaxableWages = floatval($state['TotTaxableFUTAwagesAmt'] ?? 0);
+//                     $rate = $creditReductionRates[$stateCode];
+//                     $scheduleAData[] = [
+//                         'StateCd' => $stateCode,
+//                         'CreditReductionRt' => $rate,
+//                         'TotTaxableFUTAwagesAmt' => $stateTaxableWages,
+//                         'TotCrdtRedAmt' => round($stateTaxableWages * $rate, 2)
+//                     ];
+//                 }
+//             }
+//         }
+
+//         $creditReductionAmount = array_sum(array_column($scheduleAData, 'TotCrdtRedAmt'));
+//         $maxCreditAmount = floatval($record['ReturnData']['Form940']['MaxCreditAmt'] ?? 0.00);
+//         $futaAdjustment = floatval($record['ReturnData']['Form940']['FUTAAdjAmt'] ?? 0);
+
+//         // Official Form 940 calculation
+//         $futaTaxAfterAdj = $futaTaxBeforeAdj + $maxCreditAmount + $futaAdjustment + $creditReductionAmount;
+//         $totalDeposits = floatval($record['ReturnData']['Form940']['TotDepositAmt'] ?? 0);
+//         $balanceDue = max(0, $futaTaxAfterAdj - $totalDeposits);
+//         $overpaid = max(0, $totalDeposits - $futaTaxAfterAdj);
+
+//         // Quarterly
+//         $quarterly = [0,0,0,0];
+//         if ($futaTaxAfterAdj > 500) {
+//             $perQuarter = round($futaTaxAfterAdj / 4, 2);
+//             $quarterly = [$perQuarter, $perQuarter, $perQuarter, $perQuarter];
+//             $quarterly[3] += $futaTaxAfterAdj - array_sum($quarterly); // rounding adjust
+//         } else {
+//             $quarterly[3] = $futaTaxAfterAdj;
+//         }
+
+//         $totalTaxLiability = $futaTaxAfterAdj;
+
+//         // IRS Payment
+//         $IRSPaymentType = $balanceDue > 0 ? ($record['ReturnData']['IRSPaymentType'] ?? 'EFTPS') : null;
+//         $IRSPayment = ($IRSPaymentType === 'EFW') ? [
+//             "BankRoutingNum" => $company->bank_routing_number,
+//             "AccountType" => $company->bank_account_type ?? 'CHECKING',
+//             "BankAccountNum" => $company->bank_account_number,
+//             "Phone" => preg_replace('/[^0-9]/','',$company->company_phone)
+//         ] : null;
+
+//         // Prepare Form940 payload
+//         $form940 = [
+//             "WagesAmt" => round($totalWages, 2),
+//             "ExemptWagesAmt" => round($exemptWages, 2),
+//             "WagesOverLmtAmt" => round($wagesOverLimit, 2),
+//             "TotExemptWagesAmt" => round($totalExemptWages, 2),
+//             "TotTaxableWagesAmt" => round($totalTaxableWages, 2),
+//             "FUTATaxBeforeAdjAmt" => round($futaTaxBeforeAdj, 2),
+//             "MaxCreditAmt" => round($maxCreditAmount, 2),
+//             "FUTAAdjAmt" => round($futaAdjustment, 2),
+//             "TotCrdtRedAmt" => round($creditReductionAmount, 2),
+//             "FUTATaxAfterAdjAmt" => round($futaTaxAfterAdj, 2),
+//             "TotDepositAmt" => round($totalDeposits, 2),
+//             "BalanceDueAmt" => round($balanceDue, 2),
+//             "OverPaidAmt" => round($overpaid, 2),
+//             "FirstQtrTaxLiabilityAmt" => round($quarterly[0], 2),
+//             "SecondQtrTaxLiabilityAmt" => round($quarterly[1], 2),
+//             "ThirdQtrTaxLiabilityAmt" => round($quarterly[2], 2),
+//             "FourthQtrTaxLiabilityAmt" => round($quarterly[3], 2),
+//             "TotTaxLiabilityAmt" => round($totalTaxLiability, 2),
+//             "IsCreditReduction" => !empty($scheduleAData),
+//             "ScheduleA" => $scheduleAData,
+//             "IsPymtsMadeToEmployees" => $madePayments
+//         ];
+
+//         // Zero-out if no payments
+//         if (!$madePayments) {
+//             foreach ($form940 as $key => $val) {
+//                 if ($key !== 'IsPymtsMadeToEmployees') $form940[$key] = 0;
+//             }
+//             $form940['IsCreditReduction'] = false;
+//             $form940['ScheduleA'] = [];
+//             $IRSPaymentType = null;
+//             $IRSPayment = null;
+//         }
+
+//         // Auto-fill business info
+//         $payerRef = "IRS-9400-{$companyId}-" . now()->year . "-" . uniqid();
+//         $returnHeader = $record['ReturnHeader'] ?? [];
+//         $autoBusinessData = [
+//             "BusinessId" => null,
+//             "BusinessNm" => $companyName ?? 'Unknown Corp',
+//             "Email"=>$companyEmail,
+//             "ContactNm"=> $ContactPersonName,
+//             "Phone"=>$companyPhone ,
+//             "TradeNm" => $company->trade_name ?? null,
+//             "PayerRef" => $payerRef,
+//             "EINorSSN"=>$ein,
+//             "IsEIN" =>true
+//         ];
+//         $returnHeader['Business'] = array_merge($returnHeader['Business'] ?? [], $autoBusinessData);
+
+//         $payload = [
+//             "Form940Records" => [[
+//                 "Sequence" => $record['Sequence'] ?? null,
+//                 "ReturnHeader" => $returnHeader,
+//                 "ReturnData" => [
+//                     "Form940" => $form940,
+//                     "IRSPaymentType" => $IRSPaymentType,
+//                     "IRSPayment" => $IRSPayment
+//                 ],
+//                // "EmployeeFUTA" => $employeeFutaSummary->toArray()
+//             ]]
+//         ];
+
+//         // TaxBandits API
+//         $clientId = config('services.taxbandits.client_id');
+//         $clientSecret = config('services.taxbandits.client_secret');
+//         $userToken = config('services.taxbandits.user_token');
+//         $apiUrl = config('services.taxbandits.api_url');
+//         $authUrl = config('services.taxbandits.auth_url');
+
+//         $jwtToken = $this->generateTaxBanditsJWT($clientId, $clientSecret, $userToken);
+//         $authResponse = Http::withHeaders(['Authentication' => $jwtToken])->get($authUrl);
+
+//         if (!$authResponse->successful()) {
+//             return response()->json([
+//                 'status' => 'error',
+//                 'message' => 'Authentication failed',
+//                 'auth_response' => $authResponse->json()
+//             ], $authResponse->status());
+//         }
+
+//         $accessToken = $authResponse->json()['AccessToken'] ?? null;
+//         if (!$accessToken) {
+//             return response()->json([
+//                 'status' => 'error',
+//                 'message' => 'AccessToken not found in auth response',
+//                 'auth_response' => $authResponse->json()
+//             ], 400);
+//         }
+
+//         $response = Http::withHeaders([
+//             'Authorization' => 'Bearer ' . $accessToken,
+//             'Content-Type' => 'application/json'
+//         ])->timeout(60)->post($apiUrl . '/Form940/Create', $payload);
+
+//         $responseJson = $response->json();
+//         if ($response->successful()) {
+//             $submissionId = $responseJson['SubmissionId'] ?? null;
+//             $recordId = $responseJson['Form940Records']['SuccessRecords'][0]['RecordId'] ?? null;
+
+//             $filing = Filing::create([
+//                 'form_type'     => 'FORM940',
+//                 'created_date'  => now(),
+//                 'status'        => 'Draft', 
+//                 'submission_id' => $submissionId,
+//                 'record_id'     => $recordId,
+//                 'form_data'     => json_encode($payload),
+//                 'api_response'  => json_encode($responseJson),
+//             ]);
+
+//             IrsFilingLog::create([
+//                 'filing_id'     => $filing->id,
+//                 'action'        => 'create',
+//                 'request_data'  => json_encode($payload),
+//                 'response_data' => json_encode($responseJson),
+//             ]);
+
+//             return response()->json([
+//                 'status' => 'success',
+//                 'message' => 'Form 940 submitted successfully',
+//                 'submission_id' => $submissionId,
+//                 'response' => $responseJson
+//             ]);
+//         }
+
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Failed to submit Form 940',
+//             'http_status' => $response->status(),
+//             'errors' => $responseJson,
+//             'payload_sent' => $payload
+//         ], $response->status());
+
+//     } catch (\Throwable $e) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => $e->getMessage(),
+//             'trace' => config('app.debug') ? $e->getTraceAsString() : null
+//         ], 500);
+//     }
+// }
 
    
 // public function updateForm940(Request $request)

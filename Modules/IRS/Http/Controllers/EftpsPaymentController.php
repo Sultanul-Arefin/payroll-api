@@ -57,8 +57,10 @@ class EftpsPaymentController extends Controller
             'tax_type' => 'required|string',
             'amount' => 'required|numeric|min:1',
             'period' => 'required|string',
+            'payment_date' => 'required|date|date_format:Y-m-d',
             //'payment_mode' => 'nullable|in:manual,auto',
             'confirmation_number' => 'required|string',
+            
         ]);
        
 
@@ -83,7 +85,7 @@ class EftpsPaymentController extends Controller
                // 'payment_mode'       => $response['payment_mode'] ?? 'Manual',
                 'payment_mode' => $request->payment_mode ?? 'Manual',
                 'confirmation_number' => $request->confirmation_number,
-                'payment_date' => now(),
+                'payment_date' => $request->payment_date
             ]);
 
             return response()->json([
@@ -116,7 +118,7 @@ class EftpsPaymentController extends Controller
         $companyId = auth()->user()->company_id;
 
         $response = $this->taxBandits->createEftpsPayment(
-            $companyId, $taxType, $amount, $period
+            $companyId, $taxType, $amount, $period, $confirmation_number
         );
       
         if (!$response || !isset($response['SubmissionId'])) {
