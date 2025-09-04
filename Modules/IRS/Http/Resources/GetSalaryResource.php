@@ -131,31 +131,31 @@ class GetSalaryResource extends JsonResource
     }
 
     public function get_employee_wise_taxable_gross($companyId, $startDate, $endDate)
-{
-    $employees = User::query()
-        ->where('company_id', $companyId)
-        ->where('role_id', '!=', User::ADMIN)
-        ->get();
-
-    $employeeWiseData = [];
-
-    foreach ($employees as $employee) {
-        $payslips = Payslip::query()
-            ->where('employee_id', $employee->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
+    {
+        $employees = User::query()
+            ->where('company_id', $companyId)
+            ->where('role_id', '!=', User::ADMIN)
             ->get();
 
-        $empGrossPay  = $payslips->sum('gross_pay_before_tax'); // yearly taxable gross pay
-        $empIncomeTax = $payslips->sum('income_tax');
+        $employeeWiseData = [];
 
-        $employeeWiseData[] = [
-            'employee_id'       => $employee->id,
-            'employee_name'     => $employee->name,
-            'taxable_gross_pay' => $empGrossPay,
-            'income_tax'        => $empIncomeTax,
-        ];
+        foreach ($employees as $employee) {
+            $payslips = Payslip::query()
+                ->where('employee_id', $employee->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+
+            $empGrossPay  = $payslips->sum('gross_pay_before_tax'); // yearly taxable gross pay
+            $empIncomeTax = $payslips->sum('income_tax');
+
+            $employeeWiseData[] = [
+                'employee_id'       => $employee->id,
+                'employee_name'     => $employee->name,
+                'taxable_gross_pay' => $empGrossPay,
+                'income_tax'        => $empIncomeTax,
+            ];
+        }
+
+        return $employeeWiseData;
     }
-
-    return $employeeWiseData;
-}
 }
