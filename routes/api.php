@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\TestPostController;
+use App\Http\Controllers\StaffTaskController;
 use App\Http\Controllers\HelpArticleController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\YoutubeVideoController;
@@ -73,6 +74,20 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
 
         /**
          * ROTA SOFTWARE MANAGEMENTS ENDS HERE
+         */
+
+        /**
+         * STAFF TASK MANAGEMENT STARTS HERE
+         */
+        Route::prefix('staff-tasks')->group(function () {
+            Route::get('/', [StaffTaskController::class, 'index']);  // List all tasks
+            Route::post('/', [StaffTaskController::class, 'store']); // Create a new task
+            Route::get('{id}', [StaffTaskController::class, 'show']); // Show a single task
+            Route::put('{id}', [StaffTaskController::class, 'update']); // Update a task
+            Route::delete('{id}', [StaffTaskController::class, 'destroy']); // Delete a task
+        });
+        /**
+         * STAFF TASK MANAGEMENT ENDS HERE
          */
 
     });
