@@ -13,8 +13,7 @@ use Modules\SalaryItemsName\Entities\LeaveSalaryItems;
 class AttendanceReportResource extends JsonResource
 {
     public function toArray($request)
-    {
-        
+    { 
         return [
             'name' => $this->name,
             'department_name' => $this?->department?->department_name,
@@ -26,9 +25,7 @@ class AttendanceReportResource extends JsonResource
             'sick_leave' => $this->getSickLeave($this->id),
             'unpaid_sick_leave_absent' => $this->getUnpaidSickLeave($this->id),
             'recuperated_hour' => $this->getRecuperatedHour($this->id),
-        ];
-
-        
+        ]; 
     }
     
     function getPresentDays($user_id) {
@@ -72,8 +69,6 @@ class AttendanceReportResource extends JsonResource
         // Return as days (rounded to 2 decimal places)
         return round(floatval(($TotalOvertimeHours / $working_hours_per_day)),2);
     }
-
-
     
     public function getDoubleOvertime($user_id)
     {
@@ -128,7 +123,6 @@ class AttendanceReportResource extends JsonResource
         // Return as days (rounded to 2 decimal places)
         return round(floatval(($totalEarlyDepartureHours / $working_hours_per_day)),2);
     }
-    
 
     function getAnnualLeave($user_id) {
        
@@ -150,6 +144,17 @@ class AttendanceReportResource extends JsonResource
                 ->where('user_id', $user_id)
                 ->where('leave_type', $annual_leave_data->salary_items_id)
                 ->where('status', UserLeave::APPROVED)
+                ->whereHas(
+                    'leave_details', function(Builder $builder){
+                        $builder->whereBetween(
+                            'dates',
+                            [
+                                request()->from_date,
+                                request()->to_date
+                            ]
+                        );
+                    }
+                )
                 ->get();
         $count = 0;
         foreach($data as $value){
@@ -181,6 +186,17 @@ class AttendanceReportResource extends JsonResource
                 ->where('user_id', $user_id)
                 ->where('leave_type', $sick_leave_data->salary_items_id)
                 ->where('status', UserLeave::APPROVED)
+                ->whereHas(
+                    'leave_details', function(Builder $builder){
+                        $builder->whereBetween(
+                            'dates',
+                            [
+                                request()->from_date,
+                                request()->to_date
+                            ]
+                        );
+                    }
+                )
                 ->get();
         $count = 0;
         foreach($data as $value){
