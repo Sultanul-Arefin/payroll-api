@@ -19,6 +19,8 @@ use Modules\IRS\Http\Traits\UserInformation;
 use Modules\IRS\Entities\Form940Transmission;
 use Modules\IRS\Entities\IrsFilingLog;
 use Modules\IRS\Entities\TaxbanditsPdfWebhook;
+use Modules\IRS\Helpers\ApiResponseHelper;
+
 
 class Form940Controller extends Controller
 {
@@ -509,7 +511,7 @@ public function submitForm940JsonToTaxBandits(Request $request)
         $hasSuta = $stateUnemploymentTax > 0;
 
         // FUTA base = 6% of taxable wages
-        $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
+        $futaTaxBeforeAdj = round($totalTaxableWages * 0.06, 2);
 
         // Credit = 5.4% if SUTA paid
         $maxCreditAmount = $hasSuta ? round($totalTaxableWages * 0.054, 2) : 0;
@@ -691,13 +693,18 @@ public function submitForm940JsonToTaxBandits(Request $request)
             ]);
         }
 
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to submit Form 940',
-            'http_status' => $response->status(),
-            'errors' => $responseJson,
-            'payload_sent' => $payload
-        ], $response->status());
+        // return response()->json([
+        //     'status' => 'error',
+        //     'message' => 'Failed to submit Form 940',
+        //     'http_status' => $response->status(),
+        //     'errors' => $responseJson,
+        //     //'payload_sent' => $payload
+        // ], $response->status());
+
+        return response()->json(
+            ApiResponseHelper::formatErrorResponse($response),
+        $response->status()
+    );
 
     } catch (\Throwable $e) {
         return response()->json([
@@ -1840,13 +1847,20 @@ public function submitForm940JsonToTaxBandits(Request $request)
                 'response' => $result
             ]);
 
-            if ($statusCode >= 400) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'API request failed',
-                    'api_response' => $result,
-                    'status_code' => $statusCode
-                ], 400);
+            // if ($statusCode >= 400) {
+            //     return response()->json([
+            //         'status' => 'error',
+            //         'message' => 'API request failed',
+            //         'api_response' => $result,
+            //         'status_code' => $statusCode
+            //     ], 400);
+            // }
+
+             if ($statusCode >= 400) {
+                    return response()->json(
+                        ApiResponseHelper::formatErrorResponse($result),
+                        $statusCode
+                    );
             }
 
             // Update database with merged form_data

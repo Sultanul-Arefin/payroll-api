@@ -3114,6 +3114,7 @@ return $payload;
         // Default status
         $statusCode = $data['StatusCode'] ?? null;
         $statusName = $data['Form941Records']['SuccessRecords'][0]['RecordStatus'] ?? null;
+        $status_message = $data['StatusMessage'] ?? null;
         $isPending = in_array(strtolower($statusName), ['created', 'inprogress']);
 
         IrsFilingLog::create([
@@ -3127,10 +3128,31 @@ return $payload;
             'status' => $response->successful() ? 'success' : 'error',
             'status_code' => $statusCode,
             'status_name' => $statusName,
+            'status_message'=> $status_message,
             'is_pending' => $isPending,
             'raw_data' => $data,
             'http_status' => $response->status(),
         ], $response->status());
+//         $body = $response->json(); // API থেকে আসা ডাটা
+
+// $successRecord = $body['Form941Records']['SuccessRecords'][0] ?? null;
+
+// return response()->json([
+//     'status'        => $response->successful() ? 'success' : 'error',
+//     'status_code'   => $body['StatusCode'] ?? null,
+//     'status_name'   => $body['StatusName'] ?? null,
+//     'status_message'=> $body['StatusMessage'] ?? null,
+//     'is_pending'    => ($successRecord['RecordStatus'] ?? '') === 'Under Process',
+//     'submission_id' => $body['SubmissionId'] ?? null,
+//     'record_status' => $successRecord['RecordStatus'] ?? null,
+//     'business_id'   => $successRecord['BusinessId'] ?? null,
+//     'payer_ref'     => $successRecord['PayerRef'] ?? null,
+//     'record_id'     => $successRecord['RecordId'] ?? null,
+//     'created_at'    => $successRecord['CreatedTs'] ?? null,
+//     'updated_at'    => $successRecord['UpdatedTs'] ?? null,
+//     'errors'        => $successRecord['Errors'] ?? ($body['Errors'] ?? []),
+//     'http_status'   => $response->status(),
+// ]);
     }
 
     public function getFiling(Request $request)
