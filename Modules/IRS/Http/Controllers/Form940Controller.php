@@ -510,11 +510,21 @@ public function submitForm940JsonToTaxBandits(Request $request)
         $stateUnemploymentTax = floatval($governmentDeductions['SUTA'] ?? 0);
         $hasSuta = $stateUnemploymentTax > 0;
 
+        
         // FUTA base = 6% of taxable wages
-        $futaTaxBeforeAdj = round($totalTaxableWages * 0.06, 2);
+        $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
 
         // Credit = 5.4% if SUTA paid
-        $maxCreditAmount = $hasSuta ? round($totalTaxableWages * 0.054, 2) : 0;
+       // $maxCreditAmount = $hasSuta ? round($totalTaxableWages * 0.054, 2) : 0;
+       // SUTA credit calculation
+        if ($hasSuta) {
+            // SUTA with - standard credit 5.4%
+            $maxCreditAmount = round($totalTaxableWages * 0.054, 2);
+        } else {
+            // SUTA withOut - no credit, কিন্তু API still expects 0.006 rate
+            $maxCreditAmount = 0;
+            // Note: Final tax will be higher without SUTA credit
+        }
 
         // FUTA adjustment (manual entry if needed)
         $futaAdjustment = floatval($record['ReturnData']['Form940']['FUTAAdjAmt'] ?? 0);
@@ -548,15 +558,15 @@ public function submitForm940JsonToTaxBandits(Request $request)
         $overpaid = max(0, $totalDeposits - $futaTaxAfterAdj);
 
         // Quarterly breakdown
-        $quarterly = [0,0,0,0];
-        if ($futaTaxAfterAdj > 500) {
+            if ($futaTaxAfterAdj < 500) {
+            $quarterly = [0,0,0,null]; // 4th quarter empty
+            $totalTaxLiability = 0;    // Total Tax Liability 0
+        } else {
             $perQuarter = round($futaTaxAfterAdj / 4, 2);
             $quarterly = [$perQuarter, $perQuarter, $perQuarter, $perQuarter];
             $quarterly[3] += $futaTaxAfterAdj - array_sum($quarterly); // rounding adjust
-        } else {
-            $quarterly[3] = $futaTaxAfterAdj;
+            $totalTaxLiability = $futaTaxAfterAdj;
         }
-        $totalTaxLiability = $futaTaxAfterAdj;
 
         // IRS Payment
         $IRSPaymentType = $balanceDue > 0 ? ($record['ReturnData']['IRSPaymentType'] ?? 'EFTPS') : null;
