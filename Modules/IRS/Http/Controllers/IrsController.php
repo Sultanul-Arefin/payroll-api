@@ -1173,7 +1173,7 @@ class IrsController extends Controller
                     ]
                 ]
             ];
-return $payload;
+
             \Log::info('Final API Payload:', $payload);
 
            

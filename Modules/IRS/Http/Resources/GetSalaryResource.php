@@ -37,8 +37,8 @@ class GetSalaryResource extends JsonResource
             'company_email'                  => $this->company_email,
             'company_phone'                  => $this->company_phone,
             'gross_pay'                      => $employeeData['gross_pay'],
+            'non_taxable_allowance'          => $employeeData['non_taxable_allowance'],
             'total_employee'                 => $employeeData['total_employee'],
-            'income_tax'                     => $employeeData['income_tax'], 
             'additional_taxes'               => $TotalAdditionalTaxes,
             'government_deductions_yearly'   => $totalGovernmentDeductions,
             'employee_wise_taxable_gross'    => $employee_wise_taxable_gross,
@@ -53,7 +53,7 @@ class GetSalaryResource extends JsonResource
             ->get();
 
         $gross_pay = 0;
-        $income_tax = 0;
+        $non_taxable_allowance=0;
 
         foreach ($employees as $employee) {
             $payslips = Payslip::query()
@@ -62,13 +62,13 @@ class GetSalaryResource extends JsonResource
                 ->get();
 
             $gross_pay += $payslips->sum('gross_pay_before_tax');
-            $income_tax += $payslips->sum('income_tax'); 
+            $non_taxable_allowance += $payslips->sum('non_taxable_allowance'); 
         }
 
         return [
             'total_employee' => $employees->count(),
             'gross_pay'      => $gross_pay,
-            'income_tax'     => $income_tax,
+            'non_taxable_allowance'     => $non_taxable_allowance,
         ];
     }
 
