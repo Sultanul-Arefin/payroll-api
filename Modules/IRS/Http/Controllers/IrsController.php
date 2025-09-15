@@ -824,7 +824,8 @@ class IrsController extends Controller
         $requestPayload = [
             'Form941Records' => [
                 [
-                    'SequenceId' => $form941Record['SequenceId'] ?? '001',
+                    //'SequenceId' => $form941Record['SequenceId'] ?? uniqid(),
+                    'SequenceId' => substr(md5(uniqid(mt_rand(), true)), 0, 10),
                     'ReturnHeader' => [
                         'ReturnType' => $form941Record['ReturnHeader']['ReturnType'] ?? 'FORM941',
                         'TaxYr' => $form941Record['ReturnHeader']['TaxYr'] ?? '2025',
