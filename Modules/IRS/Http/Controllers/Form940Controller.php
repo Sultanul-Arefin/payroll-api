@@ -631,7 +631,8 @@ public function submitForm940JsonToTaxBandits(Request $request)
 
         $payload = [
             "Form940Records" => [[
-                "Sequence" => $record['Sequence'] ?? null,
+                //"Sequence" => $record['Sequence'] ?? null,
+                'SequenceId' => substr(md5(uniqid(mt_rand(), true)), 0, 10),
                 "ReturnHeader" => $returnHeader,
                 "ReturnData" => [
                     "Form940" => $form940,
@@ -703,18 +704,18 @@ public function submitForm940JsonToTaxBandits(Request $request)
             ]);
         }
 
-        // return response()->json([
-        //     'status' => 'error',
-        //     'message' => 'Failed to submit Form 940',
-        //     'http_status' => $response->status(),
-        //     'errors' => $responseJson,
-        //     //'payload_sent' => $payload
-        // ], $response->status());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to submit Form 940',
+            'http_status' => $response->status(),
+            'errors' => $responseJson,
+            //'payload_sent' => $payload
+        ], $response->status());
 
-        return response()->json(
-            ApiResponseHelper::formatErrorResponse($response),
-        $response->status()
-    );
+    //     // return response()->json(
+    //     //     ApiResponseHelper::formatErrorResponse($response),
+    //     // $response->status()
+    // );
 
     } catch (\Throwable $e) {
         return response()->json([
