@@ -107,7 +107,7 @@ class GetSalaryResource extends JsonResource
     public function irs_government_deductions($companyId, $startDate, $endDate)
     {
         $allowedItems = [
-            'ESI',
+            'SUTA',
             'Futa',
             'Social Security',
             'Government Deductions 2',

@@ -1009,36 +1009,88 @@ public function submitForm940JsonToTaxBandits(Request $request)
 
         $madePayments = filter_var($record['ReturnData']['Form940']['IsPymtsMadeToEmployees'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
-        $employeeList = collect($salaryData['employee_wise_taxable_gross'] ?? []);
-        $employeeFutaSummary = $employeeList->map(function ($emp) {
-            $gross = floatval($emp['taxable_gross_pay'] ?? 0);
-            $taxable = min($gross, 7000.00);
-            return [
-                'employee_id'   => $emp['employee_id'] ?? null,
-                'employee_name' => $emp['employee_name'] ?? null,
-                'gross_pay'     => round($gross, 2),
-                'futa_taxable'  => round($taxable, 2),
-                'futa_tax'      => round($taxable * 0.006, 2)
-            ];
-        })->filter(fn($e) => ($e['gross_pay'] ?? 0) > 0)->values();
+        // $employeeList = collect($salaryData['employee_wise_taxable_gross'] ?? []);
+        // $employeeFutaSummary = $employeeList->map(function ($emp) {
+        //     $gross = floatval($emp['taxable_gross_pay'] ?? 0);
+        //     $taxable = min($gross, 7000.00);
+        //     return [
+        //         'employee_id'   => $emp['employee_id'] ?? null,
+        //         'employee_name' => $emp['employee_name'] ?? null,
+        //         'gross_pay'     => round($gross, 2),
+        //         'futa_taxable'  => round($taxable, 2),
+        //         'futa_tax'      => round($taxable * 0.006, 2)
+        //     ];
+        // })->filter(fn($e) => ($e['gross_pay'] ?? 0) > 0)->values();
 
-        $totalWages       = round($employeeFutaSummary->sum('gross_pay'), 2);
-        $exemptWages      = round(floatval($salaryData['exempt_wages'] ?? 0), 2);
-        $wagesOverLimit   = round($employeeFutaSummary->reduce(function ($carry, $emp) {
-            return $carry + max(0, ($emp['gross_pay'] - 7000));
-        }, 0.0), 2);
+        // $totalWages       = round($employeeFutaSummary->sum('gross_pay'), 2);
+        // $exemptWages      = round(floatval($salaryData['exempt_wages'] ?? 0), 2);
+        // $wagesOverLimit   = round($employeeFutaSummary->reduce(function ($carry, $emp) {
+        //     return $carry + max(0, ($emp['gross_pay'] - 7000));
+        // }, 0.0), 2);
 
-        $totalTaxableWages = round($employeeFutaSummary->sum('futa_taxable'), 2);
-        $futaTaxBeforeAdj  = round($totalTaxableWages * 0.006, 2);
+        // $totalTaxableWages = round($employeeFutaSummary->sum('futa_taxable'), 2);
+        // $futaTaxBeforeAdj  = round($totalTaxableWages * 0.006, 2);
 
-        // ------------------------------
-        // Credit reduction (Schedule A)
-        // ------------------------------
+        // // ------------------------------
+        // // Credit reduction (Schedule A)
+        // // ------------------------------
+        // $creditReductionRates = [
+        //     'CA' => 0.009,
+        //     'NY' => 0.009,
+        //     'VI' => 0.042
+        // ];
+
+        // ✅ Check if company paid SUTA tax
+        $governmentDeductions = $salaryData['government_deductions_yearly'] ?? [];
+        $stateUnemploymentTax = floatval($governmentDeductions['SUTA'] ?? 0);
+
+        // Default FUTA base rate = 6%
+        $futaRate = 0.06;
+
+        // If company has SUTA payment, apply max credit (FUTA effective = 0.6%)
+        if ($stateUnemploymentTax > 0) {
+            $futaRate = 0.006;
+        }
+
+        // Credit reduction rates
         $creditReductionRates = [
             'CA' => 0.009,
             'NY' => 0.009,
             'VI' => 0.042
         ];
+
+        $employeeList = collect($salaryData['employee_wise_taxable_gross'] ?? []);
+        $employeeFutaSummary = $employeeList->map(function ($emp) use ($futaRate, $creditReductionRates) {
+            $gross   = floatval($emp['taxable_gross_pay'] ?? 0);
+            $taxable = min($gross, 7000.00);
+
+            // Base FUTA calculation
+            $futaTax = $taxable * $futaRate;
+
+            // If employee belongs to Credit Reduction State → add extra
+            $stateCd = strtoupper(trim($emp['state'] ?? ''));
+            if ($stateCd && isset($creditReductionRates[$stateCd])) {
+                $futaTax += $taxable * $creditReductionRates[$stateCd];
+            }
+
+            return [
+                'employee_id'   => $emp['employee_id'] ?? null,
+                'employee_name' => $emp['employee_name'] ?? null,
+                'gross_pay'     => round($gross, 2),
+                'futa_taxable'  => round($taxable, 2),
+                'futa_tax'      => round($futaTax, 2),
+            ];
+        })->filter(fn($e) => ($e['gross_pay'] ?? 0) > 0)->values();
+
+        $totalWages        = round($employeeFutaSummary->sum('gross_pay'), 2);
+        $exemptWages       = round(floatval($salaryData['exempt_wages'] ?? 0), 2);
+        $wagesOverLimit    = round($employeeFutaSummary->reduce(function ($carry, $emp) {
+            return $carry + max(0, ($emp['gross_pay'] - 7000));
+        }, 0.0), 2);
+
+        $totalTaxableWages = round($employeeFutaSummary->sum('futa_taxable'), 2);
+        $futaTaxBeforeAdj = round($totalTaxableWages * 0.006, 2);
+
 
         $scheduleAInput = $record['ReturnData']['Form940']['ScheduleA'] ?? [];
         $scheduleAData = [];
