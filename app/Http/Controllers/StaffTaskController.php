@@ -9,9 +9,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StaffTaskResource;
 use App\Http\Resources\StaffTaskCollection;
+use App\Http\Traits\StaffTaskTrait;
 
 class StaffTaskController extends Controller
 {
+    use StaffTaskTrait;
+    
     // Display a listing of the resource
     public function index()
     {

@@ -85,6 +85,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             Route::get('{id}', [StaffTaskController::class, 'show']); // Show a single task
             Route::put('{id}', [StaffTaskController::class, 'update']); // Update a task
             Route::delete('{id}', [StaffTaskController::class, 'destroy']); // Delete a task
+
+            Route::get('details/{staff_task}', [StaffTaskController::class, 'details']);
+            Route::post('details/{staff_task}', [StaffTaskController::class, 'update_details']);
         });
         /**
          * STAFF TASK MANAGEMENT ENDS HERE
