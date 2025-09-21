@@ -2048,8 +2048,9 @@ class IrsController extends Controller
 
         if ($pdfResponse->successful()) {
             return response()->json([
-                'status' => 'success',
+                'status' => 'generated',
                 'message' => 'PDF generation requested successfully.',
+                'generation_complete' => true,
                 'response' => $pdfResponse->json(),
             ]);
         } else {
