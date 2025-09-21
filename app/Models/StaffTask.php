@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StaffTask extends Model
 {
@@ -30,5 +31,13 @@ class StaffTask extends Model
     public function employees()
     {
         return $this->belongsToMany(User::class, 'staff_task_employees', 'staff_task_id', 'employee_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function main_points(): HasMany
+    {
+        return $this->hasMany(StaffTaskMainPoint::class, 'staff_task_id', 'id');
     }
 }
