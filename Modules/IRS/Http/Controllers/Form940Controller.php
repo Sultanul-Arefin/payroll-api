@@ -3251,16 +3251,16 @@ public function submitForm940JsonToTaxBandits(Request $request)
 
             if ($pdfResponse->successful()) {
                 return response()->json([
-                    'status' => 'success',
+                    'status' => 'generated',
                     'message' => 'PDF generation requested successfully.',
+                    'generation_complete' => true,
                     'response' => $pdfResponse->json(),
                 ]);
             } else {
                 return response()->json(
                     [
-                        'status' => 'generated',
+                        'status' => 'error',
                         'message' => 'Failed to request PDF generation',
-                        'generation_complete' => true,
                         'errors' => $pdfResponse->json(),
                     ],
                     $pdfResponse->status(),

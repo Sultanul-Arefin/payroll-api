@@ -661,63 +661,63 @@ class ViewJapanesePayslipResource extends JsonResource
 
 
     private function getIncomeTaxAndCategoryDetails($payslipDetails)
-{
-    $filteredDetails = [];
-    $totalAmount = 0;
-    $total_amount_yearly=0;
+    {
+        $filteredDetails = [];
+        $totalAmount = 0;
+        $total_amount_yearly=0;
 
-    if (empty($payslipDetails)) {
+        if (empty($payslipDetails)) {
+            return [
+                'filtered_details' => [],
+                'total_amount' => 0,
+                'total_deductions_tax' => $this->total_employee_deduction,
+            ];
+        }
+
+        $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
+
+        $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
+
+        foreach ($payslipDetails as $detail) {
+            if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
+                $pay_detail_name = $detail['pay_details'] ?? 'N/A';
+
+                // Check for "Threshold" category specifically
+                if (strpos($pay_detail_name, 'Threshold') !== false) {
+                    // If the category is 'Threshold', we need to calculate the yearly total
+                    // Apply custom logic for Threshold if you have a rule for it
+                    // For example, multiply the amount by a factor to estimate yearly total
+                    $yearly_total = $detail['amount'] * 12; // Example: Assume monthly value and multiply by 12 for yearly total
+                } else {
+                    // Get yearly total from the data if available
+                    $yearly_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
+                }
+
+                // If yearly_total is still 0 and it's a Threshold, apply custom logic
+                if ($yearly_total === 0 && strpos($pay_detail_name, 'Threshold') !== false) {
+                    // Set a custom value for Threshold if you want
+                    $yearly_total = 1000; // Replace with your own logic
+                }
+
+                $filteredDetails[] = [
+                    'pay_details' => $pay_detail_name,
+                    'base_amount_or_hours' => $detail['base_amount_or_hours'],
+                    'rate' => $detail['rate'],
+                    'amount' => $detail['amount'],
+                    'yearly_total' => $yearly_total, 
+                ];
+
+                $totalAmount += $detail['amount']; // Accumulate the total amount
+                $total_amount_yearly += $detail['yearly_total'];
+            }
+        }
+
         return [
-            'filtered_details' => [],
-            'total_amount' => 0,
-            'total_deductions_tax' => $this->total_employee_deduction,
+            'filtered_details' => $filteredDetails,
+            'total_amount' => round(floatval($totalAmount), 2),
+            'total_amount_yearly' => $total_amount_yearly,
         ];
     }
-
-    $current_month = date('m', strtotime($payslipDetails[0]['first_date'] ?? now()));
-
-    $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
-
-    foreach ($payslipDetails as $detail) {
-        if (in_array($detail['category_id'], [5, 6])) { // Check if category_id is 5 or 6
-            $pay_detail_name = $detail['pay_details'] ?? 'N/A';
-
-            // Check for "Threshold" category specifically
-            if (strpos($pay_detail_name, 'Threshold') !== false) {
-                // If the category is 'Threshold', we need to calculate the yearly total
-                // Apply custom logic for Threshold if you have a rule for it
-                // For example, multiply the amount by a factor to estimate yearly total
-                $yearly_total = $detail['amount'] * 12; // Example: Assume monthly value and multiply by 12 for yearly total
-            } else {
-                // Get yearly total from the data if available
-                $yearly_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
-            }
-
-            // If yearly_total is still 0 and it's a Threshold, apply custom logic
-            if ($yearly_total === 0 && strpos($pay_detail_name, 'Threshold') !== false) {
-                // Set a custom value for Threshold if you want
-                $yearly_total = 1000; // Replace with your own logic
-            }
-
-            $filteredDetails[] = [
-                'pay_details' => $pay_detail_name,
-                'base_amount_or_hours' => $detail['base_amount_or_hours'],
-                'rate' => $detail['rate'],
-                'amount' => $detail['amount'],
-                'yearly_total' => $yearly_total, 
-            ];
-
-            $totalAmount += $detail['amount']; // Accumulate the total amount
-            $total_amount_yearly += $detail['yearly_total'];
-        }
-    }
-
-    return [
-        'filtered_details' => $filteredDetails,
-        'total_amount' => round(floatval($totalAmount), 2),
-        'total_amount_yearly' => $total_amount_yearly,
-    ];
-}
     public function get_total_other_deduction()
     {
         $deduction_details = PayslipDetailsForDeduction::query()
@@ -898,65 +898,65 @@ class ViewJapanesePayslipResource extends JsonResource
      * Get yearly total for each salary item from January to previous month.
      */
 
-     public function getYearToDateCalculations()
-{
-    // payment_date starting year
-    $paymentDate = Carbon::parse($this->payment_date);
-    $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
+    public function getYearToDateCalculations()
+    {
+        // payment_date starting year
+        $paymentDate = Carbon::parse($this->payment_date);
+        $startOfYear = $paymentDate->copy()->startOfYear()->toDateString();
 
-    // // Devaging
-    // \Log::info('Start of Year: ' . $startOfYear);
-    // \Log::info('Payment Date: ' . $paymentDate->toDateString());
-    // \Log::info('Employee ID: ' . $this->employee->id);
+        // // Devaging
+        // \Log::info('Start of Year: ' . $startOfYear);
+        // \Log::info('Payment Date: ' . $paymentDate->toDateString());
+        // \Log::info('Employee ID: ' . $this->employee->id);
 
-    // payslip Filter
-    $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
-        ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
-        ->get();
+        // payslip Filter
+        $yearToDatePayslips = Payslip::where('employee_id', $this->employee->id)
+            ->whereBetween('payment_date', [$startOfYear, $paymentDate->toDateString()])
+            ->get();
 
-    if ($yearToDatePayslips->isEmpty()) {
-        \Log::warning('No Payslips found in range.', [
-            'employee_id' => $this->employee->id,
-            'start_of_year' => $startOfYear,
-            'payment_date' => $paymentDate->toDateString(),
-        ]);
+        if ($yearToDatePayslips->isEmpty()) {
+            \Log::warning('No Payslips found in range.', [
+                'employee_id' => $this->employee->id,
+                'start_of_year' => $startOfYear,
+                'payment_date' => $paymentDate->toDateString(),
+            ]);
+            return [
+                'gross_pay' => 0,
+                'taxable_gross' => 0,
+                'tax' => 0,
+            ];
+        }
+
+        // Yearly Gross Pay
+        $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
+            return (
+                ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+                + $payslip->taxable_allowance
+                + $payslip->non_taxable_allowance
+            );
+        });
+
+        // Yearly Taxable Gross Pay
+        $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
+            return (
+                ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
+                + $payslip->taxable_allowance
+            );
+        });
+
+        // Yearly Net Pay
+        $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
+            return $payslip->tax_value + $payslip->post_tax_value;
+        });
+
+    $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
+
         return [
-            'gross_pay' => 0,
-            'taxable_gross' => 0,
-            'tax' => 0,
+            'gross_pay' => $yearToDateGrossPay,
+            'taxable_gross' => $yearToDateTaxableGross,
+            'tax' => $yearToDateTaxPay,
         ];
     }
-
-    // Yearly Gross Pay
-    $yearToDateGrossPay = $yearToDatePayslips->sum(function ($payslip) {
-        return (
-            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
-            + $payslip->taxable_allowance
-            + $payslip->non_taxable_allowance
-        );
-    });
-
-    // Yearly Taxable Gross Pay
-    $yearToDateTaxableGross = $yearToDatePayslips->sum(function ($payslip) {
-        return (
-            ($payslip->wages + $payslip->additional_pay - $payslip->leave_deduction)
-            + $payslip->taxable_allowance
-        );
-    });
-
-    // Yearly Net Pay
-    $yearToDateTaxPay = $yearToDatePayslips->sum(function ($payslip) {
-        return $payslip->tax_value + $payslip->post_tax_value;
-    });
-
-   $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
-
-    return [
-        'gross_pay' => $yearToDateGrossPay,
-        'taxable_gross' => $yearToDateTaxableGross,
-        'tax' => $yearToDateTaxPay,
-    ];
-}
     public function get_yearly_payslip_totals($employee_id, $current_month)
         {
             $current_year = date('Y');
@@ -989,7 +989,7 @@ class ViewJapanesePayslipResource extends JsonResource
             }
         
             return $yearly_totals;
-        }
+    }
     
 
     public function get_base_amount_or_hours($get_base_amount_or_hours)
