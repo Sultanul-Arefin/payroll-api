@@ -42,7 +42,7 @@ class ViewIndianPayslipResource extends JsonResource
             'social_decution' => $this->get_social_deduction(),
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
-            'total_company_deduction' => $this->get_total_company_deduction(),
+            'total_company_deduction' => $this->get_total_company_deduction(),//sub total
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
             // 'attendance' => $this->getTotalAttendanceDays(
             //     $this->employee->id,
@@ -408,87 +408,315 @@ class ViewIndianPayslipResource extends JsonResource
 
 
 
-        public function get_other_deduction()
-        {
-            $deduction_details = PayslipDetailsForDeduction::query()
-                                ->whereHas(
-                                    'salary_item_name', function(Builder $builder){
-                                        $builder->where('salary_items_category_id', 8);
-                                    }
-                                )
-                                ->where('payslip_id', $this->id)
-                                ->get();
-            $response = [];
-            $total_company_amount = 0;
-            $total_employee_amount=0;
-            foreach($deduction_details as $value)
-            {
-                $total_company_amount += $value->government_or_company_amount;
-                $total_employee_amount += $value->employee_amount;
-                array_push($response, [
-                    'title' => $value?->salary_item_name?->name,
-                    'base' => $this->gross_pay_before_tax,
-                    'employee_rate' => $value->employee_amount_rate,
-                    'employee_amount' => $value->employee_amount,
-                    'company_rate' => $value->government_or_company_amount_rate,
-                    'company_amount' => $value->government_or_company_amount
-                ]);
-            }
-            return [
-                'deductions' => $response,
-                'total_company_amount' => $total_company_amount,
-                'total_employee_amount' => $total_employee_amount,
-            ];
+    // public function get_other_deduction()
+    // {
+    //     $deduction_details = PayslipDetailsForDeduction::query()
+    //                             ->whereHas(
+    //                                 'salary_item_name', function(Builder $builder){
+    //                                     $builder->where('salary_items_category_id', 8);
+    //                                 }
+    //                             )
+    //                             ->where('payslip_id', $this->id)
+    //                             ->get();
+    //     $response = [];
+    //     $total_company_amount = 0;
+    //     $total_employee_amount=0;
+    //     foreach($deduction_details as $value)
+    //         {
+    //             $total_company_amount += $value->government_or_company_amount;
+    //             $total_employee_amount += $value->employee_amount;
+    //             array_push($response, [
+    //                 'title' => $value?->salary_item_name?->name,
+    //                 'base' => $this->gross_pay_before_tax,
+    //                 'employee_rate' => $value->employee_amount_rate,
+    //                 'employee_amount' => $value->employee_amount,
+    //                 'company_rate' => $value->government_or_company_amount_rate,
+    //                 'company_amount' => $value->government_or_company_amount
+    //             ]);
+    //         }
+    //         return [
+    //             'deductions' => $response,
+    //             'total_company_amount' => $total_company_amount,
+    //             'total_employee_amount' => $total_employee_amount,
+    //         ];
+    // }
+
+    public function get_other_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+            ->whereHas('salary_item_name', function (Builder $builder) {
+                $builder->where('salary_items_category_id', 8);
+            })
+            ->where('payslip_id', $this->id)
+            ->get();
+
+        $response = [];
+        $total_company_amount = 0;
+        $total_employee_amount = 0;
+        $yearly_total_company_amount = 0;
+        $yearly_total_employee_amount = 0;
+
+        $current_month = date('m', strtotime(now()));
+
+        $yearly_payslip_data = $this->get_yearly_Other_deductions($this->employee_id, $current_month);
+
+        foreach ($deduction_details as $value) {
+            $title = $value?->salary_item_name?->name ?? 'N/A';
+
+            // Yearly Total = January to current month total
+            $yearly_total = $yearly_payslip_data[$title] ?? ['employee' => 0, 'company' => 0];
+
+            // Cast amounts to float for calculation and formatting
+            $employee_amount = (float) $value->employee_amount;
+            $company_amount = (float) $value->government_or_company_amount;
+            $yearly_employee_total = (float) $yearly_total['employee'];
+            $yearly_company_total = (float) $yearly_total['company'];
+
+            // Update total amounts
+            $total_company_amount += $company_amount;
+            $total_employee_amount += $employee_amount;
+            $yearly_total_company_amount += $yearly_company_total;
+            $yearly_total_employee_amount += $yearly_employee_total;
+
+            array_push($response, [
+                'title' => $title,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->employee_amount_rate,
+                'employee_amount' => round(floatval($employee_amount), 2),
+                'company_rate' => $value->government_or_company_amount_rate,
+                'company_amount' => round(floatval($company_amount), 2),
+                'yearly_total_employee_amount' => round(floatval($yearly_employee_total), 2),
+                'yearly_total_company_amount' => round(floatval($yearly_company_total), 2),
+            ]);
         }
 
-        public function get_social_deduction()
-        {
-            $deduction_details = PayslipDetailsForDeduction::query()
-                                ->whereHas(
-                                    'salary_item_name', function(Builder $builder){
-                                        $builder->where('salary_items_category_id', 7);
-                                    }
-                                )
-                                ->where('payslip_id', $this->id)
-                                ->get();
-            $response = [];
-            $total_company_amount = 0;
-            $total_employee_amount=0;
+        // After the loop, format the totals
+        $total_company_amount = round(floatval($total_company_amount), 2);
+        $total_employee_amount = round(floatval($total_employee_amount), 2);
+        $yearly_total_company_amount = round(floatval($yearly_total_company_amount), 2);
+        $yearly_total_employee_amount = round(floatval($yearly_total_employee_amount), 2);
 
-            foreach($deduction_details as $value)
-            {
-                $total_company_amount += $value->government_or_company_amount;
-                $total_employee_amount += $value->employee_amount;
+        // Final response with formatted totals
+        return [
+            'deductions' => $response,
+            'total_company_amount' => $total_company_amount,
+            'total_employee_amount' => $total_employee_amount,
+            'yearly_total_company_amount' => $yearly_total_company_amount,
+            'yearly_total_employee_amount' => $yearly_total_employee_amount,
+        ];
+    }
 
-                array_push($response, [
-                    'title' => $value?->salary_item_name?->name,
-                    'base' => $this->gross_pay_before_tax,
-                    'employee_rate' => $value->employee_amount_rate,
-                    'employee_amount' => $value->employee_amount,
-                    'company_rate' => $value->government_or_company_amount_rate,
-                    'company_amount' => $value->government_or_company_amount
-                ]);
-            }
-            return [
-                'deductions' => $response,
-                'total_company_amount' => $total_company_amount,
-                'total_employee_amount' => $total_employee_amount,
-            ];
-        }
+    public function get_yearly_Other_deductions($employee_id, $current_month, $category_id = 8)
+    {
+        // First, get the payslip's actual year and month using $this->first_date
+        $current_year = date('Y', strtotime($this->first_date));
+        $current_month = date('m', strtotime($this->first_date));
 
-        public function get_total_company_deduction()
-            {
-                $other_deduction = $this->get_other_deduction();
-                $social_deduction = $this->get_social_deduction();
+        // Query the payslip deductions up to the current month of that year
+        $yearly_payslips = PayslipDetailsForDeduction::query()
+            ->whereHas('payslip', function ($query) use ($employee_id, $current_year, $current_month) {
+                $query->where('employee_id', $employee_id)
+                    ->whereYear('first_date', $current_year)
+                    ->whereMonth('first_date', '<=', $current_month);
+            })
+            ->whereHas('salary_item_name', function ($query) use ($category_id) {
+                $query->where('salary_items_category_id', $category_id);
+            })
+            ->get();
 
-                $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
-                $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
+        $yearly_totals = [];
 
-                return [
-                    'total_company_amount' => round(floatval($total_company_amount),2),
-                    'total_employee_amount' => round(floatval($total_employee_amount),2),
+        foreach ($yearly_payslips as $payslip) {
+            $pay_detail_name = $payslip->salary_item_name->name ?? 'N/A';
+
+            if (!isset($yearly_totals[$pay_detail_name])) {
+                $yearly_totals[$pay_detail_name] = [
+                    'employee' => 0,
+                    'company' => 0,
                 ];
             }
+
+            $yearly_totals[$pay_detail_name]['employee'] += (float) $payslip->employee_amount;
+            $yearly_totals[$pay_detail_name]['company'] += (float) $payslip->government_or_company_amount;
+        }
+
+        return $yearly_totals;
+    }
+
+    
+
+    // public function get_social_deduction()
+    // {
+    //     $deduction_details = PayslipDetailsForDeduction::query()
+    //                         ->whereHas(
+    //                             'salary_item_name', function(Builder $builder){
+    //                                 $builder->where('salary_items_category_id', 7);
+    //                             }
+    //                         )
+    //                         ->where('payslip_id', $this->id)
+    //                         ->get();
+    //     $response = [];
+    //     $total_company_amount = 0;
+    //     $total_employee_amount=0;
+
+    //     foreach($deduction_details as $value)
+    //     {
+    //             $total_company_amount += $value->government_or_company_amount;
+    //             $total_employee_amount += $value->employee_amount;
+
+    //             array_push($response, [
+    //                 'title' => $value?->salary_item_name?->name,
+    //                 'base' => $this->gross_pay_before_tax,
+    //                 'employee_rate' => $value->employee_amount_rate,
+    //                 'employee_amount' => $value->employee_amount,
+    //                 'company_rate' => $value->government_or_company_amount_rate,
+    //                 'company_amount' => $value->government_or_company_amount
+    //             ]);
+    //     }
+    //         return [
+    //             'deductions' => $response,
+    //             'total_company_amount' => $total_company_amount,
+    //             'total_employee_amount' => $total_employee_amount,
+    //         ];
+    // }
+
+    public function get_social_deduction()
+    {
+        $deduction_details = PayslipDetailsForDeduction::query()
+            ->whereHas('salary_item_name', function (Builder $builder) {
+                $builder->where('salary_items_category_id', 7);
+            })
+            ->where('payslip_id', $this->id)
+            ->get();
+
+        $response = [];
+        $total_company_amount = 0;
+        $total_employee_amount = 0;
+        $yearly_total_company_amount = 0;
+        $yearly_total_employee_amount = 0;
+
+        
+        $current_month = date('m', strtotime(now()));
+
+        // Yearly total to current_month 
+        $yearly_payslip_data = $this->get_yearly_deduction_details($this->employee_id, $current_month);
+        
+
+        foreach ($deduction_details as $value) {
+            $title = $value?->salary_item_name?->name ?? 'N/A';
+        
+            $yearly_total = $yearly_payslip_data[$title] ?? ['employee' => 0, 'company' => 0];
+        
+            // Ensure these values are properly initialized as floats
+            $employee_amount = (float) $value->employee_amount; 
+            $company_amount = (float) $value->government_or_company_amount;
+            $yearly_employee_total = (float) $yearly_total['employee'];
+            $yearly_company_total = (float) $yearly_total['company'];
+        
+            // Update total amounts
+            $total_company_amount += $company_amount;
+            $total_employee_amount += $employee_amount;
+            $yearly_total_company_amount += $yearly_company_total;
+            $yearly_total_employee_amount += $yearly_employee_total;
+        
+            // Add formatted response data
+            array_push($response, [
+                'title' => $title,
+                'base' => $this->gross_pay_before_tax,
+                'employee_rate' => $value->employee_amount_rate,
+                'employee_amount' => round(floatval($employee_amount), 2),
+                'company_rate' => $value->government_or_company_amount_rate,
+                'company_amount' => round(floatval($company_amount), 2),
+                'yearly_total_employee_amount' => round(floatval($yearly_employee_total), 2),
+                'yearly_total_company_amount' => round(floatval($yearly_company_total), 2),
+            ]);
+        }
+        
+        // After the loop, format the totals
+        $total_company_amount = round(floatval($total_company_amount), 2);
+        $total_employee_amount = round(floatval($total_employee_amount), 2);
+        $yearly_total_company_amount = round(floatval($yearly_total_company_amount), 2);
+        $yearly_total_employee_amount = round(floatval($yearly_total_employee_amount), 2);
+        
+        // Final response with formatted totals
+        return [
+            'deductions' => $response,
+            'total_company_amount' => $total_company_amount,
+            'total_employee_amount' => $total_employee_amount,
+            'yearly_total_company_amount' => $yearly_total_company_amount,
+            'yearly_total_employee_amount' => $yearly_total_employee_amount,
+        ];
+    }
+
+    public function get_yearly_deduction_details($employee_id, $current_month, $category_id = 7)
+    {
+        // First, get the payslip's actual year and month using $this->first_date
+        $current_year = date('Y', strtotime($this->first_date));
+        $current_month = date('m', strtotime($this->first_date));
+
+        // Query the payslip deductions up to the current month of that year
+        $yearly_payslips = PayslipDetailsForDeduction::query()
+            ->whereHas('payslip', function ($query) use ($employee_id, $current_year, $current_month) {
+                $query->where('employee_id', $employee_id)
+                    ->whereYear('first_date', $current_year)
+                    ->whereMonth('first_date', '<=', $current_month);
+            })
+            ->whereHas('salary_item_name', function ($query) use ($category_id) {
+                $query->where('salary_items_category_id', $category_id);
+            })
+            ->get();
+
+        $yearly_totals = [];
+
+        foreach ($yearly_payslips as $payslip) {
+            $pay_detail_name = $payslip->salary_item_name->name ?? 'N/A';
+
+            if (!isset($yearly_totals[$pay_detail_name])) {
+                $yearly_totals[$pay_detail_name] = [
+                    'employee' => 0,
+                    'company' => 0,
+                ];
+            }
+
+            $yearly_totals[$pay_detail_name]['employee'] += (float) $payslip->employee_amount;
+            $yearly_totals[$pay_detail_name]['company'] += (float) $payslip->government_or_company_amount;
+        }
+
+        return $yearly_totals;
+    }
+
+    public function get_total_company_deduction()
+    {
+            $other_deduction = $this->get_other_deduction();
+            $social_deduction = $this->get_social_deduction();
+
+            $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
+            $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
+            $yearly_total_company_amount = $other_deduction['yearly_total_company_amount'] + $social_deduction['yearly_total_company_amount'];
+            $yearly_total_employee_amount = $other_deduction['yearly_total_employee_amount'] + $social_deduction['yearly_total_employee_amount'];
+
+            return [
+                'total_company_amount' =>round(floatval($total_company_amount),2),
+                'total_employee_amount' => round(floatval($total_employee_amount),2),
+                'yearly_total_company_amount' => round(floatval($yearly_total_company_amount),2),
+                'yearly_total_employee_amount' => round(floatval($yearly_total_employee_amount),2),
+            ];
+    }
+
+
+    // public function get_total_company_deduction()
+    // {
+    //         $other_deduction = $this->get_other_deduction();
+    //         $social_deduction = $this->get_social_deduction();
+
+    //         $total_company_amount = $other_deduction['total_company_amount'] + $social_deduction['total_company_amount'];
+    //         $total_employee_amount = $other_deduction['total_employee_amount'] + $social_deduction['total_employee_amount'];
+
+    //         return [
+    //             'total_company_amount' => round(floatval($total_company_amount),2),
+    //             'total_employee_amount' => round(floatval($total_employee_amount),2),
+    //         ];
+    // }
 
     public function get_staff_social_charges()
     {
@@ -521,38 +749,138 @@ class ViewIndianPayslipResource extends JsonResource
     // ];
     // }
 
-    public function get_payslip_details($payslip_details){
-        $payslip_value = 0;
-        // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
-        $filtered_details = $payslip_details->filter(function ($payslip_detail) {
-            return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
-        });
+    // public function get_payslip_details($payslip_details){
+    //     $payslip_value = 0;
+    //     // Filter out rows where salary_item->name is "Annual Leave" or "Sick Leave"
+    //     $filtered_details = $payslip_details->filter(function ($payslip_detail) {
+    //         return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
+    //     });
 
-        foreach($filtered_details as $payslip_detail){
-            // if($payslip_detail->salary_item->name == "Annual Leave" || $payslip_detail->salary_item->name == "Annual Leave"){
+    //     foreach($filtered_details as $payslip_detail){
+    //         // if($payslip_detail->salary_item->name == "Annual Leave" || $payslip_detail->salary_item->name == "Annual Leave"){
 
-            // } else{
-                $payslip_detail->pay_details = $payslip_detail->salary_item->name;
-                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
+    //         // } else{
+    //             $payslip_detail->pay_details = $payslip_detail->salary_item->name;
+    //             $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours);
 
-                $payslip_detail->rate = $payslip_detail->rate;
-                $payslip_detail->amount = $payslip_detail->amount;
-                if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+    //             $payslip_detail->rate = $payslip_detail->rate;
+    //             $payslip_detail->amount = $payslip_detail->amount;
+    //             if (in_array($payslip_detail->salary_item->name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
+    //                 $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
+    //             } else {
+    //                 $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
+    //             }
+    //         // }
+    //         $payslip_value += $payslip_detail->amount;
+
+    //         // unset these keys from the response
+    //         unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
+    //     }
+    //     return [
+    //         'payslip_details' => $filtered_details->values(),
+    //         //'total_earnings' => $payslip_value
+    //     ];
+    // }
+
+    public function get_payslip_details($payslip_details)
+    {
+            $payslip_value = 0;
+            $filteredDetails = [];
+        
+            if ($payslip_details->isEmpty()) {
+                return [
+                    'payslip_details' => [],
+                    'total_payslip_value_employee' => 0,
+                ];
+            }
+        
+            $current_month = date('m', strtotime($payslip_details->first()->payslip->first_date));
+        
+            $yearly_payslip_data = $this->get_yearly_payslip_totals($this->employee_id, $current_month);
+        
+            $filtered_details = $payslip_details->filter(function ($payslip_detail) {
+                return !in_array($payslip_detail->salary_item->name, ['Annual Leave', 'Sick Leave']);
+            });
+        
+            foreach ($filtered_details as $payslip_detail) {
+                $pay_detail_name = $payslip_detail->salary_item->name ?? 'N/A';
+        
+                $payslip_detail->pay_details = $pay_detail_name;
+                $payslip_detail->base_amount_or_hours = $this->get_base_amount_or_hours($payslip_detail->base_amount_or_hours) ?? 0;
+                $payslip_detail->rate = $payslip_detail->rate ?? 0;
+                $payslip_detail->amount = $payslip_detail->amount ?? 0;
+        
+                $previous_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
+                $payslip_detail->yearly_total = $previous_total;
+        
+                if (in_array($pay_detail_name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
                     $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
                 } else {
                     $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id;
                 }
-            // }
-            $payslip_value += $payslip_detail->amount;
-
-            // unset these keys from the response
-            unset($payslip_detail->salary_item, $payslip_detail->id, $payslip_detail->created_at, $payslip_detail->updated_at, $payslip_detail->payslip_id, $payslip_detail->salary_item_id);
-        }
-        return [
-            'payslip_details' => $filtered_details->values(),
-            //'total_earnings' => $payslip_value
-        ];
+        
+                // Skip category_id 5 and 6
+                if (in_array($payslip_detail->category_id, [5, 6])) {
+                    continue;
+                }
+        
+                $payslip_value += $payslip_detail->amount;
+        
+                // Unset unnecessary keys
+                unset(
+                    $payslip_detail->salary_item,
+                    $payslip_detail->id,
+                    $payslip_detail->created_at,
+                    $payslip_detail->updated_at,
+                    $payslip_detail->payslip_id,
+                    $payslip_detail->salary_item_id,
+                    $payslip_detail->payslip
+                );
+        
+                $filteredDetails[] = $payslip_detail;
+            }
+        
+            return [
+                'payslip_details' => $filteredDetails,
+                'total_payslip_value_employee' => $payslip_value,
+                'total' => $this->get_yearly_data("total_gross_pay")['total_gross_pay'],
+            ];
     }
+
+    public function get_yearly_payslip_totals($employee_id, $current_month)
+    {
+            $current_year = date('Y');
+        
+            // Get all payslips from January to the selected month
+            $yearly_payslips = PayslipDetail::query()
+                ->whereHas('payslip', function ($query) use ($employee_id, $current_year, $current_month) {
+                    $query->where('employee_id', $employee_id)
+                        ->whereYear('first_date', $current_year)
+                        ->whereMonth('first_date', '<=', $current_month); // Only up to selected month
+                })
+                ->get();
+        
+            $yearly_totals = [];
+        
+            foreach ($yearly_payslips as $payslip) {
+                $pay_detail_name = $payslip->salary_item->name;
+        
+                preg_match('/(\d+)/', $payslip->base_amount_or_hours, $matches);
+                $months = isset($matches[1]) ? (int)$matches[1] : 1;
+        
+                $amount = $months * (float) $payslip->rate;
+        
+                // Accumulate totals for each salary item
+                if (!isset($yearly_totals[$pay_detail_name])) {
+                    $yearly_totals[$pay_detail_name] = 0;
+                }
+        
+                $yearly_totals[$pay_detail_name] += $amount;
+            }
+        
+            return $yearly_totals;
+    }
+    
 
     public function get_base_amount_or_hours($get_base_amount_or_hours){
         $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
@@ -564,6 +892,8 @@ class ViewIndianPayslipResource extends JsonResource
             return $get_base_amount_or_hours;
         }
     }
+
+    
 
     public function getOvertimeHours($payslip_details)
     {
@@ -629,40 +959,113 @@ class ViewIndianPayslipResource extends JsonResource
 
     public function overall_calculation()
     {
-        return [
-            'monthly' => [
-                [
-                    'hours' => $this->hours_worked,
-                    'overtime_hours' => 0, // calculate full working hours & get overtime
-                    'total_fixed_pay' => $this->wages - $this->leave_deduction,
-                    'taxable_allowances' => $this->taxable_allowance,
-                    'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
-                    'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-                    'ytd_tax_paid' => 0,
-                    'total_staff_contribution' => $this->total_employee_deduction,
-                    'total_company_contribution' => $this->company_contribution,
-                    'total_staff_cost' => $this->net_pay,
-                    'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
+            return [
+                'monthly' => [
+                    [
+                        'hours' => $this->hours_worked,
+                        'overtime_hours' => 0, // calculate full working hours & get overtime
+                        'total_fixed_pay' => $this->wages - $this->leave_deduction,
+                        'taxable_allowances' => $this->taxable_allowance,
+                        'non_taxable_allowances' => $this->non_taxable_allowance,
+                        'total_gross_pay' => $this->gross_pay_before_tax,
+                        'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+                        'ytd_tax_paid' => 0,
+                        'total_staff_contribution' => $this->total_employee_deduction,
+                        'total_company_contribution' => $this->company_contribution,
+                        'total_staff_cost' => $this->net_pay,
+                        'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
+                    ],
                 ],
-            ],
-            'yearly' => [
-                [
-                    'hours' => $this->hours_worked,
-                    'overtime_hours' => 0,
-                    'total_fixed_pay' => $this->wages - $this->leave_deduction,
-                    'taxable_allowances' => $this->taxable_allowance,
-                    'non_taxable_allowances' => $this->non_taxable_allowance,
-                    'total_gross_pay' => $this->gross_pay_before_tax,
-                    'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-                    'ytd_tax_paid' => 0,
-                    'total_staff_contribution' => $this->total_employee_deduction,
-                    'total_company_contribution' => $this->company_contribution,
-                    'total_staff_cost' => $this->net_pay,
-                    'total_net_pay' => $this->net_pay,
+                'yearly' => [
+                    [
+                        'hours' => $this->hours_worked,
+                        'overtime_hours' => 0,
+                        'total_fixed_pay' => $this->wages - $this->leave_deduction,
+                        'taxable_allowances' => $this->taxable_allowance,
+                        'non_taxable_allowances' => $this->non_taxable_allowance,
+                        'total_gross_pay' => $this->gross_pay_before_tax,
+                        'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
+                        'ytd_tax_paid' => 0,
+                        'total_staff_contribution' => $this->total_employee_deduction,
+                        'total_company_contribution' => $this->company_contribution,
+                        'total_staff_cost' => $this->net_pay,
+                        'total_net_pay' => $this->net_pay,
+                    ],
                 ],
-            ],
-            'total_net_pay' => $this->net_pay,
-        ];
+                'total_net_pay' => $this->net_pay,
+            ];
+    }
+
+    public function get_yearly_data($key)
+    {
+            $working_hours_per_day = auth()->user()->company?->working_hours_per_day;
+            $payslip_year = date('Y', strtotime($this->first_date));
+            $payslip_month = date('m', strtotime($this->first_date));
+            $payslip_data = Payslip::query()
+                                        ->whereBetween('first_date', [
+                                            date("$payslip_year-1-1"), // Start of the year
+                                            date("$payslip_year-$payslip_month-31"), // End of the year
+                                        ])
+                                        ->whereBetween('last_date', [
+                                            date("$payslip_year-1-1"), // Start of the year
+                                            date("$payslip_year-$payslip_month-31"), // End of the year
+                                        ])
+                                        ->where('employee_id', $this->employee->id)
+                                        ->orderBy('created_at', 'ASC')
+                                        ->get();
+            $data['hours'] = 0;
+            $data['overtime_hours'] = 0;
+            $data['total_fixed_pay'] = 0;
+            $data['taxable_allowances'] = 0;
+            $data['non_taxable_allowances'] = 0;
+            $data['total_gross_pay'] = 0;
+            $data['taxable_gross_pay'] = 0;
+            $data['ytd_tax_paid'] = 0;
+            $data['tax_amount'] = 0;
+            $data['total_staff_contribution'] = 0;
+            $data['total_company_contribution'] = 0;
+            $data['total_staff_cost'] = 0;
+            $data['total_net_pay'] = 0;
+            foreach($payslip_data as $value)
+            {
+                if($key == "hours"){
+                    $data['hours'] += $value->hours_worked;
+                }
+                if($key == "total_fixed_pay"){
+                    $data["total_fixed_pay"] += ($value->wages + $value->additional_pay) - $value->leave_deduction;
+                }
+                if($key == "taxable_allowances"){
+                    $data["taxable_allowances"] += $value->taxable_allowance;
+                }
+                if($key == "non_taxable_allowances"){
+                    $data["non_taxable_allowances"] += $value->non_taxable_allowance;
+                }
+                if($key == "total_gross_pay"){
+                    $data["total_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance;
+                }
+                if($key == "taxable_gross_pay"){
+                    $data["taxable_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance - $value->non_taxable_allowance;
+                }
+                if($key == "ytd_tax_paid"){
+                    $data["ytd_tax_paid"] += $value->tax_value + $value->post_tax_value;
+                }
+                if($key == "tax_amount"){
+                    $data["tax_amount"] += $value->tax_value + $value->post_tax_value;
+                }
+                if($key == "total_staff_contribution"){
+                    $data["total_staff_contribution"] += $value->total_employee_deduction;
+                }
+                if($key == "total_company_contribution"){
+                    $data["total_company_contribution"] += $value->company_contribution;
+                }
+                if($key == "total_staff_cost"){
+                    // $data["total_staff_cost"] += ($value->gross_pay_before_tax + $value->company_contribution);
+                    $data["total_staff_cost"] += (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance + $value->company_contribution;
+                }
+                if($key == "total_net_pay"){
+                    $data["total_net_pay"] += $value->net_pay;
+                }
+            }
+            return $data;
     }
 }
