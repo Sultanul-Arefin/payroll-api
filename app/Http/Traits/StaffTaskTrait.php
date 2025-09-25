@@ -18,6 +18,12 @@ trait StaffTaskTrait
 
     public function update_details(StaffTask $staff_task, Request $request)
     {
+        $request->validate([
+            'title' => 'required',
+            'given_date' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
+        ]);
         DB::transaction(function () use ($request, $staff_task) {
             // 1. Delete old main points & sub points (cascade handles sub points)
             $staff_task->main_points()->delete();
@@ -52,6 +58,9 @@ trait StaffTaskTrait
             }
         });
 
-        return response()->json(['message' => 'Task updated successfully']);
+        return $this->apiResponse(
+            data: null,
+            message: 'Task updated successfully'
+        );
     }
 }
