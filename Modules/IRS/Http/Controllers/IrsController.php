@@ -971,7 +971,7 @@ class IrsController extends Controller
                 ],
             ],
         ];
-return $requestPayload;
+
         // Step 5: Submit JSON payload to TaxBandits API
         $endpoint = $apiUrl . '/Form941/Create';
 
