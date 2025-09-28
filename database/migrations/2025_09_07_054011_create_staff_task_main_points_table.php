@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('documents')->nullable();
             $table->double('estimated_time')->nullable();
             $table->integer('signed_off_by_manager')->default(StaffTaskMainPoint::NOT_SINGED_OFF);
-            $table->timestamp('signed_off_time');
+            $table->timestamp('signed_off_time')->nullable();
             $table->timestamps();
         });
     }
