@@ -786,13 +786,75 @@ class IrsController extends Controller
             ?? 'NONE';
 
 
+        // $totalQuarterTaxLiabilityAmt = round($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax, 2);
+
+        // if (empty($depositorType) || strtoupper($depositorType) === 'NONE') {
+        //     if ($totalQuarterTaxLiabilityAmt < 2500) {
+        //         $depositorType = 'NONE';
+        //         $monthlyDepositor = null;
+        //     } else {
+        //         $depositorType = 'MONTHLY';
+        //         $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
+        //         $monthlyDepositor = [
+        //             'TaxLiabilityMonth1' => $perMonth,
+        //             'TaxLiabilityMonth2' => $perMonth,
+        //             'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
+        //         ];
+        //     }
+        // } else {
+            
+        //     if (strtoupper($depositorType) === 'MONTHLY') {
+        //         $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
+        //     $monthlyDepositor = [
+        //             'TaxLiabilityMonth1' => $perMonth,
+        //             'TaxLiabilityMonth2' => $perMonth,
+        //             'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
+        //         ];
+        //     } else {
+        //         $monthlyDepositor = null;
+        //     }
+
+            
+        // }
+
         $totalQuarterTaxLiabilityAmt = round($federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax, 2);
 
-        if (empty($depositorType) || strtoupper($depositorType) === 'NONE') {
-            if ($totalQuarterTaxLiabilityAmt < 2500) {
-                $depositorType = 'NONE';
-                $monthlyDepositor = null;
+        // Determine depositor type
+        $depositorTypeInput = strtoupper($depositorType ?? 'NONE');
+        $monthlyDepositor = null;
+        $semiWeeklyDepositor = null;
+
+        if ($totalQuarterTaxLiabilityAmt < 2500) {
+            // Small tax liability → no deposit required
+            $depositorType = 'NONE';
+        } else {
+            // Tax liability >= 2500 → need deposit
+            if ($depositorTypeInput === 'MONTHLY') {
+                $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
+                $monthlyDepositor = [
+                    'TaxLiabilityMonth1' => $perMonth,
+                    'TaxLiabilityMonth2' => $perMonth,
+                    'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
+                ];
+            } elseif ($depositorTypeInput === 'SEMIWEEKLY') {
+                // Semi-weekly depositor calculation
+                // IRS requires 1-2 weeks of payroll tax deposits
+                // Approx: 13 weeks per quarter → 6,6,1 weeks
+                $weeklyLiability = round($totalQuarterTaxLiabilityAmt / 13, 2);
+
+                $semiWeeklyDepositor = [];
+                for ($i = 1; $i <= 13; $i++) {
+                    $semiWeeklyDepositor['Week'.$i.'TaxLiability'] = $weeklyLiability;
+                }
+
+                // Adjust last week to match exact total
+                $sumWeeks = array_sum($semiWeeklyDepositor);
+                $difference = $totalQuarterTaxLiabilityAmt - $sumWeeks;
+                $semiWeeklyDepositor['Week13TaxLiability'] += $difference;
+
+                $depositorType = 'SEMIWEEKLY';
             } else {
+                // Default to monthly if unknown
                 $depositorType = 'MONTHLY';
                 $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
                 $monthlyDepositor = [
@@ -801,23 +863,7 @@ class IrsController extends Controller
                     'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
                 ];
             }
-        } else {
-            
-            if (strtoupper($depositorType) === 'MONTHLY') {
-                $perMonth = round($totalQuarterTaxLiabilityAmt / 3, 2);
-            $monthlyDepositor = [
-                    'TaxLiabilityMonth1' => $perMonth,
-                    'TaxLiabilityMonth2' => $perMonth,
-                    'TaxLiabilityMonth3' => round($totalQuarterTaxLiabilityAmt - 2 * $perMonth, 2),
-                ];
-            } else {
-                $monthlyDepositor = null;
             }
-
-            
-        }
-        
-
         $payerRef = "IRS-" ."941-" . $companyId . "-" . now()->year . $quarter . "-" . uniqid();
 
         // Build JSON payload for TaxBandits API
@@ -925,7 +971,7 @@ class IrsController extends Controller
                 ],
             ],
         ];
-
+return $requestPayload;
         // Step 5: Submit JSON payload to TaxBandits API
         $endpoint = $apiUrl . '/Form941/Create';
 
