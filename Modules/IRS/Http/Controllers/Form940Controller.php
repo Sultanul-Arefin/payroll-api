@@ -996,10 +996,10 @@ public function submitForm940JsonToTaxBandits(Request $request)
     }
 
     try {
-        [$startDate, $endDate] = $this->getYearlyDateRange($year);
-        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+        //[$startDate, $endDate] = $this->getYearlyDateRange($year);
+        $months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $months, $year);
         $salaryData = $salaryResource->toArray(request());
-
         $totalEmployees    = $salaryData['total_employee'] ?? 0;
         $companyName       = $salaryData['company_name'] ?? $company->name;
         $ein               = $salaryData['employer_identification_number'] ?? ($company->employer_identification_number ?? null);
