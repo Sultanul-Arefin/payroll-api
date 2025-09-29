@@ -614,29 +614,41 @@ class IrsController extends Controller
     //     }
     // }
 
-    private function getQuarterDateRange($year, $quarter)
+    // private function getQuarterDateRange($year, $quarter)
+    // {
+    //     switch ($quarter) {
+    //         case 'Q1':
+    //             return [
+    //                 Carbon::create($year, 1, 1)->startOfDay(),
+    //                 Carbon::create($year, 3, 31)->endOfDay(),
+    //             ];
+    //         case 'Q2':
+    //             return [
+    //                 Carbon::create($year, 4, 1)->startOfDay(),
+    //                 Carbon::create($year, 6, 30)->endOfDay(),
+    //             ];
+    //         case 'Q3':
+    //             return [
+    //                 Carbon::create($year, 7, 1)->startOfDay(),
+    //                 Carbon::create($year, 9, 30)->endOfDay(),
+    //             ];
+    //         case 'Q4':
+    //             return [
+    //                 Carbon::create($year, 10, 1)->startOfDay(),
+    //                 Carbon::create($year, 12, 31)->endOfDay(),
+    //             ];
+    //         default:
+    //             throw new \InvalidArgumentException("Invalid quarter: $quarter");
+    //     }
+    // }
+
+    private function getQuarterMonths($quarter)
     {
         switch ($quarter) {
-            case 'Q1':
-                return [
-                    Carbon::create($year, 1, 1)->startOfDay(),
-                    Carbon::create($year, 3, 31)->endOfDay(),
-                ];
-            case 'Q2':
-                return [
-                    Carbon::create($year, 4, 1)->startOfDay(),
-                    Carbon::create($year, 6, 30)->endOfDay(),
-                ];
-            case 'Q3':
-                return [
-                    Carbon::create($year, 7, 1)->startOfDay(),
-                    Carbon::create($year, 9, 30)->endOfDay(),
-                ];
-            case 'Q4':
-                return [
-                    Carbon::create($year, 10, 1)->startOfDay(),
-                    Carbon::create($year, 12, 31)->endOfDay(),
-                ];
+            case 'Q1': return ['January','February','March'];
+            case 'Q2': return ['April','May','June'];
+            case 'Q3': return ['July','August','September'];
+            case 'Q4': return ['October','November','December'];
             default:
                 throw new \InvalidArgumentException("Invalid quarter: $quarter");
         }
@@ -664,15 +676,16 @@ class IrsController extends Controller
         }
 
         // Quarter date range 
-        [$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+        //[$startDate, $endDate] = $this->getQuarterDateRange($year, $quarter);
+        $months = $this->getQuarterMonths($quarter);
 
 
-        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+        //$salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $startDate, $endDate);
+        $salaryResource = new \Modules\IRS\Http\Resources\GetSalaryResource($company, $months);
         $salaryData = $salaryResource->toArray(request());
 
         $grossPay         = $salaryData['gross_pay'] ?? 0;
-        
-
+    
         // Additional taxes
         $additionalTaxes = $salaryData['additional_taxes'] ?? [];
         $federalIncomeTaxWithheld = floatval($additionalTaxes['Federal Income Tax'] ?? 0);
@@ -762,7 +775,7 @@ class IrsController extends Controller
 
         $socialSecurityTax =round($socialSecurityTaxCon) +  round($socialSecurityTaxAmt);
         $medicareTax       = round($medicareWagesTipsCom) + round($medicareWagesTipsAmt);
-        
+      
         $totalTaxBeforeAdjustmentAmt = floatval($returnData['TotalTaxBeforeAdjustmentAmt'] ?? $federalIncomeTaxWithheld + $socialSecurityTax + $medicareTax);
 
         $payrollTaxCreditAmt = floatval($returnData['PayrollTaxCreditAmt'] ?? 0);
