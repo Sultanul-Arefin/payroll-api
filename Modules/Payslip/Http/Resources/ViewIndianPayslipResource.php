@@ -30,8 +30,8 @@ class ViewIndianPayslipResource extends JsonResource
             'total_fixed_pay' => $this->wages - $this->leave_deduction,
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
-            'total_gross_pay' => (($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance, // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
-            'taxable_gross_pay' => ((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance, // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
+            'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate            'tax_amount' => $this->tax_value + $this->post_tax_value,
+            'taxable_gross_pay' => round(floatval(((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance) - $this->non_taxable_allowance),2), // this is accurate // total_gross_pay - non_taxable_allowance            'pay_due_before_deduction' => $this->pay_due_before_deduction,
             //'staff_social_charges' => 0.00,
             'tax_amount' => $this->tax_value + $this->post_tax_value,
             'gross_pay_after_tax' => $this->gross_pay_after_tax,
@@ -50,7 +50,7 @@ class ViewIndianPayslipResource extends JsonResource
             //     $this->end_date
             // ),
             'net_salary' => round(floatval($this->net_pay),2),
-           // 'overall_calculation' => $this->overall_calculation(),
+            'overall_calculation' => $this->overall_calculation(),
            'attendance'=>$this->getTotalWorkingDaysAttribute(),
         ];
     }
@@ -811,7 +811,7 @@ class ViewIndianPayslipResource extends JsonResource
                 $payslip_detail->amount = $payslip_detail->amount ?? 0;
         
                 $previous_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
-                $payslip_detail->yearly_total = $previous_total;
+                $payslip_detail->yearly_total = round(floatval($previous_total),2);
         
                 if (in_array($pay_detail_name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
                     $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
@@ -820,9 +820,9 @@ class ViewIndianPayslipResource extends JsonResource
                 }
         
                 // Skip category_id 5 and 6
-                if (in_array($payslip_detail->category_id, [5, 6])) {
-                    continue;
-                }
+                // if (in_array($payslip_detail->category_id, [5, 6])) {
+                //     continue;
+                // }
         
                 $payslip_value += $payslip_detail->amount;
         
@@ -962,34 +962,47 @@ class ViewIndianPayslipResource extends JsonResource
             return [
                 'monthly' => [
                     [
-                        'hours' => $this->hours_worked,
-                        'overtime_hours' => 0, // calculate full working hours & get overtime
-                        'total_fixed_pay' => $this->wages - $this->leave_deduction,
-                        'taxable_allowances' => $this->taxable_allowance,
-                        'non_taxable_allowances' => $this->non_taxable_allowance,
-                        'total_gross_pay' => $this->gross_pay_before_tax,
-                        'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-                        'ytd_tax_paid' => 0,
-                        'total_staff_contribution' => $this->total_employee_deduction,
-                        'total_company_contribution' => $this->company_contribution,
-                        'total_staff_cost' => $this->net_pay,
+                        'hours' => round(floatval($this->hours_worked), 2),
+                        'overtime_hours' => round(floatval($this->getOvertimeHours($this->payslip_details)), 2),
+                        'total_fixed_pay' => round(floatval(($this->wages + $this->additional_pay) - $this->leave_deduction), 2),
+                        'taxable_allowances' => round(floatval($this->taxable_allowance), 2),
+                        'non_taxable_allowances' => round(floatval($this->non_taxable_allowance), 2),
+                        'total_gross_pay' => round(floatval(
+                            (($this->wages + $this->additional_pay) - $this->leave_deduction) +
+                            $this->taxable_allowance + $this->non_taxable_allowance
+                        ), 2),
+                        'taxable_gross_pay' => round(floatval(
+                            ((($this->wages + $this->additional_pay) - $this->leave_deduction) +
+                            $this->taxable_allowance + $this->non_taxable_allowance) -
+                            $this->non_taxable_allowance
+                        ), 2),
+                        'ytd_tax_paid' => round(floatval($this->tax_value + $this->post_tax_value), 2),
+                        'tax_amount' => round(floatval($this->tax_value + $this->post_tax_value), 2),
+                        'total_staff_contribution' => round(floatval($this->total_employee_deduction), 2),
+                        'total_company_contribution' => round(floatval($this->company_contribution), 2),
+                        // total_staff_cost = total_gross_pay + company contribution
+                        'total_staff_cost' => round(floatval(
+                            (($this->wages + $this->additional_pay) - $this->leave_deduction) +
+                            $this->taxable_allowance + $this->non_taxable_allowance + $this->company_contribution
+                        ), 2),
                         'total_net_pay' =>$this->get_netPay($this->wages,$this->hours_worked,$this->net_pay),
                     ],
                 ],
                 'yearly' => [
                     [
-                        'hours' => $this->hours_worked,
-                        'overtime_hours' => 0,
-                        'total_fixed_pay' => $this->wages - $this->leave_deduction,
-                        'taxable_allowances' => $this->taxable_allowance,
-                        'non_taxable_allowances' => $this->non_taxable_allowance,
-                        'total_gross_pay' => $this->gross_pay_before_tax,
-                        'taxable_gross_pay' => $this->gross_pay_before_tax - $this->non_taxable_allowance,
-                        'ytd_tax_paid' => 0,
-                        'total_staff_contribution' => $this->total_employee_deduction,
-                        'total_company_contribution' => $this->company_contribution,
-                        'total_staff_cost' => $this->net_pay,
-                        'total_net_pay' => $this->net_pay,
+                        'hours' => round(floatval($this->get_yearly_data("hours")['hours']), 2),
+                        'overtime_hours' => round(floatval($this->getTotalOvertimeHours($this->payslip_details)), 2),
+                        'total_fixed_pay' => round(floatval($this->get_yearly_data("total_fixed_pay")['total_fixed_pay']), 2),
+                        'taxable_allowances' => round(floatval($this->get_yearly_data("taxable_allowances")['taxable_allowances']), 2),
+                        'non_taxable_allowances' => round(floatval($this->get_yearly_data("non_taxable_allowances")['non_taxable_allowances']), 2),
+                        'total_gross_pay' => round(floatval($this->get_yearly_data("total_gross_pay")['total_gross_pay']), 2),
+                        'taxable_gross_pay' => round(floatval($this->get_yearly_data("taxable_gross_pay")['taxable_gross_pay']), 2),
+                        'ytd_tax_paid' => round(floatval($this->get_yearly_data("ytd_tax_paid")['ytd_tax_paid']), 2),
+                        'tax_amount' => round(floatval($this->get_yearly_data("tax_amount")['tax_amount']), 2),
+                        'total_staff_contribution' => round(floatval($this->get_yearly_data("total_staff_contribution")['total_staff_contribution']), 2),
+                        'total_company_contribution' => round(floatval($this->get_yearly_data("total_company_contribution")['total_company_contribution']), 2),
+                        'total_staff_cost' => round(floatval($this->get_yearly_data("total_staff_cost")['total_staff_cost']), 2),
+                        'total_net_pay' => round(floatval($this->get_yearly_data("total_net_pay")['total_net_pay']), 2),
                     ],
                 ],
                 'total_net_pay' => $this->net_pay,
