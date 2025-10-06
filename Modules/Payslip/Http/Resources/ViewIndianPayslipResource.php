@@ -43,6 +43,7 @@ class ViewIndianPayslipResource extends JsonResource
             'other_decution' => $this->get_other_deduction(),
             'total_deductions' => $this->total_employee_deduction,
             'total_company_deduction' => $this->get_total_company_deduction(),//sub total
+            'total_ctc' => $this->get_total_ctc(),
             'annual_leave' => $this->get_annual_leave_calculation($this->employee),
             // 'attendance' => $this->getTotalAttendanceDays(
             //     $this->employee->id,
@@ -703,6 +704,35 @@ class ViewIndianPayslipResource extends JsonResource
             ];
     }
 
+    public function get_total_ctc()
+    {
+        // Step 1: Get gross pay (total earnings)
+        $grossPay = round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2);
+
+        // Step 2: Get employer contributions (company deductions)
+        $companyDeductions = $this->get_total_company_deduction();
+        $employerContribution = $companyDeductions['total_company_amount'] ?? 0;
+        $yearlyEmployerContribution = $companyDeductions['yearly_total_company_amount'] ?? 0;
+
+        $yearlyGross = round(floatval($this->get_yearly_data("total_gross_pay")['total_gross_pay']), 2);
+
+        // Step 3: Calculate CTC (Cost to Company)
+        $totalCTC = (float) $grossPay + (float) $employerContribution;
+
+        // Step 4: Calculate Yearly CTC (approximate, up to current month)
+        //$currentMonth = date('n', strtotime($this->first_date)); // numeric month (1–12)
+        $yearlyCTC = $yearlyGross + $yearlyEmployerContribution;
+
+        // Step 5: Return structured response
+        return [
+            'monthly_ctc' => round($totalCTC, 2),
+            'yearly_ctc' => round($yearlyCTC, 2),
+            'gross_pay' => round($grossPay, 2),
+            'yearly_gross_pay' => round($yearlyGross, 2),
+            'employer_contribution' => round($employerContribution, 2),
+        ];
+    }
+
 
     // public function get_total_company_deduction()
     // {
@@ -997,6 +1027,7 @@ class ViewIndianPayslipResource extends JsonResource
                         'non_taxable_allowances' => round(floatval($this->get_yearly_data("non_taxable_allowances")['non_taxable_allowances']), 2),
                         'total_gross_pay' => round(floatval($this->get_yearly_data("total_gross_pay")['total_gross_pay']), 2),
                         'taxable_gross_pay' => round(floatval($this->get_yearly_data("taxable_gross_pay")['taxable_gross_pay']), 2),
+                        'pay_due_before_deduction' => round(floatval($this->get_yearly_data("pay_due_before_deduction")['pay_due_before_deduction']), 2),
                         'ytd_tax_paid' => round(floatval($this->get_yearly_data("ytd_tax_paid")['ytd_tax_paid']), 2),
                         'tax_amount' => round(floatval($this->get_yearly_data("tax_amount")['tax_amount']), 2),
                         'total_staff_contribution' => round(floatval($this->get_yearly_data("total_staff_contribution")['total_staff_contribution']), 2),
@@ -1033,6 +1064,7 @@ class ViewIndianPayslipResource extends JsonResource
             $data['non_taxable_allowances'] = 0;
             $data['total_gross_pay'] = 0;
             $data['taxable_gross_pay'] = 0;
+            $data['pay_due_before_deduction'] = 0;
             $data['ytd_tax_paid'] = 0;
             $data['tax_amount'] = 0;
             $data['total_staff_contribution'] = 0;
@@ -1058,6 +1090,9 @@ class ViewIndianPayslipResource extends JsonResource
                 }
                 if($key == "taxable_gross_pay"){
                     $data["taxable_gross_pay"] += (($value->wages + $value->additional_pay) - $value->leave_deduction) + $value->taxable_allowance + $value->non_taxable_allowance - $value->non_taxable_allowance;
+                }
+                if($key == "pay_due_before_deduction"){
+                    $data["pay_due_before_deduction"] += $value->pay_due_before_deduction;
                 }
                 if($key == "ytd_tax_paid"){
                     $data["ytd_tax_paid"] += $value->tax_value + $value->post_tax_value;
