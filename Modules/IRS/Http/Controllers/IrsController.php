@@ -1029,14 +1029,53 @@ class IrsController extends Controller
             
             ]);
 
-            } else {
-                return response()->json([
-                    'status'      => 'error',
-                    'message'     => 'Failed to submit JSON to TaxBandits.',
-                    'http_status' => $transmitResponse->status(),
-                    'raw_body'    => $transmitResponse->body(),
-                ],$transmitResponse->status());
+            } else 
+            // {
+            //     return response()->json([
+            //         'status'      => 'error',
+            //         'message'     => 'Failed to submit JSON to TaxBandits.',
+            //         'http_status' => $transmitResponse->status(),
+            //         'raw_body'    => $transmitResponse->body(),
+            //     ],$transmitResponse->status());
+            // }
+
+            {
+            $responseJson = $transmitResponse->json();
+            $errorMessage = 'Failed to submit JSON to TaxBandits';
+
+            // Check nested Form941Records -> ErrorRecords
+            if (!empty($responseJson['Form941Records']['ErrorRecords'][0]['Errors'][0]['Message'])) {
+                $errorMessage = $responseJson['Form941Records']['ErrorRecords'][0]['Errors'][0]['Message'];
             }
+            // Check top-level Errors array
+            elseif (!empty($responseJson['Errors'][0]['Message'])) {
+                $errorMessage = $responseJson['Errors'][0]['Message'];
+                $errorName = $responseJson['Errors'][0]['Name'] ?? null;
+
+                // Friendly messages for known errors
+                if (!empty($errorName)) {
+                    switch ($errorName) {
+                        case 'Duplicate Return':
+                            $errorMessage = 'This return has already been filed for this EIN and Year.';
+                            break;
+                        case 'Business.EINorSSN':
+                            $errorMessage = 'Invalid EIN. It should be 9 digits (XXXXXXXXX or XX-XXXXXXX).';
+                            break;
+                    }
+                }
+            }
+            // Check StatusMessage fallback
+            elseif (!empty($responseJson['StatusMessage'])) {
+                $errorMessage = $responseJson['StatusMessage'];
+            }
+
+            return response()->json([
+                'status'      => 'error',
+                'message'     => $errorMessage,
+                'http_status' => $transmitResponse->status(),
+                'raw_body'    => $responseJson,
+            ], 200); // 200 ensures frontend reads 'status' field
+        }
     }
 
 
