@@ -1282,22 +1282,65 @@ public function submitForm940JsonToTaxBandits(Request $request)
                 'response' => $responseJson
             ]);
         }
+        
+        $errorMessage = 'Failed to submit Form 940';
+
+        // 1️⃣ Nested Form940Records → ErrorRecords
+        if (!empty($responseJson['Form940Records']['ErrorRecords'][0]['Errors'][0]['Message'])) {
+            $errorMessage = $responseJson['Form940Records']['ErrorRecords'][0]['Errors'][0]['Message'];
+            $errorName = $responseJson['Form940Records']['ErrorRecords'][0]['Errors'][0]['Name'] ?? null;
+        }
+        // 2️⃣ Top-level Errors array
+        elseif (!empty($responseJson['Errors'][0]['Message'])) {
+            $errorMessage = $responseJson['Errors'][0]['Message'];
+            $errorName = $responseJson['Errors'][0]['Name'] ?? null;
+        }
+        // 3️⃣ Fallback: StatusMessage
+        elseif (!empty($responseJson['StatusMessage'])) {
+            $errorMessage = $responseJson['StatusMessage'];
+            $errorName = null;
+        }
+
+        // Optional: Friendly message for known errors
+        if (!empty($errorName)) {
+            switch($errorName) {
+                case 'Duplicate Return':
+                    $errorMessage = 'This return has already been filed for this EIN and Year.';
+                    break;
+                case 'Business.EINorSSN':
+                    $errorMessage = 'Invalid EIN. It should be 9 digits (XXXXXXXXX or XX-XXXXXXX).';
+                    break;
+                case 'ONLINESIGNATUREPIN':
+                    $errorMessage = 'OnlineSignature PIN is required.';
+                    break;
+            }
+
+        } elseif (!empty($responseJson['StatusMessage'])) {
+            $errorMessage = $responseJson['StatusMessage'];
+        }
 
         return response()->json([
             'status' => 'error',
-            'message' => 'Failed to submit Form 940',
+            'message' => $errorMessage,
             'http_status' => $response->status(),
             'errors' => $responseJson,
             'payload_sent' => $payload
-        ], $response->status());
+        ], 200);
 
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'trace' => config('app.debug') ? $e->getTraceAsString() : null
-        ], 500);
-    }
+        } catch (\Throwable $e) {
+            // Optional: Log exception for debugging
+            Log::error('Form940 Submission Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'payload_sent' => $payload ?? null
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => config('app.debug') ? $e->getMessage() : 'Something went wrong during submission.',
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 200);
+        }
 }
 
 
