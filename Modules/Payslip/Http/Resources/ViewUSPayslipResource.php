@@ -33,7 +33,7 @@ class ViewUSPayslipResource extends JsonResource
             'fixed_pay_details' => round(floatval($this->wages),2),
             'additional_pay' => $this->additional_pay, // additional pay goes here
             'wage_deduction' => $this->leave_deduction,
-            'total_fixed_pay' => ($this->wages + $this->additional_pay) - $this->leave_deduction,
+            'total_fixed_pay' => round(floatval(($this->wages + $this->additional_pay) - $this->leave_deduction),2),
             'taxable_allowance' => $this->taxable_allowance,
             'non_taxable_allowance' => $this->non_taxable_allowance,
             'total_gross_pay' => round(floatval((($this->wages + $this->additional_pay) - $this->leave_deduction) + $this->taxable_allowance + $this->non_taxable_allowance),2), // this is accurate
@@ -834,7 +834,7 @@ class ViewUSPayslipResource extends JsonResource
                 $payslip_detail->amount = $payslip_detail->amount ?? 0;
         
                 $previous_total = $yearly_payslip_data[$pay_detail_name] ?? 0;
-                $payslip_detail->yearly_total = $previous_total;
+                $payslip_detail->yearly_total = round(floatval($previous_total),2);
         
                 if (in_array($pay_detail_name, ["Bonus", "Overtime Rate", "Double Overtime Rate"])) {
                     $payslip_detail->category_id = $payslip_detail?->salary_item?->salaryItemsCategory?->id . "_additional";
@@ -866,7 +866,7 @@ class ViewUSPayslipResource extends JsonResource
             return [
                 'payslip_details' => $filteredDetails,
                 'total_payslip_value_employee' => $payslip_value,
-                'total' => $this->get_yearly_data("total_gross_pay")['total_gross_pay'],
+                'total' => round(floatval($this->get_yearly_data("total_gross_pay")['total_gross_pay']),2),
             ];
         }
         
@@ -980,9 +980,9 @@ class ViewUSPayslipResource extends JsonResource
     $yearToDateTaxPay = number_format($yearToDateTaxPay, 2, '.', '');
 
         return [
-            'gross_pay' => $yearToDateGrossPay,
-            'taxable_gross' => $yearToDateTaxableGross,
-            'tax' => $yearToDateTaxPay,
+            'gross_pay' => round(floatval($yearToDateGrossPay),2),
+            'taxable_gross' => round(floatval($yearToDateTaxableGross),2),
+            'tax' => round(floatval($yearToDateTaxPay),2),
         ];
     }
     public function get_yearly_payslip_totals($employee_id, $current_month)
