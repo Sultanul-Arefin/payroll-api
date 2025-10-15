@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('staff_task_main_point_id')
                     ->constrained('staff_task_main_points', 'id')
                     ->cascadeOnDelete();
-            $table->text('title');
+            $table->text('title')->nullable();
             $table->foreignId('manager_id')
                     ->nullable()
                     ->constrained('users', 'id')
@@ -26,9 +26,9 @@ return new class extends Migration
                     ->nullable()
                     ->constrained('users', 'id')
                     ->nullOnDelete();
-            $table->date('given_date');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('given_date')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->integer('progress')->default(StaffTaskSubPoint::PENDING);
             $table->string('documents')->nullable();
             $table->double('estimated_time')->nullable();

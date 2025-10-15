@@ -19,10 +19,18 @@ trait StaffTaskTrait
     public function update_details(StaffTask $staff_task, Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'given_date' => 'required',
-            'start_date' => 'required',
-            'end_date' => 'required',
+            'main_points' => 'required|array',
+            'main_points.*.title' => 'required|string|max:255',
+            'main_points.*.given_date' => 'required|date',
+            'main_points.*.start_date' => 'required|date',
+            'main_points.*.end_date' => 'required|date|after_or_equal:main_points.*.start_date',
+
+            // Optional: validate nested sub_points
+            'main_points.*.sub_points' => 'array',
+            'main_points.*.sub_points.*.title' => 'required|string|max:255',
+            'main_points.*.sub_points.*.given_date' => 'required|date',
+            'main_points.*.sub_points.*.start_date' => 'required|date',
+            'main_points.*.sub_points.*.end_date' => 'required|date|after_or_equal:main_points.*.sub_points.*.start_date',
         ]);
         DB::transaction(function () use ($request, $staff_task) {
             // 1. Delete old main points & sub points (cascade handles sub points)
