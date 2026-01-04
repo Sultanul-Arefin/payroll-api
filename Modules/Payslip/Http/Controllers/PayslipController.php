@@ -40,6 +40,7 @@ use Modules\Payslip\Http\Resources\ViewUSPayslipResource;
 use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayslipController extends Controller
 {
@@ -1051,25 +1052,58 @@ class PayslipController extends Controller
         );
     }
 
+    // public function payslips_history(Request $request)
+    // {
+    //     $request->validate([
+    //         'employee_id' => 'required|exists:users,id',
+    //         'from_date' => 'required|date_format:Y-m-d',
+    //         'to_date' => 'required|date_format:Y-m-d',
+    //     ]);
+    //     $payslips = Payslip::query()
+    //                 ->where('employee_id', $request->employee_id)
+    //                 ->whereBetween('payment_date', [
+    //                     $request->from_date,
+    //                     $request->to_date
+    //                 ])
+    //                 ->get();
+
+    //     return PayslipResource::collection(
+    //         $payslips
+    //     );
+    // }
+
     public function payslips_history(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|exists:users,id',
-            'from_date' => 'required|date_format:Y-m-d',
-            'to_date' => 'required|date_format:Y-m-d',
+            'department_id' => 'required',
+            'from_date'     => 'required|date_format:Y-m-d',
+            'to_date'       => 'required|date_format:Y-m-d',
         ]);
-        $payslips = Payslip::query()
-                    ->where('employee_id', $request->employee_id)
-                    ->whereBetween('payment_date', [
-                        $request->from_date,
-                        $request->to_date
-                    ])
-                    ->get();
 
-        return PayslipResource::collection(
-            $payslips
-        );
+        $payslips = Payslip::query()
+
+            // 🔹 Department filter
+            ->when($request->department_id !== 'all', function ($query) use ($request) {
+                $query->whereHas('employee', function ($q) use ($request) {
+                    $q->where('department_id', $request->department_id);
+                });
+            })
+
+            // 🔹 Employee filter (only if selected)
+            ->when($request->filled('employee_id'), function ($query) use ($request) {
+                $query->where('employee_id', $request->employee_id);
+            })
+
+            // 🔹 Date range
+            ->whereBetween('payment_date', [
+                $request->from_date,
+                $request->to_date
+            ])
+            ->get();
+
+        return PayslipResource::collection($payslips);
     }
+
 
     public function upload_own_design_payslip(Request $request)
     {
