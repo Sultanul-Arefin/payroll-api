@@ -25,6 +25,27 @@ use Modules\Dashboard\app\Transformers\DigitalSocialReportResource;
 class ReportController extends Controller
 {
     use Attachment;
+    // public function department_wise_report(Request $request)
+    // {
+    //     $request->validate([
+    //         'department_id' => 'required',
+    //         'month' => 'required'
+    //     ]);
+
+    //     $payslips = Payslip::query()
+    //                 ->whereHas(
+    //                     'employee', function(Builder $builder) use($request){
+    //                         $builder->where('department_id', $request->department_id);
+    //                     }
+    //                 )
+    //                 ->where('month', 'like', '%' . $request->month . '%')
+    //                 ->get();
+
+    //     return PayslipResource::collection(
+    //         $payslips
+    //     );
+    // }
+
     public function department_wise_report(Request $request)
     {
         $request->validate([
@@ -33,17 +54,15 @@ class ReportController extends Controller
         ]);
 
         $payslips = Payslip::query()
-                    ->whereHas(
-                        'employee', function(Builder $builder) use($request){
-                            $builder->where('department_id', $request->department_id);
-                        }
-                    )
-                    ->where('month', 'like', '%' . $request->month . '%')
-                    ->get();
+            ->when($request->department_id !== 'all', function ($query) use ($request) {
+                $query->whereHas('employee', function (Builder $builder) use ($request) {
+                    $builder->where('department_id', $request->department_id);
+                });
+            })
+            ->where('month', 'like', '%' . $request->month . '%')
+            ->get();
 
-        return PayslipResource::collection(
-            $payslips
-        );
+        return PayslipResource::collection($payslips);
     }
 
     public function get_internal_report(Request $request)

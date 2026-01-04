@@ -15,20 +15,42 @@ use Modules\TimeManagement\Http\Resources\TimeManagementResource;
 
 class TimeManagementController extends Controller
 {
+    // function time_management_report(Request $request)
+    // {
+    //     $request->validate([
+    //         'department_id' => 'required|integer',
+    //         'year' => 'required'
+    //     ]);
+    //     $users = User::query()
+    //             ->where('company_id', auth()->user()->company_id)
+    //             ->where('department_id', $request->department_id)
+    //             ->where('status', User::USER_ACTIVE)
+    //             ->get();
+    //     $response = TimeManagementResource::collection(
+    //         $users
+    //     );
+    //     return apiResponse(
+    //         data: $response
+    //     );
+    // }
+
     function time_management_report(Request $request)
     {
         $request->validate([
-            'department_id' => 'required|integer',
+            'department_id' => 'required',
             'year' => 'required'
         ]);
+
         $users = User::query()
-                ->where('company_id', auth()->user()->company_id)
-                ->where('department_id', $request->department_id)
-                ->where('status', User::USER_ACTIVE)
-                ->get();
-        $response = TimeManagementResource::collection(
-            $users
-        );
+            ->where('company_id', auth()->user()->company_id)
+            ->where('status', User::USER_ACTIVE)
+            ->when($request->department_id !== 'all', function ($query) use ($request) {
+                $query->where('department_id', $request->department_id);
+            })
+            ->get();
+
+        $response = TimeManagementResource::collection($users);
+
         return apiResponse(
             data: $response
         );
