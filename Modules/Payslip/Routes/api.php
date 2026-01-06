@@ -50,6 +50,9 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
             ->name('payslip.delete');
         Route::get('payslips-history', [PayslipController::class, 'payslips_history'])
             ->name('payslip.history');
+        Route::get('payslips-employees-by-department', [PayslipController::class, 'employees_by_department'])
+            ->name('payslips.employees.by.department');
+        
 
         Route::post('upload-own-design-payslip', [PayslipController::class, 'upload_own_design_payslip']);
     });
