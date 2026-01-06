@@ -1078,6 +1078,7 @@ class PayslipController extends Controller
             'department_id' => 'required',
             'from_date'     => 'required|date_format:Y-m-d',
             'to_date'       => 'required|date_format:Y-m-d',
+            'employee_id' => 'nullable|exists:users,id',
         ]);
 
         $payslips = Payslip::query()
@@ -1102,6 +1103,26 @@ class PayslipController extends Controller
             ->get();
 
         return PayslipResource::collection($payslips);
+    }
+
+    public function employees_by_department(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required'
+        ]);
+
+        // department = all show employee
+        $employees = User::query()
+            ->when($request->department_id !== 'all', function ($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            })
+            ->select('id', 'name')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $employees
+        ]);
     }
 
 
