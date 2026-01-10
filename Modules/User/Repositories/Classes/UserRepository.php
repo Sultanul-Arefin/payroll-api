@@ -30,7 +30,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int $count = 15
+        int $count = 100
     ): CursorPaginator {
         return $this->searchQuery($relations)->cursorPaginate($count, $columns);
     }
