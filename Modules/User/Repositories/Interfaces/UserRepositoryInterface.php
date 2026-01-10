@@ -12,7 +12,7 @@ interface UserRepositoryInterface
     public function allWithSearch(
         array $columns = ['*'],
         array $relations = [],
-        int $count = 15
+        int $count = 100
     ): CursorPaginator;
 
     public function userDetailsUpdate($user_id, $attributes);

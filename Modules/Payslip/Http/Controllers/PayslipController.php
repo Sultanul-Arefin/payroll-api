@@ -41,6 +41,7 @@ use Modules\Payslip\Notifications\PayslipCreatedNotificationToUser;
 use Modules\Payslip\Repositories\Interfaces\PayslipRepositoryInterface;
 use Modules\SalaryItemsCategory\Entities\SalaryItemsCategory;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\Payslip\Http\Resources\ViewRussianPayslipResource;
 
 class PayslipController extends Controller
 {
@@ -1002,6 +1003,42 @@ class PayslipController extends Controller
                 ),
                 'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
                 'payslip_info' => new ViewUAEPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
+                'others' => array_merge(
+                    $payslip->only(['id', 'payment_date','net_pay'])
+                )
+            ]
+        );
+    }
+
+    public function preview_Russian_payslip(Payslip $payslip)
+    {
+        $employee_type = [
+            '0' => 'No Type',
+            '1' => 'FULL TIME',
+            '2' => 'PART TIME',
+            '3' => 'FLEXI TIME',
+            '4' => 'CONTRACTUAL'
+        ];
+        return apiResponse(
+            data: [
+                'user_info' => array_merge(
+                    $payslip?->employee?->only(['name', 'email', 'customer_id']),
+                    $payslip?->employee?->user_details?->only(['user_area', 'user_city','zip_code','tax_number','social_security_number','pension_number','visa_number','work_permit_number','ni_category','national_identity_number','national_insurance_number','others_number','fax','passport','bank_bic_or_swift_code','state','region', 'user_phone', 'joining_date','bank_name','bank_iban_or_account_no', 'esi_no', 'pf_no','uan_no','tin_number']),
+                    [
+                        'employee_type' => $employee_type[$payslip?->employee?->employee_type ?? 0] ?? 'Unknown'
+                    ],
+                    [
+                        'month' => $payslip?->month,
+                        'year' =>$payslip->year,
+                        'pay_period' => $payslip?->first_date . " to " . $payslip?->last_date
+                    ],
+                    [
+                        'department' => $payslip?->employee?->department?->department_name,
+                        'designation' => $payslip?->employee?->designation?->name,
+                    ]
+                ),
+                'company_info' => $payslip?->employee?->company?->only(['company_name', 'company_registration_no', 'company_email','company_phone','bank_bic_or_swift_code','bank_iban_or_account_no','contact_person_name','contact_person_email','contact_person_phone','bank_name','government_employee_no', 'company_website', 'company_address','subscription_duration']),
+                'payslip_info' => new ViewRussianPayslipResource($payslip), // THIS RESOURCE FILE SHOULD BE UPDATED WITH CORRECT DATA
                 'others' => array_merge(
                     $payslip->only(['id', 'payment_date','net_pay'])
                 )
