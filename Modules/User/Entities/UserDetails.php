@@ -28,6 +28,7 @@ class UserDetails extends Model
     public const SWEDISH_PAYSLIP = 12;
     public const TURKISH_PAYSLIP = 13;
     public const UAE_PAYSLIP = 14;
+    public const RUSSIAN_PAYSLIP = 15;
 
     public const WEB_ATTENDANCE = 1;
 
@@ -73,6 +74,7 @@ class UserDetails extends Model
         "tin_number",
         "abn_number",
         "dependent",
+        "inn"
         
     ];
 
