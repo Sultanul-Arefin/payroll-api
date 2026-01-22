@@ -26,7 +26,7 @@ class PayslipResource extends JsonResource
                     'month',
                 ])
             ),
-            'employee' => $this->employee?->only('name', 'email'),
+            'employee' => $this->employee?->only('id','name', 'email'),
             'employee_payslip_type' => $this->employee?->user_details?->payslip_type,
             'payment_date' => $this->payment_date,
             'department' => $this->employee?->department?->department_name,

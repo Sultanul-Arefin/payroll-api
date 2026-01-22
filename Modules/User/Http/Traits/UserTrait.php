@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Modules\User\Entities\UserDetails;
 use Spatie\Activitylog\Models\Activity;
 
 trait UserTrait
@@ -78,6 +79,22 @@ trait UserTrait
         return apiResponse(
             data: null,
             message: 'User Role Successfully Updated'
+        );
+    }
+
+    public function update_payslip_type($userId, Request $request)
+    {
+        $request->validate([
+            'payslip_type' => 'required|integer|in:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15'
+        ]);
+        $userDetails = UserDetails::where('user_id', $userId)->firstOrFail();
+        $userDetails->update([
+            'payslip_type' => $request->payslip_type,
+        ]);
+
+        return apiResponse(
+            data: null,
+            message: 'User Payslip Type Successfully Updated'
         );
     }
 
