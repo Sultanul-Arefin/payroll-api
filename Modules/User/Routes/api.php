@@ -41,6 +41,7 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         Route::post('activate-user', [UserController::class, 'activate_user']);
         Route::patch('update-password/{user}', [UserController::class, 'update_password']);
         Route::patch('update-role/{user}', [UserController::class, 'update_role']);
+        Route::patch('update-payslip_type/{user}', [UserController::class, 'update_payslip_type']);
 
         // Route for payslip
         Route::get('user-info-for-payslip', [UserController::class, 'user_info_for_payslip'])->name('user-info-for-payslip');
