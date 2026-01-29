@@ -44,6 +44,8 @@ Route::middleware(['json.response'])->prefix('v1')->group(function () {
         ->name('preview-uae-payslip');
         Route::get('preview-russian-payslip/{payslip}', [PayslipController::class, 'preview_Russian_payslip'])
         ->name('preview-russian-payslip');
+         Route::get('preview-chaina-payslip/{payslip}', [PayslipController::class, 'preview_China_payslip'])
+        ->name('preview-chaina-payslip');
         Route::get('payslips', [PayslipController::class, 'payslips'])
             ->name('payslips');
         Route::get('payslips/{payslip}', [PayslipController::class, 'show'])
