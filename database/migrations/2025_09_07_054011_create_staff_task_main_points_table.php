@@ -35,6 +35,7 @@ return new class extends Migration
             $table->integer('signed_off_by_manager')->default(StaffTaskMainPoint::NOT_SINGED_OFF);
             $table->timestamp('signed_off_time')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
