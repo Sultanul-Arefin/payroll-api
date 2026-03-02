@@ -84,7 +84,7 @@ class StaffTaskController extends Controller
     public function destroy($id)
     {
         $staffTask = StaffTask::findOrFail($id);
-        $staffTask->employees()->detach();
+        // $staffTask->employees()->detach();
         $staffTask->delete();
 
         return response()->json(['message' => 'Staff task deleted successfully']);
