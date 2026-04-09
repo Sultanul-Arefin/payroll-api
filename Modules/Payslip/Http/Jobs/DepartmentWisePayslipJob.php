@@ -51,7 +51,7 @@ class DepartmentWisePayslipJob implements ShouldQueue
     {
         // Mail::to($this->email)
         //     ->send(new SendPassword($this->username, $this->password));
-        $users = User::where('department_id', $this->department_id)->where('company_id', $this->auth_user->company_id)->get();
+        $users = User::where('department_id', $this->department_id)->where('company_id', $this->auth_user->company_id)->where('status', User::USER_ACTIVE)->get();
         foreach($users as $user){
 
             $request = new Request([
