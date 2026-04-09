@@ -163,72 +163,153 @@ class TaskController extends Controller
         return view('projectmanagement::show');
     }
 
+    // public function update(UpdateTaskRequest $request, Task $task)
+    // {
+        
+    //     $task_update = DB::transaction(function () use ($request, $task) {
+    //         $task->update([
+    //             'task_title' => $request->task_title,
+    //             'task_description' => $request->task_description,
+    //             'estimation_hour' =>(float) $request->estimation_hour,
+    //             'start_date_time' => $request->start_date_time,
+    //             'end_date_time' => $request->end_date_time,
+    //         ]);
+
+    //         /**
+    //          * - Check If Assigned Employee Number Is Greater Than 0
+    //          *      - If yes
+    //          *          - then check if this task has any employees
+    //          *              - If Yes
+    //          *                  - Then Check If Assigned Employee Id & Already Assigned Employee Id Is Not Same
+    //          *                      - If Same
+    //          *                          - Do Nothing
+    //          *                      - If Not Same
+    //          *                          - Then Just Insert & Send Notification to the specific user
+    //          *              - If No
+    //          *                  - Then Just Insert & Send Notification to the specific user
+    //          *      - If no
+    //          *          - Do Nothing
+    //          */
+    //         if(count($request->assigned_employees) > 0){
+    //             $task_associate_employees = TaskAssociatedEmployee::where('task_id', $task->id)->get();
+    //             if(count($task_associate_employees) > 0){
+    //                 foreach($request->assigned_employees as $assigned_employee_id){
+    //                     foreach($task_associate_employees as $already_associated_employee){
+    //                         if((int)$assigned_employee_id != (int)$already_associated_employee->user_id){
+    //                             TaskAssociatedEmployee::create([
+    //                                 'task_id' => $task->id,
+    //                                 'user_id' => $assigned_employee_id,
+    //                             ]);
+                
+    //                             // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
+                
+    //                             $data = [
+    //                                 'title' => 'Task Assigned!',
+    //                                 'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
+    //                                 'action' => [
+    //                                     'name' => auth()->user()->name,
+    //                                     'email' => auth()->user()->email,
+    //                                     'phone' => auth()->user()->phone,
+    //                                 ],
+    //                                 'action_at' => date('Y-m-d H:i:s'),
+    //                                 'type' => 'Project Management',
+    //                                 'color' => '',
+    //                             ];
+    //                             $user_whom_should_be_notified = User::where('id', $assigned_employee_id)->first();
+    //                             $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
+    //                         }
+    //                     }
+    //                 }
+    //             } else{
+    //                 foreach($request->assigned_employees as $assigned_employee_id){
+    //                     TaskAssociatedEmployee::create([
+    //                         'task_id' => $task->id,
+    //                         'user_id' => $assigned_employee_id,
+    //                     ]);
+        
+    //                     // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
+        
+    //                     $data = [
+    //                         'title' => 'Task Assigned!',
+    //                         'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
+    //                         'action' => [
+    //                             'name' => auth()->user()->name,
+    //                             'email' => auth()->user()->email,
+    //                             'phone' => auth()->user()->phone,
+    //                         ],
+    //                         'action_at' => date('Y-m-d H:i:s'),
+    //                         'type' => 'Project Management',
+    //                         'color' => '',
+    //                     ];
+    //                     $user_whom_should_be_notified = User::where('id', $assigned_employee_id)->first();
+    //                     $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
+    //                 }
+    //             }
+    //         }
+
+    //         // TASK UPDATE NOTIFICATION
+    //         $project = Project::where('id', $task->project_id)->first();
+
+    //         $data = [
+    //             'title' => 'Task Updated',
+    //             'description' => 'Task Named ' . $task->task_title . ' Has Been Updated',
+    //             'action' => [
+    //                 'name' => auth()->user()->name,
+    //                 'email' => auth()->user()->email,
+    //                 'phone' => auth()->user()->phone,
+    //             ],
+    //             'action_at' => date('Y-m-d H:i:s'),
+    //             'type' => 'Project Management',
+    //             'color' => '',
+    //         ];
+    //         $user = app(ProjectController::class)->getAdminUser();
+    //         $user->notify(new ProjectManagementNotification($data));
+    //         // $project->notify(new ProjectManagementNotification($data));
+
+    //         return $task;
+    //     });
+
+    //     return apiResponse(
+    //         data: $task,
+    //         message: 'Task Updated Successfully',
+    //         status: 'success'
+    //     );
+    // }
+
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        
         $task_update = DB::transaction(function () use ($request, $task) {
+
             $task->update([
                 'task_title' => $request->task_title,
                 'task_description' => $request->task_description,
-                'estimation_hour' =>(float) $request->estimation_hour,
+                'estimation_hour' => (float) $request->estimation_hour,
                 'start_date_time' => $request->start_date_time,
                 'end_date_time' => $request->end_date_time,
             ]);
 
-            /**
-             * - Check If Assigned Employee Number Is Greater Than 0
-             *      - If yes
-             *          - then check if this task has any employees
-             *              - If Yes
-             *                  - Then Check If Assigned Employee Id & Already Assigned Employee Id Is Not Same
-             *                      - If Same
-             *                          - Do Nothing
-             *                      - If Not Same
-             *                          - Then Just Insert & Send Notification to the specific user
-             *              - If No
-             *                  - Then Just Insert & Send Notification to the specific user
-             *      - If no
-             *          - Do Nothing
-             */
-            if(count($request->assigned_employees) > 0){
-                $task_associate_employees = TaskAssociatedEmployee::where('task_id', $task->id)->get();
-                if(count($task_associate_employees) > 0){
-                    foreach($request->assigned_employees as $assigned_employee_id){
-                        foreach($task_associate_employees as $already_associated_employee){
-                            if((int)$assigned_employee_id != (int)$already_associated_employee->user_id){
-                                TaskAssociatedEmployee::create([
-                                    'task_id' => $task->id,
-                                    'user_id' => $assigned_employee_id,
-                                ]);
-                
-                                // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
-                
-                                $data = [
-                                    'title' => 'Task Assigned!',
-                                    'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
-                                    'action' => [
-                                        'name' => auth()->user()->name,
-                                        'email' => auth()->user()->email,
-                                        'phone' => auth()->user()->phone,
-                                    ],
-                                    'action_at' => date('Y-m-d H:i:s'),
-                                    'type' => 'Project Management',
-                                    'color' => '',
-                                ];
-                                $user_whom_should_be_notified = User::where('id', $assigned_employee_id)->first();
-                                $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
-                            }
-                        }
-                    }
-                } else{
-                    foreach($request->assigned_employees as $assigned_employee_id){
+            // ✅ FIX START
+            if (!empty($request->assigned_employees)) {
+
+                // remove duplicate from request
+                $assignedEmployees = array_unique($request->assigned_employees);
+
+                // existing users
+                $existingUserIds = TaskAssociatedEmployee::where('task_id', $task->id)
+                                    ->pluck('user_id')
+                                    ->toArray();
+
+                // 🔹 ADD new users
+                foreach ($assignedEmployees as $assigned_employee_id) {
+
+                    if (!in_array($assigned_employee_id, $existingUserIds)) {
+
                         TaskAssociatedEmployee::create([
                             'task_id' => $task->id,
                             'user_id' => $assigned_employee_id,
                         ]);
-        
-                        // SEND NOTIFICATION TO CORRESPONDENT EMPLOYEE
-        
+
+                        // notification
                         $data = [
                             'title' => 'Task Assigned!',
                             'description' => 'Task Named ' . $task->task_title . ' Has Been Assigned to You',
@@ -237,19 +318,32 @@ class TaskController extends Controller
                                 'email' => auth()->user()->email,
                                 'phone' => auth()->user()->phone,
                             ],
-                            'action_at' => date('Y-m-d H:i:s'),
+                            'action_at' => now(),
                             'type' => 'Project Management',
                             'color' => '',
                         ];
-                        $user_whom_should_be_notified = User::where('id', $assigned_employee_id)->first();
-                        $user_whom_should_be_notified->notify(new ProjectManagementNotification($data));
+
+                        $user = User::find($assigned_employee_id);
+                        if ($user) {
+                            $user->notify(new ProjectManagementNotification($data));
+                        }
+                    }
+                }
+
+                // 🔹 REMOVE unselected users
+                foreach ($existingUserIds as $existingUserId) {
+
+                    if (!in_array($existingUserId, $assignedEmployees)) {
+
+                        TaskAssociatedEmployee::where('task_id', $task->id)
+                            ->where('user_id', $existingUserId)
+                            ->delete();
                     }
                 }
             }
+            // ✅ FIX END
 
             // TASK UPDATE NOTIFICATION
-            $project = Project::where('id', $task->project_id)->first();
-
             $data = [
                 'title' => 'Task Updated',
                 'description' => 'Task Named ' . $task->task_title . ' Has Been Updated',
@@ -258,19 +352,21 @@ class TaskController extends Controller
                     'email' => auth()->user()->email,
                     'phone' => auth()->user()->phone,
                 ],
-                'action_at' => date('Y-m-d H:i:s'),
+                'action_at' => now(),
                 'type' => 'Project Management',
                 'color' => '',
             ];
+
             $user = app(ProjectController::class)->getAdminUser();
-            $user->notify(new ProjectManagementNotification($data));
-            // $project->notify(new ProjectManagementNotification($data));
+            if ($user) {
+                $user->notify(new ProjectManagementNotification($data));
+            }
 
             return $task;
         });
 
         return apiResponse(
-            data: $task,
+            data: $task_update,
             message: 'Task Updated Successfully',
             status: 'success'
         );
