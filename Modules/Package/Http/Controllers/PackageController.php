@@ -32,7 +32,7 @@ class PackageController extends Controller
 
     public function package_list(): mixed
     {
-        $rows = 15;
+        $rows = 100;
         if (request()?->has('rows')) {
             $rows = (int) request('rows');
         }
