@@ -25,6 +25,7 @@ class PackageResourceUnguarded extends JsonResource
                     'package_name',
                 ])
             ),
+            'price' => $this->discounted_price,
         ];
     }
 }
