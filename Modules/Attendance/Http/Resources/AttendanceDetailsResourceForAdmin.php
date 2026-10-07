@@ -28,6 +28,7 @@ class AttendanceDetailsResourceForAdmin extends JsonResource
             'date' => $this->dates,
             'attendance_details' => $this->getAttendanceDetails($this->attendance_details),
             'created_at' => $this->created_at?->format('H:i:s'),
+            'custom_given_time' => $this->custom_given_time?->format('H:i:s'),
             'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_editable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_overtime' => $this->overtime ? 1 : 0,
