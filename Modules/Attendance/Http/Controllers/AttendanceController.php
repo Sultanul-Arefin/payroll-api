@@ -157,7 +157,7 @@ class AttendanceController extends Controller
                 'user_id' => auth()->user()->id,
                 'status' => Attendance::PENDING,
                 'approved_by' => auth()->user()->id,
-                'custom_given_time' => Carbon::now('Asia/Dhaka'),
+                'custom_given_time' => $this->randomGivenTimeForDate($request->dates),
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
