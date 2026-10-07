@@ -15,13 +15,9 @@ class AttendanceDetail extends Model
         'office_type',
         'in_time',
         'out_time',
-        'custom_given_time',
     ];
 
-    protected $casts = [
-    'custom_given_time' => 'datetime',
-];
-
+    
     public function attendance(): BelongsTo
     {
         return $this->belongsTo(Attendance::class, 'attendance_id', 'id');
