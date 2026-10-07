@@ -18,8 +18,14 @@ class Attendance extends Model
         'dates',
         'user_id',
         'status',
-        'approved_by'
+        'approved_by',
+        'custom_given_time',
     ];
+
+    protected $casts = [
+        'custom_given_time' => 'datetime',
+    ];
+
 
     protected static function newFactory()
     {
