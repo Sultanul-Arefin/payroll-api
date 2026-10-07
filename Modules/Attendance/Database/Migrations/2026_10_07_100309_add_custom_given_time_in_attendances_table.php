@@ -16,11 +16,11 @@ return new class extends Migration
     public function up()
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->timestamp('given_time')->nullable()->after('updated_at');
+            $table->timestamp('custom_given_time')->nullable()->after('updated_at');
         });
 
         // purono row gulor jonno backfill
-        DB::statement("UPDATE attendances SET given_time = created_at WHERE given_time IS NULL");
+        DB::statement("UPDATE attendances SET custom_given_time = created_at WHERE custom_given_time IS NULL");
     }
 
     /**
