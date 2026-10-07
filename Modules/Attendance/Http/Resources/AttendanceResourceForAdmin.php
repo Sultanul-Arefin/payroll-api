@@ -25,6 +25,7 @@ class AttendanceResourceForAdmin extends JsonResource
             'count' => $this->count_appearances($this->dates),
             'details' => $this->get_info($this->dates),
             'created_at' => $this->created_at?->format('H:i:s'),
+            'given_time' => $this->given_time?->format('H:i:s'),
             'working_hours_per_day' => $this->user?->company?->working_hours_per_day,
             'lunch_and_others_per_day' => $this->user?->company?->lunch_and_others_per_day,
             'total_office_hours' => $this->user?->company?->working_hours_per_day + $this->user?->company?->lunch_and_others_per_day,

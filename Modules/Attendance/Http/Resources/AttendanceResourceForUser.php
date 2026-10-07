@@ -34,6 +34,7 @@ class AttendanceResourceForUser extends JsonResource
                 ];
             }),
             'created_at' => $this->created_at->format('H:i:s'),
+            'given_time' => $this->given_time?->format('H:i:s'),
             'is_deletable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'is_editable' => $this->getStatus($this->status) == "pending" ? 1 : 0,
             'working_hours_per_day' => $this->user?->company?->working_hours_per_day,

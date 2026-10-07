@@ -156,7 +156,8 @@ class AttendanceController extends Controller
                 'dates' => $request->dates,
                 'user_id' => auth()->user()->id,
                 'status' => Attendance::PENDING,
-                'approved_by' => auth()->user()->id
+                'approved_by' => auth()->user()->id,
+                'given_time' => Carbon::now('Asia/Dhaka'),
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
@@ -313,7 +314,8 @@ class AttendanceController extends Controller
                 'dates' => $request->dates,
                 'user_id' => $target_user->id,
                 'status' => Attendance::PRESENT,
-                'approved_by' => auth()->user()->id
+                'approved_by' => auth()->user()->id,
+                'given_time' => $this->randomGivenTimeForDate($request->dates),
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
@@ -453,5 +455,13 @@ class AttendanceController extends Controller
             message: 'Attendance Successfully Deleted',
             status: 'success'
         );
+    }
+
+    private function randomGivenTimeForDate(string $date): Carbon
+    {
+        // oi date er 08:45:00 theke 09:30:00 (2700 second)
+        return Carbon::parse($date, 'Asia/Dhaka')
+            ->setTime(8, 45, 0)
+            ->addSeconds(random_int(0, 2700));
     }
 }
