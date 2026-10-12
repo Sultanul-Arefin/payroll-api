@@ -157,7 +157,8 @@ class AttendanceController extends Controller
                 'user_id' => auth()->user()->id,
                 'status' => Attendance::PENDING,
                 'approved_by' => auth()->user()->id,
-                'custom_given_time' => $this->randomGivenTimeForDate($request->dates),
+                // 'custom_given_time' => $this->randomGivenTimeForDate($request->dates),
+                'custom_given_time' => $this->userGivenTime($request->dates),
             ]);
             $attendance_details = AttendanceDetail::create([
                 'attendance_id' => $attendance->id,
@@ -463,5 +464,24 @@ class AttendanceController extends Controller
         return Carbon::parse($date, 'Asia/Dhaka')
             ->setTime(8, 45, 0)
             ->addSeconds(random_int(0, 2700));
+    }
+
+    private function userGivenTime(string $date): Carbon
+    {
+        $now = Carbon::now('Asia/Dhaka');
+
+        // sudhu aajker date e current time check hobe
+        if ($now->isSameDay(Carbon::parse($date, 'Asia/Dhaka'))) {
+            $start = $now->copy()->setTime(8, 45, 0);
+            $end   = $now->copy()->setTime(9, 30, 0);
+
+            // 08:45 theke 09:30 er moddhe dile current time-i
+            if ($now->between($start, $end)) {
+                return $now;
+            }
+        }
+
+        // baki shob khetre 08:45 theke 09:30 er moddhe random
+        return $this->randomGivenTimeForDate($date);
     }
 }
